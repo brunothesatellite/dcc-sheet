@@ -2,7 +2,8 @@
 require_once __DIR__ . '/db.php';
 session_start();
 
-$action = $_GET['action'] ?? '';
+$input = json_decode(file_get_contents('php://input'), true);
+$action = $_GET['action'] ?? ($input['action'] ?? '');
 
 if ($action === 'check') {
     $db = getDB();
@@ -14,7 +15,6 @@ if ($action === 'check') {
 }
 
 if ($action === 'register') {
-    $input = json_decode(file_get_contents('php://input'), true);
     $pseudo = trim($input['pseudo'] ?? '');
     $password = $input['password'] ?? '';
     if (strlen($pseudo) < 3 || strlen($pseudo) > 20) { jsonError('Pseudo: 3 a 20 caracteres'); }
@@ -37,7 +37,6 @@ if ($action === 'register') {
 }
 
 if ($action === 'login') {
-    $input = json_decode(file_get_contents('php://input'), true);
     $pseudo = trim($input['pseudo'] ?? '');
     $password = $input['password'] ?? '';
     if (!$pseudo || !$password) { jsonError('Champs requis'); }
@@ -62,7 +61,6 @@ if ($action === 'logout') {
 }
 
 if ($action === 'change_password') {
-    $input = json_decode(file_get_contents('php://input'), true);
     $oldPassword = $input['old_password'] ?? '';
     $newPassword = $input['new_password'] ?? '';
     if (strlen($newPassword) < 6) { jsonError('Nouveau MDP: 6 caracteres minimum'); }

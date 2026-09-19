@@ -2,7 +2,8 @@
 require_once __DIR__ . '/db.php';
 session_start();
 
-$action = $_GET['action'] ?? '';
+$input = json_decode(file_get_contents('php://input'), true);
+$action = $_GET['action'] ?? ($input['action'] ?? '');
 $db = getDB();
 $user = requireLogin($db);
 
@@ -35,7 +36,6 @@ if ($action === 'get') {
 }
 
 if ($action === 'create') {
-    $input = json_decode(file_get_contents('php://input'), true);
     $class = $input['class'] ?? '';
     $name = trim($input['name'] ?? 'Sans nom');
     $validClasses = ['clerc','elfe','guerrier','halfelin','mage','nain','voleur'];
@@ -54,7 +54,6 @@ if ($action === 'create') {
 }
 
 if ($action === 'save') {
-    $input = json_decode(file_get_contents('php://input'), true);
     $id = (int)($input['id'] ?? 0);
     $data = $input['data'] ?? null;
     $name = $input['name'] ?? null;
@@ -77,7 +76,6 @@ if ($action === 'save') {
 }
 
 if ($action === 'set_active') {
-    $input = json_decode(file_get_contents('php://input'), true);
     $id = (int)($input['id'] ?? 0);
     $isActive = (int)($input['is_active'] ?? 0);
     if (!$id) { jsonError('ID requis'); }
@@ -90,7 +88,6 @@ if ($action === 'set_active') {
 }
 
 if ($action === 'delete') {
-    $input = json_decode(file_get_contents('php://input'), true);
     $id = (int)($input['id'] ?? 0);
     if (!$id) { jsonError('ID requis'); }
     $stmt = $db->prepare('DELETE FROM characters WHERE id = :id AND user_id = :uid');

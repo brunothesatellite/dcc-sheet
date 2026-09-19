@@ -52,7 +52,7 @@
         if (k === 'className') node.className = attrs[k];
         else if (k === 'textContent') node.textContent = attrs[k];
         else if (k === 'innerHTML') node.innerHTML = attrs[k];
-        else if (k.startsWith('on')) node.addEventListener(k.slice(2), attrs[k]);
+        else if (k.startsWith('on')) node.addEventListener(k.slice(2).toLowerCase(), attrs[k]);
         else node.setAttribute(k, attrs[k]);
       });
     }
@@ -322,7 +322,7 @@
     if (parsed.niveau) metaParts.push('Niv.' + parsed.niveau);
     if (parsed.dieu) metaParts.push(parsed.dieu);
 
-    var statusText = isActive ? 'En expedition' : 'A l\'auberge';
+    var statusText = isActive ? 'EN EXPEDITION' : "A L'AUBERGE";
     var statusColor = isActive ? 'var(--green)' : 'var(--red)';
 
     var card = el('div', { className: 'char-card' + (isActive ? '' : ' inactive') });
@@ -347,7 +347,7 @@
     toggleWrapper.appendChild(toggleLabel);
     toggleWrapper.appendChild(el('span', {
       className: 'toggle-inn-label',
-      textContent: isActive ? 'Exp.' : 'Aub.',
+      textContent: isActive ? 'EN EXPEDITION' : "A L'AUBERGE",
     }));
 
     toggleInput.addEventListener('change', function (e) {
@@ -514,12 +514,12 @@
     var label = el('span', {
       className: 'toggle-inn-label',
       id: cls + '-sheet-status',
-      textContent: isActive ? 'En expedition' : 'A l\'auberge',
+      textContent: isActive ? 'EN EXPEDITION' : "A L'AUBERGE",
     });
 
     input.addEventListener('change', function (e) {
       var checked = e.target.checked;
-      label.textContent = checked ? 'En expedition' : 'A l\'auberge';
+      label.textContent = checked ? 'EN EXPEDITION' : "A L'AUBERGE";
       label.style.color = checked ? 'var(--green)' : 'var(--red)';
 
       saveCharacter(charData.id, undefined, undefined);

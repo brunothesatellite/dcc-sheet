@@ -451,6 +451,7 @@ ul, ol {
 }
 
 .char-card-btns button {
+  flex: 0 0 auto;
   width: 30px;
   height: 30px;
   border-radius: var(--radius-sm);
@@ -458,7 +459,9 @@ ul, ol {
   align-items: center;
   justify-content: center;
   background: var(--field-bg);
+  border: 1px solid var(--input-border);
   color: var(--ink);
+  font-size: 12px;
   transition: background 0.2s;
 }
 

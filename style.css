@@ -799,58 +799,120 @@ input[type="number"]::-webkit-outer-spin-button {
 
 @media (max-width: 600px) {
   .topbar {
-    padding: 0 12px;
-    gap: 8px;
+    padding: 0 10px;
+    gap: 6px;
   }
 
   .logo {
-    font-size: 15px;
+    font-size: 14px;
+    letter-spacing: 0.5px;
   }
 
-  .tab-bar {
-    padding: 6px 12px;
+  .logo span {
+    display: none;
   }
 
-  .tab {
-    padding: 6px 14px;
+  .theme-toggle {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  #auth-guest .auth-btn,
+  #auth-logged .auth-logout {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  .auth-pseudo {
+    display: none;
+  }
+
+  .auth-avatar {
+    width: 28px;
+    height: 28px;
     font-size: 12px;
   }
 
+  .tab-bar {
+    padding: 4px 10px;
+    gap: 2px;
+    top: 44px;
+  }
+
+  .tab {
+    padding: 6px 12px;
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+
   .main {
-    padding: 16px 12px 60px;
+    padding: 12px 10px 60px;
   }
 
   .char-grid {
     grid-template-columns: 1fr;
   }
 
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
   .section-title {
     font-size: 18px;
   }
 
-  .sheet-row.cols-2,
-  .sheet-row.cols-3,
-  .sheet-row.cols-4 {
-    grid-template-columns: 1fr;
-  }
-
-  .sheet-row.cols-1-2,
-  .sheet-row.cols-2-1,
-  .sheet-row.cols-3-1 {
-    grid-template-columns: 1fr;
+  .sheet-header {
+    flex-wrap: wrap;
+    gap: 8px;
   }
 
   .sheet-title {
-    font-size: 18px;
+    font-size: 16px;
+    flex: 1 1 100%;
+    order: 1;
+  }
+
+  .btn-back {
+    width: 32px;
+    height: 32px;
+  }
+
+  .toggle-inn {
+    font-size: 11px;
+    gap: 6px;
+  }
+
+  .sheet-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .sheet-row.cols-2,
+  .sheet-row.cols-3,
+  .sheet-row.cols-4,
+  .sheet-row.cols-1-2,
+  .sheet-row.cols-2-1,
+  .sheet-row.cols-3-1 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .sheet-page .row {
+    flex-direction: column;
+  }
+
+  .sheet-page .row > * {
+    flex: 1 1 100%;
   }
 
   .page-title {
-    font-size: 14px;
-    padding: 8px 12px;
+    font-size: 13px;
+    padding: 6px 10px;
   }
 
   .stat-row {
-    padding: 6px 10px;
+    padding: 6px 8px;
   }
 
   .stat-value {

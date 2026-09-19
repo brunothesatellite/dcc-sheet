@@ -4,7 +4,19 @@ $DB_PATH = __DIR__ . '/../data/dcc.db';
 function getDB() {
     global $DB_PATH;
     $dir = dirname($DB_PATH);
-    if (!is_dir($dir)) { mkdir($dir, 0755, true); }
+
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0777, true);
+    }
+
+    if (!is_writable($dir)) {
+        @chmod($dir, 0777);
+    }
+
+    if (!is_writable($dir)) {
+        jsonResponse(['error' => 'Le dossier data/ n\'est pas accessible en ecriture. Verifiez les permissions sur votre serveur.'], 500);
+    }
+
     $db = new SQLite3($DB_PATH);
     $db->enableExceptions(true);
     $db->exec('PRAGMA journal_mode=WAL');

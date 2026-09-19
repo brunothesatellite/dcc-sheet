@@ -36,7 +36,7 @@ h1{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:24px;text
 </style>
 </head>
 <body>
-<header class="topbar"><div class="logo">DCC <span>Fiches</span></div></header>
+<header class="topbar"><a href="index.html" class="logo" style="text-decoration:none">DCC <span>Fiches</span></a></header>
 <div class="card">
   <h1>Inscription</h1>
   <div class="error" id="error-msg"></div>
@@ -56,6 +56,7 @@ h1{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:24px;text
     <button type="submit" class="btn">Creer mon compte</button>
   </form>
   <div class="link">Deja un compte ? <a href="login.php">Se connecter</a></div>
+  <div class="link"><a href="index.html">Retour a l'application</a></div>
 </div>
 <script>
 document.getElementById('form').addEventListener('submit', async function(e) {

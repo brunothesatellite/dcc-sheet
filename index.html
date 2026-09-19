@@ -14,18 +14,17 @@
 <body>
 
 <header class="topbar">
-  <div class="topbar-left"><div class="logo">DCC <span>Fiches</span></div></div>
-  <div class="topbar-right">
-    <button class="theme-toggle" id="btn-theme" title="Changer de theme">&#9789;</button>
-    <div class="auth-user" id="auth-guest" style="display:none">
-      <a href="login.php" class="auth-btn" style="text-decoration:none;color:#fff">Connexion</a>
-      <a href="register.php" class="auth-btn" style="background:transparent;border:1px solid var(--header-text);text-decoration:none;color:var(--header-text)">Inscription</a>
-    </div>
-    <div class="auth-user" id="auth-logged" style="display:none">
-      <div class="auth-avatar" id="auth-avatar"></div>
-      <span class="auth-pseudo" id="auth-pseudo"></span>
-      <button class="auth-logout" id="btn-logout">Deconnexion</button>
-    </div>
+  <a href="index.html" class="logo">DCC <span>Fiches</span></a>
+  <div class="topbar-spacer"></div>
+  <button class="theme-toggle" id="btn-theme" title="Changer de theme">&#9789;</button>
+  <div id="auth-guest" style="display:none">
+    <a href="login.php" class="auth-btn">Connexion</a>
+    <a href="register.php" class="auth-btn auth-btn-outline">Inscription</a>
+  </div>
+  <div id="auth-logged" style="display:none;display:none;align-items:center;gap:8px">
+    <div class="auth-avatar" id="auth-avatar"></div>
+    <span class="auth-pseudo" id="auth-pseudo"></span>
+    <button class="auth-logout" id="btn-logout">Deconnexion</button>
   </div>
 </header>
 

@@ -1,3 +1,22 @@
+** TODO **
+* Bruno doit vérifier que les champs sont bien nommés pour chaque classe et qu'il n'y a aucun oubli
+* Bruno doit proposer des améliorations d'IHM par rapport aux fiches de personnage (la liste des sorts par exemple)
+
+** BUGS **
+* Les fiches de personnage doivent reprendre la mise en page des PDF, par exemple pour le Clerce, je veux que sa fiche corresponde à la maquette que tu avais réalisée.
+* Ensuite, pour les parties communes à toutes les classes, le layout doit être identique entre les classes. Réutilise le layout validé de la classe Clerc pour la partie commune des autres classes.
+* Quand je créé un nouveau personnage, il reste un résidu d'IHM au dessus de lui, je dois faire un refresh pour qu'il prenne tout l'espace de l'onglet de sa classe
+* quand j'affiche une fiche de personnage : inconsistence entre les deux interrupteur, celui du haut affiche encore "à l'auberge" alors que celui du bas affiche 'en expédition"
+
+
+** EVOLUTION **
+*SECTION NOTE*
+Chaque fichee de personnage doit offrir une section "Notes" de type textarea en base de la fiche
+
+*INFO SAUVEGARDE*
+Indiquer comme dans le projet fabled-lands-sheet quand un enregistrement est réalisé avec un icone d'enregistrement qui apparait à l'écran (inspire toi de l'autre projet)
+
+*ONGLET EQUIPE*
 A un moment, il faudra ajouter un onlget "Equipe" qui va récapituler les éléments principaux des personnages actifs dans un onglet = Liste des personnages sous forme de tableau :
 colonnes : 
 * Nom 
@@ -18,9 +37,7 @@ Sous ce tableau, un tableau avec les colonnes
 * compteur de tour (0 par défaut; clic droit / appui long sur mobile remise à zéro; clic gauche ou appui simple : incrément de 1)
 Prévoit plusieurs lignes vides, 3 par défaut, et un bouton +/- pour en ajouter supprimer, et un bouton raz pour vider ce tableau
 
-Fait une maquette html sans implémenter pour l'instant
 
 
 
 
-Indiquer comme dans fabled-lands-sheet quand un enregistrement est réalisé

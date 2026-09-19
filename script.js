@@ -267,11 +267,20 @@
   }
 
   function createNewButton(cls) {
-    return el('button', {
-      className: 'btn-new',
-      textContent: '+ Nouveau',
-      onClick: function () { createCharacter(cls); },
-    });
+    var btnGroup = el('div', { className: 'btn-group' }, [
+      el('button', {
+        className: 'btn-new',
+        textContent: '+ Nouveau',
+        onClick: function () { createCharacter(cls); },
+      }),
+      el('button', {
+        className: 'btn-import',
+        textContent: 'Import',
+        title: 'Importer un JSON',
+        onClick: function () { importCharacter(cls); },
+      }),
+    ]);
+    return btnGroup;
   }
 
   function renderCharList(panel, cls, active, inactive) {
@@ -490,6 +499,13 @@
       }),
     ]);
 
+    var exportBtn = el('button', {
+      className: 'btn-export',
+      textContent: 'Export',
+      title: 'Exporter en JSON',
+      onClick: function () { exportCharacter(charData); },
+    });
+
     var toggleWrapper = el('div', { className: 'toggle-inn' });
     var toggle = el('label', { className: 'switch' });
     var input = el('input', { type: 'checkbox' });
@@ -520,6 +536,7 @@
     toggleWrapper.appendChild(label);
 
     header.appendChild(left);
+    header.appendChild(exportBtn);
     header.appendChild(toggleWrapper);
 
     return header;
@@ -695,6 +712,72 @@
     var input = el('input', { type: 'text', 'data-key': key });
     if (value) input.value = value;
     return input;
+  }
+
+  /* =========================================================================
+     13b. Import / Export
+     ======================================================================== */
+
+  function exportCharacter(charData) {
+    var parsed = {};
+    try { parsed = JSON.parse(charData.data || '{}'); } catch (e) {}
+
+    var exportObj = {
+      version: 1,
+      class: charData.class,
+      name: charData.name,
+      is_active: charData.is_active,
+      data: parsed,
+    };
+
+    var json = JSON.stringify(exportObj, null, 2);
+    var blob = new Blob([json], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = (charData.name || 'personnage').replace(/[^a-zA-Z0-9_-]/g, '_') + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importCharacter(cls) {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+
+    input.addEventListener('change', async function (e) {
+      var file = e.target.files[0];
+      if (!file) return;
+
+      try {
+        var text = await file.text();
+        var obj = JSON.parse(text);
+
+        if (!obj.class) {
+          alert('Fichier JSON invalide : classe manquante');
+          return;
+        }
+
+        var res = await api('characters.php', {
+          method: 'POST',
+          body: {
+            action: 'create',
+            class: obj.class,
+            name: obj.name || 'Importe',
+          },
+        });
+
+        if (res.character) {
+          await saveCharacter(res.character.id, obj.data, obj.name);
+          openSheet(cls, { ...res.character, data: JSON.stringify(obj.data) });
+        }
+      } catch (err) {
+        alert('Erreur lors de l\'import : ' + err.message);
+      }
+    });
+
+    input.click();
   }
 
   /* =========================================================================

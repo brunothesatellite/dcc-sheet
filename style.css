@@ -348,6 +348,35 @@ ul, ol {
   filter: brightness(1.1);
 }
 
+.btn-group {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-import,
+.btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink);
+  background: var(--field-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.btn-import:hover,
+.btn-export:hover {
+  background: var(--line);
+  border-color: var(--muted);
+}
+
 /* --------------------------------------------------------------------------
    7. Character Cards
    -------------------------------------------------------------------------- */

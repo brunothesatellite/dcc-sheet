@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DCC Fiches de Personnage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script>
+(function(){var t=localStorage.getItem('dcc-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();
+</script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-left"><div class="logo">DCC <span>Fiches</span></div></div>
+  <div class="topbar-right">
+    <button class="theme-toggle" id="btn-theme" title="Changer de theme">&#9789;</button>
+    <div class="auth-user" id="auth-guest" style="display:none">
+      <a href="login.php" class="auth-btn" style="text-decoration:none;color:#fff">Connexion</a>
+      <a href="register.php" class="auth-btn" style="background:transparent;border:1px solid var(--header-text);text-decoration:none;color:var(--header-text)">Inscription</a>
+    </div>
+    <div class="auth-user" id="auth-logged" style="display:none">
+      <div class="auth-avatar" id="auth-avatar"></div>
+      <span class="auth-pseudo" id="auth-pseudo"></span>
+      <button class="auth-logout" id="btn-logout">Deconnexion</button>
+    </div>
+  </div>
+</header>
+
+<nav class="tab-bar" id="tab-bar">
+  <button class="tab active" data-class="clerc">Clerc</button>
+  <button class="tab" data-class="elfe">Elfe</button>
+  <button class="tab" data-class="guerrier">Guerrier</button>
+  <button class="tab" data-class="halfelin">Halfelin</button>
+  <button class="tab" data-class="mage">Mage</button>
+  <button class="tab" data-class="nain">Nain</button>
+  <button class="tab" data-class="voleur">Voleur</button>
+</nav>
+
+<main class="main" id="main-content">
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>

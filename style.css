@@ -1,0 +1,859 @@
+/* ==========================================================================
+   DCC Character Sheet - Main Stylesheet
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Design Tokens & CSS Reset
+   -------------------------------------------------------------------------- */
+
+:root {
+  --bg: #f1eee8;
+  --paper: #fff;
+  --ink: #171717;
+  --muted: #706d68;
+  --line: #d7d1c8;
+  --accent: #2a2a2a;
+  --red: #c0392b;
+  --green: #27ae60;
+  --yellow: #f2bd3d;
+  --field-bg: #dde4f0;
+  --input-border: #9aa5b4;
+  --header-bg: #1a1a2e;
+  --header-text: #fff;
+  --tab-active: #c0392b;
+  --tab-bg: #e8e5df;
+  --shadow: rgba(0, 0, 0, 0.08);
+  --inn-bg: #f5f0e6;
+  --inn-border: #d4c9a8;
+
+  --font-heading: 'Barlow Condensed', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  --topbar-h: 56px;
+  --tabbar-h: 48px;
+  --radius: 6px;
+  --radius-sm: 4px;
+}
+
+[data-theme="dark"] {
+  --bg: #1a1917;
+  --paper: #242320;
+  --ink: #e8e4dc;
+  --muted: #9a9590;
+  --line: #4a4744;
+  --accent: #e8e4dc;
+  --red: #e84535;
+  --green: #4caf50;
+  --yellow: #f5c542;
+  --field-bg: #2a2926;
+  --input-border: #5a5754;
+  --header-bg: #0d0d1a;
+  --header-text: #e8e4dc;
+  --tab-active: #e84535;
+  --tab-bg: #2a2926;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --inn-bg: #1e1d1a;
+  --inn-border: #3a3936;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--bg);
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+input, textarea, select {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+/* --------------------------------------------------------------------------
+   2. Top Bar
+   -------------------------------------------------------------------------- */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--topbar-h);
+  padding: 0 16px;
+  background: var(--header-bg);
+  color: var(--header-text);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.logo span {
+  color: var(--yellow);
+}
+
+.topbar-spacer {
+  flex: 1;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--header-text);
+  transition: background 0.2s;
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.auth-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-btn {
+  padding: 6px 14px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s, color 0.2s;
+  background: var(--tab-active);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.auth-btn:hover {
+  filter: brightness(1.1);
+}
+
+.auth-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--tab-active);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 14px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.auth-pseudo {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.auth-logout {
+  padding: 4px 10px;
+  font-size: 11px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--header-text);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+/* --------------------------------------------------------------------------
+   3. Tab Bar
+   -------------------------------------------------------------------------- */
+
+.tab-bar {
+  position: sticky;
+  top: var(--topbar-h);
+  z-index: 90;
+  display: flex;
+  gap: 4px;
+  padding: 8px 16px;
+  background: var(--tab-bg);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tab-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  flex-shrink: 0;
+  padding: 8px 20px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: transparent;
+  color: var(--muted);
+  transition: background 0.2s, color 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.tab.active {
+  background: var(--paper);
+  color: var(--tab-active);
+  box-shadow: 0 2px 4px var(--shadow);
+}
+
+/* --------------------------------------------------------------------------
+   4. Main Content Area
+   -------------------------------------------------------------------------- */
+
+.main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 80px;
+}
+
+/* --------------------------------------------------------------------------
+   5. Tab Panels & View Switching
+   -------------------------------------------------------------------------- */
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+.view-list {
+  display: block;
+}
+
+.view-sheet {
+  display: none;
+}
+
+.view-sheet.active {
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   6. Section Headers & Button New
+   -------------------------------------------------------------------------- */
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 22px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ink);
+}
+
+.btn-new {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #fff;
+  background: var(--green);
+  border-radius: var(--radius);
+  transition: filter 0.2s;
+}
+
+.btn-new:hover {
+  filter: brightness(1.1);
+}
+
+/* --------------------------------------------------------------------------
+   7. Character Cards
+   -------------------------------------------------------------------------- */
+
+.char-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.char-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 2px 6px var(--shadow);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+  cursor: pointer;
+}
+
+.char-card:hover {
+  box-shadow: 0 4px 12px var(--shadow);
+  border-color: var(--muted);
+}
+
+.char-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.char-card-name {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.char-card-meta {
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.char-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.char-card-level {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.char-card-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.char-card-btns button {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--field-bg);
+  color: var(--ink);
+  transition: background 0.2s;
+}
+
+.char-card-btns button:hover {
+  background: var(--line);
+}
+
+.char-card-btns button.btn-delete {
+  color: var(--red);
+}
+
+.char-card-btns button.btn-delete:hover {
+  background: var(--red);
+  color: #fff;
+}
+
+/* --------------------------------------------------------------------------
+   8. Toggle Inn (Switch Slider)
+   -------------------------------------------------------------------------- */
+
+.toggle-inn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.toggle-inn-label {
+  user-select: none;
+}
+
+.switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.switch-slider {
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  background: var(--line);
+  transition: background 0.3s;
+  cursor: pointer;
+}
+
+.switch-slider::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.3s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.switch input:checked + .switch-slider {
+  background: var(--green);
+}
+
+.switch input:checked + .switch-slider::before {
+  transform: translateX(20px);
+}
+
+/* --------------------------------------------------------------------------
+   9. Empty States
+   -------------------------------------------------------------------------- */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state-title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 20px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  color: var(--ink);
+}
+
+.empty-state-text {
+  font-size: 14px;
+  max-width: 320px;
+  line-height: 1.6;
+}
+
+/* --------------------------------------------------------------------------
+   10. Sheet Header
+   -------------------------------------------------------------------------- */
+
+.sheet-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.btn-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--field-bg);
+  color: var(--ink);
+  transition: background 0.2s;
+}
+
+.btn-back:hover {
+  background: var(--line);
+}
+
+.sheet-title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink);
+  flex: 1;
+}
+
+.sheet-header .toggle-inn {
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   11. Sheet Pages, Rows, Fields
+   -------------------------------------------------------------------------- */
+
+.sheet-page {
+  display: block;
+}
+
+.page-title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--header-text);
+  background: var(--header-bg);
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+
+.sheet-row {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.sheet-row.cols-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.sheet-row.cols-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.sheet-row.cols-4 {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.sheet-row.cols-1-2 {
+  grid-template-columns: 1fr 2fr;
+}
+
+.sheet-row.cols-2-1 {
+  grid-template-columns: 2fr 1fr;
+}
+
+.sheet-row.cols-3-1 {
+  grid-template-columns: 3fr 1fr;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field-label {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+}
+
+.field-value {
+  font-size: 14px;
+  color: var(--ink);
+  min-height: 24px;
+  padding: 6px 10px;
+  background: var(--field-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  word-break: break-word;
+}
+
+/* --------------------------------------------------------------------------
+   12. Inputs and Textareas
+   -------------------------------------------------------------------------- */
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--field-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--tab-active);
+  box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.15);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.6;
+}
+
+select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23706d68' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   13. Section Title Bars (Dark Headers)
+   -------------------------------------------------------------------------- */
+
+.section-bar {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--header-text);
+  background: var(--header-bg);
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  margin: 20px 0 12px;
+}
+
+.section-bar:first-child {
+  margin-top: 0;
+}
+
+/* --------------------------------------------------------------------------
+   14. Stat Rows
+   -------------------------------------------------------------------------- */
+
+.stat-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+}
+
+.stat-name {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink);
+}
+
+.stat-value {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--ink);
+  text-align: center;
+  min-width: 40px;
+}
+
+.stat-mod {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  min-width: 36px;
+  padding: 2px 6px;
+  background: var(--field-bg);
+  border-radius: var(--radius-sm);
+}
+
+.stat-mod.positive {
+  color: var(--green);
+}
+
+.stat-mod.negative {
+  color: var(--red);
+}
+
+/* --------------------------------------------------------------------------
+   15. Responsive - 600px Breakpoint
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 600px) {
+  .topbar {
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .logo {
+    font-size: 15px;
+  }
+
+  .tab-bar {
+    padding: 6px 12px;
+  }
+
+  .tab {
+    padding: 6px 14px;
+    font-size: 12px;
+  }
+
+  .main {
+    padding: 16px 12px 60px;
+  }
+
+  .char-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .sheet-row.cols-2,
+  .sheet-row.cols-3,
+  .sheet-row.cols-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .sheet-row.cols-1-2,
+  .sheet-row.cols-2-1,
+  .sheet-row.cols-3-1 {
+    grid-template-columns: 1fr;
+  }
+
+  .sheet-title {
+    font-size: 18px;
+  }
+
+  .page-title {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .stat-row {
+    padding: 6px 10px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+
+  .btn-login,
+  .btn-signup {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+  .auth-buttons {
+    gap: 4px;
+  }
+}

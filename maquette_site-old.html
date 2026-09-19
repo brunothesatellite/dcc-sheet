@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DCC Fiches de Personnage - Maquette Site Complet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* === DESIGN TOKENS === */
+:root {
+  --bg: #f1eee8;
+  --paper: #ffffff;
+  --ink: #171717;
+  --muted: #706d68;
+  --line: #d7d1c8;
+  --accent: #2a2a2a;
+  --red: #c0392b;
+  --yellow: #f2bd3d;
+  --field-bg: #dde4f0;
+  --input-bg: #dde4f0;
+  --input-border: #9aa5b4;
+  --header-bg: #1a1a2e;
+  --header-text: #ffffff;
+  --tab-active: #c0392b;
+  --tab-bg: #e8e5df;
+  --shadow: rgba(0,0,0,0.08);
+}
+[data-theme="dark"] {
+  --bg: #1a1917;
+  --paper: #242320;
+  --ink: #e8e4dc;
+  --muted: #9a9590;
+  --line: #4a4744;
+  --accent: #e8e4dc;
+  --red: #e84535;
+  --yellow: #f5c542;
+  --field-bg: #2a2926;
+  --input-bg: #2a2926;
+  --input-border: #5a5754;
+  --header-bg: #0d0d1a;
+  --header-text: #e8e4dc;
+  --tab-active: #e84535;
+  --tab-bg: #2a2926;
+  --shadow: rgba(0,0,0,0.3);
+}
+/* === RESET === */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+}
+/* === TOP BAR === */
+.topbar {
+  background: var(--header-bg);
+  color: var(--header-text);
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+.topbar-left { display: flex; align-items: center; gap: 10px; }
+.logo {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+.logo span { color: var(--yellow); }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.theme-toggle {
+  background: none;
+  border: 2px solid var(--header-text);
+  color: var(--header-text);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.theme-toggle:hover { background: rgba(255,255,255,0.1); }
+/* Auth button */
+.auth-btn {
+  background: var(--red);
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+.auth-btn:hover { opacity: 0.9; }
+.auth-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.auth-avatar {
+  width: 30px;
+  height: 30px;
+  background: var(--red);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  color: #fff;
+}
+.auth-pseudo {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+}
+.auth-logout {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: var(--header-text);
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+/* === TAB BAR === */
+.tab-bar {
+  background: var(--tab-bg);
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  border-bottom: 2px solid var(--line);
+  position: sticky;
+  top: 54px;
+  z-index: 99;
+}
+.tab-bar::-webkit-scrollbar { display: none; }
+.tab {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--ink);
+  border-bottom: 3px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.tab:hover { background: rgba(0,0,0,0.04); }
+.tab.active {
+  color: var(--tab-active);
+  border-bottom-color: var(--tab-active);
+  background: var(--paper);
+}
+[data-theme="dark"] .tab:hover { background: rgba(255,255,255,0.04); }
+/* === MAIN CONTENT === */
+.main { padding: 14px; max-width: 800px; margin: 0 auto; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+/* === CHARACTER LIST === */
+.char-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.char-header h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  text-transform: uppercase;
+}
+.btn-new {
+  background: var(--red);
+  color: #fff;
+  border: none;
+  padding: 7px 16px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+.char-list { display: flex; flex-direction: column; gap: 8px; }
+.char-card {
+  background: var(--paper);
+  border: 2px solid var(--line);
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.char-card:hover { border-color: var(--red); }
+.char-card-info { display: flex; flex-direction: column; gap: 2px; }
+.char-card-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+}
+.char-card-meta {
+  font-size: 12px;
+  color: var(--muted);
+}
+.char-card-actions { display: flex; gap: 6px; }
+.char-card-actions button {
+  background: none;
+  border: 1px solid var(--line);
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+}
+.char-card-actions button:hover { border-color: var(--red); color: var(--red); }
+/* === EMPTY STATE === */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+}
+.empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+.empty-state p { font-size: 13px; }
+/* === RESPONSIVE === */
+@media (max-width: 600px) {
+  .topbar { padding: 8px 10px; }
+  .logo { font-size: 18px; letter-spacing: 1px; }
+  .tab { padding: 8px 10px; font-size: 11px; }
+  .main { padding: 10px; }
+  .tab-bar { top: 46px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="logo">DCC <span>Fiches</span></div>
+  </div>
+  <div class="topbar-right">
+    <button class="theme-toggle" onclick="toggleTheme()" title="Changer de theme">&#9789;</button>
+    <!-- Mode deconnecte -->
+    <div class="auth-user" id="auth-guest" style="display:flex;">
+      <button class="auth-btn" onclick="showPanel('login')">Connexion</button>
+      <button class="auth-btn" style="background:transparent; border:1px solid var(--header-text);" onclick="showPanel('register')">Inscription</button>
+    </div>
+    <!-- Mode connecte (masque par defaut) -->
+    <div class="auth-user" id="auth-logged" style="display:none;">
+      <div class="auth-avatar">J</div>
+      <span class="auth-pseudo">Joueur1</span>
+      <button class="auth-logout" onclick="logout()">Deconnexion</button>
+    </div>
+  </div>
+</header>
+
+<!-- TAB BAR -->
+<nav class="tab-bar" id="tab-bar">
+  <button class="tab active" onclick="switchTab('clerc')">Clerc</button>
+  <button class="tab" onclick="switchTab('elfe')">Elfe</button>
+  <button class="tab" onclick="switchTab('guerrier')">Guerrier</button>
+  <button class="tab" onclick="switchTab('halfelin')">Halfelin</button>
+  <button class="tab" onclick="switchTab('mage')">Mage</button>
+  <button class="tab" onclick="switchTab('nain')">Nain</button>
+  <button class="tab" onclick="switchTab('voleur')">Voleur</button>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+  <!-- PANELS - Un par classe (vides dans cette maquette) -->
+  <div class="tab-panel active" id="panel-clerc">
+    <div class="char-header">
+      <h2>Clerc</h2>
+      <button class="btn-new">+ Nouveau</button>
+    </div>
+    <div class="char-list" id="list-clerc">
+      <div class="char-card">
+        <div class="char-card-info">
+          <div class="char-card-name">Aldric le Devot</div>
+          <div class="char-card-meta">Niveau 3 - Humain - Dieu: St. Cuthbert</div>
+        </div>
+        <div class="char-card-actions">
+          <button>Ouvrir</button>
+          <button>Supprimer</button>
+        </div>
+      </div>
+      <div class="char-card">
+        <div class="char-card-info">
+          <div class="char-card-name">Sœur Mirael</div>
+          <div class="char-card-meta">Niveau 1 - Humain - Dieu: Nul</div>
+        </div>
+        <div class="char-card-actions">
+          <button>Ouvrir</button>
+          <button>Supprimer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="panel-elfe">
+    <div class="char-header">
+      <h2>Elfe</h2>
+      <button class="btn-new">+ Nouveau</button>
+    </div>
+    <div class="empty-state">
+      <div class="empty-state-icon">&#9876;</div>
+      <h3>Aucun personnage</h3>
+      <p>Creer un premier elfe pour commencer l'aventure.</p>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="panel-guerrier">
+    <div class="char-header">
+      <h2>Guerrier</h2>
+      <button class="btn-new">+ Nouveau</button>
+    </div>
+    <div class="empty-state">
+      <div class="empty-state-icon">&#9876;</div>
+      <h3>Aucun personnage</h3>
+      <p>Creer un premier guerrier pour commencer l'aventure.</p>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="panel-halfelin">
+    <div class="char-header">
+      <h2>Halfelin</h2>
+      <button class="btn-new">+ Nouveau</button>
+    </div>
+    <div class="empty-state">
+      <div class="empty-state-icon">&#9876;</div>
+      <h3>Aucun personnage</h3>
+      <p>Creer un premier halfelin pour commencer l'aventure.</p>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="panel-mage">
+    <div class="char-header">
+      <h2>Mage</h2>
+      <button class="btn-new">+ Nouveau</button>
+    </div>
+    <div class="empty-state">
+      <div class="empty-state-icon">&#9876;</div>
+      <h3>Aucun personnage</h3>
+      <p>Creer un premier mage pour commencer l'aventure.</p>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="panel-nain">
+    <div class="char-header">
+      <h2>Nain</h2>
+      <button class="btn-new">+ Nouveau</button>
+    </div>
+    <div class="empty-state">
+      <div class="empty-state-icon">&#9876;</div>
+      <h3>Aucun personnage</h3>
+      <p>Creer un premier nain pour commencer l'aventure.</p>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="panel-voleur">
+    <div class="char-header">
+      <h2>Voleur</h2>
+      <button class="btn-new">+ Nouveau</button>
+    </div>
+    <div class="empty-state">
+      <div class="empty-state-icon">&#9876;</div>
+      <h3>Aucun personnage</h3>
+      <p>Creer un premier voleur pour commencer l'aventure.</p>
+    </div>
+  </div>
+</main>
+
+<script>
+// Theme toggle
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('dcc-theme', next);
+  document.querySelector('.theme-toggle').textContent = next === 'dark' ? '\u2600' : '\u263D';
+}
+(function() {
+  const saved = localStorage.getItem('dcc-theme');
+  if (saved) {
+    document.documentElement.setAttribute('data-theme', saved);
+    document.querySelector('.theme-toggle').textContent = saved === 'dark' ? '\u2600' : '\u263D';
+  }
+})();
+
+// Tab switching
+function switchTab(tabId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+  document.getElementById('panel-' + tabId).classList.add('active');
+}
+
+// Auth mockups
+function showPanel(type) {
+  alert('Panneau ' + type + ' (a implementer)');
+}
+function logout() {
+  document.getElementById('auth-guest').style.display = 'flex';
+  document.getElementById('auth-logged').style.display = 'none';
+}
+</script>
+</body>
+</html>

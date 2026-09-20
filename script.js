@@ -587,7 +587,21 @@
     }
   }
 
+  var blocCommunLoaded = false;
+
+  async function ensureBlocCommun() {
+    if (blocCommunLoaded) return;
+    return new Promise(function (resolve, reject) {
+      var script = document.createElement('script');
+      script.src = 'classes/bloc_commun.js';
+      script.onload = function () { blocCommunLoaded = true; resolve(); };
+      script.onerror = function () { reject(new Error('Impossible de charger classes/bloc_commun.js')); };
+      document.head.appendChild(script);
+    });
+  }
+
   async function importClassModule(cls) {
+    await ensureBlocCommun();
     return new Promise(function (resolve, reject) {
       var script = document.createElement('script');
       script.src = 'classes/' + cls + '.js';

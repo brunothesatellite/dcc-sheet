@@ -1127,18 +1127,19 @@ input[type="number"]::-webkit-outer-spin-button {
 .combat-ext-field label {
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 10px;
+  font-size: 12px;
   text-transform: uppercase;
   background: var(--ink);
   color: var(--paper);
-  padding: 2px 4px;
+  padding: 4px 6px;
   text-align: center;
 }
 
 .combat-ext-field input {
-  padding: 4px;
+  padding: 6px;
   text-align: center;
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 600;
   border: 1px solid var(--input-border);
   background: var(--field-bg);
   border-radius: 2px;
@@ -1430,16 +1431,17 @@ input[type="number"]::-webkit-outer-spin-button {
   }
 
   .combat-ext-field label {
-    font-size: 7px;
-    padding: 1px 2px;
+    font-size: 9px;
+    padding: 2px 3px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .combat-ext-field input {
-    font-size: 9px;
-    padding: 2px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px;
     width: 100%;
     box-sizing: border-box;
   }

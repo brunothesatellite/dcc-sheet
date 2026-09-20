@@ -5,6 +5,7 @@
 **BUGS**
 *Critique*
 * [DONE] BUG 1 : Les fiches de personnage doivent reprendre la mise en page des PDF, par exemple pour le Clerc, je veux que sa fiche corresponde à la maquette que tu avais réalisée. Retravaille la fiche du Clerc pour qu'elle soit comme sur la maquette présentée et conforme au PDF (maquette_clerc.html)
+* BUG 5 : Aucun champ ne semble sauvegardé en base.
 
 *Majeur*
 * [DONE] BUG 2 : Pour les parties communes à toutes les classes, le layout doit être identique entre les classes. Réutilise le layout validé de la classe Clerc pour la partie commune des autres classes.

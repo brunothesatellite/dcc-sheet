@@ -345,14 +345,18 @@
     toggleLabel.appendChild(toggleInput);
     toggleLabel.appendChild(el('span', { className: 'switch-slider' }));
     toggleWrapper.appendChild(toggleLabel);
-    toggleWrapper.appendChild(el('span', {
+    var toggleText = el('span', {
       className: 'toggle-inn-label',
       textContent: isActive ? 'EN EXPEDITION' : "A L'AUBERGE",
-    }));
+    });
+    toggleWrapper.appendChild(toggleText);
 
     toggleInput.addEventListener('change', function (e) {
       e.stopPropagation();
-      setCharacterActive(charData.id, e.target.checked);
+      var checked = e.target.checked;
+      toggleText.textContent = checked ? 'EN EXPEDITION' : "A L'AUBERGE";
+      toggleText.style.color = checked ? 'var(--green)' : 'var(--red)';
+      setCharacterActive(charData.id, checked);
     });
 
     var openBtn = el('button', {

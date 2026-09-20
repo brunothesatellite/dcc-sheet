@@ -623,6 +623,7 @@ ul, ol {
 
 .sheet-page {
   display: block;
+  overflow: hidden;
 }
 
 .page-title {
@@ -776,45 +777,53 @@ input[type="number"]::-webkit-outer-spin-button {
    -------------------------------------------------------------------------- */
 
 .stat-row {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
+  gap: 6px;
   margin-bottom: 6px;
 }
 
 .stat-name {
+  background: var(--ink);
+  color: var(--paper);
   font-family: var(--font-heading);
   font-weight: 800;
-  font-size: 14px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--ink);
+  padding: 6px 10px;
+  min-width: 90px;
+  text-align: center;
+  flex-shrink: 0;
 }
 
-.stat-value {
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 20px;
-  color: var(--ink);
+.stat-value input {
+  width: 40px;
   text-align: center;
-  min-width: 40px;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 4px;
+  border: 1px solid var(--input-border);
+  background: var(--field-bg);
+  border-radius: 2px;
 }
 
 .stat-mod {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
   color: var(--muted);
+  flex-shrink: 0;
+}
+
+.stat-mod input {
+  width: 35px;
   text-align: center;
-  min-width: 36px;
-  padding: 2px 6px;
+  font-size: 12px;
+  padding: 3px;
+  border: 1px solid var(--input-border);
   background: var(--field-bg);
-  border-radius: var(--radius-sm);
+  border-radius: 2px;
 }
 
 .stat-mod.positive {
@@ -826,7 +835,304 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 /* --------------------------------------------------------------------------
-   15. Responsive - 600px Breakpoint
+   15. Sheet Components (from maquette_clerc)
+   -------------------------------------------------------------------------- */
+
+.row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+  align-items: stretch;
+}
+
+.row > * {
+  flex: 1;
+}
+
+.combat-box {
+  background: var(--field-bg);
+  border: 2px solid var(--ink);
+  padding: 6px;
+}
+
+.combat-box .section-bar {
+  margin: -6px -6px 6px -6px;
+  padding: 5px 8px;
+}
+
+.combat-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3px;
+  font-size: 12px;
+}
+
+.combat-field label {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.combat-field input {
+  width: 55%;
+  padding: 3px 5px;
+  font-size: 12px;
+}
+
+.stat-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--field-bg);
+  border: 2px solid var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-circle input {
+  width: 28px;
+  text-align: center;
+  font-size: 11px;
+  padding: 2px;
+  border: 1px solid var(--input-border);
+  background: var(--field-bg);
+  border-radius: 2px;
+}
+
+.stat-circle-label {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 8px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.defense-area {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.shield, .helmet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.shield-shape {
+  width: 80px;
+  height: 90px;
+  background: var(--field-bg);
+  border: 3px solid var(--ink);
+  border-radius: 0 0 40px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.shield-shape input {
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  border: 1.5px solid var(--input-border);
+  background: var(--field-bg);
+  border-radius: 2px;
+}
+
+.shield-label {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin-top: 4px;
+  text-align: center;
+}
+
+.helmet-shape {
+  width: 80px;
+  height: 90px;
+  background: var(--field-bg);
+  border: 3px solid var(--ink);
+  border-radius: 40px 40px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  position: relative;
+}
+
+.helmet-shape input {
+  width: 50px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1.5px solid var(--input-border);
+  background: var(--field-bg);
+  padding: 3px;
+  border-radius: 2px;
+}
+
+.helmet-label {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.helmet-max {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+}
+
+.helmet-max input {
+  width: 30px;
+  font-size: 11px;
+  padding: 2px;
+}
+
+.combat-ext {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+
+.stats-and-combat {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.stats-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.combat-ext-col {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.combat-ext-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.combat-ext-field label {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 2px 4px;
+  text-align: center;
+}
+
+.combat-ext-field input {
+  padding: 4px;
+  text-align: center;
+  font-size: 12px;
+  border: 1px solid var(--input-border);
+  background: var(--field-bg);
+  border-radius: 2px;
+}
+
+.portrait-area {
+  border: 2px solid var(--ink);
+  min-height: 80px;
+  background: var(--field-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portrait-area label {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dtable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+.dtable th {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  padding: 4px 6px;
+  text-align: center;
+}
+
+.dtable td {
+  border: 1.5px solid var(--ink);
+  padding: 3px 4px;
+  text-align: center;
+}
+
+.dtable td:first-child {
+  text-align: left;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 10px;
+}
+
+.dtable input {
+  width: 100%;
+  text-align: center;
+  border: none;
+  background: transparent;
+  font-size: 11px;
+  padding: 2px;
+}
+
+.sorts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 4px;
+}
+
+.sort-col {
+  border: 1.5px solid var(--input-border);
+  background: var(--field-bg);
+  min-height: 60px;
+  padding: 4px;
+}
+
+.sort-col input {
+  border: none;
+  background: transparent;
+  padding: 2px 0;
+  font-size: 11px;
+  width: 100%;
+  margin-bottom: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   16. Responsive - 600px Breakpoint
    -------------------------------------------------------------------------- */
 
 @media (max-width: 600px) {
@@ -930,25 +1236,166 @@ input[type="number"]::-webkit-outer-spin-button {
     grid-template-columns: 1fr !important;
   }
 
-  .sheet-page .row {
-    flex-direction: column;
-  }
-
-  .sheet-page .row > * {
-    flex: 1 1 100%;
-  }
-
   .page-title {
     font-size: 13px;
     padding: 6px 10px;
   }
 
   .stat-row {
-    padding: 6px 8px;
+    gap: 3px;
   }
 
-  .stat-value {
-    font-size: 18px;
+  .stat-name {
+    min-width: 60px;
+    font-size: 9px;
+    padding: 4px 5px;
+  }
+
+  .stat-value input {
+    width: 28px;
+    font-size: 11px;
+    padding: 2px;
+  }
+
+  .stat-mod {
+    font-size: 9px;
+  }
+
+  .stat-mod input {
+    width: 24px;
+    font-size: 10px;
+    padding: 2px;
+  }
+
+  .stat-circle {
+    width: 34px;
+    height: 34px;
+  }
+
+  .stat-circle input {
+    width: 18px;
+    font-size: 9px;
+  }
+
+  .stat-circle-label {
+    font-size: 7px;
+  }
+
+  .stats-and-combat {
+    gap: 6px;
+    overflow: hidden;
+  }
+
+  .stats-col {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .combat-ext-col {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .combat-ext {
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+
+  .combat-ext-field {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .combat-ext-field label {
+    font-size: 7px;
+    padding: 1px 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .combat-ext-field input {
+    font-size: 9px;
+    padding: 2px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .defense-area {
+    gap: 4px;
+  }
+
+  .shield-shape {
+    width: 70px;
+    height: 80px;
+  }
+
+  .shield-shape input {
+    width: 40px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .helmet-shape {
+    width: 70px;
+    height: 80px;
+  }
+
+  .helmet-shape input {
+    width: 42px;
+    font-size: 13px;
+  }
+
+  .helmet-max {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .helmet-max input {
+    width: 34px;
+    font-size: 11px;
+  }
+
+  .combat-field input {
+    width: 50%;
+    font-size: 11px;
+  }
+
+  .portrait-area {
+    display: none;
+  }
+
+  .dtable {
+    font-size: 10px;
+  }
+
+  .dtable th {
+    font-size: 9px;
+    padding: 3px 4px;
+  }
+
+  .dtable td {
+    padding: 2px 3px;
+  }
+
+  .dtable input {
+    font-size: 10px;
+  }
+
+  .sorts-grid {
+    gap: 3px;
+  }
+
+  .sort-col {
+    min-height: 50px;
+    padding: 3px;
+  }
+
+  .sort-col input {
+    font-size: 10px;
   }
 
   .btn-login,

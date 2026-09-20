@@ -834,6 +834,90 @@ input[type="number"]::-webkit-outer-spin-button {
   color: var(--red);
 }
 
+.stat-block {
+  margin-bottom: 6px;
+}
+
+.stat-block-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.stat-block-bottom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 0;
+}
+
+.stat-block .stat-name {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 13px;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  min-width: 90px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.stat-block .stat-value input {
+  width: 44px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 5px;
+  border: 1px solid var(--input-border);
+  background: var(--field-bg);
+  border-radius: 2px;
+}
+
+.stat-block .stat-mod {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.stat-block .stat-mod input {
+  width: 38px;
+  text-align: center;
+  font-size: 13px;
+  padding: 3px;
+  border: 1px solid var(--input-border);
+  background: var(--field-bg);
+  border-radius: 2px;
+}
+
+.stat-extra {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-extra .field {
+  width: 100%;
+}
+
+.stat-extra .field-label {
+  font-size: 9px;
+}
+
+.stat-extra input {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 12px;
+  padding: 4px;
+  border: 1px solid var(--input-border);
+  background: var(--field-bg);
+  border-radius: 2px;
+}
+
 /* --------------------------------------------------------------------------
    15. Sheet Components (from maquette_clerc)
    -------------------------------------------------------------------------- */
@@ -881,8 +965,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .stat-circle {
-  width: 44px;
-  height: 44px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   background: var(--field-bg);
   border: 2px solid var(--ink);
@@ -894,9 +978,9 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .stat-circle input {
-  width: 28px;
+  width: 30px;
   text-align: center;
-  font-size: 11px;
+  font-size: 13px;
   padding: 2px;
   border: 1px solid var(--input-border);
   background: var(--field-bg);
@@ -906,7 +990,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .stat-circle-label {
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 8px;
+  font-size: 9px;
   text-transform: uppercase;
   line-height: 1;
 }
@@ -1268,17 +1352,44 @@ input[type="number"]::-webkit-outer-spin-button {
   }
 
   .stat-circle {
-    width: 34px;
-    height: 34px;
+    width: 48px;
+    height: 48px;
   }
 
   .stat-circle input {
-    width: 18px;
-    font-size: 9px;
+    width: 28px;
+    font-size: 12px;
   }
 
   .stat-circle-label {
-    font-size: 7px;
+    font-size: 8px;
+  }
+
+  .stat-extra {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .stat-extra input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .stat-block .stat-name {
+    min-width: 60px;
+    font-size: 10px;
+    padding: 4px 5px;
+  }
+
+  .stat-block .stat-value input {
+    width: 36px;
+    font-size: 13px;
+    padding: 3px;
+  }
+
+  .stat-block .stat-mod input {
+    width: 30px;
+    font-size: 11px;
   }
 
   .stats-and-combat {

@@ -7,7 +7,6 @@ window.DCCModules.clerc = {
 
     container.innerHTML = `
       <div class="sheet-page">
-        <div class="page-title">Fiche de Clerc - Partie 1</div>
 
         <!-- Identite -->
         <div class="row" style="margin-bottom:4px;">
@@ -60,36 +59,82 @@ window.DCCModules.clerc = {
         <div class="stats-and-combat">
           <!-- Colonne gauche : stats + cercles -->
           <div class="stats-col">
-            <div class="stat-row">
-              <div class="stat-name">Force</div>
-              <div class="stat-value"><input type="text" data-key="${k('force')}" value="${v('force')}" placeholder="0"></div>
-              <div class="stat-mod">Modif.: <input type="text" data-key="${k('force_mod')}" value="${v('force_mod')}" placeholder="0"></div>
-            </div>
-            <div class="stat-row">
-              <div class="stat-name">Agilite</div>
-              <div class="stat-value"><input type="text" data-key="${k('agilite')}" value="${v('agilite')}" placeholder="0"></div>
-              <div class="stat-mod">Modif.: <input type="text" data-key="${k('agilite_mod')}" value="${v('agilite_mod')}" placeholder="0"></div>
-              <div class="stat-circle">
-                <input type="text" data-key="${k('js_reflexe')}" value="${v('js_reflexe')}" placeholder="0">
-                <div class="stat-circle-label">JS Ref</div>
+            <div class="stat-block">
+              <div class="stat-block-top">
+                <div class="stat-name">Force</div>
+                <div class="stat-value"><input type="text" data-key="${k('force')}" value="${v('force')}" placeholder="0"></div>
+              </div>
+              <div class="stat-block-bottom">
+                <div class="stat-mod">Modif.: <input type="text" data-key="${k('force_mod')}" value="${v('force_mod')}" placeholder="0"></div>
               </div>
             </div>
-            <div class="stat-row">
-              <div class="stat-name">Endurance</div>
-              <div class="stat-value"><input type="text" data-key="${k('endurance')}" value="${v('endurance')}" placeholder="0"></div>
-              <div class="stat-mod">Modif.: <input type="text" data-key="${k('endurance_mod')}" value="${v('endurance_mod')}" placeholder="0"></div>
-              <div class="stat-circle">
-                <input type="text" data-key="${k('js_vigueur')}" value="${v('js_vigueur')}" placeholder="0">
-                <div class="stat-circle-label">JS Vig</div>
+            <div class="stat-block">
+              <div class="stat-block-top">
+                <div class="stat-name">Agilite</div>
+                <div class="stat-value"><input type="text" data-key="${k('agilite')}" value="${v('agilite')}" placeholder="0"></div>
+                <div class="stat-circle">
+                  <input type="text" data-key="${k('js_reflexe')}" value="${v('js_reflexe')}" placeholder="0">
+                  <div class="stat-circle-label">JS Ref</div>
+                </div>
+              </div>
+              <div class="stat-block-bottom">
+                <div class="stat-mod">Modif.: <input type="text" data-key="${k('agilite_mod')}" value="${v('agilite_mod')}" placeholder="0"></div>
               </div>
             </div>
-            <div class="stat-row">
-              <div class="stat-name">Presence</div>
-              <div class="stat-value"><input type="text" data-key="${k('presence')}" value="${v('presence')}" placeholder="0"></div>
-              <div class="stat-mod">Modif.: <input type="text" data-key="${k('presence_mod')}" value="${v('presence_mod')}" placeholder="0"></div>
-              <div class="stat-circle">
-                <input type="text" data-key="${k('js_volonte')}" value="${v('js_volonte')}" placeholder="0">
-                <div class="stat-circle-label">JS Vol</div>
+            <div class="stat-block">
+              <div class="stat-block-top">
+                <div class="stat-name">Endurance</div>
+                <div class="stat-value"><input type="text" data-key="${k('endurance')}" value="${v('endurance')}" placeholder="0"></div>
+                <div class="stat-circle">
+                  <input type="text" data-key="${k('js_vigueur')}" value="${v('js_vigueur')}" placeholder="0">
+                  <div class="stat-circle-label">JS Vig</div>
+                </div>
+              </div>
+              <div class="stat-block-bottom">
+                <div class="stat-mod">Modif.: <input type="text" data-key="${k('endurance_mod')}" value="${v('endurance_mod')}" placeholder="0"></div>
+              </div>
+            </div>
+            <div class="stat-block">
+              <div class="stat-block-top">
+                <div class="stat-name">Presence</div>
+                <div class="stat-value"><input type="text" data-key="${k('presence')}" value="${v('presence')}" placeholder="0"></div>
+                <div class="stat-circle">
+                  <input type="text" data-key="${k('js_volonte')}" value="${v('js_volonte')}" placeholder="0">
+                  <div class="stat-circle-label">JS Vol</div>
+                </div>
+              </div>
+              <div class="stat-block-bottom">
+                <div class="stat-mod">Modif.: <input type="text" data-key="${k('presence_mod')}" value="${v('presence_mod')}" placeholder="0"></div>
+              </div>
+            </div>
+            <div class="stat-block">
+              <div class="stat-block-top">
+                <div class="stat-name">Chance</div>
+                <div class="stat-value"><input type="text" data-key="${k('chance')}" value="${v('chance')}" placeholder="0"></div>
+                <div class="stat-extra">
+                  <div class="field">
+                    <div class="field-label">Jet chanceux</div>
+                    <input type="text" data-key="${k('jet_chanceux')}" value="${v('jet_chanceux')}">
+                  </div>
+                </div>
+              </div>
+              <div class="stat-block-bottom">
+                <div class="stat-mod">Modif.: <input type="text" data-key="${k('chance_mod')}" value="${v('chance_mod')}" placeholder="0"></div>
+              </div>
+            </div>
+            <div class="stat-block">
+              <div class="stat-block-top">
+                <div class="stat-name">Intelligence</div>
+                <div class="stat-value"><input type="text" data-key="${k('intelligence')}" value="${v('intelligence')}" placeholder="0"></div>
+                <div class="stat-extra">
+                  <div class="field">
+                    <div class="field-label">Langues</div>
+                    <input type="text" data-key="${k('langues')}" value="${v('langues')}">
+                  </div>
+                </div>
+              </div>
+              <div class="stat-block-bottom">
+                <div class="stat-mod">Modif.: <input type="text" data-key="${k('intelligence_mod')}" value="${v('intelligence_mod')}" placeholder="0"></div>
               </div>
             </div>
           </div>
@@ -104,30 +149,8 @@ window.DCCModules.clerc = {
           </div>
         </div>
 
-        <!-- Chance + Intelligence : pleine largeur -->
-        <div class="stat-row">
-          <div class="stat-name">Chance</div>
-          <div class="stat-value"><input type="text" data-key="${k('chance')}" value="${v('chance')}" placeholder="0"></div>
-          <div class="stat-mod">Modif.: <input type="text" data-key="${k('chance_mod')}" value="${v('chance_mod')}" placeholder="0"></div>
-          <div class="field" style="flex:1;">
-            <div class="field-label">Jet chanceux</div>
-            <input type="text" data-key="${k('jet_chanceux')}" value="${v('jet_chanceux')}">
-          </div>
-        </div>
-        <div class="stat-row">
-          <div class="stat-name">Intelligence</div>
-          <div class="stat-value"><input type="text" data-key="${k('intelligence')}" value="${v('intelligence')}" placeholder="0"></div>
-          <div class="stat-mod">Modif.: <input type="text" data-key="${k('intelligence_mod')}" value="${v('intelligence_mod')}" placeholder="0"></div>
-          <div class="field" style="flex:1;">
-            <div class="field-label">Langues</div>
-            <input type="text" data-key="${k('langues')}" value="${v('langues')}">
-          </div>
-        </div>
-      </div>
-
       <!-- PAGE 2 : Equipement, Sorts -->
       <div class="sheet-page">
-        <div class="page-title">Fiche de Clerc - Partie 2</div>
 
         <!-- Armes + Equipement -->
         <div class="row" style="align-items: stretch;">

@@ -139,3 +139,68 @@ dcc-sheet/
 - Gestion des erreurs reseau en前端
 - Import/Export de personnages
 - Gestion du mot de passe oublie
+
+---
+
+## Date : 20 septembre 2026
+
+---
+
+### Refonte layout Clerc (style maquette PDF)
+
+- Suppression du rectangle vide entre Force et Attaque CAC
+- Suppression de la zone portrait
+- Les 3 cercles JdS (JS Ref, JS Vig, JS Vol) alignes sur une colonne fixe
+- Grille 2x2 combat etendu (Attaque CAC, Degats CAC, Att. a distance, Degats distance) placee a droite des stats
+- Les 6 attributs en **stat-block** (layout 2 lignes : valeur + cercle en haut, Modif. en bas)
+- Chance et Intelligence avec Jet chanceux / Langues en face (pleine largeur)
+- Polices augmentees : stat-name 13px, stat-value 16px, cercles JdS 50px diametre
+- Suppression des titres "Fiche de Clerc - Partie 1/2"
+
+### Correction bugs responsive Android
+
+- Retiré `flex-direction: column` sur `.sheet-page .row` pour garder le layout compact sur mobile
+- `stat-row` passe de `nowrap` a `wrap` sur mobile (plus de scroll horizontal)
+- `.stats-and-combat` garde le layout 2 colonnes sur mobile (pas d'empilement)
+- Ajustements compacts mobile : stat-name 60px, cercles 42px, inputs reduits
+- `min-width: 0` ajoute sur `.stat-extra .field` pour permettre l'expansion des inputs Jet chanceux/Langues sur Android
+- Cercles JdS augmentes a 48px sur mobile
+
+### Boutons action cartes
+
+- Bouton "Ouvrir" remplace par icone ✎ (stylo) + tooltip
+- Bouton "Supprimer" deja en icone ✖ + tooltip
+- Hover : fond noir pour ouvrir, fond rouge pour supprimer
+
+### Police combat etendu
+
+- Labels augmentes a 12px (desktop) / 9px (mobile)
+- Inputs augmentes a 14px (desktop) / 12px (mobile), gras
+
+### Architecture BLOC_COMMUN
+
+- **`classes/bloc_commun.js`** cree : module unique exposant `render(container, charId, cls, data)` avec tout le layout commun :
+  - Identite (Nom, Titre, Metier, Alignement, Mouvement, Niveau, PX)
+  - Defense (Classe d'armure, Points de vie)
+  - Combat (Initiative, Des d'action, Attaque, Des critique, Table critique)
+  - 6 stat-blocks (Force → Intelligence avec cercles JdS et Jet chanceux/Langues)
+  - Grille 2x2 combat etendu
+  - Armes, Equipement, Tresor, Armures
+- **7 modules de classe** réécrits : chacun appelle `blocCommun.render()` puis n'ajoute que ses sections specifiques
+- **Chargement automatique** : `ensureBlocCommun()` dans `script.js` charge `bloc_commun.js` avant tout module de classe
+- **Avantage** : modifier `bloc_commun.js` modifie automatiquement les 7 classes
+
+### Fichiers modifies
+
+| Fichier | Action |
+|---------|--------|
+| `classes/bloc_commun.js` | Cree |
+| `classes/clerc.js` | Réécrit (utilise bloc_commun) |
+| `classes/elfe.js` | Réécrit (utilise bloc_commun) |
+| `classes/guerrier.js` | Réécrit (utilise bloc_commun) |
+| `classes/halfelin.js` | Réécrit (utilise bloc_commun) |
+| `classes/mage.js` | Réécrit (utilise bloc_commun) |
+| `classes/nain.js` | Réécrit (utilise bloc_commun) |
+| `classes/voleur.js` | Réécrit (utilise bloc_commun) |
+| `script.js` | Ajout ensureBlocCommun() |
+| `style.css` | Ajouts : stat-block, stat-extra, responsive, combat-ext |

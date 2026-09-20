@@ -361,9 +361,10 @@
 
     var openBtn = el('button', {
       className: 'btn-open',
-      textContent: 'Ouvrir',
+      title: 'Ouvrir',
       onClick: function (e) { e.stopPropagation(); openSheet(cls, charData); },
     });
+    openBtn.innerHTML = '&#9998;';
 
     var delBtn = el('button', {
       className: 'btn-delete',

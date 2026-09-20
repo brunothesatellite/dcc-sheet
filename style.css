@@ -478,6 +478,11 @@ ul, ol {
   color: #fff;
 }
 
+.char-card-btns button.btn-open:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
 /* --------------------------------------------------------------------------
    8. Toggle Inn (Switch Slider)
    -------------------------------------------------------------------------- */
@@ -843,6 +848,7 @@ input[type="number"]::-webkit-outer-spin-button {
   align-items: center;
   gap: 6px;
   margin-bottom: 2px;
+  width: 100%;
 }
 
 .stat-block-bottom {
@@ -902,6 +908,8 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .stat-extra .field {
   width: 100%;
+  flex: 1;
+  min-width: 0;
 }
 
 .stat-extra .field-label {
@@ -1367,6 +1375,10 @@ input[type="number"]::-webkit-outer-spin-button {
 
   .stat-extra {
     flex: 1;
+    min-width: 0;
+  }
+
+  .stat-extra .field {
     min-width: 0;
   }
 

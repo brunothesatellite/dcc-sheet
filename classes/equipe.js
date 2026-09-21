@@ -127,6 +127,13 @@ window.DCCModules.equipe = {
           const tdName = document.createElement('td');
           tdName.className = 'char-name';
           tdName.textContent = charData.name || 'Sans nom';
+          tdName.style.cursor = 'pointer';
+          tdName.addEventListener('click', function () {
+            window.switchTab(charData.class);
+            setTimeout(function () {
+              window.openSheet(charData.class, charData);
+            }, 100);
+          });
           tr.appendChild(tdName);
 
           // Classe

@@ -987,5 +987,6 @@
   window.switchTab = switchTab;
   window.showList = showList;
   window.showToastSave = showToastSave;
+  window.openSheet = openSheet;
 
 })();

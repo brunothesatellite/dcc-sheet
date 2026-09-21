@@ -6,60 +6,80 @@ window.DCCModules.mage = {
     const v = (field, def = '') => data[field] ?? def;
     const bc = window.DCCModules.blocCommun;
 
+    const SORTS_ROWS = Array.from({ length: 20 }, (_, i) => i + 1);
+
     container.innerHTML = bc.render(container, charId, 'mage', data) + `
       <div class="sheet-page">
-        <div class="section-title">Sorts de mage & pouvoirs</div>
-        <div class="row">
-          <div class="field"><span class="field-label">Incantation</span><input type="text" data-key="${k('incantation')}" value="${v('incantation')}"></div>
-          <div class="field"><span class="field-label">Familier</span><input type="text" data-key="${k('familier')}" value="${v('familier')}"></div>
-        </div>
-        <div class="row">
-          <div class="field"><span class="field-label">Patron</span><input type="text" data-key="${k('patron')}" value="${v('patron')}"></div>
-          <div class="field"><span class="field-label">Corruption</span><input type="text" data-key="${k('corruption')}" value="${v('corruption')}"></div>
-        </div>
-        <div class="row">
-          <div class="field" style="text-align:center"><span class="field-label">Risque de defaire</span><input type="text" data-key="${k('risqueDefaire')}" value="${v('risqueDefaire', '0')}" style="font-weight:bold; text-align:center;"></div>
-          <div class="field"><span class="field-label">Magie mercurielle mod.</span><input type="text" data-key="${k('magieMercurielle')}" value="${v('magieMercurielle')}"></div>
-        </div>
+        <div class="section-bar">Capacités de Mage</div>
 
-        <div class="section-title">Grimoire</div>
         <div class="row">
-          <div class="field"><textarea data-key="${k('grimoire')}" rows="8" style="width:100%">${v('grimoire')}</textarea></div>
-        </div>
-
-        <div class="section-title">Formules magiques</div>
-        <div class="row">
-          <table style="width:100%; border-collapse:collapse;">
-            <thead>
-              <tr>
-                <th style="border:1px solid #888; padding:4px; text-align:left;">Niveau</th>
-                <th style="border:1px solid #888; padding:4px; text-align:left;">Test</th>
-                <th style="border:1px solid #888; padding:4px; text-align:left;">Effet</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${[1,2,3,4,5,6,7].map(i => `
-              <tr>
-                <td style="border:1px solid #888; padding:4px;"><input type="text" data-key="${k('formuleNiveau' + i)}" value="${v('formuleNiveau' + i)}" style="width:100%;border:none;background:transparent;"></td>
-                <td style="border:1px solid #888; padding:4px;"><input type="text" data-key="${k('formuleTest' + i)}" value="${v('formuleTest' + i)}" style="width:100%;border:none;background:transparent;"></td>
-                <td style="border:1px solid #888; padding:4px;"><input type="text" data-key="${k('formuleEffet' + i)}" value="${v('formuleEffet' + i)}" style="width:100%;border:none;background:transparent;"></td>
-              </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        </div>
-
-        <div class="section-title">Sorts</div>
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
-          ${['A','B','C'].map(col => `
-          <div style="display:flex; flex-direction:column; gap:4px;">
-            <div style="font-weight:bold; text-align:center;">Colonne ${col}</div>
-            ${[1,2,3,4,5,6,7].map(i => `
-            <div class="field"><span class="field-label">Sort ${i}</span><input type="text" data-key="${k('sort' + col + i)}" value="${v('sort' + col + i)}"></div>
-            `).join('')}
+          <div class="field">
+            <div class="label-on-line">
+              <label class="field-label">Test d'incantation :</label>
+              <input type="text" data-key="${k('incantation')}" value="${v('incantation')}">
+            </div>
           </div>
-          `).join('')}
         </div>
+
+        <div class="row">
+          <div class="field">
+            <div class="label-on-line">
+              <label class="field-label">Familier :</label>
+              <input type="text" data-key="${k('familier')}" value="${v('familier')}">
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <div class="label-on-line">
+              <label class="field-label">Patron(s) :</label>
+              <input type="text" data-key="${k('patron')}" value="${v('patron')}">
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <div class="label-on-line">
+              <label class="field-label">Corruption :</label>
+              <input type="text" data-key="${k('corruption')}" value="${v('corruption')}">
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <div class="mod-text">Mod. de chance pour corruption et magie mercurielle</div>
+          </div>
+        </div>
+
+        <!-- ====== SORTS ====== -->
+        <div class="section-bar">Sorts</div>
+
+        <table class="dtable">
+          <thead>
+            <tr>
+              <th style="width:30px">#</th>
+              <th>Nom du sort</th>
+              <th style="width:60px">Niveau</th>
+              <th style="width:70px">Test</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${SORTS_ROWS.map(n => `
+              <tr>
+                <td class="row-num" rowspan="2">${n}</td>
+                <td><input type="text" data-key="${k('sort_nom_' + n)}" value="${v('sort_nom_' + n)}"></td>
+                <td><input type="text" data-key="${k('sort_niveau_' + n)}" value="${v('sort_niveau_' + n)}" placeholder="1-5"></td>
+                <td><input type="text" data-key="${k('sort_test_' + n)}" value="${v('sort_test_' + n)}"></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="sort-notes"><textarea data-key="${k('sort_effet_' + n)}" rows="1">${v('sort_effet_' + n)}</textarea></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
       </div>
     `;
   },

@@ -1282,6 +1282,30 @@ input[type="number"]::-webkit-outer-spin-button {
   margin-bottom: 2px;
 }
 
+.mod-text {
+  font-size: 13px;
+  color: var(--ink);
+  padding: 8px 0;
+}
+
+.dtable td.sort-notes {
+  padding: 2px 4px;
+}
+
+.dtable td.sort-notes textarea {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  padding: 3px;
+  font-family: var(--font-body);
+  color: var(--ink);
+  outline: none;
+  resize: vertical;
+  min-height: 22px;
+  line-height: 1.4;
+}
+
 /* --------------------------------------------------------------------------
    16. Toast Notifications
    -------------------------------------------------------------------------- */

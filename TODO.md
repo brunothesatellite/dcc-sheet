@@ -4,9 +4,10 @@
 2. Elf - OK
 3. Guerrier - OK
 4. Halfelin - OK
-5. Mage
+5. Mage - OK
 6. Nain
 7. Voleur
+
 * Bruno doit proposer des améliorations d'IHM par rapport aux fiches de personnage (la liste des sorts par exemple)
 
 **BUGS**

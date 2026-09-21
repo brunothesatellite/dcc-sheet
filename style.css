@@ -927,7 +927,8 @@ input[type="number"]::-webkit-outer-spin-button {
   font-size: 9px;
 }
 
-.stat-extra input {
+.stat-extra input,
+.stat-extra textarea {
   width: 100%;
   box-sizing: border-box;
   font-size: 12px;
@@ -935,6 +936,10 @@ input[type="number"]::-webkit-outer-spin-button {
   border: 1px solid var(--input-border);
   background: var(--field-bg);
   border-radius: 2px;
+  font-family: var(--font-body);
+  line-height: 1.4;
+  resize: vertical;
+  overflow: hidden;
 }
 
 /* --------------------------------------------------------------------------
@@ -1752,11 +1757,18 @@ input[type="number"]::-webkit-outer-spin-button {
 
   .stat-extra .field {
     min-width: 0;
+    width: 100%;
   }
 
   .stat-extra input {
     width: 100%;
     box-sizing: border-box;
+  }
+
+  .stat-extra textarea {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 3em;
   }
 
   .stat-block .stat-name {
@@ -1777,6 +1789,7 @@ input[type="number"]::-webkit-outer-spin-button {
   }
 
   .stats-and-combat {
+    width: 100%;
     gap: 6px;
     overflow: hidden;
   }
@@ -1784,6 +1797,7 @@ input[type="number"]::-webkit-outer-spin-button {
   .stats-col {
     flex: 1;
     min-width: 0;
+    width: 100%;
   }
 
   .combat-ext-col {

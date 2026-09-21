@@ -113,7 +113,7 @@ window.DCCModules.blocCommun = {
                 <div class="stat-extra">
                   <div class="field">
                     <div class="field-label">Jet chanceux</div>
-                    <input type="text" data-key="${k('jet_chanceux')}" value="${v('jet_chanceux')}">
+                    <textarea data-key="${k('jet_chanceux')}" rows="1">${v('jet_chanceux')}</textarea>
                   </div>
                 </div>
               </div>
@@ -128,7 +128,7 @@ window.DCCModules.blocCommun = {
                 <div class="stat-extra">
                   <div class="field">
                     <div class="field-label">Langues</div>
-                    <input type="text" data-key="${k('langues')}" value="${v('langues')}">
+                    <textarea data-key="${k('langues')}" rows="1">${v('langues')}</textarea>
                   </div>
                 </div>
               </div>

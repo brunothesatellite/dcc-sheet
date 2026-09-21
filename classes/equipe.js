@@ -281,6 +281,7 @@ window.DCCModules.equipe = {
         clearTimeout(notesTimer);
         notesTimer = setTimeout(function () {
           localStorage.setItem('dcc-equipe-notes-' + userId, notesArea.value);
+          if (window.showToastSave) window.showToastSave();
         }, 600);
       });
 

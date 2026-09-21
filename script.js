@@ -513,6 +513,7 @@
 
       if (res.character) {
         openSheet(cls, res.character);
+        showToastSave();
       }
     } catch (err) {
       console.error('Erreur création personnage:', err);
@@ -559,6 +560,8 @@
         method: 'POST',
         body: { action: 'set_active', id: charId, is_active: isActive ? 1 : 0 },
       });
+
+      showToastSave();
 
       if (!activeSheets[activeTab]) {
         loadClassCharacters(activeTab, false);
@@ -899,6 +902,7 @@
         if (res.character) {
           await saveCharacter(res.character.id, obj.data, obj.name);
           openSheet(cls, { ...res.character, data: JSON.stringify(obj.data) });
+          showToastSave();
         }
       } catch (err) {
         alert('Erreur lors de l\'import : ' + err.message);
@@ -968,5 +972,6 @@
   window.toggleTheme = toggleTheme;
   window.switchTab = switchTab;
   window.showList = showList;
+  window.showToastSave = showToastSave;
 
 })();

@@ -1394,7 +1394,201 @@ input[type="number"]::-webkit-outer-spin-button {
    17. Responsive - 600px Breakpoint
    -------------------------------------------------------------------------- */
 
-@media (max-width: 600px) {
+/* --------------------------------------------------------------------------
+   Equipe Tab
+   -------------------------------------------------------------------------- */
+
+.tab-equipe {
+  background: var(--tab-active);
+  color: #fff;
+}
+
+.tab-equipe:hover {
+  background: var(--tab-active);
+  filter: brightness(1.1);
+  color: #fff;
+}
+
+.tab-equipe.active {
+  background: var(--paper);
+  color: var(--tab-active);
+}
+
+.btn-equipe-mobile {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--tab-active);
+  color: #fff;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.btn-equipe-mobile:hover {
+  filter: brightness(1.1);
+}
+
+.team-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
+.team-table th {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  padding: 6px 8px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.team-table td {
+  border: 1px solid var(--line);
+  padding: 4px 6px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.team-table tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.team-table input[type="text"],
+.team-table input[type="number"] {
+  width: 100%;
+  padding: 4px 6px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--field-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  outline: none;
+}
+
+.team-table input:focus {
+  border-color: var(--tab-active);
+  box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.15);
+}
+
+.team-table input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.team-table input[type="number"]::-webkit-inner-spin-button,
+.team-table input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.turn-counter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--field-bg);
+  border: 2px solid var(--ink);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--ink);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.turn-counter:active {
+  transform: scale(0.92);
+}
+
+.char-name {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.char-class {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.btn-group {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.btn-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--input-border);
+  background: var(--field-bg);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-sm:hover {
+  background: var(--line);
+}
+
+.btn-add {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
+.btn-add:hover {
+  filter: brightness(1.1);
+}
+
+.btn-remove {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
+}
+
+.btn-remove:hover {
+  filter: brightness(1.1);
+}
+
+.btn-raz {
+  background: transparent;
+  border: 1px solid var(--muted);
+  color: var(--muted);
+}
+
+.btn-raz:hover {
+  background: var(--line);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive - 600px Breakpoint
+   -------------------------------------------------------------------------- */
   .topbar {
     padding: 0 10px;
     gap: 6px;
@@ -1769,4 +1963,22 @@ input[type="number"]::-webkit-outer-spin-button {
     padding: 3px 4px;
     font-size: 11px;
   }
+
+  .tab-equipe {
+    display: none;
+  }
+
+  .btn-equipe-mobile {
+    display: flex;
+  }
+
+  .team-table { font-size: 11px; }
+  .team-table th { font-size: 9px; padding: 4px 3px; }
+  .team-table td { padding: 3px 2px; }
+  .team-table input { font-size: 11px; padding: 3px 2px; }
+  .turn-counter { width: 30px; height: 30px; font-size: 13px; }
+  .char-name { font-size: 11px; }
+  .char-class { font-size: 9px; }
+  .btn-group { flex-wrap: wrap; gap: 4px; }
+  .btn-sm { padding: 4px 8px; font-size: 10px; }
 }

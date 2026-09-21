@@ -15,6 +15,7 @@
 
 <header class="topbar">
   <a href="index.html" class="logo">DCC <span>Fiches</span></a>
+  <button class="btn-equipe-mobile" id="btn-equipe-mobile" title="Equipe">&#9876;</button>
   <div class="topbar-spacer"></div>
   <button class="theme-toggle" id="btn-theme" title="Changer de theme">&#9789;</button>
   <div id="auth-guest" style="display:none">
@@ -29,6 +30,7 @@
 </header>
 
 <nav class="tab-bar" id="tab-bar">
+  <button class="tab tab-equipe" data-class="equipe">Equipe</button>
   <button class="tab active" data-class="clerc">Clerc</button>
   <button class="tab" data-class="elfe">Elfe</button>
   <button class="tab" data-class="guerrier">Guerrier</button>
@@ -42,5 +44,6 @@
 </main>
 
 <script src="script.js"></script>
+<script src="classes/equipe.js"></script>
 </body>
 </html>

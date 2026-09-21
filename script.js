@@ -209,7 +209,6 @@
      ======================================================================== */
 
   function switchTab(cls) {
-    if (!CLASSES.includes(cls)) return;
     activeTab = cls;
 
     $$('.tab').forEach(function (btn) {
@@ -219,6 +218,18 @@
     $$('.tab-panel').forEach(function (panel) {
       panel.classList.toggle('active', panel.getAttribute('data-class') === cls);
     });
+
+    if (cls === 'equipe') {
+      var panel = $('[data-class="equipe"].tab-panel');
+      if (!panel) {
+        panel = el('div', { className: 'tab-panel active', 'data-class': 'equipe' });
+        $('#main-content').appendChild(panel);
+      }
+      loadEquipe(panel);
+      return;
+    }
+
+    if (!CLASSES.includes(cls)) return;
 
     var panel = $('[data-class="' + cls + '"].tab-panel');
     if (!panel) {
@@ -265,6 +276,57 @@
       }
     } catch (err) {
       renderEmptyState(panel, cls, 'Erreur de chargement.');
+    }
+  }
+
+  /* =========================================================================
+     8b. Equipe Tab
+     ======================================================================== */
+
+  async function loadEquipe(panel) {
+    if (!currentUser) {
+      panel.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px">Connectez-vous pour voir l\'équipe.</div>';
+      return;
+    }
+
+    try {
+      var allChars = [];
+      for (var i = 0; i < CLASSES.length; i++) {
+        var res = await api('characters.php', {
+          method: 'GET',
+          data: { action: 'list', class: CLASSES[i], is_active: 1 },
+        });
+        if (res.characters) {
+          allChars = allChars.concat(res.characters);
+        }
+      }
+
+      if (window.DCCModules && window.DCCModules.equipe) {
+        window.DCCModules.equipe.render(panel, allChars, syncPVFromEquipe, currentUser.id);
+      }
+    } catch (err) {
+      panel.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px">Erreur de chargement.</div>';
+    }
+  }
+
+  async function syncPVFromEquipe(charId, newPV) {
+    try {
+      var res = await api('characters.php', {
+        method: 'GET',
+        data: { action: 'get', id: charId },
+      });
+      if (!res.character) return;
+
+      var data = {};
+      try { data = JSON.parse(res.character.data || '{}'); } catch (e) {}
+      data.points_de_vie = newPV;
+
+      await api('characters.php', {
+        method: 'POST',
+        body: { action: 'save', id: charId, data: data },
+      });
+    } catch (err) {
+      console.error('Erreur sync PV:', err);
     }
   }
 
@@ -874,6 +936,13 @@
         if (cls) switchTab(cls);
       });
     });
+
+    var btnEquipeMobile = $('#btn-equipe-mobile');
+    if (btnEquipeMobile) {
+      btnEquipeMobile.addEventListener('click', function () {
+        switchTab('equipe');
+      });
+    }
 
     var logoutBtn = $('.auth-logout');
     if (logoutBtn) {

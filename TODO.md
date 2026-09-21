@@ -31,7 +31,7 @@
 [DONE] Indiquer comme dans le projet fabled-lands-sheet quand un enregistrement est réalisé avec un icone d'enregistrement qui apparait à l'écran (inspire toi de l'autre projet)
 
 *ONGLET EQUIPE*
-il faudra ajouter un onglet "Equipe" qui va récapituler les éléments principaux des personnages actifs dans un onglet = Liste des personnages sous forme de tableau :
+[DONE] il faudra ajouter un onglet "Equipe" qui va récapituler les éléments principaux des personnages actifs (en expédition) dans un onglet = Liste des personnages sous forme de tableau :
 colonnes : 
 * Nom 
 * Classe

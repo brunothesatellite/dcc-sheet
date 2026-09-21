@@ -438,6 +438,7 @@
     var actions = el('div', { className: 'char-card-actions' });
 
     var toggleWrapper = el('div', { className: 'toggle-inn' });
+    toggleWrapper.addEventListener('click', function (e) { e.stopPropagation(); });
     var toggleLabel = el('label', { className: 'switch' });
     var toggleInput = el('input', { type: 'checkbox' });
     toggleInput.checked = isActive;
@@ -449,6 +450,10 @@
       textContent: isActive ? 'EN EXPEDITION' : "A L'AUBERGE",
     });
     toggleWrapper.appendChild(toggleText);
+
+    toggleInput.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
 
     toggleInput.addEventListener('change', function (e) {
       e.stopPropagation();

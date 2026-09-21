@@ -39,6 +39,7 @@
   let heartbeatTimer = null;
   let toastContainer = null;
   let toastSaveTimer = null;
+  let spinnerTimer = null;
 
   /* =========================================================================
      3. Toast Notifications
@@ -73,6 +74,12 @@
     toastSaveTimer = setTimeout(function () {
       showToast('&#128190;', 'save');
     }, 600);
+  }
+
+  function hideSpinner() {
+    clearTimeout(spinnerTimer);
+    var spinner = $('#loading-spinner');
+    if (spinner) spinner.classList.add('hidden');
   }
 
   /* =========================================================================
@@ -208,7 +215,7 @@
      7. Tab Switching
      ======================================================================== */
 
-  function switchTab(cls) {
+  async function switchTab(cls) {
     activeTab = cls;
 
     $$('.tab').forEach(function (btn) {
@@ -225,7 +232,7 @@
         panel = el('div', { className: 'tab-panel active', 'data-class': 'equipe' });
         $('#main-content').appendChild(panel);
       }
-      loadEquipe(panel);
+      await loadEquipe(panel);
       return;
     }
 
@@ -241,7 +248,7 @@
       $('#main-content').appendChild(panel);
     }
 
-    loadClassCharacters(cls);
+    await loadClassCharacters(cls);
   }
 
   /* =========================================================================
@@ -956,8 +963,15 @@
       logoutBtn.addEventListener('click', logout);
     }
 
-    checkAuth().then(function () {
-      switchTab(activeTab);
+    checkAuth().then(async function () {
+      spinnerTimer = setTimeout(function () {
+        var spinner = $('#loading-spinner');
+        if (spinner) spinner.classList.remove('hidden');
+      }, 500);
+
+      await switchTab(activeTab);
+      hideSpinner();
+      showToast('Données restaurées', 'success');
       startHeartbeat();
     });
   }

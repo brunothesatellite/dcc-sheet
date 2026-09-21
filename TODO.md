@@ -1,7 +1,5 @@
 **TODO**
 * Vérifier que la sauvegarde fonctionne
-* Mettre à jour README.md
-* Mettre à jour JOURNAL.md
 
 **BUGS**
 *Critique*

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#1a1a2e"/>
+  <g transform="translate(16,14)">
+    <!-- Sword 1 -->
+    <line x1="-8" y1="-8" x2="8" y2="8" stroke="#c0392b" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="-6" y1="-6" x2="-4" y2="-4" stroke="#f2bd3d" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Sword 2 -->
+    <line x1="8" y1="-8" x2="-8" y2="8" stroke="#c0392b" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="6" y1="-6" x2="4" y2="-4" stroke="#f2bd3d" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Dice -->
+    <rect x="-4" y="-4" width="8" height="8" rx="1.5" fill="#f2bd3d" opacity="0.9"/>
+    <circle cx="-1.5" cy="-1.5" r="1" fill="#1a1a2e"/>
+    <circle cx="1.5" cy="1.5" r="1" fill="#1a1a2e"/>
+    <circle cx="-1.5" cy="1.5" r="1" fill="#1a1a2e"/>
+    <circle cx="1.5" cy="-1.5" r="1" fill="#1a1a2e"/>
+    <circle cx="0" cy="0" r="1" fill="#1a1a2e"/>
+  </g>
+  <!-- DCC text -->
+  <text x="16" y="30" font-family="sans-serif" font-weight="bold" font-size="6" fill="#f2bd3d" text-anchor="middle" letter-spacing="0.5">DCC</text>
+</svg>

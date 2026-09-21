@@ -342,7 +342,6 @@
 
     var header = el('div', { className: 'section-header' }, [
       el('h2', { className: 'section-title', textContent: CLASS_LABELS[cls] }),
-      createNewButton(cls),
     ]);
     listContent.appendChild(header);
 

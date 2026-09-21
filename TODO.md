@@ -31,15 +31,15 @@
 [DONE] Indiquer comme dans le projet fabled-lands-sheet quand un enregistrement est réalisé avec un icone d'enregistrement qui apparait à l'écran (inspire toi de l'autre projet)
 
 *ONGLET EQUIPE*
-A un moment, il faudra ajouter un onlget "Equipe" qui va récapituler les éléments principaux des personnages actifs dans un onglet = Liste des personnages sous forme de tableau :
+il faudra ajouter un onglet "Equipe" qui va récapituler les éléments principaux des personnages actifs dans un onglet = Liste des personnages sous forme de tableau :
 colonnes : 
 * Nom 
 * Classe
 * Initiative
 * AC
 * PV (modifiable et synchronisé avec la fiche de personnage)
-* Initiative combat (champ numérique vide par défaut)
-* compteur de tour (0 par défaut; clic droit / appui long sur mobile remise à zéro; clic gauche ou appui simple : incrément de 1)
+* Initiative combat (champ numérique vide par défaut) - non sauvegardé en base
+* compteur de tour (0 par défaut; clic droit / appui long sur mobile remise à zéro; clic gauche ou appui simple : incrément de 1) - non sauvegardé en base
 Une ligne par feuille de personnage active
 
 Sous ce tableau, un tableau avec les colonnes
@@ -49,7 +49,10 @@ Sous ce tableau, un tableau avec les colonnes
 * ATT (champ texte)
 * PV (champ numérique)
 * compteur de tour (0 par défaut; clic droit / appui long sur mobile remise à zéro; clic gauche ou appui simple : incrément de 1)
-Prévoit plusieurs lignes vides, 3 par défaut, et un bouton +/- pour en ajouter supprimer, et un bouton raz pour vider ce tableau
+Prévoit plusieurs lignes vides, 3 par défaut, et un bouton +/- pour en ajouter supprimer, et un bouton raz pour vider ce tableau.  non sauvegardé en base
+
+Cet onglet doit être appelable par un onglet avant Clerc sur PC et pas un bouton à droite du titre DCC sur android pour ne pas polluer la barre des classes de personnage.
+Fait un plan et une maquette html de cet onglet.
 
 
 

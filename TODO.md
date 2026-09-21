@@ -1,7 +1,7 @@
 **TODO**
 **BUGS**
 *Critique*
-* [OPEN] BUG 1 : la sauvegarde ne fonctionne pas
+* [ONGOING] BUG 1 : la sauvegarde ne fonctionne pas
 je pense qu'il y a un soucis majeur avec la sauvegarde / restauration  :
 Je créé un personnage Clerc, que je nomme Tania (Nom) et Titre = Adepte.
 Je vois bien 2 icones de sauvegarde.
@@ -15,7 +15,7 @@ Analyse en détail le problème, ne code rien.
 * [OPEN] BUG 2 : Faire une passe sur tous les irritants ergonomiques
 
 *Mineur*
-* N/A
+* [OPEN] La liste des personnages pour une classe affiche toujours Nom, Nouveau Personnage et l'interrupteur. Supprime "Nouveau Personnage" et met sur la même ligne le nom du personnage et l'interrupteur.
 
 
 

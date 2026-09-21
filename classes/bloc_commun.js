@@ -174,6 +174,7 @@ window.DCCModules.blocCommun = {
           </div>
         </div>
 
+      </div>
       `;
   }
 };

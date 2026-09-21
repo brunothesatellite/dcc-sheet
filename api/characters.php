@@ -10,7 +10,7 @@ $user = requireLogin($db);
 if ($action === 'list') {
     $class = $_GET['class'] ?? null;
     $isActive = isset($_GET['is_active']) ? (int)$_GET['is_active'] : null;
-    $sql = 'SELECT id, name, class, is_active, created_at, updated_at FROM characters WHERE user_id = :uid';
+    $sql = 'SELECT id, name, class, data, is_active, created_at, updated_at FROM characters WHERE user_id = :uid';
     $params = [':uid' => $user['id']];
     if ($class) { $sql .= ' AND class = :class'; $params[':class'] = $class; }
     if ($isActive !== null) { $sql .= ' AND is_active = :active'; $params[':active'] = $isActive; }

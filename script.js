@@ -37,9 +37,46 @@
   let loadedModules = {};
   let saveTimers = {};
   let heartbeatTimer = null;
+  let toastContainer = null;
+  let toastSaveTimer = null;
 
   /* =========================================================================
-     3. DOM Helpers
+     3. Toast Notifications
+     ======================================================================== */
+
+  function getToastContainer() {
+    if (!toastContainer) {
+      toastContainer = document.createElement('div');
+      toastContainer.className = 'toast-container';
+      document.body.appendChild(toastContainer);
+    }
+    return toastContainer;
+  }
+
+  function showToast(message, type) {
+    var container = getToastContainer();
+    var toast = document.createElement('div');
+    toast.className = 'toast toast-' + (type || 'save');
+    toast.innerHTML = message;
+    container.appendChild(toast);
+
+    setTimeout(function () {
+      toast.classList.add('toast-out');
+      setTimeout(function () {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 200);
+    }, 1500);
+  }
+
+  function showToastSave() {
+    clearTimeout(toastSaveTimer);
+    toastSaveTimer = setTimeout(function () {
+      showToast('&#128190;', 'save');
+    }, 600);
+  }
+
+  /* =========================================================================
+     4. DOM Helpers
      ======================================================================== */
 
   function $(sel, ctx) { return (ctx || document).querySelector(sel); }
@@ -415,7 +452,7 @@
   }
 
   async function saveCharacter(charId, data, name) {
-    if (!currentUser || !charId) return;
+    if (!currentUser || !charId) return { ok: false };
 
     try {
       var body = { action: 'save', id: charId };
@@ -423,8 +460,10 @@
       if (name !== undefined) body.name = name;
 
       await api('characters.php', { method: 'POST', body: body });
+      return { ok: true };
     } catch (err) {
       console.error('Erreur sauvegarde:', err);
+      return { ok: false };
     }
   }
 
@@ -686,7 +725,7 @@
     }, AUTO_SAVE_DELAY);
   }
 
-  function flushSave(cls, charId) {
+  async function flushSave(cls, charId) {
     var panel = $('[data-class="' + cls + '"].tab-panel');
     if (!panel) return;
 
@@ -696,7 +735,12 @@
     var data = collectSheetData(cls, charId, viewSheet);
 
     var name = data.nom || undefined;
-    saveCharacter(charId, data, name);
+    var result = await saveCharacter(charId, data, name);
+    if (result && result.ok) {
+      showToastSave();
+    } else {
+      showToast('Erreur sauvegarde', 'error');
+    }
   }
 
   function collectSheetData(cls, charId, container) {

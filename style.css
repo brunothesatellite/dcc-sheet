@@ -1225,7 +1225,60 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 /* --------------------------------------------------------------------------
-   16. Responsive - 600px Breakpoint
+   16. Toast Notifications
+   -------------------------------------------------------------------------- */
+
+.toast-container {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  box-shadow: 0 4px 12px var(--shadow);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink);
+  animation: toast-in 0.2s ease forwards;
+  pointer-events: auto;
+}
+
+.toast.toast-out {
+  animation: toast-out 0.2s ease forwards;
+}
+
+.toast-save {
+  border-left: 4px solid var(--green);
+}
+
+.toast-error {
+  border-left: 4px solid var(--red);
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toast-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* --------------------------------------------------------------------------
+   17. Responsive - 600px Breakpoint
    -------------------------------------------------------------------------- */
 
 @media (max-width: 600px) {

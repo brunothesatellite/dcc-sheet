@@ -326,6 +326,8 @@
         method: 'POST',
         body: { action: 'save', id: charId, data: data },
       });
+
+      showToastSave();
     } catch (err) {
       console.error('Erreur sync PV:', err);
     }
@@ -421,21 +423,12 @@
     if (parsed.niveau) metaParts.push('Niv.' + parsed.niveau);
     if (parsed.dieu) metaParts.push(parsed.dieu);
 
-    var statusText = isActive ? 'EN EXPEDITION' : "A L'AUBERGE";
-    var statusColor = isActive ? 'var(--green)' : 'var(--red)';
-
     var card = el('div', { className: 'char-card' + (isActive ? '' : ' inactive') });
 
-    var info = el('div', { className: 'char-card-info' }, [
-      el('div', { className: 'char-card-name', textContent: charData.name || 'Sans nom' }),
-      el('div', {
-        className: 'char-card-meta',
-        innerHTML: metaParts.length ? metaParts.join(' - ') : 'Nouveau personnage' +
-          ' &mdash; <strong style="color:' + statusColor + '">' + statusText + '</strong>',
-      }),
-    ]);
+    var cardTop = el('div', { className: 'char-card-top' });
 
-    var actions = el('div', { className: 'char-card-actions' });
+    var name = el('div', { className: 'char-card-name', textContent: charData.name || 'Sans nom' });
+    cardTop.appendChild(name);
 
     var toggleWrapper = el('div', { className: 'toggle-inn' });
     toggleWrapper.addEventListener('click', function (e) { e.stopPropagation(); });
@@ -449,6 +442,7 @@
       className: 'toggle-inn-label',
       textContent: isActive ? 'EN EXPEDITION' : "A L'AUBERGE",
     });
+    toggleText.style.color = isActive ? 'var(--green)' : 'var(--red)';
     toggleWrapper.appendChild(toggleText);
 
     toggleInput.addEventListener('click', function (e) {
@@ -462,6 +456,15 @@
       toggleText.style.color = checked ? 'var(--green)' : 'var(--red)';
       setCharacterActive(charData.id, checked);
     });
+
+    cardTop.appendChild(toggleWrapper);
+    card.appendChild(cardTop);
+
+    if (metaParts.length) {
+      card.appendChild(el('div', { className: 'char-card-meta', textContent: metaParts.join(' - ') }));
+    }
+
+    var actions = el('div', { className: 'char-card-actions' });
 
     var openBtn = el('button', {
       className: 'btn-open',
@@ -484,10 +487,8 @@
     btns.appendChild(openBtn);
     btns.appendChild(delBtn);
 
-    actions.appendChild(toggleWrapper);
     actions.appendChild(btns);
 
-    card.appendChild(info);
     card.appendChild(actions);
 
     card.addEventListener('click', function () {

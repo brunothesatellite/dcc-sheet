@@ -1,21 +1,16 @@
 **TODO**
+* Vérifier que la sauvegarde fonctionne
+* Améliorer les sorts de mage avec des boutons +/-
+
 **BUGS**
 *Critique*
-* [ONGOING] BUG 1 : la sauvegarde ne fonctionne pas
-je pense qu'il y a un soucis majeur avec la sauvegarde / restauration  :
-Je créé un personnage Clerc, que je nomme Tania (Nom) et Titre = Adepte.
-Je vois bien 2 icones de sauvegarde.
-Je rafraichis la page.
-L'onglet s'ouvre sur un personnage Clerc avec comme nom "Tania" sous la flêche, mais les champs NOM et TITRE sont vides.
-Même problème avec les autres champs et les autres classes.
-Pas d'erreur console.
-Analyse en détail le problème, ne code rien.
+* N/A
 
 *Majeur*
 * [OPEN] BUG 2 : Faire une passe sur tous les irritants ergonomiques
 
 *Mineur*
-* [OPEN] La liste des personnages pour une classe affiche toujours Nom, Nouveau Personnage et l'interrupteur. Supprime "Nouveau Personnage" et met sur la même ligne le nom du personnage et l'interrupteur.
+* N/A
 
 
 

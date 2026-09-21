@@ -635,7 +635,6 @@
       label.textContent = checked ? 'EN EXPEDITION' : "A L'AUBERGE";
       label.style.color = checked ? 'var(--green)' : 'var(--red)';
 
-      saveCharacter(charData.id, undefined, undefined);
       setCharacterActive(charData.id, checked);
     });
 

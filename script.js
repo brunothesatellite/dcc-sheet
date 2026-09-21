@@ -481,14 +481,15 @@
     var parsed = {};
     try { parsed = JSON.parse(charData.data || '{}'); } catch (e) {}
 
-    if (parsed.niveau) metaParts.push('Niv.' + parsed.niveau);
     if (parsed.dieu) metaParts.push(parsed.dieu);
 
     var card = el('div', { className: 'char-card' + (isActive ? '' : ' inactive') });
 
     var cardTop = el('div', { className: 'char-card-top' });
 
-    var name = el('div', { className: 'char-card-name', textContent: charData.name || 'Sans nom' });
+    var nameText = charData.name || 'Sans nom';
+    if (parsed.niveau) nameText += ' — Niv.' + parsed.niveau;
+    var name = el('div', { className: 'char-card-name', textContent: nameText });
     cardTop.appendChild(name);
 
     var toggleWrapper = el('div', { className: 'toggle-inn' });

@@ -1,6 +1,5 @@
 **TODO**
 * Vérifier que la sauvegarde fonctionne
-* A côté du nom du personnage sur sa carte, ajouter son niveau
 * Mettre à jour README.md
 * Mettre à jour JOURNAL.md
 

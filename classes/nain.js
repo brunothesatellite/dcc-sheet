@@ -12,7 +12,7 @@ window.DCCModules.nain = {
 
         <div class="cap-label">Infravision</div>
 
-        <div class="cap-label">Comp. souterraines : perception os/gemmes, délect. construction</div>
+        <div class="cap-label">Comp. souterraines : perception os/gemmes, détect. construction</div>
 
         <div class="label-on-line">
           <label class="cap-label">Arme soumise au mod. de Chance :</label>

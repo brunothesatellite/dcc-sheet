@@ -4,113 +4,76 @@
 
   function render(container, charId, data) {
     data = data || {};
+    const v = (field, def = '') => data[field] ?? def;
+    const k = (field) => `voleur-${charId}-${field}`;
     const bc = window.DCCModules.blocCommun;
 
-    function val(field, def) {
-      const key = `voleur-${charId}-${field}`;
-      const v = data[field] !== undefined ? data[field] : (def || '');
-      return `<input class="field-input" type="text" data-key="${key}" value="${v}">`;
+    function skillLine(label, prefix, field) {
+      const val = v(field);
+      const key = k(field);
+      return `<span class="skill-label">${label}</span><span class="skill-prefix">${prefix}</span><input type="text" class="skill-input" data-key="${key}" value="${val}">`;
     }
 
-    function textarea(field, def, rows) {
-      const key = `voleur-${charId}-${field}`;
-      const v = data[field] !== undefined ? data[field] : (def || '');
-      return `<textarea class="field-input textarea" data-key="${key}" rows="${rows || 4}">${v}</textarea>`;
+    function labelOnly(text) {
+      return `<span class="skill-label">${text}</span><span class="skill-prefix"></span><span></span>`;
+    }
+
+    function emptyCells() {
+      return '<span></span><span></span><span></span>';
     }
 
     container.innerHTML = bc.render(container, charId, 'voleur', data) + `
       <div class="sheet-page">
+        <div class="section-bar">Capacités de voleur</div>
 
-        <div class="section-title">Capacites de voleur</div>
-        <div class="row">
-          <div class="field">
-            <span class="field-label">De de chance</span>
-            ${val('de-chance')}
-          </div>
-          <div class="field">
-            <span class="field-label">Attaque sournoise</span>
-            ${val('attaque-sournoise')}
-          </div>
+        <div class="skills-grid">
+          ${skillLine('Dé de chance', 'd', 'de-chance')}
+          ${skillLine('Falsifier documents', '+', 'falsifier-documents')}
+
+          ${skillLine('Attaque sournoise', '+', 'attaque-sournoise')}
+          ${skillLine('Se déguiser', '+', 'deguiser')}
+
+          ${skillLine('Déplacement silencieux', '+', 'deplacement-silencieux')}
+          ${skillLine('Lire langues inconnues', '+', 'lire-langues')}
+
+          ${skillLine('Se cacher dans l\'ombre', '+', 'cacher-ombre')}
+          ${skillLine('Utiliser des poisons', '+', 'utiliser-poisons')}
+
+          ${skillLine('Vol à la tire', '+', 'vol-tire')}
+          ${skillLine('Incant. parchemin', 'd', 'incanter-parchemin')}
+
+          ${skillLine('Escal. parois abruptes', '+', 'escalade-parois')}
+          ${labelOnly('Argot des voleurs')}
+
+          ${skillLine('Crocheter les serrures', '+', 'crocheter-serrures')}
+          ${emptyCells()}
+
+          ${skillLine('Détecter les pièges', '+', 'detecter-pieges')}
+          ${emptyCells()}
+
+          ${skillLine('Désamorcer les pièges', '+', 'desamorcer-pieges')}
+          ${emptyCells()}
         </div>
-        <div class="row">
-          <div class="field">
-            <span class="field-label">Deplacement silencieux</span>
-            ${val('deplacement-silencieux')}
-          </div>
-          <div class="field">
-            <span class="field-label">Se cacher dans l'ombre</span>
-            ${val('cacher-ombre')}
-          </div>
+
+        <div class="section-bar">Notes</div>
+        <div>
+          <textarea data-key="${k('notes')}" rows="6">${v('notes')}</textarea>
         </div>
-        <div class="row">
-          <div class="field">
-            <span class="field-label">Vol a la tire</span>
-            ${val('vol-tire')}
-          </div>
-          <div class="field">
-            <span class="field-label">Escal. parois abruptes</span>
-            ${val('escalade-parois')}
-          </div>
-        </div>
-        <div class="row">
-          <div class="field">
-            <span class="field-label">Crocheter les serrures</span>
-            ${val('crocheter-serrures')}
-          </div>
-          <div class="field">
-            <span class="field-label">Detecter les pieges</span>
-            ${val('detecter-pieges')}
-          </div>
-        </div>
-        <div class="row">
-          <div class="field">
-            <span class="field-label">Desamorcer les pieges</span>
-            ${val('desamorcer-pieges')}
-          </div>
-          <div class="field">
-            <span class="field-label">Falsifier documents</span>
-            ${val('falsifier-documents')}
-          </div>
-        </div>
-        <div class="row">
-          <div class="field">
-            <span class="field-label">Se deguiser</span>
-            ${val('deguiser')}
-          </div>
-          <div class="field">
-            <span class="field-label">Lire langues inconnues</span>
-            ${val('lire-langues')}
-          </div>
-        </div>
-        <div class="row">
-          <div class="field">
-            <span class="field-label">Utiliser des poisons</span>
-            ${val('utiliser-poisons')}
-          </div>
-          <div class="field">
-            <span class="field-label">Incant. parchemin</span>
-            ${val('incanter-parchemin')}
-          </div>
-        </div>
-        <p class="info-text">Argot des voleurs: Les voleurs ont leur propre jargon.</p>
-        <div class="section-title">Notes</div>
-        ${textarea('notes', '', 10)}
       </div>
     `;
   }
 
   function collectData(container) {
-    const inputs = container.querySelectorAll('[data-key]');
-    const result = {};
-    inputs.forEach(function (el) {
+    const data = {};
+    container.querySelectorAll('[data-key]').forEach(el => {
       const key = el.getAttribute('data-key');
       const parts = key.split('-');
       if (parts[0] === 'voleur' && parts[1]) {
         const field = parts.slice(2).join('-');
-        result[field] = el.value;
+        data[field] = el.value;
       }
     });
-    return result;
+    return data;
   }
 
   window.DCCModules.voleur = {

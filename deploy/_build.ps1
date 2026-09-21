@@ -1,8 +1,9 @@
 $deployDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $src = Split-Path -Parent $deployDir
-$out = Join-Path $deployDir 'dcc-sheet.zip'
+$outDir = Join-Path $deployDir 'dcc-sheet'
 
-if (Test-Path $out) { Remove-Item $out -Force }
+if (Test-Path $outDir) { Remove-Item $outDir -Recurse -Force }
+New-Item -ItemType Directory -Path $outDir | Out-Null
 
 $excludeDirs = @('.git','captures','deploy','data')
 $excludeFiles = @('*.log','.gitignore', '.DS_Store','Thumbs.db','*.md','TODO.md','BUGFIX.md','JOURNAL.md','PLAN.md','PLAN_DB.md','PROMPT.md','README.md','LICENSE','DCC_Fiche_*','maquette_*')
@@ -22,16 +23,16 @@ $allFiles = Get-ChildItem -Path $src -Recurse -File | Where-Object {
   return $true
 }
 
-Add-Type -Assembly 'System.IO.Compression.FileSystem'
-$zip = [System.IO.Compression.ZipFile]::Open($out, 'Create')
 $count = 0
 foreach ($file in $allFiles) {
   $rel = $file.FullName.Substring($src.Length + 1)
-  [void][System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, $rel)
+  $dest = Join-Path $outDir $rel
+  $destDir = Split-Path -Parent $dest
+  if (!(Test-Path $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
+  Copy-Item $file.FullName $dest
   Write-Host ('  + ' + $rel)
   $count++
 }
-$zip.Dispose()
 Write-Host ''
-Write-Host ('Archive creee : ' + $out)
-Write-Host ('Fichiers inclus : ' + $count)
+Write-Host ('Dossier cree : ' + $outDir)
+Write-Host ('Fichiers copies : ' + $count)

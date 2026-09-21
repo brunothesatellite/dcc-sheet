@@ -1621,7 +1621,63 @@ input[type="number"]::-webkit-outer-spin-button {
     font-size: 10px;
   }
 
-  .sorts-grid {
+.capacites-grid {
+  display: flex;
+  gap: 12px;
+}
+
+.capacites-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.capacites-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.cap-label {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink);
+  padding: 8px 0;
+}
+
+.combat-info {
+  background: var(--field-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.7;
+  height: 100%;
+}
+
+.combat-info-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.combat-info ul {
+  margin: 0;
+  padding-left: 16px;
+  list-style: disc;
+}
+
+.combat-info li {
+  margin-bottom: 2px;
+}
+
+.sorts-grid {
     gap: 3px;
   }
 

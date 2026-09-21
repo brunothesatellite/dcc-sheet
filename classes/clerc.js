@@ -20,7 +20,7 @@ window.DCCModules.clerc = {
             <input type="text" data-key="${k('test_incantation')}" value="${v('test_incantation')}">
           </div>
           <div class="field">
-            <div class="field-label">Risque de defaire:</div>
+            <div class="field-label">Risque de defaveur:</div>
             <input type="text" data-key="${k('risque_defaire')}" value="${v('risque_defaire', '0')}" style="text-align:center; font-size:16px; font-weight:700;">
           </div>
         </div>

@@ -8,40 +8,40 @@ window.DCCModules.halfelin = {
 
     container.innerHTML = bc.render(container, charId, 'halfelin', data) + `
       <div class="sheet-page">
+        <div class="section-bar">Capacités de halfelin</div>
 
-
-        <h3 class="section-title">Capacites de halfelin</h3>
-
-        <div class="row">
-          <div class="field" style="flex:1">
-            <label class="field-label">Arbaletes</label>
-            <input type="text" data-key="${k('arbaletes')}" value="${v('arbaletes')}">
+        <div class="capacites-grid">
+          <!-- Colonne gauche -->
+          <div class="capacites-left">
+            <div class="label-on-line">
+              <label class="field-label">Infravision</label>
+              <input type="text" data-key="${k('infravision')}" value="${v('infravision')}">
+            </div>
+            <div class="label-on-line">
+              <label class="field-label">Discrétion :</label>
+              <input type="text" data-key="${k('discretion')}" value="${v('discretion')}">
+            </div>
+            <div class="cap-label">Porte-bonheur</div>
+            <div class="cap-label">Petite taille/lenteur</div>
           </div>
-          <div class="field" style="flex:1">
-            <label class="field-label">Camouflage</label>
-            <input type="text" data-key="${k('camouflage')}" value="${v('camouflage')}">
+          <!-- Colonne droite -->
+          <div class="capacites-right">
+            <div class="combat-info">
+              <div class="combat-info-title">Combat à deux armes</div>
+              <ul>
+                <li>Dés d'action d16+d16</li>
+                <li>Crit sur 16 naturel</li>
+                <li>Maladresse seulement sur 2x1</li>
+                <li>si Agi &gt;16, règles normales</li>
+              </ul>
+            </div>
           </div>
         </div>
 
+        <div class="section-bar">Notes</div>
         <div class="row">
-          <div class="field" style="flex:1">
-            <label class="field-label">Coup chanceux</label>
-            <input type="text" data-key="${k('coup_chanceux')}" value="${v('coup_chanceux')}">
-          </div>
-          <div class="field" style="flex:1">
-            <label class="field-label">Porte-bonheur</label>
-            <input type="text" data-key="${k('porte_bonheur')}" value="${v('porte_bonheur')}">
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="field" style="flex:1">
-            <label class="field-label">Taille</label>
-            <input type="text" data-key="${k('taille')}" value="${v('taille')}">
-          </div>
-          <div class="field" style="flex:1">
-            <label class="field-label">Infravision</label>
-            <input type="text" data-key="${k('infravision')}" value="${v('infravision')}">
+          <div class="field">
+            <textarea data-key="${k('notes')}" rows="6">${v('notes')}</textarea>
           </div>
         </div>
       </div>

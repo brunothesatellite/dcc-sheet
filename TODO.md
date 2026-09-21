@@ -3,7 +3,7 @@
 1. Clerc - OK
 2. Elf - OK
 3. Guerrier - OK
-4. Halfelin
+4. Halfelin - OK
 5. Mage
 6. Nain
 7. Voleur

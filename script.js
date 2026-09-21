@@ -1049,5 +1049,8 @@
   window.showList = showList;
   window.showToastSave = showToastSave;
   window.openSheet = openSheet;
+  window.bindAutoSave = bindAutoSave;
+  window.scheduleSave = scheduleSave;
+  window.showModal = showModal;
 
 })();

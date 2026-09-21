@@ -7,8 +7,8 @@
 5. Mage - OK
 6. Nain - OK
 7. Voleur - OK
-* Refaire une passe sur les champs labels qui sont plutôt du pur texte au lieu de textarea readonly
-* Bruno doit proposer des améliorations d'IHM par rapport aux fiches de personnage (la liste des sorts par exemple)
+* Refaire une passe sur les champs labels qui sont plutôt du pur texte au lieu de textarea readonly - OK
+* Bruno doit proposer des améliorations d'IHM par rapport aux fiches de personnage (la liste des sorts par exemple) - OK
 
 **BUGS**
 *Critique*

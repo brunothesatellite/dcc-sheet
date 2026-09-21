@@ -30,10 +30,10 @@ window.DCCModules.guerrier = {
 
         <div class="row">
           <div class="field">
-            <div class="inline-field">
-              Ajout du niveau à l'initiative, Hauts faits d'armes (dé :
-              <input type="text" data-key="${k('hfa')}" value="${v('hfa')}">
-              )
+            <div class="label-on-line">
+              <label class="field-label">Ajout du niveau à l'initiative, Hauts faits d'armes (dé :</label>
+              <input type="text" data-key="${k('hfa')}" value="${v('hfa')}" style="max-width:60px;">
+              <label class="field-label">)</label>
             </div>
           </div>
         </div>

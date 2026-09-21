@@ -1221,10 +1221,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .traits-text {
   font-size: 13px;
   color: var(--ink);
-  padding: 6px 10px;
-  background: var(--field-bg);
-  border: 1px solid var(--input-border);
-  border-radius: var(--radius-sm);
+  padding: 4px 0;
   line-height: 1.6;
 }
 
@@ -1316,7 +1313,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .skill-label {
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 12px;
+  font-size: 13px;
   text-transform: uppercase;
   color: var(--ink);
   text-align: left;

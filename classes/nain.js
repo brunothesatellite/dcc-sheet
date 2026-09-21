@@ -25,7 +25,7 @@ window.DCCModules.nain = {
           <label class="cap-label">)</label>
         </div>
 
-        <div class="cap-label">Coup de bouclier (d'd'action d14)</div>
+        <div class="cap-label">Coup de bouclier (dé d'action d14)</div>
 
         <div class="section-bar">Notes</div>
         <div class="row">

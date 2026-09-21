@@ -1305,7 +1305,8 @@ input[type="number"]::-webkit-outer-spin-button {
   padding: 2px 4px;
 }
 
-.dtable td.sort-notes textarea {
+.dtable td.sort-notes textarea,
+.dtable td.sort-name input {
   width: 100%;
   border: none;
   background: transparent;
@@ -1314,9 +1315,13 @@ input[type="number"]::-webkit-outer-spin-button {
   font-family: var(--font-body);
   color: var(--ink);
   outline: none;
+  text-align: left;
+  line-height: 1.4;
+}
+
+.dtable td.sort-notes textarea {
   resize: vertical;
   min-height: 22px;
-  line-height: 1.4;
 }
 
 .dtable td.row-del {

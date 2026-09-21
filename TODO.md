@@ -1,5 +1,12 @@
 **TODO**
 * Bruno doit vérifier que les champs sont bien nommés pour chaque classe et qu'il n'y a aucun oubli
+1. Clerc - OK
+2. Elf - OK
+3. Guerrier
+4. Halfelin
+5. Mage
+6. Nain
+7. Voleur
 * Bruno doit proposer des améliorations d'IHM par rapport aux fiches de personnage (la liste des sorts par exemple)
 
 **BUGS**

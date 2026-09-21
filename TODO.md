@@ -2,7 +2,7 @@
 * Bruno doit vérifier que les champs sont bien nommés pour chaque classe et qu'il n'y a aucun oubli
 1. Clerc - OK
 2. Elf - OK
-3. Guerrier
+3. Guerrier - OK
 4. Halfelin
 5. Mage
 6. Nain

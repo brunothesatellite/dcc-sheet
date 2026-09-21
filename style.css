@@ -1228,6 +1228,38 @@ input[type="number"]::-webkit-outer-spin-button {
   line-height: 1.6;
 }
 
+.label-on-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.label-on-line .field-label {
+  white-space: nowrap;
+}
+
+.label-on-line input {
+  flex: 1;
+  min-width: 80px;
+}
+
+.inline-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--ink);
+  flex-wrap: wrap;
+}
+
+.inline-field input {
+  width: 60px;
+  text-align: center;
+  padding: 6px 8px;
+  font-weight: 600;
+}
+
 .sorts-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;

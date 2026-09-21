@@ -82,6 +82,60 @@
     if (spinner) spinner.classList.add('hidden');
   }
 
+  function showModal(opts) {
+    return new Promise(function (resolve) {
+      var overlay = $('#modal-overlay');
+      var titleEl = $('#modal-title');
+      var msgEl = $('#modal-message');
+      var actionsEl = $('#modal-actions');
+
+      titleEl.textContent = opts.title || '';
+      msgEl.textContent = opts.message || '';
+      actionsEl.innerHTML = '';
+
+      function close(result) {
+        overlay.classList.add('hidden');
+        resolve(result);
+      }
+
+      if (opts.type === 'confirm') {
+        var cancelBtn = el('button', {
+          className: 'modal-btn-cancel',
+          textContent: 'Annuler',
+          onClick: function () { close(false); },
+        });
+        actionsEl.appendChild(cancelBtn);
+
+        var okBtn = el('button', {
+          className: opts.danger ? 'modal-btn-danger' : 'modal-btn-ok',
+          textContent: opts.okText || 'OK',
+          onClick: function () { close(true); },
+        });
+        actionsEl.appendChild(okBtn);
+      } else {
+        var okBtn = el('button', {
+          className: 'modal-btn-ok',
+          textContent: 'OK',
+          onClick: function () { close(true); },
+        });
+        actionsEl.appendChild(okBtn);
+      }
+
+      overlay.classList.remove('hidden');
+
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) close(false);
+      });
+
+      document.addEventListener('keydown', function handler(e) {
+        if (e.key === 'Escape') {
+          document.removeEventListener('keydown', handler);
+          close(false);
+        }
+      });
+    });
+  }
+
   /* =========================================================================
      4. DOM Helpers
      ======================================================================== */
@@ -545,7 +599,14 @@
 
   async function deleteCharacter(cls, charData) {
     if (!currentUser) return;
-    if (!confirm('Supprimer "' + (charData.name || 'Sans nom') + '" ?')) return;
+    var confirmed = await showModal({
+      title: 'Suppression',
+      message: 'Supprimer "' + (charData.name || 'Sans nom') + '" ?',
+      type: 'confirm',
+      okText: 'Supprimer',
+      danger: true,
+    });
+    if (!confirmed) return;
 
     try {
       await api('characters.php', {
@@ -893,7 +954,7 @@
         var obj = JSON.parse(text);
 
         if (!obj.class) {
-          alert('Fichier JSON invalide : classe manquante');
+          await showModal({ title: 'Erreur', message: 'Fichier JSON invalide : classe manquante', type: 'alert' });
           return;
         }
 
@@ -912,7 +973,7 @@
           showToastSave();
         }
       } catch (err) {
-        alert('Erreur lors de l\'import : ' + err.message);
+        await showModal({ title: 'Erreur', message: 'Erreur lors de l\'import : ' + err.message, type: 'alert' });
       }
     });
 

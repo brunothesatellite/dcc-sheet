@@ -32,7 +32,7 @@
      ======================================================================== */
 
   let currentUser = null;
-  let activeTab = CLASSES[0];
+  let activeTab = localStorage.getItem('dcc-active-tab') || CLASSES[0];
   let activeSheets = {};
   let loadedModules = {};
   let saveTimers = {};
@@ -271,6 +271,7 @@
 
   async function switchTab(cls) {
     activeTab = cls;
+    localStorage.setItem('dcc-active-tab', cls);
 
     $$('.tab').forEach(function (btn) {
       btn.classList.toggle('active', btn.getAttribute('data-class') === cls);

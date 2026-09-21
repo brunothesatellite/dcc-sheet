@@ -248,7 +248,8 @@
      8. Character List Loading & Rendering
      ======================================================================== */
 
-  async function loadClassCharacters(cls) {
+  async function loadClassCharacters(cls, autoOpen) {
+    if (autoOpen === undefined) autoOpen = true;
     var panel = $('[data-class="' + cls + '"].tab-panel');
     if (!panel) return;
 
@@ -269,7 +270,7 @@
 
       if (active.length === 0 && inactive.length === 0) {
         renderEmptyState(panel, cls);
-      } else if (active.length === 1) {
+      } else if (autoOpen && active.length === 1 && active.length + inactive.length > 0) {
         openSheet(cls, active[0]);
       } else {
         renderCharList(panel, cls, active, inactive);
@@ -538,7 +539,7 @@
         body: { action: 'delete', id: charData.id },
       });
 
-      loadClassCharacters(cls);
+      loadClassCharacters(cls, false);
     } catch (err) {
       console.error('Erreur suppression:', err);
     }
@@ -553,7 +554,9 @@
         body: { action: 'set_active', id: charId, is_active: isActive ? 1 : 0 },
       });
 
-      loadClassCharacters(activeTab);
+      if (!activeSheets[activeTab]) {
+        loadClassCharacters(activeTab, false);
+      }
     } catch (err) {
       console.error('Erreur activation:', err);
     }
@@ -629,10 +632,6 @@
 
       saveCharacter(charData.id, undefined, undefined);
       setCharacterActive(charData.id, checked);
-
-      if (!checked) {
-        loadClassCharacters(cls);
-      }
     });
 
     toggle.appendChild(input);
@@ -660,7 +659,7 @@
     activeSheets[cls] = null;
     cancelPendingSaves(cls);
 
-    loadClassCharacters(cls);
+    loadClassCharacters(cls, false);
   }
 
   /* =========================================================================

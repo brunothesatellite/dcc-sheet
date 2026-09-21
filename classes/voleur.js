@@ -20,7 +20,7 @@
 
     container.innerHTML = bc.render(container, charId, 'voleur', data) + `
       <div class="sheet-page">
-        <div class="page-title">Voleur - Page 2</div>
+
         <div class="section-title">Capacites de voleur</div>
         <div class="row">
           <div class="field">

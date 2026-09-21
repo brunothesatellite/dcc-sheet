@@ -8,8 +8,6 @@ window.DCCModules.guerrier = {
 
     container.innerHTML = bc.render(container, charId, 'guerrier', data) + `
       <div class="sheet-page">
-        <div class="page-title">Fiche de Guerrier - Partie 2</div>
-
         <div class="section-bar">Capacités de guerrier</div>
 
         <div class="row">

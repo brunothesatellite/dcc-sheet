@@ -8,7 +8,7 @@ window.DCCModules.halfelin = {
 
     container.innerHTML = bc.render(container, charId, 'halfelin', data) + `
       <div class="sheet-page">
-        <h2 class="page-title">Fiche de Halfelin - Partie 2</h2>
+
 
         <h3 class="section-title">Capacites de halfelin</h3>
 

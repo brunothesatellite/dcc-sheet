@@ -10,8 +10,6 @@ window.DCCModules.elfe = {
 
     container.innerHTML = bc.render(container, charId, 'elfe', data) + `
       <div class="sheet-page">
-        <div class="page-title">Fiche d'Elfe - Partie 2</div>
-
         <!-- ====== CAPACITES ELFIQUES ====== -->
         <div class="section-bar">Capacités elfiques</div>
 

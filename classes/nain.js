@@ -8,7 +8,7 @@ window.DCCModules.nain = {
 
     container.innerHTML = bc.render(container, charId, 'nain', data) + `
       <div class="sheet-page">
-        <h2 class="page-title">Fiche de Nain - Partie 2</h2>
+
 
         <h3 class="section-title">Capacites de nain</h3>
 

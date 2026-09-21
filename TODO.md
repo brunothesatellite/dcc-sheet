@@ -5,15 +5,15 @@
 3. Guerrier - OK
 4. Halfelin - OK
 5. Mage - OK
-6. Nain
+6. Nain - OK
 7. Voleur
-
+* REfaire une passe sur les champs labels qui sont plutôt du ^pur texte au lieu de textarea readonly
 * Bruno doit proposer des améliorations d'IHM par rapport aux fiches de personnage (la liste des sorts par exemple)
 
 **BUGS**
 *Critique*
 * [DONE] BUG 1 : Les fiches de personnage doivent reprendre la mise en page des PDF, par exemple pour le Clerc, je veux que sa fiche corresponde à la maquette que tu avais réalisée. Retravaille la fiche du Clerc pour qu'elle soit comme sur la maquette présentée et conforme au PDF (maquette_clerc.html)
-* [TO CHECK] BUG 5 : Aucun champ ne semble sauvegardé en base. PLAN_DB.md comme départ
+* [TOCHECK] BUG 5 : Aucun champ ne semble sauvegardé en base. PLAN_DB.md comme départ
 
 *Majeur*
 * [DONE] BUG 2 : Pour les parties communes à toutes les classes, le layout doit être identique entre les classes. Réutilise le layout validé de la classe Clerc pour la partie commune des autres classes.

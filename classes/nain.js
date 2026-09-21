@@ -8,51 +8,29 @@ window.DCCModules.nain = {
 
     container.innerHTML = bc.render(container, charId, 'nain', data) + `
       <div class="sheet-page">
+        <div class="section-bar">Capacités de nain</div>
 
+        <div class="cap-label">Infravision</div>
 
-        <h3 class="section-title">Capacites de nain</h3>
+        <div class="cap-label">Comp. souterraines : perception os/gemmes, délect. construction</div>
 
-        <div class="row">
-          <div class="field" style="flex:1">
-            <label class="field-label">Infravision</label>
-            <input type="text" data-key="${k('infravision')}" value="${v('infravision')}">
-          </div>
-          <div class="field" style="flex:1">
-            <label class="field-label">Competences souterraines</label>
-            <input type="text" data-key="${k('competences_souterraines')}" value="${v('competences_souterraines')}">
-          </div>
+        <div class="label-on-line">
+          <label class="cap-label">Arme soumise au mod. de Chance :</label>
+          <input type="text" data-key="${k('arme_chance')}" value="${v('arme_chance')}">
         </div>
 
-        <div class="row">
-          <div class="field" style="flex:1">
-            <label class="field-label">Arme Chance</label>
-            <input type="text" data-key="${k('arme_chance')}" value="${v('arme_chance')}">
-          </div>
-          <div class="field" style="flex:1">
-            <label class="field-label">HFA</label>
-            <input type="text" data-key="${k('hfa')}" value="${v('hfa')}">
-          </div>
+        <div class="label-on-line">
+          <label class="cap-label">Hauts faits d'arme (dé :</label>
+          <input type="text" data-key="${k('hfa')}" value="${v('hfa')}" style="max-width:60px;">
+          <label class="cap-label">)</label>
         </div>
 
-        <div class="row">
-          <div class="field" style="flex:1">
-            <label class="field-label">Coup de bouclier</label>
-            <input type="text" data-key="${k('coup_de_bouclier')}" value="${v('coup_de_bouclier')}">
-          </div>
-          <div class="field" style="flex:1">
-            <label class="field-label">Detection</label>
-            <input type="text" data-key="${k('detection')}" value="${v('detection')}">
-          </div>
-        </div>
+        <div class="cap-label">Coup de bouclier (d'd'action d14)</div>
 
+        <div class="section-bar">Notes</div>
         <div class="row">
-          <div class="field" style="flex:1">
-            <label class="field-label">Rage naine</label>
-            <input type="text" data-key="${k('rage_naine')}" value="${v('rage_naine')}">
-          </div>
-          <div class="field" style="flex:1">
-            <label class="field-label">Souffle</label>
-            <input type="text" data-key="${k('souffle')}" value="${v('souffle')}">
+          <div class="field">
+            <textarea data-key="${k('notes')}" rows="6">${v('notes')}</textarea>
           </div>
         </div>
       </div>

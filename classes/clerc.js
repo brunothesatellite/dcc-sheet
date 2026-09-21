@@ -94,6 +94,13 @@ window.DCCModules.clerc = {
             <input type="text" data-key="${k('sort_3_7')}" value="${v('sort_3_7')}">
           </div>
         </div>
+
+        <div class="section-bar">Notes</div>
+        <div class="row">
+          <div class="field">
+            <textarea data-key="${k('notes')}" rows="6">${v('notes')}</textarea>
+          </div>
+        </div>
       </div>
     `;
   },

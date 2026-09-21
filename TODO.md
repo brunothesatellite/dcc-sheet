@@ -25,10 +25,10 @@
 
 **EVOLUTION**
 *SECTION NOTE*
-Chaque fichee de personnage doit offrir une section "Notes" de type textarea en base de la fiche
+[DONE] Chaque fichee de personnage doit offrir une section "Notes" de type textarea en base de la fiche
 
 *INFO SAUVEGARDE*
-Indiquer comme dans le projet fabled-lands-sheet quand un enregistrement est réalisé avec un icone d'enregistrement qui apparait à l'écran (inspire toi de l'autre projet)
+[DONE] Indiquer comme dans le projet fabled-lands-sheet quand un enregistrement est réalisé avec un icone d'enregistrement qui apparait à l'écran (inspire toi de l'autre projet)
 
 *ONGLET EQUIPE*
 A un moment, il faudra ajouter un onlget "Equipe" qui va récapituler les éléments principaux des personnages actifs dans un onglet = Liste des personnages sous forme de tableau :

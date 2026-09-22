@@ -1726,6 +1726,7 @@ input[type="number"]::-webkit-outer-spin-button {
   border-collapse: collapse;
   font-size: 13px;
   margin-bottom: 16px;
+  table-layout: fixed;
 }
 
 .team-table th {
@@ -1803,25 +1804,56 @@ input[type="number"]::-webkit-outer-spin-button {
   transform: scale(0.92);
 }
 
-.char-name {
-  font-family: var(--font-heading);
+.team-table .char-name {
+  font-family: var(--font-body);
   font-weight: 700;
-  font-size: 13px;
+  font-size: 28px;
   text-align: left;
   white-space: nowrap;
   cursor: pointer;
   color: var(--ink);
 }
 
-.char-name:hover {
+.team-table .char-name:hover {
   color: var(--red);
 }
 
-.char-class {
+.team-table .char-class {
   font-size: 11px;
   color: var(--muted);
   text-transform: uppercase;
 }
+
+.team-portrait {
+  width: 3em;
+  height: 3em;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+.team-table th:nth-child(1),
+.team-table td:nth-child(1) { width: 20%; text-align: left; }
+
+.team-table th:nth-child(2),
+.team-table td:nth-child(2) { width: 28%; }
+
+.team-table th:nth-child(3),
+.team-table td:nth-child(3) { width: 10%; }
+
+.team-table th:nth-child(4),
+.team-table td:nth-child(4) { width: 10%; }
+
+.team-table th:nth-child(5),
+.team-table td:nth-child(5) { width: 10%; }
+
+.team-table th:nth-child(6),
+.team-table td:nth-child(6) { width: 10%; }
+
+.team-table th:nth-child(7),
+.team-table td:nth-child(7) { width: 12%; }
 
 .btn-group {
   display: flex;
@@ -2291,9 +2323,10 @@ input[type="number"]::-webkit-outer-spin-button {
   .team-table th { font-size: 9px; padding: 4px 3px; }
   .team-table td { padding: 3px 2px; }
   .team-table input { font-size: 11px; padding: 3px 2px; }
+  .team-portrait { width: 2.5em; height: 2.5em; }
   .turn-counter { width: 30px; height: 30px; font-size: 13px; }
-  .char-name { font-size: 11px; }
-  .char-class { font-size: 9px; }
+  .team-table .char-name { font-size: 11px; }
+  .team-table .char-class { font-size: 9px; }
   .btn-group { flex-wrap: wrap; gap: 4px; }
   .btn-sm { padding: 4px 8px; font-size: 10px; }
 }

@@ -87,8 +87,8 @@ dcc-sheet/
 │   └── characters.php          # CRUD personnages (list, get, create, save, set_active, delete)
 ├── classes/
 │   ├── bloc_commun.js          # Bloc commun + portrait (identite, combat, stats, portrait, equipement)
-│   ├── clerc.js                # Fiche Clerc
-│   ├── elfe.js                 # Fiche Elfe
+│   ├── clerc.js                # Fiche Clerc (sorts dynamiques, grille 2 colonnes)
+│   ├── elfe.js                 # Fiche Elfe (sorts dynamiques + 2 sorts de patron figés)
 │   ├── guerrier.js             # Fiche Guerrier
 │   ├── halfelin.js             # Fiche Halfelin
 │   ├── mage.js                 # Fiche Mage (sorts dynamiques)

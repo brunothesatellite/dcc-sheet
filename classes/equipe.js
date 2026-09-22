@@ -12,12 +12,20 @@ window.DCCModules.equipe = {
       counter.className = 'turn-counter';
       counter.textContent = '0';
 
+      function updateFill(turn) {
+        var pct = turn === 0 ? 0 : (turn % 5 === 0 ? 100 : (turn % 5) * 20);
+        counter.style.setProperty('--fill', pct + '%');
+      }
+
       function reset() {
         counter.textContent = '0';
+        updateFill(0);
       }
 
       function increment() {
-        counter.textContent = parseInt(counter.textContent || '0') + 1;
+        var n = parseInt(counter.textContent || '0') + 1;
+        counter.textContent = n;
+        updateFill(n);
       }
 
       counter.addEventListener('click', function (e) {

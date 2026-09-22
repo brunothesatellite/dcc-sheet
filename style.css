@@ -1806,13 +1806,14 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .turn-counter {
+  --fill: 0%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: var(--field-bg);
+  background: conic-gradient(var(--red) var(--fill), var(--field-bg) var(--fill));
   border: 2px solid var(--ink);
   font-family: var(--font-heading);
   font-weight: 800;
@@ -1821,7 +1822,7 @@ input[type="number"]::-webkit-outer-spin-button {
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
-  transition: background 0.15s, transform 0.1s;
+  transition: transform 0.1s;
 }
 
 .turn-counter:active {
@@ -1867,10 +1868,10 @@ input[type="number"]::-webkit-outer-spin-button {
 .team-table td:nth-child(1) { width: 20%; text-align: left; }
 
 .team-table th:nth-child(2),
-.team-table td:nth-child(2) { width: 28%; }
+.team-table td:nth-child(2) { width: 23%; }
 
 .team-table th:nth-child(3),
-.team-table td:nth-child(3) { width: 10%; }
+.team-table td:nth-child(3) { width: 15%; }
 
 .team-table th:nth-child(4),
 .team-table td:nth-child(4) { width: 10%; }

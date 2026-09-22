@@ -24,12 +24,12 @@ Application web SPA pour gerer une equipe complete de personnages pour Dungeon C
 - Cartes de personnages avec nom, niveau, et toggle
 
 ### Fiches de personnage
-- **Commun** : Identite (Nom, Titre, Metier, Alignement, Mouvement, Niveau, PX), Defense (CA, PV/Max), Combat (Initiative, Des d'action, Attaque, Critique), 6 carac. avec modif. et jets de sauvegarde, Combat etendu (CAC/Distance), **Portrait de classe** (DCC ou D&D Red Box), Equipement (Armes, Equipement, Tresor, Armure)
+- **Commun** : Identite (Nom, Titre, Metier, Alignement, Mouvement, Niveau, PX), Defense (CA, PV/Max avec **Des de vie**), Combat (Initiative, Des d'action, Attaque, Critique), 6 carac. avec modif. et jets de sauvegarde, Combat etendu (CAC/Distance), **Portrait de classe** (DCC ou D&D Red Box), Equipement (Armes, Equipement, Tresor, Armure)
 - **Clerc** : Dieu, Incantation, Defaveur, Imposition des mains, Grille de sorts
 - **Elfe** : Incantation, Familier, Patron, Corruption, Traits elfiques, Grille de sorts
 - **Guerrier** : Coup critique, Arme Chance, Hauts faits d'armes
 - **Halfelin** : Infravision, Discretion, Porte-bonheur, Combat a deux armes
-- **Mage** : Incantation, Familier, Patron, Corruption, **Liste de sorts dynamique** (ajout/suppression de lignes avec confirmation)
+- **Mage** : Incantation, Familier, Patron, Corruption, **Liste de sorts dynamique** (ajout/suppression de lignes avec confirmation, nom en gras, style editable)
 - **Nain** : Infravision, Competences souterraines, Coup de bouclier, Arme Chance
 - **Voleur** : 14 competences voleur en grille (De de chance, Escalade, Crocheter, Pieges, etc.)
 
@@ -42,11 +42,11 @@ Application web SPA pour gerer une equipe complete de personnages pour Dungeon C
 - Propages dans les imports/exports JSON individuels et globaux
 
 ### Onglet Equipe
-- Tableau des personnages en expedition avec **icone de portrait** dans la colonne Classe (150% hauteur de ligne)
-- Nom cliquable, Init, AC, PV editables, Init combat, Compteur de tour
+- Tableau des personnages en expedition avec **icone de portrait** dans la colonne Classe (100% hauteur de ligne)
+- Nom cliquable, Init, AC, PV editables, Init combat, **Compteur de tour visuel** (remplissage circulaire par 20%)
 - Synchronisation des PV vers la fiche du personnage
 - Tableau des ennemis (ajout/suppression/RAZ)
-- Compteurs de tour (clic = +1, clic droit / appui long = reset)
+- Compteurs de tour (clic = +1, clic droit / appui long = reset, cycle modulo 5)
 - Notes d'equipe (sauvegardees en localStorage)
 
 ### Sauvegarde automatique

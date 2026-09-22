@@ -386,3 +386,69 @@ Chaque fiche reecrite pour etre fidele aux PDF/screencaps :
 | `dd-red-box-icons.js` | Cree (7 icons Red Box) |
 | `api/auth.php` | Ajout `delete_account`, `change_password` verifie ancien MDP |
 | `README.md` | Mis a jour (portraits, icones, auth, structure, API) |
+
+---
+
+## Date : 22 septembre 2026 (apres-midi)
+
+---
+
+### Des de vie dans BLOC_COMMUN
+
+- Ajout du champ "Des de vie" sous "Points de vie" dans le casque (helmet)
+- Valeur determinee par la classe : d12 (guerrier), d10 (nain), d8 (clerc), d6 (elfe/voleur/halfelin), d4 (mage)
+- Style : meme fonte que les labels de la fiche
+
+### Bouclier et casque agrandis
+
+- Bouclier : 80x90 → 90x100px (input 50x44), radius 45px
+- Casque : 80x90 → 90x105px (input width 60)
+- Mobile : bouclier 80x90, casque 80x95
+
+### Sorts Mage — ameliorations visuelles
+
+- Nom du sort : `font-weight: 700` (gras)
+- Note/effet : `font-weight: normal` (pas de gras, heritait du numero via `:first-child`)
+- Numero de sort : centre (`text-align: center`) + `font-size: 13px`
+- Tous les champs de sorts (nom, effet, niveau, test) : style editable (bordure + fond) comme les autres inputs
+
+### Style des notes — uniformisation
+
+- Notes BLOC_COMMUN (2e page) : `font-size: 11px`
+- Notes classe (3e page) : `font-size: 11px`
+- Notes equipe : `font-size: 11px`
+- Clerc : ajout de `<div class="sheet-page">` pour que les notes soient dans un `.sheet-page` (correction CSS nth-child)
+
+### Header sticky — correction decalage
+
+- Wrapper `div.sticky-header` autour du topbar + tab-bar
+- Un seul `position: sticky; top: 0` sur le wrapper
+- Suppression du sticky individuel sur `.topbar` et `.tab-bar`
+- Fin du leger mouvement vers le haut au scroll
+
+### Equipe — compteur de tour visuel
+
+- Remplissage circulaire par paliers de 20% via `conic-gradient` + variable CSS `--fill`
+- Cycle modulo 5 : 0=vide, 1=20%, 2=40%, 3=60%, 4=80%, 5=100%, 6=20%, etc.
+- Clic droit / appui long : reset a 0
+
+### Equipe — colonnes ajustees
+
+- INIT : 10% → 15% (pour valeurs comme "1d20+8")
+- Classe : 28% → 23% (recuperation de place)
+
+### Skill release
+
+- Creation de `.opencode/skills/release/SKILL.md` avec les instructions de processus de release
+
+### Fichiers modifies (22 septembre apres-midi)
+
+| Fichier | Actions |
+|---------|---------|
+| `classes/bloc_commun.js` | Ajout des de vie, wrapper sheet-page Clerc |
+| `classes/clerc.js` | Ajout `<div class="sheet-page">` |
+| `classes/equipe.js` | Compteur de tour visuel (conic-gradient), fontSize notes 11px |
+| `style.css` | Bouclier/casque agrandis, sorts editable, notes 11px, sticky wrapper, colonnes equipe, turn-counter visuel |
+| `index.html` | Wrapper `sticky-header` |
+| `.opencode/skills/release/SKILL.md` | Cree |
+| `README.md` | Mis a jour |

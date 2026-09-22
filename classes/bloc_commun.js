@@ -144,6 +144,18 @@ window.DCCModules.blocCommun = {
               <div class="combat-ext-field"><label>Att. a distance</label><input type="text" data-key="${k('att_distance')}" value="${v('att_distance')}" placeholder="+0"></div>
               <div class="combat-ext-field"><label>Degats distance</label><input type="text" data-key="${k('degats_distance')}" value="${v('degats_distance')}" placeholder="1d6"></div>
             </div>
+            <div class="portrait-area">
+              <input type="hidden" data-key="${k('portrait_source')}" value="${v('portrait_source', 'dcc')}">
+              <input type="hidden" data-key="${k('portrait_index')}" value="${v('portrait_index', '0')}">
+              <img class="portrait-img" data-portrait-img alt="Portrait">
+              <div class="portrait-switch">
+                <label class="switch">
+                  <input type="checkbox" data-portrait-toggle>
+                  <span class="switch-slider"></span>
+                </label>
+                <span class="portrait-source-label">DCC</span>
+              </div>
+            </div>
           </div>
         </div>
 

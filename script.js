@@ -868,6 +868,60 @@
      10. Sheet View
      ======================================================================== */
 
+  function initPortraits(cls, charId) {
+    var area = document.querySelector('.portrait-area');
+    if (!area) return;
+
+    var img = area.querySelector('[data-portrait-img]');
+    var checkbox = area.querySelector('[data-portrait-toggle]');
+    var label = area.querySelector('.portrait-source-label');
+    var hiddenSource = area.querySelector('input[data-key$="-portrait_source"]');
+    var hiddenIndex = area.querySelector('input[data-key$="-portrait_index"]');
+    if (!img || !checkbox || !hiddenSource || !hiddenIndex) return;
+
+    var icons = window.DCCIcons || {};
+    var rbIcons = window.DDRedBoxIcons || {};
+
+    var source = hiddenSource.value || 'dcc';
+    var index = parseInt(hiddenIndex.value, 10) || 0;
+
+    function applyPortrait() {
+      if (source === 'redbox') {
+        img.src = rbIcons[cls] || '';
+        img.classList.remove('clickable');
+        if (label) label.textContent = 'Red Box';
+      } else {
+        var list = icons[cls] || [];
+        if (list.length === 0) { img.src = ''; img.classList.remove('clickable'); return; }
+        index = index % list.length;
+        img.src = list[index];
+        img.classList.add('clickable');
+        if (label) label.textContent = 'DCC';
+      }
+      checkbox.checked = source === 'redbox';
+    }
+
+    applyPortrait();
+
+    checkbox.addEventListener('change', function () {
+      source = checkbox.checked ? 'redbox' : 'dcc';
+      hiddenSource.value = source;
+      applyPortrait();
+      scheduleSave(cls, charId);
+    });
+
+    img.addEventListener('click', function () {
+      if (source !== 'dcc') return;
+      var list = icons[cls] || [];
+      if (list.length <= 1) return;
+      index = (index + 1) % list.length;
+      hiddenIndex.value = index;
+      img.src = list[index];
+      scheduleSave(cls, charId);
+    });
+    });
+  }
+
   async function openSheet(cls, charData) {
     var panel = $('[data-class="' + cls + '"].tab-panel');
     if (!panel) return;
@@ -889,6 +943,7 @@
     viewSheet.appendChild(sheetBody);
 
     await loadClassModule(cls, sheetBody, charData);
+    initPortraits(cls, charData.id);
     bindAutoSave(cls, charData.id);
   }
 

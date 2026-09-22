@@ -1226,20 +1226,44 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .portrait-area {
-  border: 2px solid var(--ink);
-  min-height: 80px;
-  background: var(--field-bg);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  margin-top: 10px;
+  gap: 6px;
 }
 
-.portrait-area label {
+.portrait-img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+  background: var(--field-bg);
+  transition: transform 0.15s;
+}
+
+.portrait-img.clickable {
+  cursor: pointer;
+}
+
+.portrait-img.clickable:hover {
+  transform: scale(1.05);
+}
+
+.portrait-switch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.portrait-source-label {
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 11px;
+  font-size: 10px;
   text-transform: uppercase;
   color: var(--muted);
+  min-width: 60px;
 }
 
 .dtable {
@@ -2129,7 +2153,16 @@ input[type="number"]::-webkit-outer-spin-button {
   }
 
   .portrait-area {
-    display: none;
+    margin-top: 6px;
+  }
+
+  .portrait-img {
+    width: 80px;
+    height: 80px;
+  }
+
+  .portrait-source-label {
+    font-size: 9px;
   }
 
   .dtable {

@@ -1302,10 +1302,10 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .dtable td:first-child {
-  text-align: left;
+  text-align: center;
   font-family: var(--font-heading);
   font-weight: 600;
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .dtable input {
@@ -1407,6 +1407,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .dtable td.sort-notes {
   padding: 2px 4px;
+  font-weight: normal;
 }
 
 .dtable td.sort-notes textarea,
@@ -1423,9 +1424,14 @@ input[type="number"]::-webkit-outer-spin-button {
   line-height: 1.4;
 }
 
+.dtable td.sort-name input {
+  font-weight: 700;
+}
+
 .dtable td.sort-notes textarea {
   resize: vertical;
   min-height: 22px;
+  font-size: 11px;
 }
 
 .dtable td.row-del {

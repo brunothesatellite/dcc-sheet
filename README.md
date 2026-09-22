@@ -6,22 +6,25 @@ Application web SPA pour gerer une equipe complete de personnages pour Dungeon C
 
 ### Authentification
 - Connexion / Inscription / Deconnexion
-- Changement de mot de passe
+- Changement de mot de passe (verification de l'ancien mot de passe)
+- Suppression de compte (avec confirmation, supprime les personnages et la session)
 - Sessions securisees (bcrypt, regeneration de session)
 - Heartbeat automatique (ping toutes les 5 min)
 - Redirection automatique selon l'etat de connexion
+- Menu utilisateur (avatar + dropdown)
 
 ### Gestion des personnages
 - 7 classes : Clerc, Elfe, Guerrier, Halfelin, Mage, Nain, Voleur
 - 0 a plusieurs personnages par classe
 - Creation rapide (bouton "+ Nouveau")
-- Import / Export au format JSON
-- Suppression avec confirmation
+- Import / Export individuel au format JSON
+- Import / Export global (tous les personnages d'un coup)
+- Suppression avec confirmation custom (modal)
 - Toggle "En expedition" / "A l'auberge" (statut actif/inactif)
-- Cartes de personnages avec nom, niveau, dieu, et toggle
+- Cartes de personnages avec nom, niveau, et toggle
 
 ### Fiches de personnage
-- **Commun** : Identite (Nom, Titre, Metier, Alignement, Mouvement, Niveau, PX), Defense (CA, PV/Max), Combat (Initiative, Des d'action, Attaque, Critique), 6 carac. avec modif. et jets de sauvegarde, Combat etendu (CAC/Distance), Equipement (Armes, Equipement, Tresor, Armure)
+- **Commun** : Identite (Nom, Titre, Metier, Alignement, Mouvement, Niveau, PX), Defense (CA, PV/Max), Combat (Initiative, Des d'action, Attaque, Critique), 6 carac. avec modif. et jets de sauvegarde, Combat etendu (CAC/Distance), **Portrait de classe** (DCC ou D&D Red Box), Equipement (Armes, Equipement, Tresor, Armure)
 - **Clerc** : Dieu, Incantation, Defaveur, Imposition des mains, Grille de sorts
 - **Elfe** : Incantation, Familier, Patron, Corruption, Traits elfiques, Grille de sorts
 - **Guerrier** : Coup critique, Arme Chance, Hauts faits d'armes
@@ -30,15 +33,24 @@ Application web SPA pour gerer une equipe complete de personnages pour Dungeon C
 - **Nain** : Infravision, Competences souterraines, Coup de bouclier, Arme Chance
 - **Voleur** : 14 competences voleur en grille (De de chance, Escalade, Crocheter, Pieges, etc.)
 
+### Portrait de classe
+- 2 sources d'icones : **DCC** (tokens officiels, 20 images au total) et **D&D Red Box** (7 illustrations)
+- Interrupteur DCC/Red Box dans chaque fiche de personnage
+- En mode DCC : clic sur l'image pour cycle sur l'image suivante
+- En mode Red Box : image unique, pas de clic
+- Choix et image sauvegardes avec le personnage en base
+- Propages dans les imports/exports JSON individuels et globaux
+
 ### Onglet Equipe
-- Tableau des personnages en expedition (Nom cliquable, Classe, Init, AC, PV editables, Init combat, Compteur de tour)
+- Tableau des personnages en expedition avec **icone de portrait** dans la colonne Classe (150% hauteur de ligne)
+- Nom cliquable, Init, AC, PV editables, Init combat, Compteur de tour
 - Synchronisation des PV vers la fiche du personnage
 - Tableau des ennemis (ajout/suppression/RAZ)
 - Compteurs de tour (clic = +1, clic droit / appui long = reset)
 - Notes d'equipe (sauvegardees en localStorage)
 
 ### Sauvegarde automatique
-- Debounce 400ms sur tous les champs modifiables
+- Debounce 600ms sur tous les champs modifiables
 - Toast de confirmation (icone disquette) a chaque sauvegarde
 - Toast "Donnees restaurees" au chargement
 - Toast sur modification des PV et notes d'equipe
@@ -46,7 +58,7 @@ Application web SPA pour gerer une equipe complete de personnages pour Dungeon C
 ### Navigation
 - Onglets avec persistence de l'onglet actif (localStorage)
 - Auto-ouverture de la fiche si 1 seul personnage actif
-- Bouton retour (flèche) pour revenir a la liste
+- Bouton retour (fleche) pour revenir a la liste
 - Bouton Equipe mobile dans le topbar (< 600px)
 
 ### UI / UX
@@ -62,16 +74,18 @@ Application web SPA pour gerer une equipe complete de personnages pour Dungeon C
 ```
 dcc-sheet/
 ├── index.html                  # SPA principale
-├── script.js                   # Gestionnaire central (tabs, auth, CRUD, auto-save, nav)
-├── style.css                   # Styles principaux (themes, layout, responsive)
+├── script.js                   # Gestionnaire central (tabs, auth, CRUD, auto-save, nav, portraits)
+├── style.css                   # Styles principaux (themes, layout, responsive, portraits)
 ├── style-auth.css              # Styles des pages d'authentification
 ├── favicon.svg                 # Favicon SVG
+├── dcc-icons.js                # Catalogue d'icones DCC (20 tokens, 7 classes)
+├── dd-red-box-icons.js         # Catalogue d'icones D&D Red Box (7 images, 7 classes)
 ├── api/
 │   ├── db.php                  # SQLite3 + helpers (users, characters, session)
-│   ├── auth.php                # Authentification (login, register, logout, change_password)
+│   ├── auth.php                # Authentification (login, register, logout, change_password, delete_account)
 │   └── characters.php          # CRUD personnages (list, get, create, save, set_active, delete)
 ├── classes/
-│   ├── bloc_commun.js          # Bloc commun a toutes les classes (identite, combat, stats, equipement)
+│   ├── bloc_commun.js          # Bloc commun + portrait (identite, combat, stats, portrait, equipement)
 │   ├── clerc.js                # Fiche Clerc
 │   ├── elfe.js                 # Fiche Elfe
 │   ├── guerrier.js             # Fiche Guerrier
@@ -79,14 +93,17 @@ dcc-sheet/
 │   ├── mage.js                 # Fiche Mage (sorts dynamiques)
 │   ├── nain.js                 # Fiche Nain
 │   ├── voleur.js               # Fiche Voleur
-│   └── equipe.js               # Onglet Equipe (tableau persos + ennemis)
+│   └── equipe.js               # Onglet Equipe (tableau persos + portraits + ennemis)
+├── icons/
+│   ├── dcc-pc-tokens/          # 20 PNG tokens officiels DCC
+│   └── dd-red-box/             # 7 webp illustrations D&D Red Box
 ├── login.php                   # Page de connexion
 ├── register.php                # Page d'inscription
 ├── change-password.php         # Page de changement de mot de passe
 ├── data/                       # Base SQLite3 (auto-creee)
 │   └── dcc.db
 └── deploy/
-    ├── build.bat               # Script de build (copie les fichiers dans deploy/dcc-sheet/)
+    ├── build.bat               # Script de build
     ├── _build.ps1              # Script PowerShell de build
     ├── start.bat               # Lanceur PHP dev server
     └── dcc-sheet/              # Dossier de deploiement (genere par build.bat)
@@ -102,13 +119,14 @@ dcc-sheet/
 | `register` | POST | `pseudo`, `password` | Inscription (pseudo 3-20 car., password 6+ car.) |
 | `login` | POST | `pseudo`, `password` | Connexion |
 | `logout` | POST | — | Deconnexion |
-| `change_password` | POST | `old_password`, `new_password` | Changement de mot de passe |
+| `change_password` | POST | `old_password`, `new_password` | Changement de mot de passe (verifie l'ancien) |
+| `delete_account` | POST | — | Supprime le compte, les personnages et la session |
 
 ### Personnages (`api/characters.php`)
 
 | Action | Methode | Parametres | Description |
 |--------|---------|------------|-------------|
-| `list` | GET | `class` (optionnel), `is_active` (optionnel) | Liste les personnages de l'utilisateur |
+| `list` | GET | `class` (optionnel), `is_active` (optionnel) | Liste les personnages (inclut les donnees JSON) |
 | `get` | GET | `id` | Recupere un personnage par son ID |
 | `create` | POST | `class`, `name` | Cree un personnage (data initialise a `{}`) |
 | `save` | POST | `id`, `data` (optionnel), `name` (optionnel) | Sauvegarde les donnees JSON et/ou le nom |

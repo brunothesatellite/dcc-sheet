@@ -314,3 +314,75 @@ Chaque fiche reecrite pour etre fidele aux PDF/screencaps :
 | `deploy/_build.ps1` | Reecri (auto-detecte fichiers, copie avec structure) |
 | `.gitignore` | Ajout `deploy/dcc-sheet/` |
 | `README.md` | Mis a jour (fonctionnalites, structure, API) |
+
+---
+
+## Date : 22 septembre 2026
+
+---
+
+### Catalogues d'icones
+
+- **`dcc-icons.js`** cree : catalogue de 20 PNG tokens officiels DCC, mappes par classe (clerc: 2, elfe: 2, guerrier: 5, halfelin: 2, mage: 4, nain: 2, voleur: 3)
+- **`dd-red-box-icons.js`** cree : catalogue de 7 webp illustrations D&D Red Box, 1 par classe
+- Fichiers charges dans `index.html` avant `script.js`
+
+### Portrait de classe dans BLOC_COMMUN
+
+- Ajout d'un bloc `portrait-area` dans `bloc_commun.js`, colonne droite sous les champs Attaque/Degats CAC/Distance
+- 2 hidden inputs avec `data-key` : `portrait_source` (defaut: "dcc") et `portrait_index` (defaut: "0")
+- Checkbox toggle DCC/Red Box avec le composant `.switch` existant
+- Affichage du label source ("DCC" / "Red Box")
+
+### Logique portrait dans script.js
+
+- **`initPortraits(cls, charId, container)`** : fonction appelee apres `loadClassModule` dans `openSheet`
+- Scope le `querySelector` sur `sheetBody` (pas le document entier) pour eviter les conflits entre onglets
+- Retry 100ms si `window.DCCIcons` ou `window.DDRedBoxIcons` pas encore charges
+- **Mode DCC** : image depuis `DCCIcons[cls][index]`, clic pour cycle, `cursor: pointer`
+- **Mode Red Box** : image unique depuis `DDRedBoxIcons[cls]`, pas de clic
+- Mise a jour des hidden inputs a chaque changement → sauvegarde automatique via `scheduleSave`
+
+### Bugs corriges (portrait)
+
+- **SyntaxError `})`** en trop : reste du `forEach` supprime lors du refactoring
+- **Specificite CSS** : `.team-table td` (0,1,1) ecrasait `.char-name` (0,1,0) → correction avec `.team-table .char-name` (0,2,0)
+- **Portrait non affiche au premier chargement** : retry si les icones ne sont pas encore chargees
+- **Portrait casse pour personnages existants** : querySelector scope sur `sheetBody` au lieu du document entier
+- **Valeurs vides sauvegardees en base** : hidden inputs avec default values dans le template `v('portrait_source', 'dcc')`
+
+### Onglet Equipe — portraits et mise en page
+
+- Ajout d'un `<img class="team-portrait">` dans la colonne Classe de chaque ligne de personnage
+- Portrait charge depuis `DCCIcons` ou `DDRedBoxIcons` selon le `portrait_source` sauvegarde
+- **CSS equipe** :
+  - `.char-class` : `display: flex; align-items: center` (puis rollback vers inline + `vertical-align: middle`)
+  - `.team-portrait` : 50px (desktop), 40px (mobile), `border-radius: 50%`
+  - `.team-table` : `table-layout: fixed` pour controler les proportions
+  - Colonnes : Nom 20%, Classe 28%, Init 10%, AC 10%, PV 10%, Init.combat 10%, Tour 12%
+  - `.team-table tbody tr` : hauteur fixe 50px (desktop), 40px (mobile)
+  - `.char-name` : font-size 28px, `var(--font-body)`
+  - Portrait 100% de la hauteur de la ligne
+
+### UI — utilisateur et import/export
+
+- **Menu utilisateur** : avatar (premiere lettre du pseudo) + dropdown menu (fichier de reference fabled-lands)
+- **Export global** : `exportAllCharacters()` — telecharge JSON avec version, date, tous les personnages
+- **Import global** : `importAllCharacters()` — selection fichier, validation, confirmation danger, remplacement total
+- **Changement de mot de passe** : modal 3 champs (ancien/nouveau/confirmer), erreurs inline en rouge, validation coté client et serveur
+- **Suppression de compte** : `showDeleteAccountModal()` → API `delete_account` → supprime personnages, user, session
+- **Console.error supprime** : la fonction `api()` ne log plus en console (erreurs toujours jettees et gerees par les appelants)
+
+### Fichiers modifies (22 septembre)
+
+| Fichier | Actions |
+|---------|---------|
+| `index.html` | Ajout scripts `dcc-icons.js` et `dd-red-box-icons.js`, menu utilisateur dropdown |
+| `script.js` | `initPortraits()`, export/import global, delete account, password change modal, console.error retire |
+| `style.css` | Portrait (area, img, switch), equipe (portraits, colonnes, hauteur lignes, char-name 28px), user-menu dropdown |
+| `classes/bloc_commun.js` | Ajout portrait-area (hidden inputs + img + switch) |
+| `classes/equipe.js` | Ajout icone portrait dans colonne Classe |
+| `dcc-icons.js` | Cree (20 tokens DCC) |
+| `dd-red-box-icons.js` | Cree (7 icons Red Box) |
+| `api/auth.php` | Ajout `delete_account`, `change_password` verifie ancien MDP |
+| `README.md` | Mis a jour (portraits, icones, auth, structure, API) |

@@ -5,7 +5,7 @@ $outDir = Join-Path $deployDir 'dcc-sheet'
 if (Test-Path $outDir) { Remove-Item $outDir -Recurse -Force }
 New-Item -ItemType Directory -Path $outDir | Out-Null
 
-$excludeDirs = @('.git','captures','deploy','data')
+$excludeDirs = @('.git','captures','deploy','data', 'exemples')
 $excludeFiles = @('*.log','.gitignore', '.DS_Store','Thumbs.db','*.md','TODO.md','BUGFIX.md','JOURNAL.md','PLAN.md','PLAN_DB.md','PROMPT.md','README.md','LICENSE','DCC_Fiche_*','maquette_*')
 
 $allFiles = Get-ChildItem -Path $src -Recurse -File | Where-Object {

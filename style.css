@@ -195,36 +195,100 @@ ul, ol {
   background: rgba(255, 255, 255, 0.1);
 }
 
+/* --- User Avatar & Dropdown --- */
+
+.user-avatar-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .auth-avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
   background: var(--tab-active);
   color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: 2px solid var(--border);
+  cursor: pointer;
   font-family: var(--font-heading);
   font-weight: 800;
   font-size: 14px;
   text-transform: uppercase;
-  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
-.auth-pseudo {
+.auth-avatar:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 3px 3px 0 var(--yellow);
+}
+
+.user-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 240px;
+  background: var(--paper);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 4px 4px 0 var(--yellow);
+  z-index: 200;
+  overflow: hidden;
+}
+
+.user-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  background: transparent;
+  color: var(--ink);
+  border: none;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.user-menu button:last-child {
+  border-bottom: none;
+}
+
+.user-menu button:hover {
+  background: var(--hover-bg);
+}
+
+.user-menu button.danger {
+  color: var(--tab-active);
+}
+
+.user-menu button.danger:hover {
+  background: var(--tab-active);
+  color: #fff;
+}
+
+.user-menu hr {
+  margin: 4px 0;
+  border: none;
+  border-top: 1px solid var(--line);
+}
+
+.menu-welcome {
+  padding: 10px 16px;
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: 13px;
-}
-
-.auth-logout {
-  padding: 4px 10px;
-  font-size: 11px;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: var(--header-text);
-  cursor: pointer;
-  border-radius: var(--radius-sm);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
 }
 
 /* --------------------------------------------------------------------------
@@ -1813,20 +1877,22 @@ input[type="number"]::-webkit-outer-spin-button {
     font-size: 16px;
   }
 
-  #auth-guest .auth-btn,
-  #auth-logged .auth-logout {
+  #auth-guest .auth-btn {
     padding: 4px 10px;
     font-size: 11px;
-  }
-
-  .auth-pseudo {
-    display: none;
   }
 
   .auth-avatar {
     width: 28px;
     height: 28px;
     font-size: 12px;
+  }
+
+  .user-menu {
+    right: 0;
+    left: auto;
+    min-width: 0;
+    max-width: calc(100vw - 1rem);
   }
 
   .tab-bar {

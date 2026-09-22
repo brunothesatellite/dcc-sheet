@@ -35,10 +35,19 @@
     <a href="login.php" class="auth-btn">Connexion</a>
     <a href="register.php" class="auth-btn auth-btn-outline">Inscription</a>
   </div>
-  <div id="auth-logged" style="display:none;display:none;align-items:center;gap:8px">
-    <div class="auth-avatar" id="auth-avatar"></div>
-    <span class="auth-pseudo" id="auth-pseudo"></span>
-    <button class="auth-logout" id="btn-logout">Deconnexion</button>
+  <div id="auth-logged" class="user-avatar-container" style="display:none">
+    <button class="auth-avatar" id="auth-avatar" type="button"
+            aria-label="Menu utilisateur" aria-expanded="false"></button>
+    <div class="user-menu" id="user-menu" hidden>
+      <div class="menu-welcome" id="user-welcome"></div>
+      <button data-action="export-all">Exporter tout (JSON)</button>
+      <button data-action="import-all">Importer tout (JSON)</button>
+      <hr>
+      <button data-action="change-password">Changer le mot de passe</button>
+      <button data-action="delete-account" class="danger">Supprimer le compte</button>
+      <hr>
+      <button data-action="logout">Deconnexion</button>
+    </div>
   </div>
 </header>
 

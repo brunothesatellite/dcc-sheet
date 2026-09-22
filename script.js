@@ -241,16 +241,16 @@
   function renderAuthUI() {
     var guestEl = $('#auth-guest');
     var loggedEl = $('#auth-logged');
+    var avatar = $('#auth-avatar');
+    var welcome = $('#user-welcome');
 
     if (!guestEl || !loggedEl) return;
 
     if (currentUser) {
       guestEl.style.display = 'none';
       loggedEl.style.display = 'flex';
-      var avatar = $('.auth-avatar', loggedEl);
-      var pseudo = $('.auth-pseudo', loggedEl);
       if (avatar) avatar.textContent = currentUser.pseudo.charAt(0).toUpperCase();
-      if (pseudo) pseudo.textContent = currentUser.pseudo;
+      if (welcome) welcome.textContent = 'Bienvenue ' + currentUser.pseudo;
     } else {
       guestEl.style.display = 'flex';
       loggedEl.style.display = 'none';
@@ -263,6 +263,191 @@
     } catch (e) { /* ignore */ }
     currentUser = null;
     window.location.href = 'login.php';
+  }
+
+  /* --- User Menu Actions --- */
+
+  async function exportAllCharacters() {
+    try {
+      var res = await api('characters.php', { method: 'GET', data: { action: 'list' } });
+      var characters = res.characters || [];
+      if (characters.length === 0) {
+        await showModal({ title: 'Aucun personnage', message: 'Vous n\'avez aucun personnage a exporter.', type: 'alert' });
+        return;
+      }
+
+      var fullCharacters = [];
+      for (var i = 0; i < characters.length; i++) {
+        var c = characters[i];
+        var detail = await api('characters.php', { method: 'GET', data: { action: 'get', id: c.id } });
+        if (detail.character) {
+          fullCharacters.push({
+            name: detail.character.name,
+            class: detail.character.class,
+            is_active: detail.character.is_active,
+            data: JSON.parse(detail.character.data || '{}'),
+          });
+        }
+      }
+
+      var exportObj = {
+        version: 1,
+        exported_at: new Date().toISOString(),
+        characters: fullCharacters,
+      };
+
+      var json = JSON.stringify(exportObj, null, 2);
+      var blob = new Blob([json], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'dcc-persos-' + new Date().toISOString().slice(0, 10) + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+
+      showToast('Export reussi (' + fullCharacters.length + ' persos)', 'success');
+    } catch (err) {
+      await showModal({ title: 'Erreur', message: 'Erreur lors de l\'export : ' + err.message, type: 'alert' });
+    }
+  }
+
+  async function importAllCharacters() {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+
+    input.addEventListener('change', async function (e) {
+      var file = e.target.files[0];
+      if (!file) return;
+
+      try {
+        var text = await file.text();
+        var obj = JSON.parse(text);
+
+        if (!obj.characters || !Array.isArray(obj.characters) || obj.characters.length === 0) {
+          await showModal({ title: 'Format invalide', message: 'Le fichier JSON ne contient aucun personnage valide.', type: 'alert' });
+          return;
+        }
+
+        var valid = obj.characters.every(function (c) { return c.class; });
+        if (!valid) {
+          await showModal({ title: 'Format invalide', message: 'Un ou plusieurs personnages n\'ont pas de classe.', type: 'alert' });
+          return;
+        }
+
+        var confirmed = await showModal({
+          title: 'Importer ' + obj.characters.length + ' personnage(s) ?',
+          message: 'Cela remplacera tous vos personnages actuels. Cette action est irreversible.',
+          type: 'confirm',
+          danger: true,
+        });
+
+        if (!confirmed) return;
+
+        var existing = await api('characters.php', { method: 'GET', data: { action: 'list' } });
+        for (var i = 0; i < (existing.characters || []).length; i++) {
+          await api('characters.php', { method: 'POST', body: { action: 'delete', id: existing.characters[i].id } });
+        }
+
+        for (var j = 0; j < obj.characters.length; j++) {
+          var c = obj.characters[j];
+          var res = await api('characters.php', {
+            method: 'POST',
+            body: { action: 'create', class: c.class, name: c.name || 'Importe' },
+          });
+          if (res.character) {
+            await saveCharacter(res.character.id, c.data || {}, c.name);
+          }
+        }
+
+        showToast('Import reussi (' + obj.characters.length + ' persos)', 'success');
+        await switchTab(activeTab);
+      } catch (err) {
+        await showModal({ title: 'Erreur', message: 'Erreur lors de l\'import : ' + err.message, type: 'alert' });
+      }
+    });
+
+    input.click();
+  }
+
+  function showChangePasswordModal() {
+    var overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = '<div class="modal-box">'
+      + '<div class="modal-title">Changer le mot de passe</div>'
+      + '<div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">'
+      + '<input type="password" id="cp-old" placeholder="Mot de passe actuel" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;background:var(--card-bg);color:var(--ink)">'
+      + '<input type="password" id="cp-new" placeholder="Nouveau mot de passe (6+ car.)" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;background:var(--card-bg);color:var(--ink)">'
+      + '</div>'
+      + '<div class="modal-actions" style="margin-top:16px">'
+      + '<button class="modal-btn modal-btn-cancel">Annuler</button>'
+      + '<button class="modal-btn modal-btn-ok">Valider</button>'
+      + '</div>'
+      + '</div>';
+
+    document.body.appendChild(overlay);
+
+    overlay.querySelector('.modal-btn-cancel').addEventListener('click', function () {
+      overlay.remove();
+    });
+
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) overlay.remove();
+    });
+
+    overlay.querySelector('.modal-btn-ok').addEventListener('click', async function () {
+      var oldPwd = overlay.querySelector('#cp-old').value;
+      var newPwd = overlay.querySelector('#cp-new').value;
+
+      if (!oldPwd || !newPwd) {
+        await showModal({ title: 'Champs requis', message: 'Veuillez remplir les deux champs.', type: 'alert' });
+        return;
+      }
+
+      if (newPwd.length < 6) {
+        await showModal({ title: 'Trop court', message: 'Le nouveau mot de passe doit faire au moins 6 caracteres.', type: 'alert' });
+        return;
+      }
+
+      try {
+        var res = await api('auth.php', {
+          method: 'POST',
+          body: { action: 'change_password', old_password: oldPwd, new_password: newPwd },
+        });
+        if (res.ok) {
+          overlay.remove();
+          showToast('Mot de passe change', 'success');
+        } else {
+          await showModal({ title: 'Erreur', message: res.error || 'Erreur lors du changement de mot de passe.', type: 'alert' });
+        }
+      } catch (err) {
+        await showModal({ title: 'Erreur', message: err.message, type: 'alert' });
+      }
+    });
+  }
+
+  async function showDeleteAccountModal() {
+    var confirmed = await showModal({
+      title: 'Supprimer le compte ?',
+      message: 'Toutes vos donnees seront perdues. Cette action est irreversible.',
+      type: 'confirm',
+      danger: true,
+    });
+
+    if (!confirmed) return;
+
+    try {
+      var res = await api('auth.php', { method: 'POST', body: { action: 'delete_account' } });
+      if (res.ok) {
+        currentUser = null;
+        window.location.href = 'login.php';
+      } else {
+        await showModal({ title: 'Erreur', message: res.error || 'Erreur lors de la suppression du compte.', type: 'alert' });
+      }
+    } catch (err) {
+      await showModal({ title: 'Erreur', message: err.message, type: 'alert' });
+    }
   }
 
   /* =========================================================================
@@ -1021,9 +1206,45 @@
       });
     }
 
-    var logoutBtn = $('.auth-logout');
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', logout);
+    var avatarBtn = $('#auth-avatar');
+    var userMenu = $('#user-menu');
+
+    if (avatarBtn && userMenu) {
+      avatarBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var ouvert = !userMenu.hidden;
+        userMenu.hidden = ouvert;
+        avatarBtn.setAttribute('aria-expanded', String(!ouvert));
+      });
+
+      userMenu.addEventListener('click', function (e) {
+        e.stopPropagation();
+      });
+
+      document.addEventListener('click', function () {
+        userMenu.hidden = true;
+        avatarBtn.setAttribute('aria-expanded', 'false');
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          userMenu.hidden = true;
+          avatarBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      userMenu.querySelectorAll('button[data-action]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          userMenu.hidden = true;
+          avatarBtn.setAttribute('aria-expanded', 'false');
+          var action = btn.getAttribute('data-action');
+          if (action === 'logout') logout();
+          else if (action === 'export-all') exportAllCharacters();
+          else if (action === 'import-all') importAllCharacters();
+          else if (action === 'change-password') showChangePasswordModal();
+          else if (action === 'delete-account') showDeleteAccountModal();
+        });
+      });
     }
 
     checkAuth().then(async function () {

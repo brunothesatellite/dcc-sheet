@@ -79,4 +79,17 @@ if ($action === 'change_password') {
     jsonResponse(['ok' => true]);
 }
 
+if ($action === 'delete_account') {
+    $db = getDB();
+    $user = requireLogin($db);
+    $stmt = $db->prepare('DELETE FROM characters WHERE user_id = :uid');
+    $stmt->bindValue(':uid', $user['id'], SQLITE3_INTEGER);
+    $stmt->execute();
+    $stmt = $db->prepare('DELETE FROM users WHERE id = :id');
+    $stmt->bindValue(':id', $user['id'], SQLITE3_INTEGER);
+    $stmt->execute();
+    session_destroy();
+    jsonResponse(['ok' => true]);
+}
+
 jsonError('Action inconnue');

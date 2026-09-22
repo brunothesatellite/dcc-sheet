@@ -868,8 +868,8 @@
      10. Sheet View
      ======================================================================== */
 
-  function initPortraits(cls, charId) {
-    var area = document.querySelector('.portrait-area');
+  function initPortraits(cls, charId, container) {
+    var area = container.querySelector('.portrait-area');
     if (!area) return;
 
     var img = area.querySelector('[data-portrait-img]');
@@ -879,8 +879,13 @@
     var hiddenIndex = area.querySelector('input[data-key$="-portrait_index"]');
     if (!img || !checkbox || !hiddenSource || !hiddenIndex) return;
 
-    var icons = window.DCCIcons || {};
-    var rbIcons = window.DDRedBoxIcons || {};
+    var icons = window.DCCIcons;
+    var rbIcons = window.DDRedBoxIcons;
+
+    if (!icons || !rbIcons) {
+      setTimeout(function () { initPortraits(cls, charId, container); }, 100);
+      return;
+    }
 
     var source = hiddenSource.value || 'dcc';
     var index = parseInt(hiddenIndex.value, 10) || 0;
@@ -942,7 +947,7 @@
     viewSheet.appendChild(sheetBody);
 
     await loadClassModule(cls, sheetBody, charData);
-    initPortraits(cls, charData.id);
+    initPortraits(cls, charData.id, sheetBody);
     bindAutoSave(cls, charData.id);
   }
 

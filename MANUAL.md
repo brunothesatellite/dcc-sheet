@@ -318,16 +318,16 @@ Chaque classe ajoute une page de capacités puis une section **Notes** :
 | Classe | Sections propres |
 |---|---|
 | **Clerc** | Dieu, Test d'incant., Risque de défaveur, rappel des pouvoirs, table **Imposition des mains** (décalage d'alignement, colonnes 12/14/20/22+), **grille de sorts** 3 × 7 |
-| **Elfe** | Test d'incantation, Familier, Patron(s), Corruption, **Traits elfiques** (rappel), Autres notes, **table de sorts** (2 sorts de patron figés en lignes 1-2 + 5 lignes libres : nom, niveau, test, effet mercuriel) |
+| **Elfe** | Test d'incantation, Familier, Patron(s), Corruption, **Traits elfiques** (rappel), Autres notes, **liste de sorts dynamique** (2 sorts de patron figés en lignes 1-2, lignes libres à partir de la 3e, même présentation que le Mage : § 6.3) |
 | **Guerrier** | Coup critique sur, Arme soumise au mod. de Chance, Hauts faits d'armes (dé) |
 | **Halfelin** | Infravision, Discrétion, Porte-bonheur, Petite taille/lenteur + encadré **Combat à deux armes** (d16+d16, crit sur 16, etc.) |
 | **Mage** | Test d'incantation, Familier, Patron(s), Corruption, mod. de chance, **liste de sorts dynamique** (§ 6.3) |
 | **Nain** | Infravision, Compétences souterraines, Arme Chance, Hauts faits d'arme, Coup de bouclier |
 | **Voleur** | Grille de **14 compétences** (Dé de chance, Falsifier documents, Attaque sournoise, Se déguiser, Déplacement silencieux, Lire langues inconnues, Se cacher dans l'ombre, Utiliser des poisons, Vol à la tire, Incant. parchemin, Escalade parois abruptes, Crocheter les serrures, Détecter les pièges, Désamorcer les pièges) + Argot des voleurs |
 
-### 6.3 Gérer les sorts du Mage (liste dynamique)
+### 6.3 Gérer les sorts du Mage et de l'Elfe (liste dynamique)
 
-La table de sorts du Mage s'adapte au nombre de sorts appris.
+Les tables de sorts du Mage et de l'Elfe s'adaptent au nombre de sorts appris.
 
 <img src="captures/mage-sorts.png" alt="Table des sorts du mage avec sorts numérotés, niveau, test, effet et bouton de suppression rouge" width="420">
 
@@ -343,7 +343,11 @@ La table de sorts du Mage s'adapte au nombre de sorts appris.
 2. Si le sort contient déjà du texte, confirmez dans la popup **« Supprimer ce sort ? »** (bouton **Supprimer**). Une ligne vide est supprimée sans confirmation.
 3. Les sorts sont **renumérotés automatiquement** ; il reste toujours au moins une ligne vide.
 
-> Les autres classes (Clerc, Elfe) disposent de grilles/tables de sorts à **nombre fixe** : il suffit de remplir les cases.
+**Côté Elfe**
+- Les 2 premières lignes sont **figées** : *Lier un patron* et *Invoquer un Patron* (2 lignes chacune, comme les autres sorts) — elles n'ont ni bouton ✕ ni champs modifiables, à l'exception du blanc **`___ /jour`** d'*Invoquer un Patron*.
+- Les lignes libres commencent à la **3e position** : les sorts ajoutés/supprimés sont numérotés à partir de 3.
+
+> Les autres classes (Clerc) disposent de grilles de sorts à **nombre fixe** : il suffit de remplir les cases.
 
 ---
 

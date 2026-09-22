@@ -523,3 +523,41 @@ Chaque fiche reecrite pour etre fidele aux PDF/screencaps :
 | `MANUAL.md` | Ligne Elfe du tableau § 6.2 |
 | `README.md` | Ligne Elfe des fonctionnalites |
 | `JOURNAL.md` | Cette entree |
+
+---
+
+## Date : 22 septembre 2026 (suite)
+
+---
+
+### Elfe — table de sorts dynamique, présentation identique au Mage
+
+- **Objectif** : même présentation et même moteur que `mage.js` — 2 lignes par sort (haut : `#` rowspan 2 / Nom en gras / Niveau / Test / ✕ ; bas : effet & notes en `colspan 3`), ajout/suppression/re-numérotation dynamiques.
+- **En-tête** : calqué sur le Mage (`# | Nom du sort | Niveau | Test | col. ✕ vide`) — le libellé de colonne « Effet mercuriel & Notes » disparaît (comme sur le Mage).
+- **2 paires fixes** en format 2 lignes (sans `data-spell`, sans ✕ → doublement intouchables) :
+  - `Lier un patron` (ligne d'effet vide figée) ;
+  - `Invoquer un Patron` (ligne d'effet = `( <input patron_invoc_nb> /jour)`, seul champ éditable des fixes).
+- **Paires libres dynamiques** (copie de la logique Mage, offset `FIXED = 2`) :
+  - clés `sort_nom|niveau|test|effet_{n}` conservées → auto-save → DB + export JSON inchangés ;
+  - détection des indices existants : regex `sort_(nom|niveau|test|effet)_(\d+)` avec **n ≥ 3** et valeur non vide (données legacy lignes 1-2 ignorées, pas de croissance à chaque rechargement) ;
+  - état initial : paires **3** et **4** si aucune donnée ; toujours 1 paire vide en fin ;
+  - `getNextIndex()` = `max(indices, 2) + 1` ; `renumber()` = position + 2, ciblé `tr[data-spell] .row-num` (les fixes ne bougent pas) ;
+  - `removeEmptyTrailing()` : purge les paires vides de fin en gardant **≥ 1** paire libre (compteur live) ;
+  - `deleteSpell()` : confirmation `window.showModal` si remplie, direct si vide, purge + garde-fou ≥ 1 paire, `renumber`, re-bind auto-save + `scheduleSave` ;
+  - `addSpell()` + délégation `tbody` sur `.btn-spell-del` + bouton **+ Ajouter un sort** ;
+  - IDs scopés par perso : `#elfe-spells-{id}`, `#btn-spell-add-{id}` (pas de conflit multi-onglets) ;
+  - non porté : `getFilledIndices()` de mage.js (code mort).
+- **CSS** : réutilisation pure (`.row-del`, `.btn-spell-del`, `.btn-spell-add`, `.sort-name`, `.sort-notes`) + `.sort-fixed` / `.patron-effet` /`.patron-jours` existants.
+- **Docs** : `MANUAL.md` § 6.2 (ligne Elfe) + § 6.3 rebaptisé « Mage **et Elfe** » avec encadré « Côté Elfe » et note Clerc seule en nombre fixe ; `README.md` ligne Elfe ; `TODO.md` demande « Elfe : sorts dynamique » passée à fait.
+
+### Fichiers modifies (22 septembre suite)
+
+| Fichier | Actions |
+|---------|---------|
+| `classes/elfe.js` | Table dynamique format Mage (2 lignes/sort, fixes en 2 lignes, moteur add/delete/renumber) |
+| `MANUAL.md` | § 6.2 ligne Elfe, § 6.3 Mage et Elfe, note classes à grille fixe |
+| `README.md` | Ligne Elfe (liste dynamique) |
+| `TODO.md` | Demande Elfe marquée faite |
+| `JOURNAL.md` | Cette entree |
+
+Verifs : `node --check classes/elfe.js` OK ; styles `.btn-spell-add` / `.btn-spell-del` / `.row-del` presents dans `style.css`.

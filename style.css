@@ -1197,6 +1197,7 @@ input[type="number"]::-webkit-outer-spin-button {
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .combat-ext-field {
@@ -1231,11 +1232,12 @@ input[type="number"]::-webkit-outer-spin-button {
   align-items: center;
   margin-top: 10px;
   gap: 6px;
+  width: 280px;
 }
 
 .portrait-img {
-  width: 120px;
-  height: 120px;
+  width: 280px;
+  height: 280px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--border);
@@ -2154,11 +2156,12 @@ input[type="number"]::-webkit-outer-spin-button {
 
   .portrait-area {
     margin-top: 6px;
+    width: 160px;
   }
 
   .portrait-img {
-    width: 80px;
-    height: 80px;
+    width: 160px;
+    height: 160px;
   }
 
   .portrait-source-label {

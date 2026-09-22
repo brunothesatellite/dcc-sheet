@@ -919,7 +919,6 @@
       img.src = list[index];
       scheduleSave(cls, charId);
     });
-    });
   }
 
   async function openSheet(cls, charData) {

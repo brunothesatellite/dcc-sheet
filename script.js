@@ -219,7 +219,6 @@
 
       return json;
     } catch (err) {
-      console.error('[API]', endpoint, err);
       throw err;
     }
   }
@@ -372,13 +371,21 @@
   }
 
   function showChangePasswordModal() {
+    var inputStyle = 'padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;background:var(--card-bg);color:var(--ink)';
+    var labelStyle = 'font-family:var(--font-heading);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted)';
+
     var overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
     overlay.innerHTML = '<div class="modal-box">'
       + '<div class="modal-title">Changer le mot de passe</div>'
-      + '<div style="display:flex;flex-direction:column;gap:12px;margin-top:12px">'
-      + '<input type="password" id="cp-old" placeholder="Mot de passe actuel" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;background:var(--card-bg);color:var(--ink)">'
-      + '<input type="password" id="cp-new" placeholder="Nouveau mot de passe (6+ car.)" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;background:var(--card-bg);color:var(--ink)">'
+      + '<div id="cp-error" style="display:none;padding:8px 12px;margin-bottom:4px;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:12px;background:rgba(226,59,46,0.1);color:var(--tab-active);border:1px solid var(--tab-active)"></div>'
+      + '<div style="display:flex;flex-direction:column;gap:14px;margin-top:12px">'
+      + '<div><label style="' + labelStyle + '">Mot de passe actuel</label>'
+      + '<input type="password" id="cp-old" autocomplete="current-password" style="' + inputStyle + ';width:100%;margin-top:4px"></div>'
+      + '<div><label style="' + labelStyle + '">Nouveau mot de passe</label>'
+      + '<input type="password" id="cp-new" autocomplete="new-password" style="' + inputStyle + ';width:100%;margin-top:4px"></div>'
+      + '<div><label style="' + labelStyle + '">Confirmer le nouveau mot de passe</label>'
+      + '<input type="password" id="cp-confirm" autocomplete="new-password" style="' + inputStyle + ';width:100%;margin-top:4px"></div>'
       + '</div>'
       + '<div class="modal-actions" style="margin-top:16px">'
       + '<button class="modal-btn modal-btn-cancel">Annuler</button>'
@@ -388,6 +395,18 @@
 
     document.body.appendChild(overlay);
 
+    var errorEl = overlay.querySelector('#cp-error');
+
+    function showError(msg) {
+      errorEl.textContent = msg;
+      errorEl.style.display = 'block';
+    }
+
+    function clearError() {
+      errorEl.style.display = 'none';
+      errorEl.textContent = '';
+    }
+
     overlay.querySelector('.modal-btn-cancel').addEventListener('click', function () {
       overlay.remove();
     });
@@ -396,17 +415,34 @@
       if (e.target === overlay) overlay.remove();
     });
 
+    overlay.querySelectorAll('input').forEach(function (input) {
+      input.addEventListener('input', clearError);
+    });
+
     overlay.querySelector('.modal-btn-ok').addEventListener('click', async function () {
       var oldPwd = overlay.querySelector('#cp-old').value;
       var newPwd = overlay.querySelector('#cp-new').value;
+      var confirmPwd = overlay.querySelector('#cp-confirm').value;
 
-      if (!oldPwd || !newPwd) {
-        await showModal({ title: 'Champs requis', message: 'Veuillez remplir les deux champs.', type: 'alert' });
+      clearError();
+
+      if (!oldPwd || !newPwd || !confirmPwd) {
+        showError('Veuillez remplir les 3 champs.');
         return;
       }
 
       if (newPwd.length < 6) {
-        await showModal({ title: 'Trop court', message: 'Le nouveau mot de passe doit faire au moins 6 caracteres.', type: 'alert' });
+        showError('Le nouveau mot de passe doit faire au moins 6 caracteres.');
+        return;
+      }
+
+      if (newPwd !== confirmPwd) {
+        showError('Les deux nouveaux mots de passe ne correspondent pas.');
+        return;
+      }
+
+      if (newPwd === oldPwd) {
+        showError('Le nouveau mot de passe doit etre different de l\'ancien.');
         return;
       }
 
@@ -419,12 +455,14 @@
           overlay.remove();
           showToast('Mot de passe change', 'success');
         } else {
-          await showModal({ title: 'Erreur', message: res.error || 'Erreur lors du changement de mot de passe.', type: 'alert' });
+          showError(res.error || 'Mot de passe actuel incorrect.');
         }
       } catch (err) {
-        await showModal({ title: 'Erreur', message: err.message, type: 'alert' });
+        showError(err.message);
       }
     });
+
+    overlay.querySelector('#cp-old').focus();
   }
 
   async function showDeleteAccountModal() {

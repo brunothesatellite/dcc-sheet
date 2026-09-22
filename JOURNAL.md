@@ -571,3 +571,40 @@ Verifs : `node --check classes/elfe.js` OK ; styles `.btn-spell-add` / `.btn-spe
 - **Lignes fixes Elfe** : meme structure (`row-del rowspan=2` vide, sans bouton) pour rester alignees avec les paires libres.
 - **CSS** : `vertical-align: middle` explicite sur `.dtable td.row-del`.
 - Bonus mage : `_spellRowHTML` (sorts ajoutes dynamiquement) gagne la classe `sort-name` → nom en gras comme les lignes initiales.
+
+---
+
+## Date : 22 septembre 2026 (suite 2)
+
+---
+
+### Clerc — liste des sorts dynamique sur 2 colonnes
+
+- **Objectif** : remplacer la grille fixe **3 colonnes × 7 lignes** (21 champs `sort_{col}_{row}`) par une liste **2 colonnes**, lignes visuellement distinctes, dynamique comme le Mage (ajout/suppression/renuméro/auto-save DB + JSON).
+- **Validation utilisateur** : champ unique « Nom n° page » par sort ; +/✕ agissent sur **1 sort (cellule)**.
+- **Structure** (`classes/clerc.js`) :
+  - cellule `.sort-cell` = `n° + input + ✕`, id `#clerc-spells-{id}`, bouton `#btn-spell-add-{id}` ;
+  - **clés nouvelles** `sort_{n}` (n ≥ 1) → auto-save générique → colonne `data` + exports, aucun changement BDD/API ;
+  - **migration au rendu** : si clés `sort_{n}` existent (valeurs non vides compactées) → elles priment ; sinon replat legacy col1(1-7) → col2 → col3 (ordre de lecture conservé, trous compactés) ; clés legacy purgées au 1er save ; imports d'anciens JSON rétrocompatibles ;
+  - état initial : **2 cellules vides** (1 ligne) ; `ensureTrailingEmpty()` garantit **≥ 1 cellule vide en fin** après chaque mutation.
+- **Moteur Mage copié** : `renumber()` (affichage 1..n, clés/data-spell figés à la création comme le Mage), `getNextIndex()` = max+1, `removeEmptyTrailing()` (≥ 1), `deleteSpell()` (confirm `showModal` si rempli, direct si vide, purge + garde-fou + renuméro + re-bind auto-save), `addSpell()`, délégation `grid` sur `.btn-spell-del`.
+- **CSS** (`style.css`) :
+  - `.sorts-grid` : `1fr 1fr`, `gap: 1.5px` + fond `--ink` + bordure `1.5px` → **traites de grille nettes** ;
+  - `.sort-cell` (flex, fond `--field-bg`) + **zébrage** `:nth-child(4n), :nth-child(4n+3)` → lignes paires en `--paper` (distinction visuelle des lignes) ;
+  - `.sort-num` discret, input sans bordure (focus translucide), `.btn-spell-del` réutilisé à droite ;
+  - suppression des règles legacy `.sort-col` (bloc orphelin ~l. 2320 inclus).
+- **Table *Imposition des mains* et reste de la fiche inchangés.**
+- **Docs** : `MANUAL.md` § 6.2 ligne Clerc + § 6.3 rebaptisé « Mage, Elfe **et Clerc** » avec encadré « Côté Clerc » ; `README.md` ligne Clerc ; `TODO.md` « Clerc : sorts dynamique » → faite.
+
+### Fichiers modifies (22 septembre suite 2)
+
+| Fichier | Actions |
+|---------|---------|
+| `classes/clerc.js` | Grille dynamique 2 colonnes (migration legacy + moteur Mage) |
+| `style.css` | `.sorts-grid`/`.sort-cell`/`.sort-num` + zébrage, suppression `.sort-col` legacy |
+| `MANUAL.md` | § 6.2 ligne Clerc, § 6.3 Mage/Elfe/Clerc + « Côté Clerc » |
+| `README.md` | Ligne Clerc (liste dynamique) |
+| `TODO.md` | Demande Clerc marquée faite |
+| `JOURNAL.md` | Cette entree |
+
+Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts → 5 lignes, ajout/suppression + confirmation, ≥ 1 vide, renuméro, persistance DB/JSON).

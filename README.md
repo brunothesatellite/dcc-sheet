@@ -26,7 +26,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 
 ### Fiches de personnage
 - **Commun** : Identite (Nom, Titre, Metier, Alignement, Mouvement, Niveau, PX), Defense (CA, PV/Max avec **Des de vie**), Combat (Initiative, Des d'action, Attaque, Critique), 6 carac. avec modif. et jets de sauvegarde, Combat etendu (CAC/Distance), **Portrait de classe** (DCC ou D&D Red Box), Equipement (Armes, Equipement, Tresor, Armure)
-- **Clerc** : Dieu, Incantation, Defaveur, Imposition des mains, Grille de sorts
+- **Clerc** : Dieu, Incantation, Defaveur, Imposition des mains, **Liste de sorts dynamique** (grille 2 colonnes, champ unique par sort, ajout/suppression avec confirmation, migration de l'ancienne grille 3 × 7)
 - **Elfe** : Incantation, Familier, Patron, Corruption, Traits elfiques, **Liste de sorts dynamique** comme le Mage (2 sorts de patron figés en lignes 1-2 : Lier un patron / Invoquer un Patron (___/jour) saisissable, lignes libres à partir de la 3e, ajout/suppression avec confirmation)
 - **Guerrier** : Coup critique, Arme Chance, Hauts faits d'armes
 - **Halfelin** : Infravision, Discretion, Porte-bonheur, Combat a deux armes

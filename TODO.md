@@ -12,4 +12,4 @@
 * Quand je modifie un texte, sauvegarder après une petite tempo (voir D:\VS Code\fabled-lands-sheet EN READONLY pour mécanisme de temporisation à la sauvgarde) pour ne pas matraquer la base de sauvegarde à chaque touche
 
 **EVOLUTIONS**
-* Clerc : rendre la liste des sorts dynamique
+* N/A

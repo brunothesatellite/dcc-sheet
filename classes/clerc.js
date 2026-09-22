@@ -2,9 +2,47 @@ if (!window.DCCModules) window.DCCModules = {};
 
 window.DCCModules.clerc = {
   render(container, charId, data) {
+    data = data || {};
     const v = (field, def = '') => data[field] ?? def;
     const k = (field) => `clerc-${charId}-${field}`;
     const bc = window.DCCModules.blocCommun;
+
+    // --- Spell values : migration grille legacy 3x7 -> liste plate ---
+    var maxNew = 0;
+    Object.keys(data).forEach(function (key) {
+      var m = key.match(/^sort_(\d+)$/);
+      if (m) maxNew = Math.max(maxNew, parseInt(m[1], 10));
+    });
+
+    var spellValues = [];
+    if (maxNew > 0) {
+      for (var n = 1; n <= maxNew; n++) {
+        var nv = data['sort_' + n];
+        if (typeof nv === 'string' && nv.trim() !== '') spellValues.push(nv);
+      }
+    } else {
+      for (var c = 1; c <= 3; c++) {
+        for (var r = 1; r <= 7; r++) {
+          var lv = data['sort_' + c + '_' + r];
+          if (typeof lv === 'string' && lv.trim() !== '') spellValues.push(lv);
+        }
+      }
+    }
+    if (spellValues.length === 0) spellValues.push('');
+    spellValues.push('');
+
+    function spellCell(n, val) {
+      return `
+        <div class="sort-cell" data-spell="${n}">
+          <span class="sort-num">${n}</span>
+          <input type="text" data-key="${k('sort_' + n)}" value="${val}" placeholder="Nom du sort">
+          <button type="button" class="btn-spell-del" data-del="${n}">&#10005;</button>
+        </div>`;
+    }
+
+    function cellsHTML() {
+      return spellValues.map(function (val, i) { return spellCell(i + 1, val); }).join('');
+    }
 
     container.innerHTML = bc.render(container, charId, 'clerc', data) + `
       <div class="sheet-page">
@@ -58,7 +96,7 @@ window.DCCModules.clerc = {
             <tr>
               <td>(oppose)</td>
               <td><input type="text" data-key="${k('impos_opp_12')}" value="${v('impos_opp_12', '1 de')}"></td>
-              <td><input type="text" data-key="${k('impos_opp_14')}" value="${v('impos_opp_14', '1 de')}"></td>
+              <td><input type="text" data-key="${k('impos_opp_14')}" value="${v('impos_opp_14', '1 des')}"></td>
               <td><input type="text" data-key="${k('impos_opp_20')}" value="${v('impos_opp_20', '2 des')}"></td>
               <td><input type="text" data-key="${k('impos_opp_22')}" value="${v('impos_opp_22', '3 des')}"></td>
             </tr>
@@ -66,35 +104,10 @@ window.DCCModules.clerc = {
         </table>
 
         <div class="section-bar">Sorts</div>
-        <div class="sorts-grid">
-          <div class="sort-col">
-            <input type="text" data-key="${k('sort_1_1')}" value="${v('sort_1_1')}">
-            <input type="text" data-key="${k('sort_1_2')}" value="${v('sort_1_2')}">
-            <input type="text" data-key="${k('sort_1_3')}" value="${v('sort_1_3')}">
-            <input type="text" data-key="${k('sort_1_4')}" value="${v('sort_1_4')}">
-            <input type="text" data-key="${k('sort_1_5')}" value="${v('sort_1_5')}">
-            <input type="text" data-key="${k('sort_1_6')}" value="${v('sort_1_6')}">
-            <input type="text" data-key="${k('sort_1_7')}" value="${v('sort_1_7')}">
-          </div>
-          <div class="sort-col">
-            <input type="text" data-key="${k('sort_2_1')}" value="${v('sort_2_1')}">
-            <input type="text" data-key="${k('sort_2_2')}" value="${v('sort_2_2')}">
-            <input type="text" data-key="${k('sort_2_3')}" value="${v('sort_2_3')}">
-            <input type="text" data-key="${k('sort_2_4')}" value="${v('sort_2_4')}">
-            <input type="text" data-key="${k('sort_2_5')}" value="${v('sort_2_5')}">
-            <input type="text" data-key="${k('sort_2_6')}" value="${v('sort_2_6')}">
-            <input type="text" data-key="${k('sort_2_7')}" value="${v('sort_2_7')}">
-          </div>
-          <div class="sort-col">
-            <input type="text" data-key="${k('sort_3_1')}" value="${v('sort_3_1')}">
-            <input type="text" data-key="${k('sort_3_2')}" value="${v('sort_3_2')}">
-            <input type="text" data-key="${k('sort_3_3')}" value="${v('sort_3_3')}">
-            <input type="text" data-key="${k('sort_3_4')}" value="${v('sort_3_4')}">
-            <input type="text" data-key="${k('sort_3_5')}" value="${v('sort_3_5')}">
-            <input type="text" data-key="${k('sort_3_6')}" value="${v('sort_3_6')}">
-            <input type="text" data-key="${k('sort_3_7')}" value="${v('sort_3_7')}">
-          </div>
+        <div class="sorts-grid" id="clerc-spells-${charId}">
+          ${cellsHTML()}
         </div>
+        <button type="button" class="btn-spell-add" id="btn-spell-add-${charId}">+ Ajouter un sort</button>
 
         <div class="section-bar">Notes</div>
         <div class="row">
@@ -104,6 +117,87 @@ window.DCCModules.clerc = {
         </div>
       </div>
     `;
+
+    // --- Dynamic spells logic (meme mecanique que le Mage) ---
+    var grid = container.querySelector('#clerc-spells-' + charId);
+    var addBtn = container.querySelector('#btn-spell-add-' + charId);
+
+    function renumber() {
+      var num = 1;
+      grid.querySelectorAll('.sort-cell .sort-num').forEach(function (el) {
+        el.textContent = num++;
+      });
+    }
+
+    function getNextIndex() {
+      var max = 0;
+      grid.querySelectorAll('.sort-cell').forEach(function (cell) {
+        var idx = parseInt(cell.getAttribute('data-spell'), 10);
+        if (idx > max) max = idx;
+      });
+      return max + 1;
+    }
+
+    function cellEmpty(cell) {
+      var input = cell.querySelector('input');
+      return !input || input.value.trim() === '';
+    }
+
+    function removeEmptyTrailing() {
+      while (grid.querySelectorAll('.sort-cell').length > 1) {
+        var cells = grid.querySelectorAll('.sort-cell');
+        var last = cells[cells.length - 1];
+        if (!cellEmpty(last)) break;
+        last.remove();
+      }
+    }
+
+    function ensureTrailingEmpty() {
+      var cells = grid.querySelectorAll('.sort-cell');
+      var last = cells[cells.length - 1];
+      if (last && cellEmpty(last)) return;
+      grid.insertAdjacentHTML('beforeend', spellCell(getNextIndex(), ''));
+    }
+
+    async function deleteSpell(cell) {
+      if (!cell) return;
+
+      if (!cellEmpty(cell)) {
+        var confirmed = await window.showModal({
+          title: 'Suppression',
+          message: 'Supprimer ce sort ?',
+          type: 'confirm',
+          okText: 'Supprimer',
+          danger: true,
+        });
+        if (!confirmed) return;
+      }
+
+      cell.remove();
+      removeEmptyTrailing();
+      ensureTrailingEmpty();
+      renumber();
+      window.bindAutoSave('clerc', charId);
+      window.scheduleSave('clerc', charId);
+    }
+
+    function addSpell() {
+      grid.insertAdjacentHTML('beforeend', spellCell(getNextIndex(), ''));
+      renumber();
+      window.bindAutoSave('clerc', charId);
+      window.scheduleSave('clerc', charId);
+    }
+
+    grid.addEventListener('click', function (e) {
+      var btn = e.target.closest('.btn-spell-del');
+      if (!btn) return;
+      e.preventDefault();
+      deleteSpell(btn.closest('.sort-cell'));
+    });
+
+    addBtn.addEventListener('click', function () {
+      addSpell();
+    });
   },
 
   collectData(container) {

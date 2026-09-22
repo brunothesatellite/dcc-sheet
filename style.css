@@ -1377,24 +1377,54 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .sorts-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 4px;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5px;
+  border: 1.5px solid var(--ink);
+  background: var(--ink);
 }
 
-.sort-col {
-  border: 1.5px solid var(--input-border);
+.sort-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 3px 8px;
   background: var(--field-bg);
-  min-height: 60px;
-  padding: 4px;
 }
 
-.sort-col input {
+.sort-cell:nth-child(4n),
+.sort-cell:nth-child(4n+3) {
+  background: var(--paper);
+}
+
+.sort-num {
+  flex: none;
+  min-width: 14px;
+  text-align: right;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.sort-cell input {
+  flex: 1;
+  min-width: 0;
   border: none;
   background: transparent;
   padding: 2px 0;
   font-size: 11px;
-  width: 100%;
-  margin-bottom: 2px;
+}
+
+.sort-cell input:focus {
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 3px;
+  outline: none;
+}
+
+.sort-cell .btn-spell-del {
+  flex: none;
+  margin-left: auto;
 }
 
 .sheet-page:nth-child(2) textarea,
@@ -2316,19 +2346,6 @@ input[type="number"]::-webkit-outer-spin-button {
 .combat-info li {
   margin-bottom: 2px;
 }
-
-.sorts-grid {
-    gap: 3px;
-  }
-
-  .sort-col {
-    min-height: 50px;
-    padding: 3px;
-  }
-
-  .sort-col input {
-    font-size: 10px;
-  }
 
   .btn-login,
   .btn-signup {

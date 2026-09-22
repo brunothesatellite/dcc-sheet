@@ -1,5 +1,5 @@
 **TODO**
-* N/A
+* Préciser dans le README.md comment déployer (build.bat et start.bat)
 
 **BUGS**
 *Critique*

@@ -452,3 +452,47 @@ Chaque fiche reecrite pour etre fidele aux PDF/screencaps :
 | `index.html` | Wrapper `sticky-header` |
 | `.opencode/skills/release/SKILL.md` | Cree |
 | `README.md` | Mis a jour |
+
+---
+
+## Date : 22 septembre 2026 (soir)
+
+---
+
+### Notes d'équipe en base + export/import global
+
+- **Objectif** : les notes de l'onglet Équipe sortent du `localStorage` pour être stockées en base et gérées par l'export/import global JSON.
+- **Base** (`api/db.php`) : colonne `users.team_notes TEXT NOT NULL DEFAULT ''` ajoutée au CREATE TABLE + `ALTER TABLE` protégé (try/catch) pour les bases existantes.
+- **API** (`api/auth.php`) :
+  - action `get_team_notes` (GET) → `{ok, notes}` ;
+  - action `save_team_notes` (POST `{notes}`) → `{ok}`, `requireLogin`, plafond 100 Ko ;
+  - action `check` enrichie avec `id` (nécessaire à la migration localStorage).
+- **Front** (`script.js`) :
+  - helpers `getTeamNotes()` / `saveTeamNotes()` ;
+  - `loadTeamNotesWithMigration()` : si notes serveur vides et clés locales non vides → poussée unique vers l'API puis purge des clés `dcc-equipe-notes-{id}` et `dcc-equipe-notes-undefined` (clé réellement utilisée avant cette évolution, `id` n'étant pas renseigné) ;
+  - export global : champ optionnel `team_notes` ajouté (pas de bump de `version`) ;
+  - import global : `team_notes` présent → remplacement ; absent → notes préservées (rétrocompatibilité) ;
+  - `loadEquipe()` charge les notes et les passe au module avec un callback de sauvegarde ;
+  - `showToast` exposé sur `window` (affichage d'erreur de sauvegarde des notes).
+- **Module** (`classes/equipe.js`) : signature `render(container, characters, onSavePV, initialNotes, onSaveNotes)` ; plus aucun accès `localStorage` ; debounce 600 ms et toast disquette conservés ; toast d'erreur si l'enregistrement échoue.
+- **Docs** : `MANUAL.md` (§ 2.3, § 4.6, § 8.4, § 9, § 10, annexe A), `README.md` (fonctionnalités + table API), cette entrée de journal.
+- **Tests** (serveur PHP éphémère, compte de test créé puis supprimé) :
+
+| Test | Résultat |
+|------|----------|
+| register + get_team_notes initial | `notes: ""` |
+| save_team_notes puis get | notes correctement renvoyées |
+| check | `logged_in: true`, `id` présent |
+| delete_account (avec la nouvelle colonne) | `ok: true` |
+| Syntaxe | `php -l` sur db.php/auth.php, `node --check` sur script.js/equipe.js : OK |
+
+### Fichiers modifies (22 septembre soir)
+
+| Fichier | Actions |
+|---------|---------|
+| `api/db.php` | Colonne `users.team_notes` + ALTER protege |
+| `api/auth.php` | Actions `get_team_notes` / `save_team_notes`, `check` + `id` |
+| `script.js` | Helpers notes, migration localStorage, export/import `team_notes`, loadEquipe, expose `showToast` |
+| `classes/equipe.js` | Notes via callback serveur (fin du localStorage) |
+| `MANUAL.md` | Notes serveur, export/import global, tableau local/serveur, depannage, annexe A |
+| `README.md` | Fonctionnalites Equipe + table API auth |

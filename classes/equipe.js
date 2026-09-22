@@ -1,7 +1,7 @@
 window.DCCModules = window.DCCModules || {};
 
 window.DCCModules.equipe = {
-  render(container, characters, onSavePV, userId) {
+  render(container, characters, onSavePV, initialNotes, onSaveNotes) {
     const CLASS_LABELS = {
       clerc: 'Clerc', elfe: 'Elfe', guerrier: 'Guerrier',
       halfelin: 'Halfelin', mage: 'Mage', nain: 'Nain', voleur: 'Voleur'
@@ -298,17 +298,21 @@ window.DCCModules.equipe = {
       notesArea.style.outline = 'none';
       notesArea.style.boxSizing = 'border-box';
 
-      // Load saved notes
-      const savedNotes = localStorage.getItem('dcc-equipe-notes-' + userId);
-      if (savedNotes) notesArea.value = savedNotes;
+      // Load notes from server (passed by central manager)
+      notesArea.value = initialNotes || '';
 
-      // Auto-save on input
+      // Auto-save on input (debounce -> serveur)
       let notesTimer = null;
       notesArea.addEventListener('input', function () {
         clearTimeout(notesTimer);
         notesTimer = setTimeout(function () {
-          localStorage.setItem('dcc-equipe-notes-' + userId, notesArea.value);
-          if (window.showToastSave) window.showToastSave();
+          if (!onSaveNotes) return;
+          var value = notesArea.value;
+          Promise.resolve(onSaveNotes(value)).then(function () {
+            if (window.showToastSave) window.showToastSave();
+          }).catch(function () {
+            if (window.showToast) window.showToast('Erreur sauvegarde', 'error');
+          });
         }, 600);
       });
 

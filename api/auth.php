@@ -10,8 +10,32 @@ if ($action === 'check') {
     $user = getUserFromSession($db);
     jsonResponse([
         'logged_in' => $user !== null,
-        'pseudo' => $user ? $user['pseudo'] : null
+        'pseudo' => $user ? $user['pseudo'] : null,
+        'id' => $user ? (int)$user['id'] : null
     ]);
+}
+
+if ($action === 'get_team_notes') {
+    $db = getDB();
+    $user = requireLogin($db);
+    $stmt = $db->prepare('SELECT team_notes FROM users WHERE id = :id');
+    $stmt->bindValue(':id', $user['id'], SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $row = $result->fetchArray(SQLITE3_ASSOC);
+    jsonResponse(['ok' => true, 'notes' => ($row && $row['team_notes'] !== null) ? $row['team_notes'] : '']);
+}
+
+if ($action === 'save_team_notes') {
+    $notes = $input['notes'] ?? '';
+    if (!is_string($notes)) { jsonError('Notes invalides'); }
+    if (strlen($notes) > 100000) { jsonError('Notes trop volumineuses (100 Ko maximum)'); }
+    $db = getDB();
+    $user = requireLogin($db);
+    $stmt = $db->prepare('UPDATE users SET team_notes = :notes WHERE id = :id');
+    $stmt->bindValue(':notes', $notes, SQLITE3_TEXT);
+    $stmt->bindValue(':id', $user['id'], SQLITE3_INTEGER);
+    $stmt->execute();
+    jsonResponse(['ok' => true]);
 }
 
 if ($action === 'register') {

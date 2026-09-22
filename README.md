@@ -19,7 +19,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - 0 a plusieurs personnages par classe
 - Creation rapide (bouton "+ Nouveau")
 - Import / Export individuel au format JSON
-- Import / Export global (tous les personnages d'un coup)
+- Import / Export global (tous les personnages + notes d equipe d un coup)
 - Suppression avec confirmation custom (modal)
 - Toggle "En expedition" / "A l'auberge" (statut actif/inactif)
 - Cartes de personnages avec nom, niveau, et toggle
@@ -48,7 +48,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - Synchronisation des PV vers la fiche du personnage
 - Tableau des ennemis (ajout/suppression/RAZ)
 - Compteurs de tour (clic = +1, clic droit / appui long = reset, cycle modulo 5)
-- Notes d'equipe (sauvegardees en localStorage)
+- Notes d'equipe (sauvegardees en base via l'API, inclues dans l'export/import global JSON)
 
 ### Sauvegarde automatique
 - Debounce 600ms sur tous les champs modifiables
@@ -116,12 +116,14 @@ dcc-sheet/
 
 | Action | Methode | Parametres | Description |
 |--------|---------|------------|-------------|
-| `check` | GET | — | Verifie la session, retourne `{logged_in, pseudo}` |
+| `check` | GET | — | Verifie la session, retourne `{logged_in, pseudo, id}` |
 | `register` | POST | `pseudo`, `password` | Inscription (pseudo 3-20 car., password 6+ car.) |
 | `login` | POST | `pseudo`, `password` | Connexion |
 | `logout` | POST | — | Deconnexion |
 | `change_password` | POST | `old_password`, `new_password` | Changement de mot de passe (verifie l'ancien) |
 | `delete_account` | POST | — | Supprime le compte, les personnages et la session |
+| `get_team_notes` | GET | — | Retrouve les notes d'equipe `{ok, notes}` |
+| `save_team_notes` | POST | `notes` | Sauvegarde les notes d'equipe (100 Ko max) |
 
 ### Personnages (`api/characters.php`)
 

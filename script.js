@@ -230,7 +230,7 @@
   async function checkAuth() {
     try {
       var res = await api('auth.php', { method: 'GET', data: { action: 'check' } });
-      currentUser = res.logged_in ? { pseudo: res.pseudo } : null;
+      currentUser = res.logged_in ? { pseudo: res.pseudo, id: res.id } : null;
     } catch (e) {
       currentUser = null;
     }
@@ -264,6 +264,56 @@
     window.location.href = 'login.php';
   }
 
+  /* --- Team Notes (serveur) --- */
+
+  async function getTeamNotes() {
+    var res = await api('auth.php', { method: 'GET', data: { action: 'get_team_notes' } });
+    return typeof res.notes === 'string' ? res.notes : '';
+  }
+
+  async function saveTeamNotes(notes) {
+    await api('auth.php', { method: 'POST', body: { action: 'save_team_notes', notes: notes || '' } });
+  }
+
+  async function loadTeamNotesWithMigration() {
+    var notes = await getTeamNotes();
+
+    var legacyKeys = [];
+    if (currentUser && currentUser.id !== undefined && currentUser.id !== null) {
+      legacyKeys.push('dcc-equipe-notes-' + currentUser.id);
+    }
+    legacyKeys.push('dcc-equipe-notes-undefined');
+
+    var hasLocal = false;
+    var legacyValue = '';
+    legacyKeys.forEach(function (key) {
+      var val = localStorage.getItem(key);
+      if (val !== null && val !== '' && !hasLocal) {
+        hasLocal = true;
+        legacyValue = val;
+      }
+    });
+
+    if (!hasLocal) return notes;
+
+    if (notes.trim() === '') {
+      try {
+        await saveTeamNotes(legacyValue);
+        notes = legacyValue;
+      } catch (e) {
+        return notes; /* echec : on conserve les notes locales telles quelles */
+      }
+    }
+
+    if (notes.trim() !== '') {
+      legacyKeys.forEach(function (key) {
+        try { localStorage.removeItem(key); } catch (e) { /* ignore */ }
+      });
+    }
+
+    return notes;
+  }
+
   /* --- User Menu Actions --- */
 
   async function exportAllCharacters() {
@@ -292,8 +342,13 @@
       var exportObj = {
         version: 1,
         exported_at: new Date().toISOString(),
+        team_notes: '',
         characters: fullCharacters,
       };
+
+      try {
+        exportObj.team_notes = await getTeamNotes();
+      } catch (e) { /* export des personnages maintenu meme si les notes echouent */ }
 
       var json = JSON.stringify(exportObj, null, 2);
       var blob = new Blob([json], { type: 'application/json' });
@@ -357,6 +412,14 @@
           });
           if (res.character) {
             await saveCharacter(res.character.id, c.data || {}, c.name);
+          }
+        }
+
+        if (Object.prototype.hasOwnProperty.call(obj, 'team_notes')) {
+          try {
+            await saveTeamNotes(typeof obj.team_notes === 'string' ? obj.team_notes : '');
+          } catch (e) {
+            showToast('Erreur sauvegarde des notes', 'error');
           }
         }
 
@@ -587,8 +650,13 @@
         }
       }
 
+      var notes = '';
+      try {
+        notes = await loadTeamNotesWithMigration();
+      } catch (e) { /* notes indisponibles : on affiche la tableau quand meme */ }
+
       if (window.DCCModules && window.DCCModules.equipe) {
-        window.DCCModules.equipe.render(panel, allChars, syncPVFromEquipe, currentUser.id);
+        window.DCCModules.equipe.render(panel, allChars, syncPVFromEquipe, notes, saveTeamNotes);
       }
     } catch (err) {
       panel.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px">Erreur de chargement.</div>';
@@ -1367,6 +1435,7 @@
   window.toggleTheme = toggleTheme;
   window.switchTab = switchTab;
   window.showList = showList;
+  window.showToast = showToast;
   window.showToastSave = showToastSave;
   window.openSheet = openSheet;
   window.bindAutoSave = bindAutoSave;

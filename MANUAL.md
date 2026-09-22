@@ -84,8 +84,8 @@ Une fois connecté, votre **avatar** (la première lettre de votre pseudo) rempl
 | Action | Effet |
 |---|---|
 | **Bienvenue {pseudo}** | En-tête du menu |
-| **Exporter tout (JSON)** | Télécharge tous vos personnages dans un fichier |
-| **Importer tout (JSON)** | Remplace **tous** vos personnages par ceux d'un fichier |
+| **Exporter tout (JSON)** | Télécharge tous vos personnages **et vos notes d'équipe** dans un fichier |
+| **Importer tout (JSON)** | Remplace **tous** vos personnages (et vos notes, si le fichier en contient) par ceux d'un fichier |
 | **Changer le mot de passe** | Ouvre le formulaire de changement (§ 2.4) |
 | **Supprimer le compte** | Suppression définitive (§ 2.5) |
 | **Deconnexion** | Ferme la session et renvoie à la page de connexion |
@@ -213,7 +213,7 @@ Le fichier contient la classe, le nom, le statut et **toutes les données de la 
 **Exporter toute la collection** :
 1. Ouvrez le **menu utilisateur** (avatar).
 2. Cliquez sur **Exporter tout (JSON)**.
-3. Un fichier `dcc-persos-AAAA-MM-JJ.json` est téléchargé, contenant **tous** vos personnages.
+3. Un fichier `dcc-persos-AAAA-MM-JJ.json` est téléchargé, contenant **tous** vos personnages **et vos notes d'équipe**.
 4. Si vous n'avez aucun personnage, une popup le signale.
 
 **Importer une collection** :
@@ -222,8 +222,9 @@ Le fichier contient la classe, le nom, le statut et **toutes les données de la 
 3. Le fichier est validé (présence d'au moins un personnage, classe de chacun).
 4. Confirmez l'avertissement **« Cela remplacera tous vos personnages actuels. Cette action est irreversible. »** (bouton rouge).
 5. **Tous** vos personnages actuels sont supprimés, puis le contenu du fichier est recréé ; un toast annonce le nombre importé.
+6. Si le fichier contient le champ **`team_notes`** (même vide), vos **notes d'équipe** sont remplacées par son contenu ; les anciens exports, dépourvus de ce champ, **laissent vos notes actuelles intactes**.
 
-> **Usage recommandé** : l'export global sert de **sauvegarde externe** régulière et de transfert entre deux navigateurs/machines.
+> **Usage recommandé** : l'export global sert de **sauvegarde externe** régulière et de transfert entre deux navigateurs/machines — fiches **et** notes d'équipe.
 
 ### 4.7 Ordre d'affichage des cartes
 
@@ -441,8 +442,8 @@ Sous la section **Ennemis** : un tableau de **3 lignes vides par défaut** (colo
 ### 8.4 Notes d'équipe
 
 - Zone de texte libre sous l'en-tête **Notes** : plan de session, butin à partager, rappels de règles…
-- **Sauvegarde automatique** (pause ~0,6 s, toast disquette).
-- Stockées **dans le navigateur** (localStorage), associées à votre compte sur **cette machine** : elles ne sont ni exportées ni synchronisées sur un autre appareil.
+- **Sauvegarde automatique** (pause ~0,6 s, toast disquette ; « Erreur sauvegarde » en cas d'échec).
+- Stockées **dans la base de données de votre compte** : elles vous suivent sur **tous vos appareils** et sont **inclues dans l'export global JSON** / restaurées par l'import global (§ 4.6).
 
 ---
 
@@ -465,8 +466,8 @@ Si le thème ne « tient » pas après un rechargement : videz le cache du navig
 |---|---|---|
 | Thème | localStorage | Non |
 | Onglet actif | localStorage | Non |
-| Notes d'équipe | localStorage (par compte) | Non |
 | Fiches de personnages | **Base de données serveur** | Oui (export JSON) |
+| Notes d'équipe | **Base de données serveur** | Oui (export JSON) |
 
 ### Comportement mobile (< 600 px)
 
@@ -498,7 +499,7 @@ Si le thème ne « tient » pas après un rechargement : videz le cache du navig
 ### Sauvegarder vos données hors ligne
 
 1. Menu utilisateur → **Exporter tout (JSON)**.
-2. Conservez le fichier `dcc-persos-….json` (clé USB, autre machine…).
+2. Conservez le fichier `dcc-persos-….json` (clé USB, autre machine…) : il contient vos personnages **et** vos notes d'équipe.
 3. Pour restaurer : **Importer tout (JSON)** sur le compte cible (remplacement complet, § 4.6).
 
 Les exports **individuels** (bouton **Export** des fiches) servent au transfert d'un PJ précis entre comptes : réimportez-les depuis **Import** dans l'onglet de la bonne classe.
@@ -507,7 +508,7 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 
 - **Mes modifications ne sont pas conservées** : attendez le toast disquette avant de fermer ; vérifiez la console (F12) et que le serveur PHP/SQLite fonctionne (côté administration du dépôt, voir README).
 - **Le thème régresse au rechargement** : le thème vit dans le localStorage ; videz le cache, réactivez-le une fois.
-- **Les notes d'équipe ne suivent pas sur un autre téléphone** : comportement normal (stockage local, § 9). Copiez-les à la main ou ajoutez-les à un export.
+- **Les notes d'équipe sont vides sur un autre appareil** : vérifiez d'abord la connexion au bon compte ; en cas de doute, restaurez-les depuis un **Exporter/Importer tout (JSON)** (§ 4.6). Les notes d'un ancien navigateur sont migrées automatiquement en base à la première ouverture de l'onglet Équipe.
 - **Un personnage n'apparaît pas dans l'Équipe** : vérifiez son interrupteur **EN EXPÉDITION** (§ 5), puis rouvrez l'onglet.
 - **Le clic sur le portrait ne change rien** : vous êtes en mode **Red Box** (image unique) — repassez en mode **DCC** (§ 7).
 - **Import global refusé** : le fichier doit contenir au moins un personnage et une `class` valide pour chacun (annexe A).
@@ -547,6 +548,7 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 {
   "version": 1,
   "exported_at": "2026-09-22T18:00:00.000Z",
+  "team_notes": "Session 3 : descendedre dans les catacombes, garder la potion pour Travok.",
   "characters": [
     { "name": "Travok", "class": "clerc", "is_active": 1, "data": { "nom": "Travok", "dieu": "AHRIMAN" } },
     { "name": "Sergiu", "class": "mage", "is_active": 1, "data": { "nom": "Sergiu" } }
@@ -555,7 +557,9 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 ```
 
 - `characters` : **tableau non vide**, chaque entrée avec au minimum `class`.
+- `team_notes` : notes d'équipe (texte libre, **champ optionnel**).
 - L'import **remplace intégralement** la collection existante (après confirmation).
+- Fichier **sans** `team_notes` (anciens exports) : les notes actuelles sont **conservées** ; fichier **avec** `team_notes` (même vide) : les notes sont **remplacées**.
 
 ---
 

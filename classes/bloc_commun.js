@@ -35,6 +35,7 @@ window.DCCModules.blocCommun = {
                 <div class="helmet-shape">
                   <input type="text" data-key="${k('points_de_vie')}" value="${v('points_de_vie')}" placeholder="0">
                   <div class="helmet-max">Max: <input type="text" data-key="${k('max_pv')}" value="${v('max_pv')}" placeholder="0"></div>
+                  <div class="hit-die">${({'guerrier':'d12','nain':'d10','clerc':'d8','elfe':'d6','voleur':'d6','halfelin':'d6','mage':'d4'})[cls] || 'd8'}</div>
                 </div>
                 <div class="helmet-label">Points de vie</div>
               </div>

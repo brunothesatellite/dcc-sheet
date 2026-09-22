@@ -12,7 +12,6 @@
 * Quand je modifie un texte, sauvegarder après une petite tempo (voir fabled-lands-sheet) pour ne pas matraquer la base de sauvegarde à chaque touche
 
 **EVOLUTIONS**
-* BLOC_COMMUN: ajouter le dé de vie sous bloc PV
 * Diminuer taille des fontes : même que celles des sorts du mage (mais pas gras)
 * Sort de mage : nom en gras, note pas en gras
 

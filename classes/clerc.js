@@ -7,6 +7,7 @@ window.DCCModules.clerc = {
     const bc = window.DCCModules.blocCommun;
 
     container.innerHTML = bc.render(container, charId, 'clerc', data) + `
+      <div class="sheet-page">
         <!-- Sorts de clerc & pouvoirs -->
         <div class="section-bar" style="font-size:14px; padding:8px;">Sorts de clerc &amp; pouvoirs</div>
 

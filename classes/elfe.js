@@ -6,7 +6,7 @@ window.DCCModules.elfe = {
     const k = (field) => `elfe-${charId}-${field}`;
     const bc = window.DCCModules.blocCommun;
 
-    const SORTS_ROWS = [1, 2, 3, 4, 5, 6, 7];
+    const SORTS_FREE_ROWS = [3, 4, 5, 6, 7];
 
     container.innerHTML = bc.render(container, charId, 'elfe', data) + `
       <div class="sheet-page">
@@ -69,7 +69,21 @@ window.DCCModules.elfe = {
             </tr>
           </thead>
           <tbody>
-            ${SORTS_ROWS.map(n => `
+            <tr class="row-fixed">
+              <td class="row-num">1</td>
+              <td class="sort-fixed">Lier un patron</td>
+              <td>1</td>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr class="row-fixed">
+              <td class="row-num">2</td>
+              <td class="sort-fixed">Invoquer un Patron</td>
+              <td>1</td>
+              <td></td>
+              <td class="patron-effet">(&nbsp;<input type="text" class="patron-jours" data-key="${k('patron_invoc_nb')}" value="${v('patron_invoc_nb')}" placeholder="___">&nbsp;/jour)</td>
+            </tr>
+            ${SORTS_FREE_ROWS.map(n => `
               <tr>
                 <td class="row-num">${n}</td>
                 <td><input type="text" data-key="${k('sort_nom_' + n)}" value="${v('sort_nom_' + n)}"></td>

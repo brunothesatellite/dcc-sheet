@@ -496,3 +496,30 @@ Chaque fiche reecrite pour etre fidele aux PDF/screencaps :
 | `classes/equipe.js` | Notes via callback serveur (fin du localStorage) |
 | `MANUAL.md` | Notes serveur, export/import global, tableau local/serveur, depannage, annexe A |
 | `README.md` | Fonctionnalites Equipe + table API auth |
+
+---
+
+## Date : 22 septembre 2026 (nuit)
+
+---
+
+### Elfe — 2 sorts de patron figés en tête de table
+
+- **Ligne 1 — Lier un patron** (Niveau 1, test/effet vides) : cellules en texte brut, **aucun `data-key`** → non modifiable, non supprimable (la table Elfe n'a pas de bouton de suppression).
+- **Ligne 2 — Invoquer un Patron** (Niveau 1, test vide) : effet `(___/jour)` avec **seul le `___` éditable** :
+  - `<input class="patron-jours" data-key="elfe-{id}-patron_invoc_nb" placeholder="___">` ;
+  - clé dédiée `patron_invoc_nb` (pas de collision avec `sort_effet_*`) ; stocke **le seul contenu du blanc** (ex. `3` → rendu `(3/jour)`) ;
+  - capté par l'auto-save générique → colonne `data` (DB) + exports individuel/global, sans changement BDD/API.
+- **Lignes libres** : `SORTS_FREE_ROWS = [3..7]` — 5 lignes conservant les clés `sort_nom_3..7` / `sort_effet_3..7` (les sorts déjà saisis aux lignes 3-7 restent alignés ; les données éventuelles des anciennes lignes 1-2 ne sont plus affichées, remplacées par les sorts figés).
+- **CSS** (`style.css`) : `.dtable td.sort-fixed` (nom en gras, aligné gauche), `.dtable td.patron-effet` (aligné gauche), `.dtable input.patron-jours` (largeur 48 px).
+- **Docs** : `MANUAL.md` § 6.2 (ligne Elfe), `README.md` (fonctionnalités Elfe).
+
+### Fichiers modifies (22 septembre nuit)
+
+| Fichier | Actions |
+|---------|---------|
+| `classes/elfe.js` | 2 lignes fixes + lignes libres 3-7 |
+| `style.css` | Styles `.sort-fixed`, `.patron-effet`, `.patron-jours` |
+| `MANUAL.md` | Ligne Elfe du tableau § 6.2 |
+| `README.md` | Ligne Elfe des fonctionnalites |
+| `JOURNAL.md` | Cette entree |

@@ -1432,6 +1432,20 @@ input[type="number"]::-webkit-outer-spin-button {
   font-weight: 700;
 }
 
+.dtable td.sort-fixed {
+  text-align: left;
+  font-weight: 700;
+}
+
+.dtable td.patron-effet {
+  text-align: left;
+}
+
+.dtable input.patron-jours {
+  width: 48px;
+  text-align: center;
+}
+
 .dtable td.sort-notes textarea {
   resize: vertical;
   min-height: 22px;

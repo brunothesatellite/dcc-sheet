@@ -3,8 +3,7 @@
 
 **BUGS**
 *Critique*
-* les notes d'équipe (onglet Equipe) doivent être stockées dans la base de données et gérées par l'export / import total json. Reformule, fait un plan, ne code rien.
-* Elfe : ajoute Lier un patron Niveau 1 et Invoquer un Patron (___/jour) Niveau 1
+* N/A
 
 *Majeur*
 * N/A

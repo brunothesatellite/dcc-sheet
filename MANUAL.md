@@ -318,7 +318,7 @@ Chaque classe ajoute une page de capacités puis une section **Notes** :
 | Classe | Sections propres |
 |---|---|
 | **Clerc** | Dieu, Test d'incant., Risque de défaveur, rappel des pouvoirs, table **Imposition des mains** (décalage d'alignement, colonnes 12/14/20/22+), **grille de sorts** 3 × 7 |
-| **Elfe** | Test d'incantation, Familier, Patron(s), Corruption, **Traits elfiques** (rappel), Autres notes, **table de sorts** (7 lignes : nom, niveau, test, effet mercuriel) |
+| **Elfe** | Test d'incantation, Familier, Patron(s), Corruption, **Traits elfiques** (rappel), Autres notes, **table de sorts** (2 sorts de patron figés en lignes 1-2 + 5 lignes libres : nom, niveau, test, effet mercuriel) |
 | **Guerrier** | Coup critique sur, Arme soumise au mod. de Chance, Hauts faits d'armes (dé) |
 | **Halfelin** | Infravision, Discrétion, Porte-bonheur, Petite taille/lenteur + encadré **Combat à deux armes** (d16+d16, crit sur 16, etc.) |
 | **Mage** | Test d'incantation, Familier, Patron(s), Corruption, mod. de chance, **liste de sorts dynamique** (§ 6.3) |

@@ -1,5 +1,5 @@
 **TODO**
-* Vérifier que la sauvegarde fonctionne
+* N/A
 
 **BUGS**
 *Critique*
@@ -9,7 +9,7 @@
 * N/A
 
 *Mineur*
-* Quand je modifie un texte, sauvegarder après une petite tempo (voir fabled-lands-sheet) pour ne pas matraquer la base de sauvegarde à chaque touche
+* Quand je modifie un texte, sauvegarder après une petite tempo (voir D:\VS Code\fabled-lands-sheet EN READONLY pour mécanisme de temporisation à la sauvgarde) pour ne pas matraquer la base de sauvegarde à chaque touche
 
 **EVOLUTIONS**
 * Compteur de tour : utiliser un remplissage par quarts du cercle, en gardant le nombre au centre visible

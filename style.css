@@ -1831,13 +1831,12 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .team-portrait {
-  height: 40px;
-  width: 40px;
+  height: 50px;
+  width: 50px;
   border-radius: 50%;
   object-fit: cover;
   border: 1px solid var(--border);
   vertical-align: middle;
-  margin-right: 4px;
 }
 
 .team-table th:nth-child(1),
@@ -2329,7 +2328,7 @@ input[type="number"]::-webkit-outer-spin-button {
   .team-table th { font-size: 9px; padding: 4px 3px; }
   .team-table td { padding: 3px 2px; }
   .team-table input { font-size: 11px; padding: 3px 2px; }
-  .team-portrait { height: 30px; width: 30px; }
+  .team-portrait { height: 40px; width: 40px; }
   .team-table tbody tr { height: 40px; }
   .turn-counter { width: 30px; height: 30px; font-size: 13px; }
   .team-table .char-name { font-size: 11px; }

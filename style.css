@@ -1455,6 +1455,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .dtable td.row-del {
   width: 30px;
   text-align: center;
+  vertical-align: middle;
   padding: 2px;
 }
 

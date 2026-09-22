@@ -555,9 +555,19 @@ Chaque fiche reecrite pour etre fidele aux PDF/screencaps :
 | Fichier | Actions |
 |---------|---------|
 | `classes/elfe.js` | Table dynamique format Mage (2 lignes/sort, fixes en 2 lignes, moteur add/delete/renumber) |
+| `classes/mage.js` | ✕ de suppression en `rowspan="2"` (colonne 2e ligne retirée) + `sort-name` sur `_spellRowHTML` (sorts ajoutés en gras) |
+| `style.css` | `.dtable td.row-del` : `vertical-align: middle` (✕ centre sur les 2 lignes) |
 | `MANUAL.md` | § 6.2 ligne Elfe, § 6.3 Mage et Elfe, note classes à grille fixe |
 | `README.md` | Ligne Elfe (liste dynamique) |
 | `TODO.md` | Demande Elfe marquée faite |
 | `JOURNAL.md` | Cette entree |
 
 Verifs : `node --check classes/elfe.js` OK ; styles `.btn-spell-add` / `.btn-spell-del` / `.row-del` presents dans `style.css`.
+
+### Correction — ✕ de suppression sur 2 lignes (Mage + Elfe)
+
+- La cellule de suppression passe en `rowspan="2"` : la croix couvre les 2 lignes du sort et reste **centre verticalement**, comme le numero (`.row-num`).
+- 2e ligne : suppression du `<td class="row-del">` decompense (colonne couverte par la cellule en rowspan).
+- **Lignes fixes Elfe** : meme structure (`row-del rowspan=2` vide, sans bouton) pour rester alignees avec les paires libres.
+- **CSS** : `vertical-align: middle` explicite sur `.dtable td.row-del`.
+- Bonus mage : `_spellRowHTML` (sorts ajoutes dynamiquement) gagne la classe `sort-name` → nom en gras comme les lignes initiales.

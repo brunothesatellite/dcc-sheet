@@ -28,11 +28,10 @@ window.DCCModules.mage = {
           <td class="sort-name"><input type="text" data-key="${k('sort_nom_' + n)}" value="${v('sort_nom_' + n)}"></td>
           <td><input type="text" data-key="${k('sort_niveau_' + n)}" value="${v('sort_niveau_' + n)}" placeholder="1-5"></td>
           <td><input type="text" data-key="${k('sort_test_' + n)}" value="${v('sort_test_' + n)}"></td>
-          <td class="row-del"><button type="button" class="btn-spell-del" data-del="${n}">&#10005;</button></td>
+          <td class="row-del" rowspan="2"><button type="button" class="btn-spell-del" data-del="${n}">&#10005;</button></td>
         </tr>
         <tr data-spell="${n}">
           <td colspan="3" class="sort-notes"><textarea data-key="${k('sort_effet_' + n)}" rows="1">${v('sort_effet_' + n)}</textarea></td>
-          <td class="row-del"></td>
         </tr>`;
     }
 
@@ -247,14 +246,13 @@ window.DCCModules.mage = {
     return `
       <tr data-spell="${n}">
         <td class="row-num" rowspan="2">${n}</td>
-        <td><input type="text" data-key="${k('sort_nom_' + n)}" value="${v('sort_nom_' + n)}"></td>
+        <td class="sort-name"><input type="text" data-key="${k('sort_nom_' + n)}" value="${v('sort_nom_' + n)}"></td>
         <td><input type="text" data-key="${k('sort_niveau_' + n)}" value="${v('sort_niveau_' + n)}" placeholder="1-5"></td>
         <td><input type="text" data-key="${k('sort_test_' + n)}" value="${v('sort_test_' + n)}"></td>
-        <td class="row-del"><button type="button" class="btn-spell-del" data-del="${n}">&#10005;</button></td>
+        <td class="row-del" rowspan="2"><button type="button" class="btn-spell-del" data-del="${n}">&#10005;</button></td>
       </tr>
       <tr data-spell="${n}">
         <td colspan="3" class="sort-notes"><textarea data-key="${k('sort_effet_' + n)}" rows="1">${v('sort_effet_' + n)}</textarea></td>
-        <td class="row-del"></td>
       </tr>`;
   },
 

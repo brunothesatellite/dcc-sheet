@@ -1,7 +1,7 @@
 # DCC Fiches de Personnage
 
 Application web SPA pour gerer une equipe complete de personnages pour Dungeon Crawl Classics (DCC). Responsive, optimisee pour smartphone.
-Manuel d'utilisation consultable dans **MANUAL.md**
+Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 
 ## Fonctionnalites
 

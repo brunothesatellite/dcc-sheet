@@ -32,7 +32,7 @@ Manuel d'utilisation de l'application web **DCC Fiches de Personnage** : créez 
 - suivre l'**équipe en expédition** (avec possibilité de laisser des personnages à l'**auberge**) dans un tableau de combat avec ennemis et compteurs de tour ;
 - choisir un **portrait** parmi les tokens officiels DCC ou les illustrations originales de la D&D Red Box de 1983.
 
-**Aucune installation** : l'application s'ouvre dans un navigateur moderne (Chrome, Firefox, Edge, Safari). Elle est optimisée pour smartphone mais fonctionne sur grand écran. Pour fonctionner elle nécessite seulement un serveur web avec **php** activé (et le module **sqlite3**). Voir **README.md** pour plus d'informations sur le déploiement de l'application sur un serveur.
+**Aucune installation** : l'application s'ouvre dans un navigateur moderne (Chrome, Firefox, Edge, Safari). Elle est optimisée pour smartphone mais fonctionne sur grand écran. Pour fonctionner elle nécessite seulement un serveur web avec **php** activé (et le module **sqlite3**). Voir **[README.md](./README.md)** pour plus d'informations sur le déploiement de l'application sur un serveur.
 
 ### Sauvegarde automatique
 

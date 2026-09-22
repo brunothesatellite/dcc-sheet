@@ -1311,19 +1311,22 @@ input[type="number"]::-webkit-outer-spin-button {
 .dtable input {
   width: 100%;
   text-align: center;
-  border: none;
-  background: transparent;
+  border: 1px solid var(--input-border);
+  background: var(--field-bg);
   font-size: 11px;
-  padding: 2px;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  outline: none;
 }
 
 .dtable textarea {
   width: 100%;
   text-align: center;
-  border: none;
-  background: transparent;
+  border: 1px solid var(--input-border);
+  background: var(--field-bg);
   font-size: 11px;
-  padding: 2px;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
   resize: vertical;
   min-height: 22px;
   line-height: 1.4;
@@ -1413,10 +1416,11 @@ input[type="number"]::-webkit-outer-spin-button {
 .dtable td.sort-notes textarea,
 .dtable td.sort-name input {
   width: 100%;
-  border: none;
-  background: transparent;
+  border: 1px solid var(--input-border);
+  background: var(--field-bg);
   font-size: 12px;
-  padding: 3px;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
   font-family: var(--font-body);
   color: var(--ink);
   outline: none;

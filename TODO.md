@@ -13,5 +13,6 @@
 
 **EVOLUTIONS**
 * A l'usage, voir comment améliorer l'onglet équipe :
-1. classement automatique dans l'ordre d'initiative des personnages ? Intéressant
-2. Intégratio des ennemis dans le premier tableau ? Pas favorable, cela risque de complexifier...
+1. Avoir quand on clique sur la classe une popup ou une ligne qui se déploie et affiche l'atk CàC, dégats CàC, Atk distance et dégats distance du personnage
+2. classement automatique dans l'ordre d'initiative des personnages ? Intéressant
+3. Intégratio des ennemis dans le premier tableau ? Pas favorable, cela risque de complexifier...

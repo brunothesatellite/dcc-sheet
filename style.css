@@ -2318,8 +2318,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .combat-info {
-  background: var(--field-bg);
-  border: 1px solid var(--input-border);
+  background: var(--inn-bg);
+  border: 1px dashed var(--inn-border);
   border-radius: var(--radius-sm);
   padding: 10px 14px;
   font-size: 13px;

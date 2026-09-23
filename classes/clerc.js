@@ -81,24 +81,24 @@ window.DCCModules.clerc = {
           <tbody>
             <tr>
               <td>(identique)</td>
-              <td><input type="text" data-key="${k('impos_id_12')}" value="${v('impos_id_12', '2 dés')}"></td>
-              <td><input type="text" data-key="${k('impos_id_14')}" value="${v('impos_id_14', '3 dés')}"></td>
-              <td><input type="text" data-key="${k('impos_id_20')}" value="${v('impos_id_20', '4 dés')}"></td>
-              <td><input type="text" data-key="${k('impos_id_22')}" value="${v('impos_id_22', '5 dés')}"></td>
+              <td class="impos-val">2 dés</td>
+              <td class="impos-val">3 dés</td>
+              <td class="impos-val">4 dés</td>
+              <td class="impos-val">5 dés</td>
             </tr>
             <tr>
               <td>(adjacent)</td>
-              <td><input type="text" data-key="${k('impos_adj_12')}" value="${v('impos_adj_12', '1 dé')}"></td>
-              <td><input type="text" data-key="${k('impos_adj_14')}" value="${v('impos_adj_14', '2 dés')}"></td>
-              <td><input type="text" data-key="${k('impos_adj_20')}" value="${v('impos_adj_20', '3 dés')}"></td>
-              <td><input type="text" data-key="${k('impos_adj_22')}" value="${v('impos_adj_22', '4 dés')}"></td>
+              <td class="impos-val">1 dé</td>
+              <td class="impos-val">2 dés</td>
+              <td class="impos-val">3 dés</td>
+              <td class="impos-val">4 dés</td>
             </tr>
             <tr>
               <td>(opposé)</td>
-              <td><input type="text" data-key="${k('impos_opp_12')}" value="${v('impos_opp_12', '1 dé')}"></td>
-              <td><input type="text" data-key="${k('impos_opp_14')}" value="${v('impos_opp_14', '1 dés')}"></td>
-              <td><input type="text" data-key="${k('impos_opp_20')}" value="${v('impos_opp_20', '2 dés')}"></td>
-              <td><input type="text" data-key="${k('impos_opp_22')}" value="${v('impos_opp_22', '3 dés')}"></td>
+              <td class="impos-val">1 dé</td>
+              <td class="impos-val">1 dé</td>
+              <td class="impos-val">2 dés</td>
+              <td class="impos-val">3 dés</td>
             </tr>
           </tbody>
         </table>

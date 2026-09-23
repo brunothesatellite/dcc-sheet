@@ -35,7 +35,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - **Voleur** : 14 competences voleur en grille (De de chance, Escalade, Crocheter, Pieges, etc.)
 
 ### Portrait
-- 7 sources d'images : **DCC** (tokens officiels, 20 images), **D&D Red Box 1983** (7 illustrations), **Leremy Gan** (7 silhouettes), **Shadowdark** (12 images), **Jeff Stevens** (8 planches), **Gonzo** (32 images) et **Old School** (17 images)
+- 7 sources d'images : **DCC** (tokens officiels, 20 images), **D&D Red Box 1983** (7 illustrations), **Leremy Gan** (7 silhouettes), **Shadowdark** (12 images), **Jeff Stevens** (8 planches), **Gonzo** (30 images) et **Old School** (17 images)
 - **Popup « Choisir un portrait »** : clic sur le portrait dans la fiche → grille continue (3 colonnes, 2 sur mobile), libellé de source au-dessus du premier portrait de chaque section
 - Portrait courant surligne (bordure accent) et scroll automatique vers lui
 - Fermeture : bouton X, bouton Fermer, clic en dehors, ou touche Echap
@@ -84,7 +84,7 @@ dcc-sheet/
 ├── shadow-icons.js             # Catalogue d'icones Leremy Gan (7 silhouettes, 7 classes)
 ├── shadowdark-icons.js         # Catalogue d'icones Shadowdark (12 images, 7 classes)
 ├── comics-icons.js             # Catalogue d'icones Jeff Stevens (8 planches, 7 classes)
-├── gonzo-icons.js              # Catalogue d'icones Gonzo (32 images, 7 classes)
+├── gonzo-icons.js              # Catalogue d'icones Gonzo (30 images, 7 classes)
 ├── osr-icons.js                # Catalogue d'icones Old School (17 images, 7 classes)
 ├── portrait-icons.js           # Registre des sources de portraits (getPortraitSrc)
 ├── api/
@@ -107,7 +107,7 @@ dcc-sheet/
 │   ├── shadow/                 # 29 PNG disponibles (7 au catalogue Leremy Gan)
 │   ├── shadowdark/             # 12 PNG portraits Shadowdark (compreses)
 │   ├── jeff-stevens/           # 8 planches Jeff Stevens
-│   ├── gonzo/                  # 32 PNG portraits Gonzo (couleur + N&B)
+│   ├── gonzo/                  # 30 PNG portraits Gonzo (couleur + N&B)
 │   └── osr/                    # 17 PNG portraits Old School
 ├── exemples/                   # Exports JSON d'exemple (equipe complete)
 ├── login.php                   # Page de connexion

@@ -371,7 +371,7 @@ Sept sources sont disponibles :
 | **Leremy Gan** | Silhouettes d'archetype (1 par classe) |
 | **Shadowdark** | Portraits (12 au total, répartis par classe) |
 | **Jeff Stevens** | Planches de comics (8 au total, répartis par classe) |
-| **Gonzo** | Portraits colorés + variantes noir et blanc (32 au total, répartis par classe) |
+| **Gonzo** | Portraits colorés + variantes noir et blanc (30 au total, répartis par classe) |
 | **Old School** | Portraits Old School Révival (17 au total, répartis par classe) |
 
 ### 7.1 Choisir un portrait (mode opératoire)
@@ -575,12 +575,12 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 |---|---|---|---|---|---|---|---|---|
 | Clerc | d8 | 2 | 1 | 1 | 2 | 2 | 4 | 2 |
 | Elfe | d6 | 2 | 1 | 1 | 2 | 1 | 6 | 4 |
-| Guerrier | **d12** | **5** | 1 | 1 | 2 | 1 | 4 | 1 |
+| Guerrier | **d12** | **5** | 1 | 1 | 2 | 1 | **2** | 1 |
 | Halfelin | d6 | 2 | 1 | 1 | 1 | 1 | 4 | 2 |
 | Mage | **d4** | **4** | 1 | 1 | 1 | 1 | 4 | 3 |
 | Nain | d10 | 2 | 1 | 1 | 1 | 1 | 6 | 3 |
 | Voleur | d6 | 3 | 1 | 1 | **3** | 1 | 4 | 2 |
-| **Total** | — | **20 tokens** | **7 illustrations** | **7 silhouettes** | **12 images** | **8 planches** | **32 images** | **17 images** |
+| **Total** | — | **20 tokens** | **7 illustrations** | **7 silhouettes** | **12 images** | **8 planches** | **30 images** | **17 images** |
 
 - La sélection se fait via la popup **« Choisir un portrait »** (§ 7) : les sept sources y sont proposées, libellé au-dessus du premier portrait de chaque section.
 
@@ -610,7 +610,7 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 | **Leremy Gan** | Source de portraits silhouette, 1 image par classe |
 | **Shadowdark** | Source de portraits, 12 images réparties par classe |
 | **Jeff Stevens** | Planches de comics, 8 images réparties par classe |
-| **Gonzo** | Portraits colorés + variantes N&B, 32 images réparties par classe |
+| **Gonzo** | Portraits colorés + variantes N&B, 30 images réparties par classe |
 | **Old School** | Portraits OSR, 17 images réparties par classe |
 | **Toast** | Petit message transitoire en bas à droite |
 | **RAZ** | Remise à zéro (table des ennemis) |

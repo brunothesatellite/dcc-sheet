@@ -617,9 +617,9 @@ Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts �
 
 ### Système de portraits générique (7 sources)
 
-- **Registre** `portrait-icons.js` : `window.PortraitSources` + `window.getPortraitSrc(source, cls, index)` ; sources : `dcc` (20 tokens), `redbox` (7), `shadow` Leremy Gan (7 silhouettes), `shadowdark` (12), `comics` Jeff Stevens (8 planches), `gonzo` (32), `osr` Old School (17).
+- **Registre** `portrait-icons.js` : `window.PortraitSources` + `window.getPortraitSrc(source, cls, index)` ; sources : `dcc` (20 tokens), `redbox` (7), `shadow` Leremy Gan (7 silhouettes), `shadowdark` (12), `comics` Jeff Stevens (8 planches), `gonzo` (30), `osr` Old School (17).
 - **Catalogues** : `dcc-icons.js`, `dd-red-box-icons.js`, `shadow-icons.js`, `shadowdark-icons.js`, `comics-icons.js`, `gonzo-icons.js`, `osr-icons.js` — chacun avec `meta.key` / `meta.label` ; chargés dans `index.html` avant le registre.
-- **Fichiers images** : `icons/shadow/` (PNG), `icons/shadowdark/` (12 PNG, **compressés ~200 Ko** au lieu de ~2,4 Mo), `icons/jeff-stevens/` (8 planches), `icons/gonzo/` (32 PNG couleur + `_nb`), `icons/osr/` (17 PNG).
+- **Fichiers images** : `icons/shadow/` (PNG), `icons/shadowdark/` (12 PNG, **compressés ~200 Ko** au lieu de ~2,4 Mo), `icons/jeff-stevens/` (8 planches), `icons/gonzo/` (30 PNG couleur + `_nb`), `icons/osr/` (17 PNG).
 - **Clés persistance** : `portrait_source` (ASCII uniquement) + `portrait_index` (wrap modulo longueur tableau) ; inputs hidden dans `bloc_commun.js`, lus par `collectData`.
 - **Popup « Choisir un portrait »** : grille **continue** 3 colonnes (2 sur mobile), libellé de source **au-dessus du premier portrait** de chaque section (cellules dédiées aux images, cases vides comblées par la suite), portrait courant surligné + auto-scroll, fermeture X / FERMER / clic extérieur / Échap ; capture `captures/choix-portrait.png` intégrée au MANUAL § 7.
 - **Affichage** : portrait sur les **cartes de la liste** (`.char-card-portrait`, 50 px / 40 px mobile), l'**onglet Equipe** (colonne Classe), et la fiche.
@@ -636,6 +636,7 @@ Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts �
 
 - Exemple d'équipe ajouté au dépôt (`exemples/dcc-persos-2026-09-22.json`).
 - Correction du bloc `@media` orphelin de `style.css` (accolades 371/371).
+- **Gonzo** : suppression des 2 doublons guerrier homme variante (`09_guerrier_homme_variante.png` + `_nb`) — 32 → **30 images** ; `gonzo-icons.js`, MANUAL (§ 7 + annexe B : guerrier 4 → 2), README et JOURNAL alignés.
 
 ### Popup portraits — grille continue (mise à jour du layout)
 

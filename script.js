@@ -804,7 +804,7 @@
     toggleWrapper.appendChild(toggleLabel);
     var toggleText = el('span', {
       className: 'toggle-inn-label',
-      textContent: isActive ? 'EN EXPEDITION' : "A L'AUBERGE",
+      textContent: isActive ? 'EN EXPÉDITION' : "A L'AUBERGE",
     });
     toggleText.style.color = isActive ? 'var(--green)' : 'var(--red)';
     toggleWrapper.appendChild(toggleText);
@@ -816,7 +816,7 @@
     toggleInput.addEventListener('change', function (e) {
       e.stopPropagation();
       var checked = e.target.checked;
-      toggleText.textContent = checked ? 'EN EXPEDITION' : "A L'AUBERGE";
+      toggleText.textContent = checked ? 'EN EXPÉDITION' : "A L'AUBERGE";
       toggleText.style.color = checked ? 'var(--green)' : 'var(--red)';
       setCharacterActive(charData.id, checked);
     });
@@ -1153,12 +1153,12 @@
     var label = el('span', {
       className: 'toggle-inn-label',
       id: cls + '-sheet-status',
-      textContent: isActive ? 'EN EXPEDITION' : "A L'AUBERGE",
+      textContent: isActive ? 'EN EXPÉDITION' : "A L'AUBERGE",
     });
 
     input.addEventListener('change', function (e) {
       var checked = e.target.checked;
-      label.textContent = checked ? 'EN EXPEDITION' : "A L'AUBERGE";
+      label.textContent = checked ? 'EN EXPÉDITION' : "A L'AUBERGE";
       label.style.color = checked ? 'var(--green)' : 'var(--red)';
 
       setCharacterActive(charData.id, checked);

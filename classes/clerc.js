@@ -59,19 +59,19 @@ window.DCCModules.clerc = {
             <input type="text" data-key="${k('test_incantation')}" value="${v('test_incantation')}">
           </div>
           <div class="field">
-            <div class="field-label">Risque de defaveur:</div>
+            <div class="field-label">Risque de défaveur:</div>
             <input type="text" data-key="${k('risque_defaire')}" value="${v('risque_defaire', '0')}" style="text-align:center; font-size:16px; font-weight:700;">
           </div>
         </div>
 
         <div style="font-size:11px; margin-bottom:6px; color:var(--muted);">
-          <strong>Pouvoirs:</strong> aide divine, repousser impiés (+mods Pre+Cha), imposition les mains.
+          <strong>Pouvoirs:</strong> aide divine, repousser impies (+mods Pre+Cha), imposition des mains.
         </div>
 
         <table class="dtable">
           <thead>
             <tr>
-              <th style="text-align:left; width:40%;">Imposition des mains (decalage d'alignement)</th>
+              <th style="text-align:left; width:40%;">Imposition des mains (décalage d'alignement)</th>
               <th>12</th>
               <th>14</th>
               <th>20</th>
@@ -81,24 +81,24 @@ window.DCCModules.clerc = {
           <tbody>
             <tr>
               <td>(identique)</td>
-              <td><input type="text" data-key="${k('impos_id_12')}" value="${v('impos_id_12', '2 des')}"></td>
-              <td><input type="text" data-key="${k('impos_id_14')}" value="${v('impos_id_14', '3 des')}"></td>
-              <td><input type="text" data-key="${k('impos_id_20')}" value="${v('impos_id_20', '4 des')}"></td>
-              <td><input type="text" data-key="${k('impos_id_22')}" value="${v('impos_id_22', '5 des')}"></td>
+              <td><input type="text" data-key="${k('impos_id_12')}" value="${v('impos_id_12', '2 dés')}"></td>
+              <td><input type="text" data-key="${k('impos_id_14')}" value="${v('impos_id_14', '3 dés')}"></td>
+              <td><input type="text" data-key="${k('impos_id_20')}" value="${v('impos_id_20', '4 dés')}"></td>
+              <td><input type="text" data-key="${k('impos_id_22')}" value="${v('impos_id_22', '5 dés')}"></td>
             </tr>
             <tr>
               <td>(adjacent)</td>
-              <td><input type="text" data-key="${k('impos_adj_12')}" value="${v('impos_adj_12', '1 de')}"></td>
-              <td><input type="text" data-key="${k('impos_adj_14')}" value="${v('impos_adj_14', '2 des')}"></td>
-              <td><input type="text" data-key="${k('impos_adj_20')}" value="${v('impos_adj_20', '3 des')}"></td>
-              <td><input type="text" data-key="${k('impos_adj_22')}" value="${v('impos_adj_22', '4 des')}"></td>
+              <td><input type="text" data-key="${k('impos_adj_12')}" value="${v('impos_adj_12', '1 dé')}"></td>
+              <td><input type="text" data-key="${k('impos_adj_14')}" value="${v('impos_adj_14', '2 dés')}"></td>
+              <td><input type="text" data-key="${k('impos_adj_20')}" value="${v('impos_adj_20', '3 dés')}"></td>
+              <td><input type="text" data-key="${k('impos_adj_22')}" value="${v('impos_adj_22', '4 dés')}"></td>
             </tr>
             <tr>
-              <td>(oppose)</td>
-              <td><input type="text" data-key="${k('impos_opp_12')}" value="${v('impos_opp_12', '1 de')}"></td>
-              <td><input type="text" data-key="${k('impos_opp_14')}" value="${v('impos_opp_14', '1 des')}"></td>
-              <td><input type="text" data-key="${k('impos_opp_20')}" value="${v('impos_opp_20', '2 des')}"></td>
-              <td><input type="text" data-key="${k('impos_opp_22')}" value="${v('impos_opp_22', '3 des')}"></td>
+              <td>(opposé)</td>
+              <td><input type="text" data-key="${k('impos_opp_12')}" value="${v('impos_opp_12', '1 dé')}"></td>
+              <td><input type="text" data-key="${k('impos_opp_14')}" value="${v('impos_opp_14', '1 dés')}"></td>
+              <td><input type="text" data-key="${k('impos_opp_20')}" value="${v('impos_opp_20', '2 dés')}"></td>
+              <td><input type="text" data-key="${k('impos_opp_22')}" value="${v('impos_opp_22', '3 dés')}"></td>
             </tr>
           </tbody>
         </table>

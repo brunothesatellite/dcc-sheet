@@ -81,7 +81,7 @@ window.DCCModules.elfe = {
             <label class="field-label">Traits elfiques</label>
             <div class="traits-text">
               Sensibilité au fer, immunité au sommeil/paralysie, infravision,
-              sans signe developpé, mod. de Cha à un sort de niveau 1
+              sens surdeveloppés, mod. de Cha à un sort de niveau 1
             </div>
           </div>
         </div>

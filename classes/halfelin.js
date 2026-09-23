@@ -15,7 +15,7 @@ window.DCCModules.halfelin = {
           <div class="capacites-left">
             <div class="cap-label">Infravision</div>
             <div class="label-on-line">
-              <label class="field-label">Discrétion :</label>
+              <label class="cap-label">Discrétion :</label>
               <input type="text" data-key="${k('discretion')}" value="${v('discretion')}">
             </div>
             <div class="cap-label">Porte-bonheur</div>

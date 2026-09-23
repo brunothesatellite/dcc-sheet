@@ -45,9 +45,9 @@ window.DCCModules.blocCommun = {
             <div class="combat-box">
               <div class="section-bar">Combat</div>
               <div class="combat-field"><label>Initiative:</label><input type="text" data-key="${k('initiative')}" value="${v('initiative')}" placeholder="0"></div>
-              <div class="combat-field"><label>Des(s) d'action:</label><input type="text" data-key="${k('des_action')}" value="${v('des_action')}" placeholder="1d20"></div>
+              <div class="combat-field"><label>Dés(s) d'action:</label><input type="text" data-key="${k('des_action')}" value="${v('des_action')}" placeholder="1d20"></div>
               <div class="combat-field"><label>Attaque:</label><input type="text" data-key="${k('attaque')}" value="${v('attaque')}" placeholder="+0"></div>
-              <div class="combat-field"><label>Des critique:</label><input type="text" data-key="${k('des_critique')}" value="${v('des_critique')}" placeholder="d20"></div>
+              <div class="combat-field"><label>Dés critique:</label><input type="text" data-key="${k('des_critique')}" value="${v('des_critique')}" placeholder="d20"></div>
               <div class="combat-field"><label>Table critique:</label><input type="text" data-key="${k('table_critique')}" value="${v('table_critique')}"></div>
             </div>
           </div>
@@ -70,7 +70,7 @@ window.DCCModules.blocCommun = {
             </div>
             <div class="stat-block">
               <div class="stat-block-top">
-                <div class="stat-name">Agilite</div>
+                <div class="stat-name">Agilité</div>
                 <div class="stat-value"><input type="text" data-key="${k('agilite')}" value="${v('agilite')}" placeholder="0"></div>
                 <div class="stat-circle">
                   <input type="text" data-key="${k('js_reflexe')}" value="${v('js_reflexe')}" placeholder="0">
@@ -96,7 +96,7 @@ window.DCCModules.blocCommun = {
             </div>
             <div class="stat-block">
               <div class="stat-block-top">
-                <div class="stat-name">Presence</div>
+                <div class="stat-name">Présence</div>
                 <div class="stat-value"><input type="text" data-key="${k('presence')}" value="${v('presence')}" placeholder="0"></div>
                 <div class="stat-circle">
                   <input type="text" data-key="${k('js_volonte')}" value="${v('js_volonte')}" placeholder="0">
@@ -140,10 +140,10 @@ window.DCCModules.blocCommun = {
           </div>
           <div class="combat-ext-col">
             <div class="combat-ext">
-              <div class="combat-ext-field"><label>Attaque CAC</label><input type="text" data-key="${k('attaque_cac')}" value="${v('attaque_cac')}" placeholder="+0"></div>
-              <div class="combat-ext-field"><label>Degats CAC</label><input type="text" data-key="${k('degats_cac')}" value="${v('degats_cac')}" placeholder="1d6"></div>
-              <div class="combat-ext-field"><label>Att. a distance</label><input type="text" data-key="${k('att_distance')}" value="${v('att_distance')}" placeholder="+0"></div>
-              <div class="combat-ext-field"><label>Degats distance</label><input type="text" data-key="${k('degats_distance')}" value="${v('degats_distance')}" placeholder="1d6"></div>
+              <div class="combat-ext-field"><label>Attaque CàC</label><input type="text" data-key="${k('attaque_cac')}" value="${v('attaque_cac')}" placeholder="+0"></div>
+              <div class="combat-ext-field"><label>Degats CàC</label><input type="text" data-key="${k('degats_cac')}" value="${v('degats_cac')}" placeholder="1d6"></div>
+              <div class="combat-ext-field"><label>Att. à distance</label><input type="text" data-key="${k('att_distance')}" value="${v('att_distance')}" placeholder="+0"></div>
+              <div class="combat-ext-field"><label>Degats à distance</label><input type="text" data-key="${k('degats_distance')}" value="${v('degats_distance')}" placeholder="1d6"></div>
             </div>
             <div class="portrait-area">
               <input type="hidden" data-key="${k('portrait_source')}" value="${v('portrait_source', 'dcc')}">
@@ -164,15 +164,15 @@ window.DCCModules.blocCommun = {
             <textarea data-key="${k('armes')}" rows="5" placeholder="Liste des armes...">${v('armes')}</textarea>
           </div>
           <div class="field">
-            <div class="section-bar">Equipement</div>
-            <textarea data-key="${k('equipement')}" rows="5" placeholder="Liste de l'equipement...">${v('equipement')}</textarea>
+            <div class="section-bar">Équipement</div>
+            <textarea data-key="${k('equipement')}" rows="5" placeholder="Liste de l'équipement...">${v('equipement')}</textarea>
           </div>
         </div>
 
         <div class="row" style="align-items: stretch;">
           <div class="field">
-            <div class="section-bar">Tresor</div>
-            <textarea data-key="${k('tresor')}" rows="4" placeholder="Tresor...">${v('tresor')}</textarea>
+            <div class="section-bar">Trésor</div>
+            <textarea data-key="${k('tresor')}" rows="4" placeholder="Trésor...">${v('tresor')}</textarea>
           </div>
           <div class="field">
             <div class="section-bar">Armure</div>

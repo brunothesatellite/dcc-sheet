@@ -1878,7 +1878,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .team-table .char-name {
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: 28px;
+  font-size: 20px;
   text-align: left;
   white-space: nowrap;
   cursor: pointer;
@@ -1900,7 +1900,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .team-table .char-class-content {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 6px;
   white-space: nowrap;
 }
@@ -2402,6 +2402,7 @@ input[type="number"]::-webkit-outer-spin-button {
   .turn-counter { width: 30px; height: 30px; font-size: 13px; }
   .team-table .char-name { font-size: 11px; }
   .team-table .char-class { font-size: 9px; }
+  .team-table .char-class-content { gap: 3px; }
   .btn-group { flex-wrap: wrap; gap: 4px; }
   .btn-sm { padding: 4px 8px; font-size: 10px; }
 

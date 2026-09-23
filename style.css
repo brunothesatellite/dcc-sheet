@@ -2429,8 +2429,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .portrait-picker-header {
-  background: var(--accent);
-  color: #fff;
+  background: var(--header-bg);
+  color: var(--header-text);
   padding: 12px 16px;
   display: flex;
   justify-content: space-between;
@@ -2448,7 +2448,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .portrait-picker-header-close {
   background: none;
   border: none;
-  color: #fff;
+  color: var(--header-text);
   font-size: 20px;
   cursor: pointer;
   padding: 0 4px;

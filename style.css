@@ -1379,9 +1379,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .sorts-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5px;
-  border: 1.5px solid var(--ink);
-  background: var(--ink);
+  gap: 3px 6px;
 }
 
 .sort-cell {
@@ -1391,11 +1389,14 @@ input[type="number"]::-webkit-outer-spin-button {
   min-height: 24px;
   padding: 3px 8px;
   background: var(--field-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.sort-cell:nth-child(4n),
-.sort-cell:nth-child(4n+3) {
-  background: var(--paper);
+.sort-cell:focus-within {
+  border-color: var(--tab-active);
+  box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.15);
 }
 
 .sort-cell input {
@@ -1408,8 +1409,8 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .sort-cell input:focus {
-  background: rgba(255, 255, 255, 0.55);
-  border-radius: 3px;
+  background: transparent;
+  box-shadow: none;
   outline: none;
 }
 

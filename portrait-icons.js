@@ -4,6 +4,7 @@ window.PortraitSources = [
   window.ShadowIcons,
   window.ShadowDarkIcons,
   window.ComicsIcons,
+  window.GonzoIcons,
 ].filter(Boolean);
 
 window.getPortraitSrc = function (source, cls, index) {

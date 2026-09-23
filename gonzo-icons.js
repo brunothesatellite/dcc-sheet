@@ -17,8 +17,6 @@ window.GonzoIcons = {
   guerrier: [
     'icons/gonzo/01_guerrier_homme.png',
     'icons/gonzo/01_guerrier_homme_nb.png',
-    'icons/gonzo/09_guerrier_homme_variante.png',
-    'icons/gonzo/09_guerrier_homme_variante_nb.png',
   ],
   halfelin: [
     'icons/gonzo/08_gueux_halfling_homme.png',

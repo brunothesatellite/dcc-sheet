@@ -147,16 +147,12 @@ window.DCCModules.equipe = {
           // Classe
           const tdClass = document.createElement('td');
           tdClass.className = 'char-class';
-          const portraitSource = data.portrait_source || 'dcc';
-          const portraitIndex = parseInt(data.portrait_index, 10) || 0;
           const img = document.createElement('img');
           img.className = 'team-portrait';
           img.alt = '';
-          if (portraitSource === 'redbox' && window.DDRedBoxIcons) {
-            img.src = window.DDRedBoxIcons[charData.class] || '';
-          } else if (window.DCCIcons) {
-            var list = window.DCCIcons[charData.class] || [];
-            if (list.length > 0) img.src = list[portraitIndex % list.length];
+          if (window.getPortraitSrc) {
+            var portraitResult = window.getPortraitSrc(data.portrait_source || 'dcc', charData.class, data.portrait_index);
+            img.src = portraitResult.src;
           }
           if (img.src) tdClass.appendChild(img);
           tdClass.appendChild(document.createTextNode(CLASS_LABELS[charData.class] || charData.class));

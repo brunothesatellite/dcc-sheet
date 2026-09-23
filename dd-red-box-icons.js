@@ -1,4 +1,5 @@
 window.DDRedBoxIcons = {
+  meta: { key: 'redbox', label: 'D&D Red Box 1983' },
   clerc:    'icons/dd-red-box/clerc.webp',
   elfe:     'icons/dd-red-box/elf.webp',
   guerrier: 'icons/dd-red-box/guerrier.webp',

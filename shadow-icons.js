@@ -1,4 +1,5 @@
-window.DDRedBoxIcons = {
+window.ShadowIcons = {
+  meta: { key: 'shadow', label: 'Leremy Gan' },
   clerc:    'icons/shadow/crusader.png',
   elfe:     'icons/shadow/elf_male.png',
   guerrier: 'icons/shadow/knight.png',

@@ -1262,21 +1262,6 @@ input[type="number"]::-webkit-outer-spin-button {
   transform: scale(1.05);
 }
 
-.portrait-switch {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.portrait-source-label {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 10px;
-  text-transform: uppercase;
-  color: var(--muted);
-  min-width: 60px;
-}
-
 .dtable {
   width: 100%;
   border-collapse: collapse;
@@ -2270,10 +2255,6 @@ input[type="number"]::-webkit-outer-spin-button {
     height: 160px;
   }
 
-  .portrait-source-label {
-    font-size: 9px;
-  }
-
   .dtable {
     font-size: 10px;
   }
@@ -2391,4 +2372,102 @@ input[type="number"]::-webkit-outer-spin-button {
   .team-table .char-class { font-size: 9px; }
   .btn-group { flex-wrap: wrap; gap: 4px; }
   .btn-sm { padding: 4px 8px; font-size: 10px; }
+
+  .portrait-picker { padding: 16px; max-height: 90vh; }
+  .portrait-picker-title { font-size: 15px; }
+  .portrait-picker-grid { grid-template-columns: 1fr; }
+}
+
+/* Portrait picker popup */
+.portrait-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.portrait-picker {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  max-width: 620px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.portrait-picker-title {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  text-align: center;
+}
+
+.portrait-picker-section {
+  margin-bottom: 20px;
+}
+
+.portrait-picker-section-title {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px 0;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.portrait-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.portrait-picker-img {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid transparent;
+  background: var(--field-bg);
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.portrait-picker-img:hover {
+  transform: scale(1.05);
+  border-color: var(--accent);
+}
+
+.portrait-picker-img.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.portrait-picker-close {
+  display: block;
+  margin: 16px auto 0;
+  padding: 8px 24px;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--field-bg);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.portrait-picker-close:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
 }

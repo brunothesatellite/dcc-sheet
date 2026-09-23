@@ -148,14 +148,7 @@ window.DCCModules.blocCommun = {
             <div class="portrait-area">
               <input type="hidden" data-key="${k('portrait_source')}" value="${v('portrait_source', 'dcc')}">
               <input type="hidden" data-key="${k('portrait_index')}" value="${v('portrait_index', '0')}">
-              <img class="portrait-img" data-portrait-img alt="Portrait">
-              <div class="portrait-switch">
-                <label class="switch">
-                  <input type="checkbox" data-portrait-toggle>
-                  <span class="switch-slider"></span>
-                </label>
-                <span class="portrait-source-label">DCC</span>
-              </div>
+              <img class="portrait-img clickable" data-portrait-img alt="Portrait">
             </div>
           </div>
         </div>

@@ -941,16 +941,11 @@
     if (!area) return;
 
     var img = area.querySelector('[data-portrait-img]');
-    var checkbox = area.querySelector('[data-portrait-toggle]');
-    var label = area.querySelector('.portrait-source-label');
     var hiddenSource = area.querySelector('input[data-key$="-portrait_source"]');
     var hiddenIndex = area.querySelector('input[data-key$="-portrait_index"]');
-    if (!img || !checkbox || !hiddenSource || !hiddenIndex) return;
+    if (!img || !hiddenSource || !hiddenIndex) return;
 
-    var icons = window.DCCIcons;
-    var rbIcons = window.DDRedBoxIcons;
-
-    if (!icons || !rbIcons) {
+    if (!window.getPortraitSrc) {
       setTimeout(function () { initPortraits(cls, charId, container); }, 100);
       return;
     }
@@ -959,38 +954,113 @@
     var index = parseInt(hiddenIndex.value, 10) || 0;
 
     function applyPortrait() {
-      if (source === 'redbox') {
-        img.src = rbIcons[cls] || '';
-        img.classList.remove('clickable');
-        if (label) label.textContent = 'Red Box';
-      } else {
-        var list = icons[cls] || [];
-        if (list.length === 0) { img.src = ''; img.classList.remove('clickable'); return; }
-        index = index % list.length;
-        img.src = list[index];
-        img.classList.add('clickable');
-        if (label) label.textContent = 'DCC';
-      }
-      checkbox.checked = source === 'redbox';
+      var result = window.getPortraitSrc(source, cls, index);
+      img.src = result.src;
+      source = result.source;
+      index = result.index;
+      hiddenSource.value = source;
+      hiddenIndex.value = index;
     }
 
     applyPortrait();
 
-    checkbox.addEventListener('change', function () {
-      source = checkbox.checked ? 'redbox' : 'dcc';
-      hiddenSource.value = source;
-      applyPortrait();
-      scheduleSave(cls, charId);
-    });
-
     img.addEventListener('click', function () {
-      if (source !== 'dcc') return;
-      var list = icons[cls] || [];
-      if (list.length <= 1) return;
-      index = (index + 1) % list.length;
-      hiddenIndex.value = index;
-      img.src = list[index];
-      scheduleSave(cls, charId);
+      showPortraitPicker(cls, source, index).then(function (result) {
+        if (!result) return;
+        source = result.source;
+        index = result.index;
+        hiddenSource.value = source;
+        hiddenIndex.value = index;
+        applyPortrait();
+        scheduleSave(cls, charId);
+      });
+    });
+  }
+
+  function showPortraitPicker(cls, currentSource, currentIndex) {
+    return new Promise(function (resolve) {
+      var overlay = document.createElement('div');
+      overlay.className = 'portrait-picker-overlay';
+
+      var picker = document.createElement('div');
+      picker.className = 'portrait-picker';
+
+      var title = document.createElement('h2');
+      title.className = 'portrait-picker-title';
+      title.textContent = 'Choisir un portrait';
+      picker.appendChild(title);
+
+      var scrollTarget = null;
+
+      window.PortraitSources.forEach(function (ps) {
+        var entry = ps[cls];
+        if (!entry) return;
+        var images = Array.isArray(entry) ? entry : [entry];
+        if (images.length === 0) return;
+
+        var section = document.createElement('div');
+        section.className = 'portrait-picker-section';
+
+        var sectionTitle = document.createElement('h3');
+        sectionTitle.className = 'portrait-picker-section-title';
+        sectionTitle.textContent = ps.meta.label;
+        section.appendChild(sectionTitle);
+
+        var grid = document.createElement('div');
+        grid.className = 'portrait-picker-grid';
+
+        images.forEach(function (src, i) {
+          var imgEl = document.createElement('img');
+          imgEl.className = 'portrait-picker-img';
+          imgEl.src = src;
+          imgEl.alt = '';
+          if (ps.meta.key === currentSource && i === currentIndex) {
+            imgEl.classList.add('active');
+            scrollTarget = imgEl;
+          }
+          imgEl.addEventListener('click', function () {
+            overlay.remove();
+            resolve({ source: ps.meta.key, index: i });
+          });
+          grid.appendChild(imgEl);
+        });
+
+        section.appendChild(grid);
+        picker.appendChild(section);
+      });
+
+      var closeBtn = document.createElement('button');
+      closeBtn.className = 'portrait-picker-close';
+      closeBtn.textContent = 'Fermer';
+      closeBtn.addEventListener('click', function () {
+        overlay.remove();
+        resolve(null);
+      });
+      picker.appendChild(closeBtn);
+
+      overlay.appendChild(picker);
+      document.body.appendChild(overlay);
+
+      if (scrollTarget) {
+        setTimeout(function () {
+          scrollTarget.scrollIntoView({ block: 'center', behavior: 'instant' });
+        }, 50);
+      }
+
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) {
+          overlay.remove();
+          resolve(null);
+        }
+      });
+
+      document.addEventListener('keydown', function handler(e) {
+        if (e.key === 'Escape') {
+          document.removeEventListener('keydown', handler);
+          overlay.remove();
+          resolve(null);
+        }
+      });
     });
   }
 

@@ -1,4 +1,5 @@
 window.DCCIcons = {
+  meta: { key: 'dcc', label: 'Dungeon Crawl Classics' },
   clerc: [
     'icons/dcc-pc-tokens/DCC_PC_Cleric_Female_280px.png',
     'icons/dcc-pc-tokens/DCC_PC_Cleric_Male_280px.png',

@@ -783,7 +783,16 @@
     var nameText = charData.name || 'Sans nom';
     if (parsed.niveau) nameText += ' — Niv.' + parsed.niveau;
     var name = el('div', { className: 'char-card-name', textContent: nameText });
-    cardTop.appendChild(name);
+
+    var nameRow = el('div', { className: 'char-card-name-row' });
+    if (window.getPortraitSrc) {
+      var portraitResult = window.getPortraitSrc(parsed.portrait_source || 'dcc', cls, parsed.portrait_index);
+      if (portraitResult.src) {
+        nameRow.appendChild(el('img', { className: 'char-card-portrait', src: portraitResult.src, alt: '' }));
+      }
+    }
+    nameRow.appendChild(name);
+    cardTop.appendChild(nameRow);
 
     var toggleWrapper = el('div', { className: 'toggle-inn' });
     toggleWrapper.addEventListener('click', function (e) { e.stopPropagation(); });

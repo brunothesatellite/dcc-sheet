@@ -486,6 +486,22 @@ ul, ol {
   gap: 8px;
 }
 
+.char-card-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.char-card-portrait {
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
 .char-card-name {
   font-family: var(--font-heading);
   font-weight: 800;
@@ -2367,6 +2383,7 @@ input[type="number"]::-webkit-outer-spin-button {
   .team-table td { padding: 3px 2px; }
   .team-table input { font-size: 11px; padding: 3px 2px; }
   .team-portrait { height: 40px; width: 40px; }
+  .char-card-portrait { height: 40px; width: 40px; }
   .team-table tbody tr { height: 40px; }
   .turn-counter { width: 30px; height: 30px; font-size: 13px; }
   .team-table .char-name { font-size: 11px; }

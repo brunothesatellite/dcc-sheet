@@ -1015,23 +1015,14 @@
       body.className = 'portrait-picker-body';
 
       var scrollTarget = null;
+      var grid = document.createElement('div');
+      grid.className = 'portrait-picker-grid';
 
       window.PortraitSources.forEach(function (ps) {
         var entry = ps[cls];
         if (!entry) return;
         var images = Array.isArray(entry) ? entry : [entry];
         if (images.length === 0) return;
-
-        var section = document.createElement('div');
-        section.className = 'portrait-picker-section';
-
-        var sectionTitle = document.createElement('div');
-        sectionTitle.className = 'portrait-picker-section-title';
-        sectionTitle.textContent = ps.meta.label;
-        section.appendChild(sectionTitle);
-
-        var grid = document.createElement('div');
-        grid.className = 'portrait-picker-grid';
 
         images.forEach(function (src, i) {
           var imgEl = document.createElement('img');
@@ -1045,12 +1036,20 @@
           imgEl.addEventListener('click', function () {
             close({ source: ps.meta.key, index: i });
           });
-          grid.appendChild(imgEl);
-        });
 
-        section.appendChild(grid);
-        body.appendChild(section);
+          var cell = document.createElement('div');
+          cell.className = 'portrait-picker-cell';
+
+          var sectionTitle = document.createElement('div');
+          sectionTitle.className = 'portrait-picker-section-title';
+          if (i === 0) sectionTitle.textContent = ps.meta.label;
+          cell.appendChild(sectionTitle);
+          cell.appendChild(imgEl);
+          grid.appendChild(cell);
+        });
       });
+
+      body.appendChild(grid);
 
       picker.appendChild(body);
 

@@ -36,7 +36,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 
 ### Portrait
 - 7 sources d'images : **DCC** (tokens officiels, 20 images), **D&D Red Box 1983** (7 illustrations), **Leremy Gan** (7 silhouettes), **Shadowdark** (12 images), **Jeff Stevens** (8 planches), **Gonzo** (32 images) et **Old School** (17 images)
-- **Popup « Choisir un portrait »** : clic sur le portrait dans la fiche → grille regroupee par source (3 colonnes, 2 sur mobile)
+- **Popup « Choisir un portrait »** : clic sur le portrait dans la fiche → grille continue (3 colonnes, 2 sur mobile), libellé de source au-dessus du premier portrait de chaque section
 - Portrait courant surligne (bordure accent) et scroll automatique vers lui
 - Fermeture : bouton X, bouton Fermer, clic en dehors, ou touche Echap
 - Choix sauvegarde avec le personnage en base, propage dans les imports/exports JSON individuels et globaux

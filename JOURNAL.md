@@ -621,7 +621,7 @@ Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts �
 - **Catalogues** : `dcc-icons.js`, `dd-red-box-icons.js`, `shadow-icons.js`, `shadowdark-icons.js`, `comics-icons.js`, `gonzo-icons.js`, `osr-icons.js` — chacun avec `meta.key` / `meta.label` ; chargés dans `index.html` avant le registre.
 - **Fichiers images** : `icons/shadow/` (PNG), `icons/shadowdark/` (12 PNG, **compressés ~200 Ko** au lieu de ~2,4 Mo), `icons/jeff-stevens/` (8 planches), `icons/gonzo/` (32 PNG couleur + `_nb`), `icons/osr/` (17 PNG).
 - **Clés persistance** : `portrait_source` (ASCII uniquement) + `portrait_index` (wrap modulo longueur tableau) ; inputs hidden dans `bloc_commun.js`, lus par `collectData`.
-- **Popup « Choisir un portrait »** : grille 3 colonnes regroupée par source (2 sur mobile), portrait courant surligné + auto-scroll, fermeture X / FERMER / clic extérieur / Échap ; capture `captures/choix-portrait.png` intégrée au MANUAL § 7.
+- **Popup « Choisir un portrait »** : grille **continue** 3 colonnes (2 sur mobile), libellé de source **au-dessus du premier portrait** de chaque section (cellules dédiées aux images, cases vides comblées par la suite), portrait courant surligné + auto-scroll, fermeture X / FERMER / clic extérieur / Échap ; capture `captures/choix-portrait.png` intégrée au MANUAL § 7.
 - **Affichage** : portrait sur les **cartes de la liste** (`.char-card-portrait`, 50 px / 40 px mobile), l'**onglet Equipe** (colonne Classe), et la fiche.
 - **Header popup en thème sombre** : `--header-bg` / `--header-text` au lieu de `--accent` + `#fff` (le crème `#e8e4dc` du dark rendait la barre illisible).
 - **Nav mobile** : onglet Equipe masqué ≤ 600px, remplacé par l'icône ⚔ `#btn-equipe-mobile` dans le topbar.
@@ -637,17 +637,24 @@ Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts �
 - Exemple d'équipe ajouté au dépôt (`exemples/dcc-persos-2026-09-22.json`).
 - Correction du bloc `@media` orphelin de `style.css` (accolades 371/371).
 
+### Popup portraits — grille continue (mise à jour du layout)
+
+- **`showPortraitPicker`** réécrit : une **seule** `.portrait-picker-grid` ; chaque image dans une `.portrait-picker-cell` ; le **libellé de source** n'apparaît que sur la cellule du **premier portrait** de la section (empilé au-dessus), les autres cellules réservent la même hauteur (`min-height: 24px`) pour garder l'alignement des rangées.
+- **Gain** : plus de cases vides en fin de section (les portraits de la source suivante comblent la suite), plus de case occupée par un titre seul.
+- **Capture** `captures/choix-portrait.png` régénérée (nouveau layout) ; **MANUAL § 7.1**, **README** et **JOURNAL** alignés sur la description « grille continue, libellé au-dessus du premier portrait ».
+
 ### Fichiers modifies (23 septembre)
 
 | Fichier | Actions |
 |---------|---------|
 | `portrait-icons.js` + 7 catalogues + `icons/*` | Registre des 7 sources + images (dont `gonzo-icons.js`, `osr-icons.js`) |
-| `script.js` | `initPortraits`, `showPortraitPicker`, `createCharCard`, bouton équipe mobile |
+| `script.js` | `initPortraits`, `showPortraitPicker` (grille continue + cells), `createCharCard`, bouton équipe mobile |
 | `index.html` | Chargement des catalogues, bouton ⚔ |
 | `classes/bloc_commun.js` | Portrait-area + inputs hidden source/index |
 | `classes/equipe.js` | Portrait dans le tableau |
 | `classes/clerc.js` | Table Imposition des mains statique |
 | `classes/halfelin.js` | `cap-label` |
-| `style.css` | Fix media query, portrait picker, cartes, `.impos-val`, `.combat-info`, header popup dark |
-| `MANUAL.md` / `README.md` | Portraits 7 sources, popup, nav, table statique |
+| `style.css` | Fix media query, portrait picker (`.portrait-picker-cell`, titre section), cartes, `.impos-val`, `.combat-info`, header popup dark |
+| `captures/choix-portrait.png` | Capture régénérée (layout grille continue) |
+| `MANUAL.md` / `README.md` | Portraits 7 sources, popup grille continue, nav, table statique |
 | `JOURNAL.md` | Cette entrée |

@@ -2471,23 +2471,25 @@ input[type="number"]::-webkit-outer-spin-button {
   padding: 16px;
 }
 
-.portrait-picker-section {
-  margin-bottom: 20px;
-}
-
-.portrait-picker-section:last-child {
-  margin-bottom: 0;
+.portrait-picker-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
 .portrait-picker-section-title {
   font-family: var(--font-heading);
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 700;
   text-transform: uppercase;
   color: var(--muted);
-  margin: 0 0 10px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid var(--border);
+  text-align: center;
+  margin: 0 0 6px;
+  line-height: 1.2;
+  min-height: 24px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 
 .portrait-picker-grid {

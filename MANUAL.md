@@ -377,14 +377,14 @@ Sept sources sont disponibles :
 ### 7.1 Choisir un portrait (mode opératoire)
 
 1. Ouvrez la fiche, cliquez sur le portrait.
-2. La popup **« Choisir un portrait »** s'ouvre : les images sont groupées par source, en 3 colonnes (2 sur mobile).
+2. La popup **« Choisir un portrait »** s'ouvre : grille continue de portraits ronds (3 colonnes, 2 sur mobile), le **nom de chaque source** s'affiche **au-dessus du premier portrait** de cette source.
 3. Le portrait courant est **surligné** (bordure accent) et la liste s'y **défile automatiquement**.
 4. Cliquez sur une image : la popup se ferme, l'image et le choix sont **sauvegardés automatiquement** (toast disquette).
 5. Pour annuler : bouton **✕** (en-tête), bouton **FERMER** (pied), clic en dehors de la fenêtre, ou touche **Échap**.
 
-<img src="captures/choix-portrait.png" alt="Popup « Choisir un portrait » : les images sont groupées par source, en grille de portraits ronds" width="420">
+<img src="captures/choix-portrait.png" alt="Popup « Choisir un portrait » : grille continue de portraits ronds, le nom de chaque source affiché au-dessus de son premier portrait" width="420">
 
-*La popup de choix : les images sont regroupées par source (DCC, Red Box, Leremy Gan, Shadowdark, Jeff Stevens, Gonzo, Old School). Le portrait courant est cerclé de la couleur d'accent.*
+*La popup de choix : grille continue (3 colonnes) ; le libellé de chaque source (DCC, Red Box, Leremy Gan, Shadowdark, Jeff Stevens, Gonzo, Old School) apparaît au-dessus du premier portrait de la section. Le portrait courant est cerclé de la couleur d'accent.*
 
 ### 7.2 Où le portrait apparaît
 
@@ -582,7 +582,7 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 | Voleur | d6 | 3 | 1 | 1 | **3** | 1 | 4 | 2 |
 | **Total** | — | **20 tokens** | **7 illustrations** | **7 silhouettes** | **12 images** | **8 planches** | **32 images** | **17 images** |
 
-- La sélection se fait via la popup **« Choisir un portrait »** (§ 7) : les sept sources y sont proposées, groupées par section.
+- La sélection se fait via la popup **« Choisir un portrait »** (§ 7) : les sept sources y sont proposées, libellé au-dessus du premier portrait de chaque section.
 
 ---
 

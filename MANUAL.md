@@ -12,7 +12,7 @@ Manuel d'utilisation de l'application web **DCC Fiches de Personnage** : créez 
 4. [Gérer ses personnages](#4-gérer-ses-personnages)
 5. [Statut : en expédition vs à l'auberge](#5-statut--en-expédition-vs-à-lauberge)
 6. [La fiche de personnage](#6-la-fiche-de-personnage)
-7. [Le portrait (5 sources)](#7-le-portrait-5-sources)
+7. [Le portrait (7 sources)](#7-le-portrait-7-sources)
 8. [Onglet Équipe (suivi de partie)](#8-onglet-équipe-suivi-de-partie)
 9. [Personnalisation & responsive](#9-personnalisation--responsive)
 10. [Astuces & dépannage](#10-astuces--dépannage)
@@ -30,7 +30,7 @@ Manuel d'utilisation de l'application web **DCC Fiches de Personnage** : créez 
 - créer **zéro à plusieurs personnages** par classe ;
 - remplir des **fiches fidèles aux feuilles officielles DCC** (PDF éditables fournis dans le dépôt) ;
 - suivre l'**équipe en expédition** (avec possibilité de laisser des personnages à l'**auberge**) dans un tableau de combat avec ennemis et compteurs de tour ;
-- choisir un **portrait** parmi 5 sources : tokens officiels DCC, illustrations D&D Red Box 1983, silhouettes Leremy Gan, portraits Shadowdark ou planches Jeff Stevens.
+- choisir un **portrait** parmi 7 sources : tokens officiels DCC, illustrations D&D Red Box 1983, silhouettes Leremy Gan, portraits Shadowdark, planches Jeff Stevens, portraits Gonzo ou portraits Old School.
 
 **Aucune installation** : l'application s'ouvre dans un navigateur moderne (Chrome, Firefox, Edge, Safari). Elle est optimisée pour smartphone mais fonctionne sur grand écran. Pour fonctionner elle nécessite seulement un serveur web avec **php** activé (et le module **sqlite3**). Voir **[README.md](./README.md)** pour plus d'informations sur le déploiement de l'application sur un serveur.
 
@@ -358,11 +358,11 @@ Les listes de sorts du Mage (2 lignes par sort), de l'Elfe (2 lignes par sort + 
 
 ---
 
-## 7. Le portrait (5 sources)
+## 7. Le portrait (7 sources)
 
 Chaque fiche possède un portrait, sous le bloc « combat étendu ». **Cliquez dessus** pour ouvrir la fenêtre de sélection.
 
-Cinq sources sont disponibles :
+Sept sources sont disponibles :
 
 | Source | Contenu |
 |---|---|
@@ -371,6 +371,8 @@ Cinq sources sont disponibles :
 | **Leremy Gan** | Silhouettes d'archetype (1 par classe) |
 | **Shadowdark** | Portraits (12 au total, répartis par classe) |
 | **Jeff Stevens** | Planches de comics (8 au total, répartis par classe) |
+| **Gonzo** | Portraits colorés + variantes noir et blanc (32 au total, répartis par classe) |
+| **Old School** | Portraits Old School Révival (17 au total, répartis par classe) |
 
 ### 7.1 Choisir un portrait (mode opératoire)
 
@@ -382,7 +384,7 @@ Cinq sources sont disponibles :
 
 <img src="captures/choix-portrait.png" alt="Popup « Choisir un portrait » : les images sont groupées par source, en grille de portraits ronds" width="420">
 
-*La popup de choix : les images sont regroupées par source (DCC, Red Box, Leremy Gan, Shadowdark, Jeff Stevens). Le portrait courant est cerclé de la couleur d'accent.*
+*La popup de choix : les images sont regroupées par source (DCC, Red Box, Leremy Gan, Shadowdark, Jeff Stevens, Gonzo, Old School). Le portrait courant est cerclé de la couleur d'accent.*
 
 ### 7.2 Où le portrait apparaît
 
@@ -544,7 +546,7 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 
 - `class` est **obligatoire** à l'import (sinon refus) : `clerc`, `elfe`, `guerrier`, `halfelin`, `mage`, `nain`, `voleur`.
 - `data` contient tous les champs de la fiche (textes bruts).
-- `portrait_source` vaut `dcc`, `redbox`, `shadow` (Leremy Gan), `shadowdark` ou `comics` (Jeff Stevens) ; `portrait_index` est la position de l'image dans la source (§ 7).
+- `portrait_source` vaut `dcc`, `redbox`, `shadow` (Leremy Gan), `shadowdark`, `comics` (Jeff Stevens), `gonzo` ou `osr` (Old School) ; `portrait_index` est la position de l'image dans la source (§ 7).
 
 ### Collection globale (Exporter tout / Importer tout)
 
@@ -569,18 +571,18 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 
 ## Annexe B : dés de vie et portraits par classe
 
-| Classe | Dé de vie (affiché dans le casque) | Portraits DCC | Red Box | Leremy Gan | Shadowdark | Jeff Stevens |
-|---|---|---|---|---|---|---|
-| Clerc | d8 | 2 | 1 | 1 | 2 | 2 |
-| Elfe | d6 | 2 | 1 | 1 | 2 | 1 |
-| Guerrier | **d12** | **5** | 1 | 1 | 2 | 1 |
-| Halfelin | d6 | 2 | 1 | 1 | 1 | 1 |
-| Mage | **d4** | **4** | 1 | 1 | 1 | 1 |
-| Nain | d10 | 2 | 1 | 1 | 1 | 1 |
-| Voleur | d6 | 3 | 1 | 1 | **3** | 1 |
-| **Total** | — | **20 tokens** | **7 illustrations** | **7 silhouettes** | **12 images** | **8 planches** |
+| Classe | Dé de vie (affiché dans le casque) | Portraits DCC | Red Box | Leremy Gan | Shadowdark | Jeff Stevens | Gonzo | Old School |
+|---|---|---|---|---|---|---|---|---|
+| Clerc | d8 | 2 | 1 | 1 | 2 | 2 | 4 | 2 |
+| Elfe | d6 | 2 | 1 | 1 | 2 | 1 | 6 | 4 |
+| Guerrier | **d12** | **5** | 1 | 1 | 2 | 1 | 4 | 1 |
+| Halfelin | d6 | 2 | 1 | 1 | 1 | 1 | 4 | 2 |
+| Mage | **d4** | **4** | 1 | 1 | 1 | 1 | 4 | 3 |
+| Nain | d10 | 2 | 1 | 1 | 1 | 1 | 6 | 3 |
+| Voleur | d6 | 3 | 1 | 1 | **3** | 1 | 4 | 2 |
+| **Total** | — | **20 tokens** | **7 illustrations** | **7 silhouettes** | **12 images** | **8 planches** | **32 images** | **17 images** |
 
-- La sélection se fait via la popup **« Choisir un portrait »** (§ 7) : les cinq sources y sont proposées, groupées par section.
+- La sélection se fait via la popup **« Choisir un portrait »** (§ 7) : les sept sources y sont proposées, groupées par section.
 
 ---
 
@@ -608,6 +610,8 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 | **Leremy Gan** | Source de portraits silhouette, 1 image par classe |
 | **Shadowdark** | Source de portraits, 12 images réparties par classe |
 | **Jeff Stevens** | Planches de comics, 8 images réparties par classe |
+| **Gonzo** | Portraits colorés + variantes N&B, 32 images réparties par classe |
+| **Old School** | Portraits OSR, 17 images réparties par classe |
 | **Toast** | Petit message transitoire en bas à droite |
 | **RAZ** | Remise à zéro (table des ennemis) |
 

@@ -615,11 +615,11 @@ Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts �
 
 ---
 
-### Système de portraits générique (5 sources)
+### Système de portraits générique (7 sources)
 
-- **Registre** `portrait-icons.js` : `window.PortraitSources` + `window.getPortraitSrc(source, cls, index)` ; sources : `dcc` (20 tokens), `redbox` (7), `shadow` Leremy Gan (7 silhouettes), `shadowdark` (12), `comics` Jeff Stevens (8 planches).
-- **Catalogues** : `dcc-icons.js`, `dd-red-box-icons.js`, `shadow-icons.js`, `shadowdark-icons.js`, `comics-icons.js` — chacun avec `meta.key` / `meta.label` ; chargés dans `index.html` avant le registre.
-- **Fichiers images** : `icons/shadow/` (PNG), `icons/shadowdark/` (12 PNG, **compressés ~200 Ko** au lieu de ~2,4 Mo), `icons/jeff-stevens/` (8 planches).
+- **Registre** `portrait-icons.js` : `window.PortraitSources` + `window.getPortraitSrc(source, cls, index)` ; sources : `dcc` (20 tokens), `redbox` (7), `shadow` Leremy Gan (7 silhouettes), `shadowdark` (12), `comics` Jeff Stevens (8 planches), `gonzo` (32), `osr` Old School (17).
+- **Catalogues** : `dcc-icons.js`, `dd-red-box-icons.js`, `shadow-icons.js`, `shadowdark-icons.js`, `comics-icons.js`, `gonzo-icons.js`, `osr-icons.js` — chacun avec `meta.key` / `meta.label` ; chargés dans `index.html` avant le registre.
+- **Fichiers images** : `icons/shadow/` (PNG), `icons/shadowdark/` (12 PNG, **compressés ~200 Ko** au lieu de ~2,4 Mo), `icons/jeff-stevens/` (8 planches), `icons/gonzo/` (32 PNG couleur + `_nb`), `icons/osr/` (17 PNG).
 - **Clés persistance** : `portrait_source` (ASCII uniquement) + `portrait_index` (wrap modulo longueur tableau) ; inputs hidden dans `bloc_commun.js`, lus par `collectData`.
 - **Popup « Choisir un portrait »** : grille 3 colonnes regroupée par source (2 sur mobile), portrait courant surligné + auto-scroll, fermeture X / FERMER / clic extérieur / Échap ; capture `captures/choix-portrait.png` intégrée au MANUAL § 7.
 - **Affichage** : portrait sur les **cartes de la liste** (`.char-card-portrait`, 50 px / 40 px mobile), l'**onglet Equipe** (colonne Classe), et la fiche.
@@ -641,7 +641,7 @@ Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts �
 
 | Fichier | Actions |
 |---------|---------|
-| `portrait-icons.js` + 5 catalogues + `icons/*` | Registre des 5 sources + images |
+| `portrait-icons.js` + 7 catalogues + `icons/*` | Registre des 7 sources + images (dont `gonzo-icons.js`, `osr-icons.js`) |
 | `script.js` | `initPortraits`, `showPortraitPicker`, `createCharCard`, bouton équipe mobile |
 | `index.html` | Chargement des catalogues, bouton ⚔ |
 | `classes/bloc_commun.js` | Portrait-area + inputs hidden source/index |
@@ -649,5 +649,5 @@ Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts �
 | `classes/clerc.js` | Table Imposition des mains statique |
 | `classes/halfelin.js` | `cap-label` |
 | `style.css` | Fix media query, portrait picker, cartes, `.impos-val`, `.combat-info`, header popup dark |
-| `MANUAL.md` / `README.md` | Portraits 5 sources, popup, nav, table statique |
+| `MANUAL.md` / `README.md` | Portraits 7 sources, popup, nav, table statique |
 | `JOURNAL.md` | Cette entrée |

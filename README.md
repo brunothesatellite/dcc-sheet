@@ -25,7 +25,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - Cartes de personnages avec **portrait**, nom, niveau, et toggle
 
 ### Fiches de personnage
-- **Commun** : Identite (Nom, Titre, Metier, Alignement, Mouvement, Niveau, PX), Defense (CA, PV/Max avec **Des de vie**), Combat (Initiative, Des d'action, Attaque, Critique), 6 carac. avec modif. et jets de sauvegarde, Combat etendu (CAC/Distance), **Portrait** (5 sources, choix via popup), Equipement (Armes, Equipement, Tresor, Armure)
+- **Commun** : Identite (Nom, Titre, Metier, Alignement, Mouvement, Niveau, PX), Defense (CA, PV/Max avec **Des de vie**), Combat (Initiative, Des d'action, Attaque, Critique), 6 carac. avec modif. et jets de sauvegarde, Combat etendu (CAC/Distance), **Portrait** (7 sources, choix via popup), Equipement (Armes, Equipement, Tresor, Armure)
 - **Clerc** : Dieu, Incantation, Defaveur, Imposition des mains (tableau de référence non modifiable), **Liste de sorts dynamique** (grille 2 colonnes, champ unique par sort, ajout/suppression avec confirmation, migration de l'ancienne grille 3 × 7)
 - **Elfe** : Incantation, Familier, Patron, Corruption, Traits elfiques, **Liste de sorts dynamique** comme le Mage (2 sorts de patron figés en lignes 1-2 : Lier un patron / Invoquer un Patron (___/jour) saisissable, lignes libres à partir de la 3e, ajout/suppression avec confirmation)
 - **Guerrier** : Coup critique, Arme Chance, Hauts faits d'armes
@@ -35,7 +35,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - **Voleur** : 14 competences voleur en grille (De de chance, Escalade, Crocheter, Pieges, etc.)
 
 ### Portrait
-- 5 sources d'images : **DCC** (tokens officiels, 20 images), **D&D Red Box 1983** (7 illustrations), **Leremy Gan** (7 silhouettes), **Shadowdark** (12 images) et **Jeff Stevens** (8 planches)
+- 7 sources d'images : **DCC** (tokens officiels, 20 images), **D&D Red Box 1983** (7 illustrations), **Leremy Gan** (7 silhouettes), **Shadowdark** (12 images), **Jeff Stevens** (8 planches), **Gonzo** (32 images) et **Old School** (17 images)
 - **Popup « Choisir un portrait »** : clic sur le portrait dans la fiche → grille regroupee par source (3 colonnes, 2 sur mobile)
 - Portrait courant surligne (bordure accent) et scroll automatique vers lui
 - Fermeture : bouton X, bouton Fermer, clic en dehors, ou touche Echap
@@ -84,6 +84,8 @@ dcc-sheet/
 ├── shadow-icons.js             # Catalogue d'icones Leremy Gan (7 silhouettes, 7 classes)
 ├── shadowdark-icons.js         # Catalogue d'icones Shadowdark (12 images, 7 classes)
 ├── comics-icons.js             # Catalogue d'icones Jeff Stevens (8 planches, 7 classes)
+├── gonzo-icons.js              # Catalogue d'icones Gonzo (32 images, 7 classes)
+├── osr-icons.js                # Catalogue d'icones Old School (17 images, 7 classes)
 ├── portrait-icons.js           # Registre des sources de portraits (getPortraitSrc)
 ├── api/
 │   ├── db.php                  # SQLite3 + helpers (users, characters, session)
@@ -104,7 +106,9 @@ dcc-sheet/
 │   ├── dd-red-box/             # 7 webp illustrations D&D Red Box
 │   ├── shadow/                 # 29 PNG disponibles (7 au catalogue Leremy Gan)
 │   ├── shadowdark/             # 12 PNG portraits Shadowdark (compreses)
-│   └── jeff-stevens/           # 8 planches Jeff Stevens
+│   ├── jeff-stevens/           # 8 planches Jeff Stevens
+│   ├── gonzo/                  # 32 PNG portraits Gonzo (couleur + N&B)
+│   └── osr/                    # 17 PNG portraits Old School
 ├── exemples/                   # Exports JSON d'exemple (equipe complete)
 ├── login.php                   # Page de connexion
 ├── register.php                # Page d'inscription

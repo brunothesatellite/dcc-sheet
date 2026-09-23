@@ -147,6 +147,8 @@ window.DCCModules.equipe = {
           // Classe
           const tdClass = document.createElement('td');
           tdClass.className = 'char-class';
+          const classContent = document.createElement('div');
+          classContent.className = 'char-class-content';
           const img = document.createElement('img');
           img.className = 'team-portrait';
           img.alt = '';
@@ -154,8 +156,9 @@ window.DCCModules.equipe = {
             var portraitResult = window.getPortraitSrc(data.portrait_source || 'dcc', charData.class, data.portrait_index);
             img.src = portraitResult.src;
           }
-          if (img.src) tdClass.appendChild(img);
-          tdClass.appendChild(document.createTextNode(CLASS_LABELS[charData.class] || charData.class));
+          if (img.src) classContent.appendChild(img);
+          classContent.appendChild(document.createTextNode(CLASS_LABELS[charData.class] || charData.class));
+          tdClass.appendChild(classContent);
           tr.appendChild(tdClass);
 
           // Initiative (from sheet data)

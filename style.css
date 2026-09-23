@@ -1897,6 +1897,14 @@ input[type="number"]::-webkit-outer-spin-button {
   line-height: 1;
 }
 
+.team-table .char-class-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
 .team-table tbody tr {
   height: 50px;
 }
@@ -2288,6 +2296,7 @@ input[type="number"]::-webkit-outer-spin-button {
   .dtable input {
     font-size: 10px;
   }
+}
 
 .capacites-grid {
   display: flex;
@@ -2349,6 +2358,7 @@ input[type="number"]::-webkit-outer-spin-button {
   margin-bottom: 2px;
 }
 
+@media (max-width: 600px) {
   .btn-login,
   .btn-signup {
     padding: 5px 10px;

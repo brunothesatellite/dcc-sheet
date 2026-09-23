@@ -22,10 +22,10 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - Import / Export global (tous les personnages + notes d equipe d un coup)
 - Suppression avec confirmation custom (modal)
 - Toggle "En expedition" / "A l'auberge" (statut actif/inactif)
-- Cartes de personnages avec nom, niveau, et toggle
+- Cartes de personnages avec **portrait**, nom, niveau, et toggle
 
 ### Fiches de personnage
-- **Commun** : Identite (Nom, Titre, Metier, Alignement, Mouvement, Niveau, PX), Defense (CA, PV/Max avec **Des de vie**), Combat (Initiative, Des d'action, Attaque, Critique), 6 carac. avec modif. et jets de sauvegarde, Combat etendu (CAC/Distance), **Portrait de classe** (DCC ou D&D Red Box), Equipement (Armes, Equipement, Tresor, Armure)
+- **Commun** : Identite (Nom, Titre, Metier, Alignement, Mouvement, Niveau, PX), Defense (CA, PV/Max avec **Des de vie**), Combat (Initiative, Des d'action, Attaque, Critique), 6 carac. avec modif. et jets de sauvegarde, Combat etendu (CAC/Distance), **Portrait** (DCC, D&D Red Box ou Leremy Gan, choix via popup), Equipement (Armes, Equipement, Tresor, Armure)
 - **Clerc** : Dieu, Incantation, Defaveur, Imposition des mains, **Liste de sorts dynamique** (grille 2 colonnes, champ unique par sort, ajout/suppression avec confirmation, migration de l'ancienne grille 3 × 7)
 - **Elfe** : Incantation, Familier, Patron, Corruption, Traits elfiques, **Liste de sorts dynamique** comme le Mage (2 sorts de patron figés en lignes 1-2 : Lier un patron / Invoquer un Patron (___/jour) saisissable, lignes libres à partir de la 3e, ajout/suppression avec confirmation)
 - **Guerrier** : Coup critique, Arme Chance, Hauts faits d'armes
@@ -34,13 +34,13 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - **Nain** : Infravision, Competences souterraines, Coup de bouclier, Arme Chance
 - **Voleur** : 14 competences voleur en grille (De de chance, Escalade, Crocheter, Pieges, etc.)
 
-### Portrait de classe
-- 2 sources d'icones : **DCC** (tokens officiels, 20 images au total) et **D&D Red Box** (7 illustrations)
-- Interrupteur DCC/Red Box dans chaque fiche de personnage
-- En mode DCC : clic sur l'image pour cycle sur l'image suivante
-- En mode Red Box : image unique, pas de clic
-- Choix et image sauvegardes avec le personnage en base
-- Propages dans les imports/exports JSON individuels et globaux
+### Portrait
+- 3 sources d'images : **DCC** (tokens officiels, 20 images), **D&D Red Box 1983** (7 illustrations) et **Leremy Gan** (7 silhouettes)
+- **Popup « Choisir un portrait »** : clic sur le portrait dans la fiche → grille regroupee par source (3 colonnes, 2 sur mobile)
+- Portrait courant surligne (bordure accent) et scroll automatique vers lui
+- Fermeture : bouton X, bouton Fermer, clic en dehors, ou touche Echap
+- Choix sauvegarde avec le personnage en base, propage dans les imports/exports JSON individuels et globaux
+- Affiche aussi dans les **cartes de la liste** (a gauche du nom) et dans l'**onglet Equipe** (colonne Classe)
 
 ### Onglet Equipe
 - Tableau des personnages en expedition avec **icone de portrait** dans la colonne Classe (100% hauteur de ligne)
@@ -60,7 +60,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - Onglets avec persistence de l'onglet actif (localStorage)
 - Auto-ouverture de la fiche si 1 seul personnage actif
 - Bouton retour (fleche) pour revenir a la liste
-- Bouton Equipe mobile dans le topbar (< 600px)
+- Onglet Equipe dedie sur grand ecran ; sur ecran reduit (<= 600px), icone Equipe dans le topbar
 
 ### UI / UX
 - Theme sombre / clair (localStorage)
@@ -81,6 +81,8 @@ dcc-sheet/
 ├── favicon.svg                 # Favicon SVG
 ├── dcc-icons.js                # Catalogue d'icones DCC (20 tokens, 7 classes)
 ├── dd-red-box-icons.js         # Catalogue d'icones D&D Red Box (7 images, 7 classes)
+├── shadow-icons.js             # Catalogue d'icones Leremy Gan (7 silhouettes, 7 classes)
+├── portrait-icons.js           # Registre des sources de portraits (getPortraitSrc)
 ├── api/
 │   ├── db.php                  # SQLite3 + helpers (users, characters, session)
 │   ├── auth.php                # Authentification (login, register, logout, change_password, delete_account)
@@ -97,7 +99,8 @@ dcc-sheet/
 │   └── equipe.js               # Onglet Equipe (tableau persos + portraits + ennemis)
 ├── icons/
 │   ├── dcc-pc-tokens/          # 20 PNG tokens officiels DCC
-│   └── dd-red-box/             # 7 webp illustrations D&D Red Box
+│   ├── dd-red-box/             # 7 webp illustrations D&D Red Box
+│   └── shadow/                 # 7 images Leremy Gan
 ├── login.php                   # Page de connexion
 ├── register.php                # Page d'inscription
 ├── change-password.php         # Page de changement de mot de passe

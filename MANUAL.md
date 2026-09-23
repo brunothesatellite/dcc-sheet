@@ -12,7 +12,7 @@ Manuel d'utilisation de l'application web **DCC Fiches de Personnage** : créez 
 4. [Gérer ses personnages](#4-gérer-ses-personnages)
 5. [Statut : en expédition vs à l'auberge](#5-statut--en-expédition-vs-à-lauberge)
 6. [La fiche de personnage](#6-la-fiche-de-personnage)
-7. [Le portrait (DCC ↔ D&D Red Box)](#7-le-portrait-dcc--dnd-red-box)
+7. [Le portrait (DCC, Red Box & Leremy Gan)](#7-le-portrait-dcc-red-box--leremy-gan)
 8. [Onglet Équipe (suivi de partie)](#8-onglet-équipe-suivi-de-partie)
 9. [Personnalisation & responsive](#9-personnalisation--responsive)
 10. [Astuces & dépannage](#10-astuces--dépannage)
@@ -30,7 +30,7 @@ Manuel d'utilisation de l'application web **DCC Fiches de Personnage** : créez 
 - créer **zéro à plusieurs personnages** par classe ;
 - remplir des **fiches fidèles aux feuilles officielles DCC** (PDF éditables fournis dans le dépôt) ;
 - suivre l'**équipe en expédition** (avec possibilité de laisser des personnages à l'**auberge**) dans un tableau de combat avec ennemis et compteurs de tour ;
-- choisir un **portrait** parmi les tokens officiels DCC ou les illustrations originales de la D&D Red Box de 1983.
+- choisir un **portrait** parmi les tokens officiels DCC, les illustrations originales de la D&D Red Box de 1983 ou les silhouettes Leremy Gan.
 
 **Aucune installation** : l'application s'ouvre dans un navigateur moderne (Chrome, Firefox, Edge, Safari). Elle est optimisée pour smartphone mais fonctionne sur grand écran. Pour fonctionner elle nécessite seulement un serveur web avec **php** activé (et le module **sqlite3**). Voir **[README.md](./README.md)** pour plus d'informations sur le déploiement de l'application sur un serveur.
 
@@ -126,7 +126,7 @@ Tous vos personnages sont supprimés avec le compte : vous êtes redirigé vers 
 
 ### La barre supérieure (topbar)
 
-- **Bouton ⚔** : ouvre directement l'onglet **Equipe**.
+- **Bouton ⚔** : ouvre l'onglet **Equipe** — affiché uniquement en basse résolution (≤ 600 px), où l'onglet lui-même est masqué.
 - **Texte « Dungeon Crawl Classics »**
 - **Bouton ☾ / ☀** : bascule le thème sombre/clair (§ 9).
 - **Avatar** : menu utilisateur (une fois connecté) — ou boutons **Connexion / Inscription** sinon.
@@ -135,6 +135,8 @@ Tous vos personnages sont supprimés avec le compte : vous êtes redirigé vers 
 ### La barre d'onglets
 
 8 onglets : **Equipe** (rouge, en premier et en haut) puis en dessous les 7 classes : **Clerc, Elfe, Guerrier, Halfelin, Mage, Nain, Voleur**.
+
+> En basse résolution (≤ 600 px), l'onglet **Equipe** est masqué : on y accède par l'**icône ⚔** (haut gauche de la barre supérieure).
 
 - L'onglet actif est **mémorisé** dans le navigateur : à votre prochaine visite, c'est lui qui s'ouvre.
 - Cliquer sur un onglet charge aussitôt la liste des personnages de cette classe.
@@ -232,7 +234,7 @@ Dans une liste, les cartes sont triées ainsi :
 1. les personnages **en expédition** d'abord ;
 2. puis par **date de dernière modification** (les plus récents en premier).
 
-La carte affiche `NOM — Niv.X` si un niveau est renseigné, et pour les Clercs, le nom du dieu en sous-titre.
+La carte affiche `NOM — Niv.X` si un niveau est renseigné, le **portrait** du personnage à gauche de son nom, et pour les Clercs, le nom du dieu en sous-titre.
 
 ### 4.8 Comment fonctionne la sauvegarde automatique
 
@@ -356,45 +358,35 @@ Les listes de sorts du Mage (2 lignes par sort), de l'Elfe (2 lignes par sort + 
 
 ---
 
-## 7. Le portrait (DCC ↔ D&D Red Box)
+## 7. Le portrait (DCC, Red Box & Leremy Gan)
 
-Chaque fiche possède un portrait, sous le bloc « combat étendu ». Deux sources sont disponibles :
+Chaque fiche possède un portrait, sous le bloc « combat étendu ». **Cliquez dessus** pour ouvrir la fenêtre de sélection.
 
-| Source | Contenu | Cycle au clic ? |
-|---|---|---|
-| **DCC** | Tokens officiels DCC (20 au total, répartis par classe) | **Oui** : cliquez sur l'image pour passer à la suivante |
-| **Red Box** | Illustrations D&D Red Box (1 par classe) | Non : image unique |
+Trois sources sont disponibles :
 
-### 7.1 Changer la source du portrait
+| Source | Contenu |
+|---|---|
+| **Dungeon Crawl Classics** | Tokens officiels DCC (20 au total, répartis par classe) |
+| **D&D Red Box 1983** | Illustrations classiques noir et blanc (1 par classe) |
+| **Leremy Gan** | Silhouettes d'archetype (1 par classe) |
 
-1. Ouvrez la fiche.
-2. Sous le portrait, repérez l'**interrupteur** et son libellé (**DCC** ou **Red Box**).
-3. Cliquez sur l'interrupteur :
-   - vers la droite (vert) = **Red Box** ;
-   - vers la gauche = **DCC**.
-4. L'image et le libellé changent immédiatement ; le choix est **sauvegardé avec le personnage**.
+### 7.1 Choisir un portrait (mode opératoire)
 
-**Mode DCC** — token coloré officiel, interrupteur à gauche, libellé « DCC » :
+1. Ouvrez la fiche, cliquez sur le portrait.
+2. La popup **« Choisir un portrait »** s'ouvre : les images sont groupées par source, en 3 colonnes (2 sur mobile).
+3. Le portrait courant est **surligné** (bordure accent) et la liste s'y **défile automatiquement**.
+4. Cliquez sur une image : la popup se ferme, l'image et le choix sont **sauvegardés automatiquement** (toast disquette).
+5. Pour annuler : bouton **✕** (en-tête), bouton **FERMER** (pied), clic en dehors de la fenêtre, ou touche **Échap**.
 
-<img src="captures/portrait-dcc.png" alt="Portrait DCC en couleur sur la fiche d'un mage, interrupteur sur DCC" width="420">
+<img src="captures/choix-portrait.png" alt="Popup « Choisir un portrait » pour un guerrier : 5 tokens DCC, 1 illustration D&D Red Box 1983 et 1 silhouette Leremy Gan" width="420">
 
-**Mode Red Box** — illustration classique en noir et blanc, interrupteur vert, libellé « RED BOX » :
+*La popup de choix, ici pour un Guerrier : 5 tokens DCC, 1 illustration Red Box, 1 silhouette Leremy Gan. Le portrait courant est cerclé de la couleur d'accent.*
 
-<img src="captures/portrait-dd.png" alt="Portrait D&D Red Box en noir et blanc sur la même fiche, interrupteur sur Red Box" width="420">
+### 7.2 Où le portrait apparaît
 
-### 7.2 Faire défiler les portraits DCC (cycle)
-
-1. Assurez-vous d'être en mode **DCC** (interrupteur à gauche).
-2. **Cliquez sur l'image du portrait** : elle est remplacée par le token suivant de la classe.
-3. Chaque clic enregistre l'index (toast disquette) ; en fin de liste, le cycle **reprend au début**.
-4. En mode **Red Box**, le clic n'a aucun effet (une seule image par classe).
-
-Nombre d'images à parcourir par classe : Guerrier **5**, Mage **4**, Voleur **3**, Clerc/Elfe/Halfelin/Nain **2** (détail en [annexe B](#annexe-b--dés-de-vie-et-portraits-par-classe)).
-
-### 7.3 Où le portrait apparaît ailleurs
-
-- La source et l'index choisis sont enregistrés **dans la fiche** : ils survivent à la déconnexion et suivent l'export/import JSON.
-- Dans l'onglet **Équipe**, la colonne **Classe** affiche le portrait courant du PJ (voir § 8).
+- Dans la **liste des cartes** : à gauche du nom, même taille que dans l'onglet Équipe.
+- Dans l'onglet **Équipe** : colonne **Classe**.
+- La source et l'index choisis sont enregistrés **dans la fiche** : ils survivent à la déconnexion et suivent l'export/import JSON (§ 4.4, [annexe A](#annexe-a--format-json-dexportimport)).
 
 ---
 
@@ -403,8 +395,8 @@ Nombre d'images à parcourir par classe : Guerrier **5**, Mage **4**, Voleur **3
 L'onglet **Equipe** (premier onglet, fond rouge) est le tableau de bord de vos parties : il liste tous les personnages **en expédition** de vos 7 classes et sert de initiative tracker pendant le combat.
 
 **Accès** :
-- clic sur l'onglet **Equipe** (ordinateur) ;
-- bouton **⚔** en haut à gauche ;
+- **écran large** : onglet **Equipe** dédié (premier onglet, fond rouge) ;
+- **basse résolution / mobile (≤ 600 px)** : l'onglet est masqué — utilisez l'**icône ⚔** ronde en haut à gauche de la barre supérieure ;
 - connexion obligatoire, sinon message « Connectez-vous pour voir l'équipe. ».
 
 <img src="captures/equipe.png" alt="Onglet Équipe : tableau des personnages en expédition avec portraits, ennemis et notes" width="420">
@@ -519,7 +511,7 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 - **Le thème régresse au rechargement** : le thème vit dans le localStorage ; videz le cache, réactivez-le une fois.
 - **Les notes d'équipe sont vides sur un autre appareil** : vérifiez d'abord la connexion au bon compte ; en cas de doute, restaurez-les depuis un **Exporter/Importer tout (JSON)** (§ 4.6). Les notes d'un ancien navigateur sont migrées automatiquement en base à la première ouverture de l'onglet Équipe.
 - **Un personnage n'apparaît pas dans l'Équipe** : vérifiez son interrupteur **EN EXPÉDITION** (§ 5), puis rouvrez l'onglet.
-- **Le clic sur le portrait ne change rien** : vous êtes en mode **Red Box** (image unique) — repassez en mode **DCC** (§ 7).
+- **Je ne trouve plus l'onglet Équipe** : en basse résolution (≤ 600 px) il est masqué — utilisez l'**icône ⚔** en haut à gauche (§ 8).
 - **Import global refusé** : le fichier doit contenir au moins un personnage et une `class` valide pour chacun (annexe A).
 - **Pseudo/mot de passe refusé** : pseudo 3-20 caractères (`a-z A-Z 0-9 - _`), mot de passe 6+ ; une ancienne session peut rester active → rechargez la page.
 
@@ -550,6 +542,7 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 
 - `class` est **obligatoire** à l'import (sinon refus) : `clerc`, `elfe`, `guerrier`, `halfelin`, `mage`, `nain`, `voleur`.
 - `data` contient tous les champs de la fiche (textes bruts).
+- `portrait_source` vaut `dcc`, `redbox` ou `shadow` (Leremy Gan) ; `portrait_index` est la position de l'image dans la source (§ 7).
 
 ### Collection globale (Exporter tout / Importer tout)
 
@@ -574,19 +567,18 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 
 ## Annexe B : dés de vie et portraits par classe
 
-| Classe | Dé de vie (affiché dans le casque) | Portraits DCC (clicables) | Portrait Red Box |
-|---|---|---|---|
-| Clerc | d8 | 2 | 1 |
-| Elfe | d6 | 2 | 1 |
-| Guerrier | **d12** | **5** | 1 |
-| Halfelin | d6 | 2 | 1 |
-| Mage | **d4** | **4** | 1 |
-| Nain | d10 | 2 | 1 |
-| Voleur | d6 | 3 | 1 |
-| **Total** | — | **20 tokens** | **7 illustrations** |
+| Classe | Dé de vie (affiché dans le casque) | Portraits DCC | Portrait Red Box | Portrait Leremy Gan |
+|---|---|---|---|---|
+| Clerc | d8 | 2 | 1 | 1 |
+| Elfe | d6 | 2 | 1 | 1 |
+| Guerrier | **d12** | **5** | 1 | 1 |
+| Halfelin | d6 | 2 | 1 | 1 |
+| Mage | **d4** | **4** | 1 | 1 |
+| Nain | d10 | 2 | 1 | 1 |
+| Voleur | d6 | 3 | 1 | 1 |
+| **Total** | — | **20 tokens** | **7 illustrations** | **7 silhouettes** |
 
-- Mode **DCC** : le clic sur le portrait fait défiler la liste de la classe (boucle infinie).
-- Mode **Red Box** : une seule illustration par classe, le clic est inactif.
+- La sélection se fait via la popup **« Choisir un portrait »** (§ 7) : les trois sources y sont proposées, groupées par section.
 
 ---
 
@@ -610,7 +602,8 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 | **À l'auberge** | Statut inactif : le PJ reste en retrait (jamais supprimé) |
 | **Tour** | Compteur de round visuel (cycle modulo 5, remplissage 20 %) |
 | **DCC** | *Dungeon Crawl Classics* — tokens de portraits officiels |
-| **Red Box** | Illustrations classiques D&D (Basic/Red Box) |
+| **Red Box** | Illustrations classiques D&D (Basic/Red Box 1983), noir et blanc |
+| **Leremy Gan** | Source de portraits silhouette, 1 image par classe |
 | **Toast** | Petit message transitoire en bas à droite |
 | **RAZ** | Remise à zéro (table des ennemis) |
 

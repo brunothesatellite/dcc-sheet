@@ -608,3 +608,46 @@ Verifs : `node --check classes/elfe.js` OK ; styles `.btn-spell-add` / `.btn-spe
 | `JOURNAL.md` | Cette entree |
 
 Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts → 5 lignes, ajout/suppression + confirmation, ≥ 1 vide, renuméro, persistance DB/JSON).
+
+---
+
+## Date : 23 septembre 2026
+
+---
+
+### Système de portraits générique (5 sources)
+
+- **Registre** `portrait-icons.js` : `window.PortraitSources` + `window.getPortraitSrc(source, cls, index)` ; sources : `dcc` (20 tokens), `redbox` (7), `shadow` Leremy Gan (7 silhouettes), `shadowdark` (12), `comics` Jeff Stevens (8 planches).
+- **Catalogues** : `dcc-icons.js`, `dd-red-box-icons.js`, `shadow-icons.js`, `shadowdark-icons.js`, `comics-icons.js` — chacun avec `meta.key` / `meta.label` ; chargés dans `index.html` avant le registre.
+- **Fichiers images** : `icons/shadow/` (PNG), `icons/shadowdark/` (12 PNG, **compressés ~200 Ko** au lieu de ~2,4 Mo), `icons/jeff-stevens/` (8 planches).
+- **Clés persistance** : `portrait_source` (ASCII uniquement) + `portrait_index` (wrap modulo longueur tableau) ; inputs hidden dans `bloc_commun.js`, lus par `collectData`.
+- **Popup « Choisir un portrait »** : grille 3 colonnes regroupée par source (2 sur mobile), portrait courant surligné + auto-scroll, fermeture X / FERMER / clic extérieur / Échap ; capture `captures/choix-portrait.png` intégrée au MANUAL § 7.
+- **Affichage** : portrait sur les **cartes de la liste** (`.char-card-portrait`, 50 px / 40 px mobile), l'**onglet Equipe** (colonne Classe), et la fiche.
+- **Header popup en thème sombre** : `--header-bg` / `--header-text` au lieu de `--accent` + `#fff` (le crème `#e8e4dc` du dark rendait la barre illisible).
+- **Nav mobile** : onglet Equipe masqué ≤ 600px, remplacé par l'icône ⚔ `#btn-equipe-mobile` dans le topbar.
+
+### Fiches — corrections
+
+- **Clerc** : table *Imposition des mains (décalage d'alignement)* passée en **statique** — 12 `<input data-key>` remplacés par du texte en dur (`.impos-val` centré) ; plus ramassé par `collectData`, plus sauvegardé ; coquille `1 dés` → `1 dé` ; clés orphelines `impos_*` en base ignorées sans migration.
+- **Halfelin** : bloc `.combat-info` « Combat à deux armes » en fond `--inn-bg` + bordure `--inn-border` pointillée ( distinction visuelle inputs / contenu de référence ) ; libellé `field-label` → `cap-label`.
+- **Accents** : corrections de typos et accents sur 5 fichiers (libellés/textes uniquement, clés `k()` ASCII inchangées).
+
+### Divers
+
+- Exemple d'équipe ajouté au dépôt (`exemples/dcc-persos-2026-09-22.json`).
+- Correction du bloc `@media` orphelin de `style.css` (accolades 371/371).
+
+### Fichiers modifies (23 septembre)
+
+| Fichier | Actions |
+|---------|---------|
+| `portrait-icons.js` + 5 catalogues + `icons/*` | Registre des 5 sources + images |
+| `script.js` | `initPortraits`, `showPortraitPicker`, `createCharCard`, bouton équipe mobile |
+| `index.html` | Chargement des catalogues, bouton ⚔ |
+| `classes/bloc_commun.js` | Portrait-area + inputs hidden source/index |
+| `classes/equipe.js` | Portrait dans le tableau |
+| `classes/clerc.js` | Table Imposition des mains statique |
+| `classes/halfelin.js` | `cap-label` |
+| `style.css` | Fix media query, portrait picker, cartes, `.impos-val`, `.combat-info`, header popup dark |
+| `MANUAL.md` / `README.md` | Portraits 5 sources, popup, nav, table statique |
+| `JOURNAL.md` | Cette entrée |

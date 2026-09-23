@@ -102,9 +102,10 @@ dcc-sheet/
 ├── icons/
 │   ├── dcc-pc-tokens/          # 20 PNG tokens officiels DCC
 │   ├── dd-red-box/             # 7 webp illustrations D&D Red Box
-│   ├── shadow/                 # 7 images Leremy Gan
-│   ├── shadowdark/             # 12 images Shadowdark
+│   ├── shadow/                 # 29 PNG disponibles (7 au catalogue Leremy Gan)
+│   ├── shadowdark/             # 12 PNG portraits Shadowdark (compreses)
 │   └── jeff-stevens/           # 8 planches Jeff Stevens
+├── exemples/                   # Exports JSON d'exemple (equipe complete)
 ├── login.php                   # Page de connexion
 ├── register.php                # Page d'inscription
 ├── change-password.php         # Page de changement de mot de passe

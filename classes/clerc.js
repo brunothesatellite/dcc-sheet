@@ -34,8 +34,7 @@ window.DCCModules.clerc = {
     function spellCell(n, val) {
       return `
         <div class="sort-cell" data-spell="${n}">
-          <span class="sort-num">${n}</span>
-          <input type="text" data-key="${k('sort_' + n)}" value="${val}" placeholder="Nom du sort">
+          <input type="text" data-key="${k('sort_' + n)}" value="${val}" placeholder="Nom du sort (n° page)">
           <button type="button" class="btn-spell-del" data-del="${n}">&#10005;</button>
         </div>`;
     }
@@ -122,13 +121,6 @@ window.DCCModules.clerc = {
     var grid = container.querySelector('#clerc-spells-' + charId);
     var addBtn = container.querySelector('#btn-spell-add-' + charId);
 
-    function renumber() {
-      var num = 1;
-      grid.querySelectorAll('.sort-cell .sort-num').forEach(function (el) {
-        el.textContent = num++;
-      });
-    }
-
     function getNextIndex() {
       var max = 0;
       grid.querySelectorAll('.sort-cell').forEach(function (cell) {
@@ -176,14 +168,12 @@ window.DCCModules.clerc = {
       cell.remove();
       removeEmptyTrailing();
       ensureTrailingEmpty();
-      renumber();
       window.bindAutoSave('clerc', charId);
       window.scheduleSave('clerc', charId);
     }
 
     function addSpell() {
       grid.insertAdjacentHTML('beforeend', spellCell(getNextIndex(), ''));
-      renumber();
       window.bindAutoSave('clerc', charId);
       window.scheduleSave('clerc', charId);
     }

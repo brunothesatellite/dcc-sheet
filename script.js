@@ -556,6 +556,7 @@
      ======================================================================== */
 
   async function switchTab(cls) {
+    closePortraitPicker();
     activeTab = cls;
     localStorage.setItem('dcc-active-tab', cls);
 
@@ -985,10 +986,24 @@
       var picker = document.createElement('div');
       picker.className = 'portrait-picker';
 
-      var title = document.createElement('h2');
-      title.className = 'portrait-picker-title';
-      title.textContent = 'Choisir un portrait';
-      picker.appendChild(title);
+      var header = document.createElement('div');
+      header.className = 'portrait-picker-header';
+
+      var headerTitle = document.createElement('span');
+      headerTitle.className = 'portrait-picker-header-title';
+      headerTitle.textContent = 'Choisir un portrait';
+
+      var headerClose = document.createElement('button');
+      headerClose.className = 'portrait-picker-header-close';
+      headerClose.innerHTML = '&times;';
+      headerClose.addEventListener('click', function () { close(null); });
+
+      header.appendChild(headerTitle);
+      header.appendChild(headerClose);
+      picker.appendChild(header);
+
+      var body = document.createElement('div');
+      body.className = 'portrait-picker-body';
 
       var scrollTarget = null;
 
@@ -1001,7 +1016,7 @@
         var section = document.createElement('div');
         section.className = 'portrait-picker-section';
 
-        var sectionTitle = document.createElement('h3');
+        var sectionTitle = document.createElement('div');
         sectionTitle.className = 'portrait-picker-section-title';
         sectionTitle.textContent = ps.meta.label;
         section.appendChild(sectionTitle);
@@ -1019,49 +1034,57 @@
             scrollTarget = imgEl;
           }
           imgEl.addEventListener('click', function () {
-            overlay.remove();
-            resolve({ source: ps.meta.key, index: i });
+            close({ source: ps.meta.key, index: i });
           });
           grid.appendChild(imgEl);
         });
 
         section.appendChild(grid);
-        picker.appendChild(section);
+        body.appendChild(section);
       });
 
-      var closeBtn = document.createElement('button');
-      closeBtn.className = 'portrait-picker-close';
-      closeBtn.textContent = 'Fermer';
-      closeBtn.addEventListener('click', function () {
-        overlay.remove();
-        resolve(null);
-      });
-      picker.appendChild(closeBtn);
+      picker.appendChild(body);
+
+      var footer = document.createElement('div');
+      footer.className = 'portrait-picker-footer';
+
+      var footerBtn = document.createElement('button');
+      footerBtn.className = 'portrait-picker-footer-btn';
+      footerBtn.textContent = 'Fermer';
+      footerBtn.addEventListener('click', function () { close(null); });
+
+      footer.appendChild(footerBtn);
+      picker.appendChild(footer);
 
       overlay.appendChild(picker);
       document.body.appendChild(overlay);
 
       if (scrollTarget) {
         setTimeout(function () {
-          scrollTarget.scrollIntoView({ block: 'center', behavior: 'instant' });
-        }, 50);
+          body.scrollTop = scrollTarget.offsetTop - (body.clientHeight / 2) + (scrollTarget.clientHeight / 2);
+        }, 0);
       }
 
       overlay.addEventListener('click', function (e) {
-        if (e.target === overlay) {
-          overlay.remove();
-          resolve(null);
-        }
+        if (e.target === overlay) close(null);
       });
 
-      document.addEventListener('keydown', function handler(e) {
-        if (e.key === 'Escape') {
-          document.removeEventListener('keydown', handler);
-          overlay.remove();
-          resolve(null);
-        }
-      });
+      function onKeyDown(e) {
+        if (e.key === 'Escape') close(null);
+      }
+      document.addEventListener('keydown', onKeyDown);
+
+      function close(result) {
+        document.removeEventListener('keydown', onKeyDown);
+        overlay.remove();
+        resolve(result);
+      }
     });
+  }
+
+  function closePortraitPicker() {
+    var overlay = document.querySelector('.portrait-picker-overlay');
+    if (overlay) overlay.remove();
   }
 
   async function openSheet(cls, charData) {

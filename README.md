@@ -55,7 +55,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - Tableau des **Statistiques** (entre Ennemis et Notes) : FOR AGI END PRE CHA INT, **vert = max / rouge = min** de colonne (texte seul, ex æquo inclus)
   - Zone **AGI–END–PRE** groupée + **chevron sous END** → detail des jets de sauvegarde (REF / VIG / VOL) juste sous la ligne
   - Un seul detail JdS ouvert ; collapse independant du detail combat
-- Tableau des ennemis : colonnes **Ennemi, AC, ATT, PV, Init., Tour** (ajout/suppression/RAZ)
+- Tableau des ennemis : colonnes **Ennemi, AC, ATT, PV, Init., Tour** (ajout/suppression/RAZ avec confirmation)
 - Compteurs de tour (clic = +1, clic droit / appui long = reset, cycle modulo 5)
 - Notes d'equipe (sauvegardees en base via l'API, inclues dans l'export/import global JSON)
 - L'onglet Equipe n'est **recharge qu'une fois** par session (brouillons ennemis / compteurs / notes non save preserves au changement d'onglet) ; rechargement auto si la liste des persos change (create / delete / toggle / import)

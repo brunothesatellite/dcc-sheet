@@ -456,7 +456,7 @@ Sous la section **Ennemis** : un tableau de **3 lignes vides par défaut**, colo
 
 - **+ Ajouter** : ajoute une ligne en fin de tableau.
 - **− Supprimer** : supprime la **dernière** ligne.
-- **RAZ** : vide le tableau et le réinitialise à **3 lignes vides**.
+- **RAZ** : demande confirmation, puis vide le tableau et le réinitialise à **3 lignes vides**.
 
 > Les ennemis et leurs valeurs sont **éphémères** : ils servent au combat en cours et disparaissent au rechargement. Les compteurs de tour fonctionnent comme pour les PJ (§ 8.2).
 

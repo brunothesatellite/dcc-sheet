@@ -794,3 +794,21 @@ Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts �
 | `JOURNAL.md` | Cette entrée |
 | `PLAN-stats-equipe.md` / `mockup-equipe-stats.html` | Créés puis retirés après validation |
 
+## Date : 24 septembre 2026 — confirmation RAZ ennemis
+
+---
+
+- **Demande** : le bouton **RAZ** de la section **Ennemis** doit demander confirmation, comme le RAZ Init. combat + Tours sous le tableau expédition.
+- **`classes/equipe.js`** : `btnRaz` (ennemis) → handler `async` ; `window.showModal` (fallback `window.confirm`) avec message « Vider le tableau des ennemis et réinitialiser à 3 lignes vides ? », `danger: true` ; si annulé, aucune modification de `tbodyE`.
+- **Tests** `04-equipe.test.js` : ajout d'une ligne + nom avant RAZ ; `modalResult = false` → annulation conserve les lignes/valeurs ; `modalResult = true` → 3 lignes vides. **324/324 OK** (6 skip).
+- **Docs** : MANUAL § 8.3 (« demande confirmation »), README (ennemis RAZ avec confirmation).
+
+### Fichiers modifies (24 septembre — RAZ ennemis)
+
+| Fichier | Actions |
+|---------|---------|
+| `classes/equipe.js` | Confirmation RAZ ennemis |
+| `tests/04-equipe.test.js` | + cancel/confirm RAZ ennemis |
+| `README.md` / `MANUAL.md` | Confirmation RAZ ennemis |
+| `JOURNAL.md` | Cette entrée |
+

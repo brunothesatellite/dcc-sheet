@@ -650,7 +650,20 @@ window.DCCModules.equipe = {
         }
       });
 
-      btnRaz.addEventListener('click', function () {
+      btnRaz.addEventListener('click', async function () {
+        let confirmed = false;
+        if (typeof window.showModal === 'function') {
+          confirmed = await window.showModal({
+            title: 'Remise à zéro',
+            message: 'Vider le tableau des ennemis et réinitialiser à 3 lignes vides ?',
+            type: 'confirm',
+            okText: 'RAZ',
+            danger: true,
+          });
+        } else {
+          confirmed = window.confirm('Vider le tableau des ennemis et réinitialiser à 3 lignes vides ?');
+        }
+        if (!confirmed) return;
         tbodyE.innerHTML = '';
         for (let i = 0; i < 3; i++) {
           tbodyE.appendChild(createEnemyRow());

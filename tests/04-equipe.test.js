@@ -203,8 +203,28 @@ async function run() {
       r.eq(enemies.querySelectorAll('tbody tr').length, 4, 'add enemy row');
       click(group.querySelector('.btn-remove'));
       r.eq(enemies.querySelectorAll('tbody tr').length, 3, 'remove enemy row');
-      click(group.querySelector('.btn-raz'));
-      r.eq(enemies.querySelectorAll('tbody tr').length, 3, 'RAZ resets to 3 rows');
+
+      // RAZ ennemis : confirmation
+      const btnRazEnemies = group.querySelector('.btn-raz');
+      r.ok(!!btnRazEnemies, 'enemy RAZ button present');
+
+      click(group.querySelector('.btn-add'));
+      r.eq(enemies.querySelectorAll('tbody tr').length, 4, 'add row before RAZ');
+      enemies.querySelectorAll('tbody tr input')[0].value = 'Gobelin';
+
+      modalResult = false;
+      const enemyModalBefore = modalCalls;
+      click(btnRazEnemies);
+      await delay(20);
+      r.ok(modalCalls > enemyModalBefore, 'enemy RAZ asks confirmation');
+      r.eq(enemies.querySelectorAll('tbody tr').length, 4, 'cancel keeps enemy rows');
+      r.eq(enemies.querySelectorAll('tbody tr input')[0].value, 'Gobelin', 'cancel keeps enemy name');
+
+      modalResult = true;
+      click(btnRazEnemies);
+      await delay(20);
+      r.eq(enemies.querySelectorAll('tbody tr').length, 3, 'confirm RAZ resets to 3 rows');
+      r.eq(enemies.querySelectorAll('tbody tr input')[0].value, '', 'confirm clears enemy name');
     }
   }
 

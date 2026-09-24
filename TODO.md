@@ -13,6 +13,7 @@
 
 **EVOLUTIONS**
 * A l'usage, voir comment améliorer l'onglet équipe :
-2. classement automatique dans l'ordre d'initiative des personnages ? Intéressant
-3. Intégration des ennemis dans le premier tableau ? Pas favorable, cela risque de complexifier...
+marching order (voir MARCHING-ORDER.md)
+classement automatique dans l'ordre d'initiative des personnages ? Intéressant
+Intégration des ennemis dans le premier tableau ? Pas favorable, cela risque de complexifier...
 

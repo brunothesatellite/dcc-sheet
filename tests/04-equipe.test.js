@@ -81,6 +81,12 @@ async function run() {
   let opened = 0;
   env.window.switchTab = function () { switched += 1; };
   env.window.openSheet = function () { opened += 1; };
+  let modalResult = true;
+  let modalCalls = 0;
+  env.window.showModal = function (opts) {
+    modalCalls += 1;
+    return Promise.resolve(modalResult);
+  };
 
   const mod = env.window.DCCModules.equipe;
   if (!mod || typeof mod.render !== 'function') {
@@ -326,6 +332,55 @@ async function run() {
     r.eq(counts(container).statsExpanded, 0, 'keyboard Space collapses stats');
     await delay(320);
     r.eq(counts(container).statsDetails, 0, 'Space collapse removes stats detail');
+  }
+
+  // --- RAZ Init. combat + Tours ---
+  const expTable = container.querySelector('table.team-table:not(.team-table-enemies):not(.team-table-stats)');
+  r.ok(!!expTable, 'expedition table for RAZ');
+  if (expTable) {
+    const foot = expTable.querySelector('tfoot');
+    r.ok(!!foot, 'expedition table has tfoot');
+    const footTds = foot ? foot.querySelectorAll('td') : [];
+    r.eq(footTds.length, 2, 'tfoot has 2 cells');
+    if (footTds.length === 2) {
+      r.eq(footTds[0].colSpan, 5, 'pad cell colspan=5');
+      r.eq(footTds[1].colSpan, 2, 'RAZ cell colspan=2 (Init combat + Tour)');
+    }
+    const btnRazExp = foot ? foot.querySelector('.btn-raz') : null;
+    r.ok(!!btnRazExp, 'RAZ button in tfoot');
+
+    const initInputs = expTable.querySelectorAll('.init-combat-input');
+    r.eq(initInputs.length, 2, 'init combat inputs tagged');
+    initInputs[0].value = '5';
+    initInputs[1].value = '3';
+    const counters = expTable.querySelectorAll('.turn-counter');
+    r.ok(counters.length >= 2, 'turn counters present');
+    click(counters[0]); // increment to 1
+    r.eq(counters[0].textContent, '1', 'counter incremented before RAZ');
+
+    // annulation : rien ne change
+    modalResult = false;
+    const callsBefore = modalCalls;
+    click(btnRazExp);
+    await delay(20);
+    r.ok(modalCalls > callsBefore, 'RAZ asks confirmation');
+    r.eq(initInputs[0].value, '5', 'cancel keeps init value');
+    r.eq(counters[0].textContent, '1', 'cancel keeps counter');
+
+    // confirmation : efface init + reset tours
+    modalResult = true;
+    click(btnRazExp);
+    await delay(20);
+    r.eq(initInputs[0].value, '', 'confirm clears init combat 1');
+    r.eq(initInputs[1].value, '', 'confirm clears init combat 2');
+    r.eq(counters[0].textContent, '0', 'confirm resets counter 1');
+    r.eq(counters[1].textContent, '0', 'confirm resets counter 2');
+
+    // ennemis non touchés
+    const enemies = container.querySelector('table.team-table-enemies');
+    if (enemies) {
+      r.ok(enemies.querySelectorAll('.init-combat-input').length === 0, 'enemies have no init-combat-input class');
+    }
   }
 
   return r;

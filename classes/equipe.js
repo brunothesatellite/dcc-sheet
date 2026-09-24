@@ -49,6 +49,8 @@ window.DCCModules.equipe = {
         increment();
       });
 
+      counter.resetTurn = reset;
+
       counter.addEventListener('contextmenu', function (e) {
         e.preventDefault();
         reset();
@@ -518,6 +520,7 @@ window.DCCModules.equipe = {
           const inputInit = document.createElement('input');
           inputInit.type = 'number';
           inputInit.placeholder = '';
+          inputInit.className = 'init-combat-input';
           tdInitCombat.appendChild(inputInit);
           tr.appendChild(tdInitCombat);
 
@@ -540,6 +543,47 @@ window.DCCModules.equipe = {
         });
 
         tableChars.appendChild(tbody);
+
+        // RAZ sous Init. combat + Tour (colspan 5 | 2)
+        const tfoot = document.createElement('tfoot');
+        const trFoot = document.createElement('tr');
+        trFoot.className = 'stats-raz-row';
+        const tdPad = document.createElement('td');
+        tdPad.colSpan = 5;
+        trFoot.appendChild(tdPad);
+        const tdRaz = document.createElement('td');
+        tdRaz.colSpan = 2;
+        const btnRazInit = document.createElement('button');
+        btnRazInit.type = 'button';
+        btnRazInit.className = 'btn-sm btn-raz';
+        btnRazInit.textContent = 'RAZ';
+        btnRazInit.setAttribute('aria-label', 'RAZ Init. combat et tours');
+        btnRazInit.addEventListener('click', async function () {
+          let confirmed = false;
+          if (typeof window.showModal === 'function') {
+            confirmed = await window.showModal({
+              title: 'Remise à zéro',
+              message: 'Effacer les Init. combat et remettre les tours à zéro ?',
+              type: 'confirm',
+              okText: 'RAZ',
+              danger: true,
+            });
+          } else {
+            confirmed = window.confirm('Effacer les Init. combat et remettre les tours à zéro ?');
+          }
+          if (!confirmed) return;
+          tableChars.querySelectorAll('.init-combat-input').forEach(function (input) {
+            input.value = '';
+          });
+          tableChars.querySelectorAll('.turn-counter').forEach(function (counter) {
+            if (typeof counter.resetTurn === 'function') counter.resetTurn();
+          });
+        });
+        tdRaz.appendChild(btnRazInit);
+        trFoot.appendChild(tdRaz);
+        tfoot.appendChild(trFoot);
+        tableChars.appendChild(tfoot);
+
         container.appendChild(tableChars);
       }
 

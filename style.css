@@ -2152,6 +2152,18 @@ tr.team-stats-detail.open .team-detail-wrap {
   grid-template-rows: 1fr;
 }
 
+/* RAZ Init. combat + Tours (tfoot expédition) */
+.team-table tfoot td {
+  border-top: none;
+  padding: 4px 6px;
+  text-align: center;
+  background: transparent;
+}
+
+.team-table tfoot .btn-raz {
+  min-width: 56px;
+}
+
 .btn-group {
   display: flex;
   gap: 6px;

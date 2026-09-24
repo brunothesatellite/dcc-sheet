@@ -64,10 +64,10 @@ window.DCCModules.equipe = {
       return counter;
     }
 
-    function statCellHtml(label, value, def) {
+    function statCellHtml(label, value) {
       const raw = (value == null ? '' : String(value)).trim();
       const has = raw !== '';
-      const shown = has ? raw : def;
+      const shown = has ? raw : '-';
       return '<div class="team-stat-cell">' +
         '<span class="team-stat-label">' + label + '</span>' +
         '<span class="team-stat-value' + (has ? '' : ' empty') + '">' + shown + '</span>' +
@@ -84,12 +84,12 @@ window.DCCModules.equipe = {
         '<div class="team-detail-wrap"><div class="team-detail-inner">' +
           '<div class="team-detail-pad">' +
             '<div class="team-stat-line">' +
-              statCellHtml('⚔ Att CàC', data.attaque_cac, '+0') +
-              statCellHtml('⚔ Dég CàC', data.degats_cac, '1d6') +
+              statCellHtml('⚔ Att CàC', data.attaque_cac) +
+              statCellHtml('⚔ Dég CàC', data.degats_cac) +
             '</div>' +
             '<div class="team-stat-line">' +
-              statCellHtml('🏹 Att Dist.', data.att_distance, '+0') +
-              statCellHtml('🏹 Dég Dist.', data.degats_distance, '1d6') +
+              statCellHtml('🏹 Att Dist.', data.att_distance) +
+              statCellHtml('🏹 Dég Dist.', data.degats_distance) +
             '</div>' +
           '</div>' +
         '</div></div>';

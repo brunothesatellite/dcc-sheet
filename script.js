@@ -579,6 +579,9 @@
       // re-render = innerHTML = '' → perd brouillons ennemis / compteurs / notes non save
       if (panel.getAttribute('data-equipe-loaded') !== '1') {
         await loadEquipe(panel);
+      } else {
+        // Déjà rendu : resynchronisation sur place des valeurs persos
+        await resyncEquipe(panel);
       }
       return;
     }
@@ -643,6 +646,46 @@
     if (panel) panel.removeAttribute('data-equipe-loaded');
   }
 
+  function expeditionIdsAttr(chars) {
+    return chars.map(function (c) { return c.id; }).join(',');
+  }
+
+  async function fetchExpeditionChars() {
+    var allChars = [];
+    for (var i = 0; i < CLASSES.length; i++) {
+      var res = await api('characters.php', {
+        method: 'GET',
+        data: { action: 'list', class: CLASSES[i], is_active: 1 },
+      });
+      if (res.characters) {
+        allChars = allChars.concat(res.characters);
+      }
+    }
+    return allChars;
+  }
+
+  /* Resynchronisation sans re-render : les valeurs persos viennent de la base,
+     les champs non sauvegardés (Init. combat, tours, ennemis) sont préservés.
+     Composition changée → rechargement complet de la page. */
+  async function resyncEquipe(panel) {
+    if (!window.DCCModules || !window.DCCModules.equipe ||
+        typeof window.DCCModules.equipe.resync !== 'function') {
+      return;
+    }
+    var fresh;
+    try {
+      fresh = await fetchExpeditionChars();
+    } catch (e) {
+      return; /* échec réseau : on conserve l'affichage actuel */
+    }
+    var ok = window.DCCModules.equipe.resync(fresh);
+    if (ok === false) {
+      location.reload();
+      return;
+    }
+    panel.setAttribute('data-expedition-ids', expeditionIdsAttr(fresh));
+  }
+
   async function loadEquipe(panel) {
     if (!currentUser) {
       panel.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px">Connectez-vous pour voir l\'équipe.</div>';
@@ -651,14 +694,25 @@
     }
 
     try {
-      var allChars = [];
-      for (var i = 0; i < CLASSES.length; i++) {
-        var res = await api('characters.php', {
-          method: 'GET',
-          data: { action: 'list', class: CLASSES[i], is_active: 1 },
-        });
-        if (res.characters) {
-          allChars = allChars.concat(res.characters);
+      var allChars = await fetchExpeditionChars();
+      var freshIds = expeditionIdsAttr(allChars);
+      var prevIds = panel.getAttribute('data-expedition-ids');
+      var alreadyRendered = !!panel.querySelector('.section-bar');
+
+      if (prevIds !== null && alreadyRendered) {
+        if (prevIds !== freshIds) {
+          /* Composition modifiée : rechargement complet (perte des champs
+             non sauvegardés, comme un rafraîchissement de page) */
+          location.reload();
+          return;
+        }
+        /* Composition inchangée : resync sur place plutôt que re-render
+           (préserve Init. combat, compteurs, ennemis) */
+        if (window.DCCModules && window.DCCModules.equipe &&
+            typeof window.DCCModules.equipe.resync === 'function') {
+          window.DCCModules.equipe.resync(allChars);
+          panel.setAttribute('data-equipe-loaded', '1');
+          return;
         }
       }
 
@@ -670,6 +724,7 @@
       if (window.DCCModules && window.DCCModules.equipe) {
         window.DCCModules.equipe.render(panel, allChars, syncPVFromEquipe, notes, saveTeamNotes);
         panel.setAttribute('data-equipe-loaded', '1');
+        panel.setAttribute('data-expedition-ids', freshIds);
       }
     } catch (err) {
       panel.removeAttribute('data-equipe-loaded');
@@ -693,6 +748,21 @@
         method: 'POST',
         body: { action: 'save', id: charId, data: data },
       });
+
+      /* Synchro PV : si la fiche du personnage est déjà ouverte, elle suit
+         aussitôt (cache activeSheets + champ PV de la fiche) */
+      var sheetCls = res.character.class;
+      if (sheetCls && activeSheets[sheetCls] && activeSheets[sheetCls].id === charId) {
+        var cached = activeSheets[sheetCls];
+        var cachedData = {};
+        try { cachedData = JSON.parse(cached.data || '{}'); } catch (e) {}
+        cachedData.points_de_vie = newPV;
+        cached.data = JSON.stringify(cachedData);
+        var sPanel = $('[data-class="' + sheetCls + '"].tab-panel');
+        var sView = sPanel ? $('.view-sheet', sPanel) : null;
+        var pvInput = sView ? sView.querySelector('input[data-key$="-points_de_vie"]') : null;
+        if (pvInput) pvInput.value = newPV;
+      }
 
       showToastSave();
     } catch (err) {
@@ -1112,6 +1182,16 @@
   }
 
   async function openSheet(cls, charData) {
+    if (!charData) return;
+
+    /* Toujours relire la fiche en base : l'onglet doit afficher les valeurs
+       sauvegardées (PV, initiative, AC...), même si l'appelant fournit des
+       données mises en cache (liste, onglet équipe) */
+    try {
+      var fresh = await api('characters.php', { method: 'GET', data: { action: 'get', id: charData.id } });
+      if (fresh.character) charData = fresh.character;
+    } catch (e) { /* base inaccessible : on garde les données transmises */ }
+
     var panel = $('[data-class="' + cls + '"].tab-panel');
     if (!panel) return;
 

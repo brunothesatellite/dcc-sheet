@@ -403,6 +403,58 @@ async function run() {
     }
   }
 
+  // --- Resync onglet Équipe (valeurs persos fraîches, brouillons préservés) ---
+  const freshChars = JSON.parse(JSON.stringify(CHARACTERS));
+  freshChars[0].name = 'Travok Maj';
+  const f0 = JSON.parse(freshChars[0].data);
+  f0.points_de_vie = '9';
+  f0.initiative = '+5';
+  f0.attaque_cac = '+2';
+  freshChars[0].data = JSON.stringify(f0);
+  const f1 = JSON.parse(freshChars[1].data);
+  f1.classe_armure = '13';
+  freshChars[1].data = JSON.stringify(f1);
+
+  const expTable2 = container.querySelector('table.team-table:not(.team-table-enemies):not(.team-table-stats)');
+  r.ok(!!expTable2, 'expedition table present for resync');
+  const initInput2 = expTable2.querySelectorAll('.init-combat-input')[0];
+  initInput2.value = '7';
+  const counter2 = expTable2.querySelectorAll('.turn-counter')[0];
+  click(counter2);
+  r.eq(counter2.textContent, '1', 'counter incremented before resync');
+  const enemyInput2 = container.querySelector('table.team-table-enemies tbody input');
+  enemyInput2.value = 'Gobelin';
+
+  // détail combat déplié avant resync
+  const tds2 = Array.prototype.slice.call(container.querySelectorAll('.char-class'));
+  click(tds2[0]);
+  r.eq(counts(container).details, 1, 'combat detail open before resync');
+
+  const resyncOk = mod.resync(freshChars);
+  r.eq(resyncOk, true, 'resync same composition returns true');
+  const rows2 = container.querySelectorAll('tr[data-char-id]');
+  r.eq(rows2.length, 2, 'resync keeps row count');
+  r.eq(rows2[0].querySelector('.char-name').textContent, 'Travok Maj', 'resync updates name');
+  r.eq(rows2[0].children[2].textContent, '+5', 'resync updates initiative');
+  r.eq(rows2[0].children[3].textContent, '14', 'resync updates AC');
+  r.eq(rows2[0].children[4].querySelector('input').value, '9', 'resync updates PV');
+  r.eq(rows2[1].children[3].textContent, '13', 'resync updates AC of char2');
+
+  r.eq(initInput2.value, '7', 'resync preserves init combat (non sauvegardé)');
+  r.eq(counter2.textContent, '1', 'resync preserves turn counter');
+  r.eq(enemyInput2.value, 'Gobelin', 'resync preserves enemy rows');
+
+  r.eq(counts(container).details, 1, 'resync preserves expanded combat detail');
+  const detailAfter = detailHtml(container);
+  r.ok(detailAfter.indexOf('+2') !== -1, 'expanded detail refreshed with new attaque_cac');
+
+  const statsNameAfter = container.querySelector('table.team-table-stats tbody .char-name');
+  r.ok(!!statsNameAfter && statsNameAfter.textContent === 'Travok Maj', 'stats section rebuilt with fresh name');
+
+  const extra = { id: 99, name: 'Extra', class: 'mage', data: '{}' };
+  r.eq(mod.resync(freshChars.concat([extra])), false, 'composition change returns false (→ rechargement)');
+  r.eq(container.querySelectorAll('tr[data-char-id]').length, 2, 'failed resync does not mutate rows');
+
   return r;
 }
 

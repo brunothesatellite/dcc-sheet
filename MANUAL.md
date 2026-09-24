@@ -415,13 +415,15 @@ Colonnes :
 | **Classe** | Portrait + nom de classe (+ chevron) | Clic = **déplier le détail combat** (§ 8.1b) |
 | **Init.** | Initiative lue dans la fiche | Non (éditez-la dans la fiche) |
 | **AC** | Classe d'armure lue dans la fiche | Non (éditez-la dans la fiche) |
-| **PV** | Points de vie | **Oui** : la valeur est **synchronisée vers la fiche** du PJ (toast disquette) |
-| **Init. combat** | Initiative d'ordre de combat | Oui, mais **non enregistrée** (remise à zéro au rechargement) : usage de combat ponctuel |
+| **PV** | Points de vie | **Oui** : sauvegarde immédiate en base + **synchronisation vers la fiche** du PJ, même déjà ouverte (toast disquette) |
+| **Init. combat** | Initiative d'ordre de combat | Oui, mais **non enregistrée** (remise à zéro à chaque rechargement complet de la page) : usage de combat ponctuel |
 | **Tour** | Compteur de tour visuel (§ 8.2) | Oui (§ 8.2) |
 
-> Seuls les PJ **en expédition** apparaissent. Pour en retirer un, passez-le à l'auberge depuis sa classe (§ 5) puis rechargez l'onglet.
+> Seuls les PJ **en expédition** apparaissent. Pour en retirer un, passez-le à l'auberge depuis sa classe (§ 5) : à votre retour sur l'onglet Équipe, la page est **rechargée automatiquement** (les champs non sauvegardés sont alors effacés, comme en F5).
 
 Sous le tableau, **à cheval sous les colonnes Init. combat et Tour**, un bouton **RAZ** remet à zéro la colonne Init. combat et les compteurs Tour de **tous les PJ**. Une confirmation s'affiche avant d'exécuter. Les ennemis (§ 8.3) ne sont pas concernés.
+
+**Synchronisation automatique** : chaque fois que vous affichez à nouveau l'onglet Équipe (retour depuis une fiche ou un autre onglet), les valeurs issues des fiches — **Nom, Initiative, AC, PV, détail combat, statistiques** — sont resynchronisées avec la base **sans recharger l'onglet** : vos champs non sauvegardés (Init. combat, compteurs de tour, tableau des ennemis) sont conservés. Si la **composition** de l'expédition a changé (personnage ajouté, supprimé ou basculé à l'auberge), la page est **rechargée entièrement** à la place. Les PV sont toujours synchronisés dans les deux sens (§ tableau ci-dessus) ; en cas d'échec réseau, l'affichage actuel est conservé.
 
 ### 8.1b Détail combat dépliable
 

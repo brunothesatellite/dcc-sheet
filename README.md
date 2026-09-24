@@ -58,7 +58,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - Tableau des ennemis : colonnes **Ennemi, AC, ATT, PV, Init., Tour** (ajout/suppression/RAZ avec confirmation)
 - Compteurs de tour (clic = +1, clic droit / appui long = reset, cycle modulo 5)
 - Notes d'equipe (sauvegardees en base via l'API, inclues dans l'export/import global JSON)
-- L'onglet Equipe n'est **recharge qu'une fois** par session (brouillons ennemis / compteurs / notes non save preserves au changement d'onglet) ; rechargement auto si la liste des persos change (create / delete / toggle / import)
+- L'onglet Equipe n'est **recharge qu'une fois** par session ; a chaque retour sur l'onglet, les valeurs persos (nom, initiative, AC, PV, details, stats) sont **resynchronisees sur place** depuis la base avec preservation des brouillons (Init. combat / compteurs / ennemis) ; **rechargement complet de la page** si la composition change (create / delete / toggle / import) ; PV synchronises bidirectionnellement Equipe <-> fiche ouverte
 
 ### Sauvegarde automatique
 - Debounce 600ms sur tous les champs modifiables

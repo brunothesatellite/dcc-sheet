@@ -3,7 +3,7 @@
 
 **BUGS**
 *Critique*
-* N/A
+* ~~Modification perso non reflêtée dans Equipe !~~ **CORRIGÉ** (24/09 : resync automatique des valeurs perso à chaque affichage de l'onglet ; composition changée → rechargement complet ; PV synchronisés Equipe ↔ fiche)
 
 *Majeur*
 * N/A

@@ -91,6 +91,12 @@ window.DCCModules.equipe = {
       '</div>';
     }
 
+    function parsedDataOf(charData) {
+      const d = {};
+      try { Object.assign(d, JSON.parse(charData.data || '{}')); } catch (e) {}
+      return d;
+    }
+
     function buildDetailRow(charData, data) {
       const trD = document.createElement('tr');
       trD.className = 'team-detail';
@@ -436,6 +442,8 @@ window.DCCModules.equipe = {
           try { Object.assign(data, JSON.parse(charData.data || '{}')); } catch (e) {}
 
           const tr = document.createElement('tr');
+          tr.dataset.charId = charData.id;
+          tr._charData = charData;
 
           // Nom
           const tdName = document.createElement('td');
@@ -443,9 +451,10 @@ window.DCCModules.equipe = {
           tdName.textContent = charData.name || 'Sans nom';
           tdName.style.cursor = 'pointer';
           tdName.addEventListener('click', function () {
-            window.switchTab(charData.class);
+            const cd = tr._charData || charData;
+            window.switchTab(cd.class);
             setTimeout(function () {
-              window.openSheet(charData.class, charData);
+              window.openSheet(cd.class, cd);
             }, 100);
           });
           tr.appendChild(tdName);
@@ -482,12 +491,14 @@ window.DCCModules.equipe = {
           classContent.appendChild(classLabels);
           tdClass.appendChild(classContent);
           tdClass.addEventListener('click', function () {
-            toggleDetail(charData, data, tdClass, tr);
+            const cd = tr._charData || charData;
+            toggleDetail(cd, parsedDataOf(cd), tdClass, tr);
           });
           tdClass.addEventListener('keydown', function (e) {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              toggleDetail(charData, data, tdClass, tr);
+              const cd = tr._charData || charData;
+              toggleDetail(cd, parsedDataOf(cd), tdClass, tr);
             }
           });
           tr.appendChild(tdClass);
@@ -718,6 +729,75 @@ window.DCCModules.equipe = {
 
       container.appendChild(notesArea);
     }
+
+    /* Resynchronisation sur place (retour sur l'onglet Équipe) : met à jour les
+       valeurs issues des personnages en base (nom, classe, portrait, initiative,
+       AC, PV, détails dépliés, statistiques agrégées) SANS re-render → les
+       champs non sauvegardés (Init. combat, compteurs de tour, tableau des
+       ennemis, notes) et les états dépliés sont préservés.
+       Retourne false si la composition a changé (appelant → rechargement
+       complet de la page). */
+    window.DCCModules.equipe.resync = function (freshChars) {
+      if (!Array.isArray(freshChars)) return true;
+
+      function idsOf(list) {
+        return list.map(function (c) { return String(c.id); }).sort().join(',');
+      }
+      if (idsOf(freshChars) !== idsOf(characters)) return false;
+
+      freshChars.forEach(function (fresh) {
+        const data = parsedDataOf(fresh);
+        const tr = container.querySelector('tr[data-char-id="' + fresh.id + '"]');
+        if (!tr) return;
+        tr._charData = fresh;
+
+        const tdName = tr.children[0];
+        if (tdName) tdName.textContent = fresh.name || 'Sans nom';
+
+        const tdClass = tr.children[1];
+        if (tdClass) {
+          const img = tdClass.querySelector('img.team-portrait');
+          if (img && window.getPortraitSrc) {
+            try {
+              const pr = window.getPortraitSrc(data.portrait_source || 'dcc', fresh.class, data.portrait_index);
+              if (pr && pr.src) img.src = pr.src;
+            } catch (e) { /* portrait inchangé */ }
+          }
+          const label = tdClass.querySelector('.char-class-labels span');
+          if (label) label.textContent = CLASS_LABELS[fresh.class] || fresh.class;
+        }
+
+        if (tr.children[2]) tr.children[2].textContent = data.initiative || '+0';
+        if (tr.children[3]) tr.children[3].textContent = data.classe_armure || '10';
+        const tdPV = tr.children[4];
+        const inputPV = tdPV ? tdPV.querySelector('input') : null;
+        if (inputPV) inputPV.value = data.points_de_vie || '';
+
+        if (expandedCharacterId === fresh.id) {
+          const oldDetail = document.getElementById('team-detail-' + fresh.id);
+          if (oldDetail) {
+            const newDetail = buildDetailRow(fresh, data);
+            newDetail.classList.add('open');
+            oldDetail.replaceWith(newDetail);
+          }
+        }
+      });
+
+      characters = freshChars.slice();
+
+      /* Statistiques agrégées : reconstruction (min/max recalculés sur les
+         valeurs fraîches, détail déplié conservé via expandedStatsId) */
+      const oldStatsTable = container.querySelector('table.team-table-stats');
+      if (oldStatsTable) {
+        const prev = oldStatsTable.previousElementSibling;
+        const oldBar = (prev && prev.classList.contains('section-bar')) ? prev : null;
+        container.insertBefore(buildStatsSection(), oldBar || oldStatsTable);
+        oldStatsTable.remove();
+        if (oldBar) oldBar.remove();
+      }
+
+      return true;
+    };
 
     render();
   }

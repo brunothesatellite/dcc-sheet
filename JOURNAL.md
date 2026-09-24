@@ -812,3 +812,29 @@ Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts �
 | `README.md` / `MANUAL.md` | Confirmation RAZ ennemis |
 | `JOURNAL.md` | Cette entrée |
 
+## Date : 24 septembre 2026 — resync onglet Équipe (valeurs persos)
+
+---
+
+- **Demande** : l'onglet Équipe, mis en cache pour préserver les brouillons (Init. combat, compteurs, ennemis), n'affichait plus les valeurs modifiées dans les fiches (PV, initiative, AC…) tant qu'on ne rechargeait pas la page.
+- **Comportement retenu** :
+  - retour sur l'onglet Équipe → **resync sur place** des valeurs perso (nom, classe, portrait, initiative, AC, PV, détail combat déplié, statistiques agrégées) **sans re-render** → brouillons préservés ;
+  - **composition modifiée** (create / delete / toggle / import) → **rechargement complet de la page** (brouillons effacés, comme en F5) ;
+  - **PV bidirectionnels** : Équipe → fiche (champ PV + cache `activeSheets` mis à jour aussitôt si la fiche est ouverte) ; fiche → Équipe (resync au retour sur l'onglet) ;
+  - `openSheet` **relit toujours la fiche en base** (les appelants peuvent fournir des données en cache) ;
+  - échec réseau pendant le resync → affichage actuel conservé.
+- **`classes/equipe.js`** : `tr.dataset.charId` + `tr._charData` (listeners de nom/détail sur données fraîches), helper `parsedDataOf()`, nouveau **`DCCModules.equipe.resync(freshChars)`** → `false` si la composition change (appelant → `location.reload()`) ; met à jour nom / classe / portrait / initiative / AC / PV, remplace la ligne de détail combat dépliée, reconstruit la section Statistiques (min/max recalculés, dépliés conservés).
+- **`script.js`** : helpers `fetchExpeditionChars()`, `expeditionIdsAttr()`, `resyncEquipe()` ; `switchTab('equipe')` → resync si déjà rendu ; `loadEquipe` compare `data-expedition-ids` (ids différents → `location.reload()`, ids identiques → resync au lieu de re-render) ; `openSheet` GET `get` avant rendu ; `syncPVFromEquipe` patche la fiche ouverte (`input[data-key$="-points_de_vie"]` + `activeSheets[cls].data`).
+- **Tests** `04-equipe.test.js` : +17 assertions resync (valeurs mises à jour ; Init. combat / compteurs / ennemis préservés ; détail déplié rafraîchi ; stats reconstruites ; composition changée → `false` sans mutation). **348/348 OK**.
+- **Docs** : MANUAL § 8.1 (sync auto + reload composition + PV bidirectionnels), README (onglet Équipe), TODO (bug corrigé), JOURNAL (cette entrée).
+
+### Fichiers modifies (24 septembre — resync onglet Équipe)
+
+| Fichier | Actions |
+|---------|---------|
+| `classes/equipe.js` | `resync()`, `data-char-id`, listeners `_charData`, helper `parsedDataOf` |
+| `script.js` | `resyncEquipe` / `fetchExpeditionChars`, reload si composition, `openSheet` frais, synchro PV fiche ouverte |
+| `tests/04-equipe.test.js` | + 17 assertions resync |
+| `README.md` / `MANUAL.md` / `TODO.md` | Comportement resync + synchro PV |
+| `JOURNAL.md` | Cette entrée |
+

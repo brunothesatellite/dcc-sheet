@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Équipe, détail combat déplié</title>
+<style>
+  :root {
+    --font-heading: "Segoe UI", system-ui, sans-serif;
+    --font-body: "Segoe UI", system-ui, sans-serif;
+    --ink: #1a1a1a;
+    --muted: #6b6b6b;
+    --border: #cfc9b8;
+    --accent: #8b1e1e;
+    --field-bg: #f7f3ea;
+    --row-even: #f0ebe0;
+    --detail-bg: #ebe4d4;
+    --radius-sm: 4px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 16px;
+    font-family: var(--font-body);
+    background: #faf7f0;
+    color: var(--ink);
+  }
+  h1 { font-size: 14px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 12px; }
+  .hint { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  .section-bar {
+    background: var(--ink);
+    color: #fff;
+    font-family: var(--font-heading);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 6px 10px;
+    margin: 16px 0 0;
+  }
+  .team-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    background: #fff;
+    border: 1px solid var(--border);
+  }
+  .team-table th {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: var(--field-bg);
+    border-bottom: 2px solid var(--ink);
+    padding: 8px 6px;
+    text-align: center;
+  }
+  .team-table td {
+    border-bottom: 1px solid var(--border);
+    padding: 6px;
+    text-align: center;
+    font-size: 14px;
+    vertical-align: middle;
+  }
+  .team-table tbody tr.team-row { height: 50px; }
+  .team-table th:nth-child(1), .team-table td:nth-child(1) { width: 20%; text-align: left; }
+  .team-table th:nth-child(2), .team-table td:nth-child(2) { width: 23%; }
+  .team-table th:nth-child(3), .team-table td:nth-child(3) { width: 15%; }
+  .team-table th:nth-child(n+4):nth-child(-n+6) { width: 10%; }
+  .team-table th:nth-child(7), .team-table td:nth-child(7) { width: 12%; }
+
+  .char-name {
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: left !important;
+  }
+  .char-name:hover { color: var(--accent); }
+
+  .char-class {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    white-space: nowrap;
+    line-height: 1;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
+  }
+  .char-class:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--accent);
+  }
+  .char-class-content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .char-class-labels {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    min-width: 0;
+  }
+  .team-portrait {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    background: var(--field-bg);
+    display: block;
+    flex-shrink: 0;
+  }
+  .char-class[aria-expanded="true"] .team-portrait {
+    border-color: var(--accent);
+  }
+  .chevron {
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1;
+  }
+  .char-class[aria-expanded="true"] .chevron { color: var(--accent); }
+
+  .team-table input[type="number"] {
+    width: 52px;
+    padding: 4px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--field-bg);
+    text-align: center;
+    font-size: 13px;
+  }
+
+  .turn-counter {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 3px solid var(--ink);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    background: var(--field-bg);
+    cursor: pointer;
+  }
+
+  /* —— Detail row : 2 lignes × 2 stats —— */
+  tr.team-detail > td {
+    padding: 0 !important;
+    border-bottom: 1px solid var(--border);
+    background: var(--detail-bg) !important;
+    text-align: left;
+  }
+  tr.team-row:nth-child(even) td { background: var(--row-even); }
+  .team-detail-wrap {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 250ms ease;
+  }
+  tr.team-detail.open .team-detail-wrap { grid-template-rows: 1fr; }
+  .team-detail-inner {
+    overflow: hidden;
+    min-height: 0;
+  }
+  .team-detail-pad {
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .stat-line {
+    display: flex;
+    gap: 8px;
+  }
+  .stat-cell {
+    flex: 1 1 0;
+    background: var(--field-bg);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 7px 10px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+  }
+  .stat-cell .label {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .stat-cell .value {
+    font-size: 15px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+  .stat-cell .value.empty { color: var(--muted); font-weight: 400; }
+
+  @media (max-width: 600px) {
+    .team-table tbody tr.team-row { height: 40px; }
+    .team-table th { font-size: 9px; padding: 4px 3px; }
+    .team-table td { padding: 3px 2px; font-size: 11px; }
+    .char-name { font-size: 14px; }
+    .team-portrait { width: 40px; height: 40px; }
+    .char-class-content { gap: 3px; }
+    .team-detail-pad { padding: 8px; gap: 5px; }
+    .stat-cell { padding: 6px 8px; }
+    .stat-cell .label { font-size: 9px; }
+    .stat-cell .value { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+  <h1>Mockup — Onglet Équipe (expand combat, 2 lignes)</h1>
+  <p class="hint">
+    Clique sur la <strong>colonne Classe</strong> (portrait + libellé, ▼/▲ sous le libellé) pour déplier / replier le détail.
+    Un seul personnage ouvert à la fois. Le nom ouvre la fiche (inchangé).
+    Détail : <strong>ligne 1</strong> = Att CàC + Dég CàC · <strong>ligne 2</strong> = Att Dist + Dég Dist.
+    Hauteur des lignes fermées inchangée.
+  </p>
+
+  <div class="section-bar">Personnages en expédition</div>
+  <table class="team-table" id="team">
+    <thead>
+      <tr>
+        <th style="text-align:left">Nom</th>
+        <th>Classe</th>
+        <th>Init.</th>
+        <th>AC</th>
+        <th>PV</th>
+        <th>Init. combat</th>
+        <th>Tour</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <div class="section-bar">Ennemis</div>
+  <p class="hint" style="margin-top:8px">(hors périmètre du mockup)</p>
+
+<script>
+  var characters = [
+    { id: 1, name: 'Travok', class: 'clerc', portrait: 'C',
+      data: { attaque_cac: '+1', degats_cac: '1d6+1', att_distance: '0', degats_distance: '0',
+               initiative: '+2', classe_armure: '14', points_de_vie: '7' } },
+    { id: 2, name: 'Sergiu', class: 'mage', portrait: 'M',
+      data: { attaque_cac: '+0', degats_cac: '1d4-1', att_distance: '+2', degats_distance: '1d6',
+               initiative: '+1', classe_armure: '10', points_de_vie: '4' } },
+    { id: 3, name: 'Thorg', class: 'guerrier', portrait: 'G',
+      data: { attaque_cac: '+3', degats_cac: '1d12+2', att_distance: '+1', degats_distance: '1d8',
+               initiative: '+0', classe_armure: '16', points_de_vie: '15' } },
+    { id: 4, name: 'Lina', class: 'voleur', portrait: 'V',
+      data: { attaque_cac: '+2', degats_cac: '', att_distance: '', degats_distance: '',
+               initiative: '+4', classe_armure: '13', points_de_vie: '6' } },
+  ];
+
+  var CLASS_LABELS = { clerc:'Clerc', elfe:'Elfe', guerrier:'Guerrier', halfelin:'Halfelin', mage:'Mage', nain:'Nain', voleur:'Voleur' };
+  var expandedId = null;
+
+  function render() {
+    var tbody = document.getElementById('tbody');
+    tbody.innerHTML = '';
+
+    characters.forEach(function (ch) {
+      var d = ch.data;
+      var open = expandedId === ch.id;
+      var detailId = 'detail-' + ch.id;
+
+      var tr = document.createElement('tr');
+      tr.className = 'team-row';
+      tr.dataset.charId = ch.id;
+
+      var tdName = document.createElement('td');
+      tdName.className = 'char-name';
+      tdName.textContent = ch.name;
+      tdName.title = 'Ouvrir la fiche';
+      tr.appendChild(tdName);
+
+      var tdClass = document.createElement('td');
+      tdClass.className = 'char-class';
+      tdClass.setAttribute('role', 'button');
+      tdClass.setAttribute('tabindex', '0');
+      tdClass.setAttribute('aria-expanded', open ? 'true' : 'false');
+      tdClass.setAttribute('aria-controls', detailId);
+      tdClass.innerHTML =
+        '<div class="char-class-content">' +
+          '<span class="team-portrait" aria-hidden="true">' + ch.portrait + '</span>' +
+          '<span class="char-class-labels">' +
+            '<span>' + (CLASS_LABELS[ch.class] || ch.class) + '</span>' +
+            '<span class="chevron" aria-hidden="true">' + (open ? '▲' : '▼') + '</span>' +
+          '</span>' +
+        '</div>';
+
+      function toggle() {
+        expandedId = (expandedId === ch.id) ? null : ch.id;
+        render();
+      }
+      tdClass.addEventListener('click', toggle);
+      tdClass.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+      });
+      tr.appendChild(tdClass);
+
+      [d.initiative || '+0', d.classe_armure || '10'].forEach(function (v) {
+        var td = document.createElement('td'); td.textContent = v; tr.appendChild(td);
+      });
+      var tdPV = document.createElement('td');
+      tdPV.innerHTML = '<input type="number" value="' + (d.points_de_vie || '') + '" aria-label="PV">';
+      tr.appendChild(tdPV);
+      var tdIC = document.createElement('td');
+      tdIC.innerHTML = '<input type="number" value="" aria-label="Init combat">';
+      tr.appendChild(tdIC);
+      var tdT = document.createElement('td');
+      tdT.innerHTML = '<span class="turn-counter">0</span>';
+      tr.appendChild(tdT);
+
+      tbody.appendChild(tr);
+
+      if (open) {
+        var trD = document.createElement('tr');
+        trD.className = 'team-detail';
+        trD.id = detailId;
+        var tdD = document.createElement('td');
+        tdD.colSpan = 7;
+        tdD.innerHTML =
+          '<div class="team-detail-wrap"><div class="team-detail-inner">' +
+            '<div class="team-detail-pad">' +
+              '<div class="stat-line">' +
+                cell('⚔ Att CàC', d.attaque_cac, '+0') +
+                cell('⚔ Dég CàC', d.degats_cac, '1d6') +
+              '</div>' +
+              '<div class="stat-line">' +
+                cell('🏹 Att Dist.', d.att_distance, '+0') +
+                cell('🏹 Dég Dist.', d.degats_distance, '1d6') +
+              '</div>' +
+            '</div>' +
+          '</div></div>';
+        trD.appendChild(tdD);
+        tbody.appendChild(trD);
+
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { trD.classList.add('open'); });
+        });
+      }
+    });
+  }
+
+  function cell(label, value, def) {
+    var has = value != null && String(value).trim() !== '';
+    var v = has ? value : def;
+    return '<div class="stat-cell">' +
+      '<span class="label">' + label + '</span>' +
+      '<span class="value' + (has ? '' : ' empty') + '">' + v + '</span>' +
+    '</div>';
+  }
+
+  render();
+</script>
+</body>
+</html>

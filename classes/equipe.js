@@ -6,6 +6,7 @@ window.DCCModules.equipe = {
       clerc: 'Clerc', elfe: 'Elfe', guerrier: 'Guerrier',
       halfelin: 'Halfelin', mage: 'Mage', nain: 'Nain', voleur: 'Voleur'
     };
+    let expandedCharacterId = null;
 
     function createTurnCounter() {
       const counter = document.createElement('div');
@@ -61,6 +62,81 @@ window.DCCModules.equipe = {
       }, { passive: true });
 
       return counter;
+    }
+
+    function statCellHtml(label, value, def) {
+      const raw = (value == null ? '' : String(value)).trim();
+      const has = raw !== '';
+      const shown = has ? raw : def;
+      return '<div class="team-stat-cell">' +
+        '<span class="team-stat-label">' + label + '</span>' +
+        '<span class="team-stat-value' + (has ? '' : ' empty') + '">' + shown + '</span>' +
+      '</div>';
+    }
+
+    function buildDetailRow(charData, data) {
+      const trD = document.createElement('tr');
+      trD.className = 'team-detail';
+      trD.id = 'team-detail-' + charData.id;
+      const td = document.createElement('td');
+      td.colSpan = 7;
+      td.innerHTML =
+        '<div class="team-detail-wrap"><div class="team-detail-inner">' +
+          '<div class="team-detail-pad">' +
+            '<div class="team-stat-line">' +
+              statCellHtml('⚔ Att CàC', data.attaque_cac, '+0') +
+              statCellHtml('⚔ Dég CàC', data.degats_cac, '1d6') +
+            '</div>' +
+            '<div class="team-stat-line">' +
+              statCellHtml('🏹 Att Dist.', data.att_distance, '+0') +
+              statCellHtml('🏹 Dég Dist.', data.degats_distance, '1d6') +
+            '</div>' +
+          '</div>' +
+        '</div></div>';
+      trD.appendChild(td);
+      return trD;
+    }
+
+    function setExpandedUi(tdClass, open) {
+      if (!tdClass) return;
+      tdClass.setAttribute('aria-expanded', open ? 'true' : 'false');
+      const chevron = tdClass.querySelector('.chevron');
+      if (chevron) chevron.textContent = open ? '▲' : '▼';
+    }
+
+    function closeExpanded(immediate) {
+      const openTd = container.querySelector('.char-class[aria-expanded="true"]');
+      const openTr = container.querySelector('tr.team-detail');
+      const wasOpen = expandedCharacterId != null;
+      expandedCharacterId = null;
+      if (openTd) setExpandedUi(openTd, false);
+      if (openTr) {
+        if (immediate) {
+          openTr.remove();
+        } else if (wasOpen) {
+          openTr.classList.remove('open');
+          setTimeout(function () {
+            if (openTr.parentNode) openTr.remove();
+          }, 250);
+        }
+      }
+    }
+
+    function toggleDetail(charData, data, tdClass, tr) {
+      if (expandedCharacterId === charData.id) {
+        closeExpanded(false);
+        return;
+      }
+      closeExpanded(true);
+      expandedCharacterId = charData.id;
+      setExpandedUi(tdClass, true);
+      const trD = buildDetailRow(charData, data);
+      tr.parentNode.insertBefore(trD, tr.nextSibling);
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          trD.classList.add('open');
+        });
+      });
     }
 
     function createEnemyRow() {
@@ -144,9 +220,15 @@ window.DCCModules.equipe = {
           });
           tr.appendChild(tdName);
 
-          // Classe
+          // Classe (clic = déplier détail combat)
           const tdClass = document.createElement('td');
           tdClass.className = 'char-class';
+          tdClass.setAttribute('role', 'button');
+          tdClass.setAttribute('tabindex', '0');
+          const detailId = 'team-detail-' + charData.id;
+          const isOpen = expandedCharacterId === charData.id;
+          tdClass.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+          tdClass.setAttribute('aria-controls', detailId);
           const classContent = document.createElement('div');
           classContent.className = 'char-class-content';
           const img = document.createElement('img');
@@ -157,8 +239,27 @@ window.DCCModules.equipe = {
             img.src = portraitResult.src;
           }
           if (img.src) classContent.appendChild(img);
-          classContent.appendChild(document.createTextNode(CLASS_LABELS[charData.class] || charData.class));
+          const classLabels = document.createElement('span');
+          classLabels.className = 'char-class-labels';
+          const classLabel = document.createElement('span');
+          classLabel.textContent = CLASS_LABELS[charData.class] || charData.class;
+          const chevron = document.createElement('span');
+          chevron.className = 'chevron';
+          chevron.setAttribute('aria-hidden', 'true');
+          chevron.textContent = isOpen ? '▲' : '▼';
+          classLabels.appendChild(classLabel);
+          classLabels.appendChild(chevron);
+          classContent.appendChild(classLabels);
           tdClass.appendChild(classContent);
+          tdClass.addEventListener('click', function () {
+            toggleDetail(charData, data, tdClass, tr);
+          });
+          tdClass.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              toggleDetail(charData, data, tdClass, tr);
+            }
+          });
           tr.appendChild(tdClass);
 
           // Initiative (from sheet data)
@@ -198,6 +299,16 @@ window.DCCModules.equipe = {
           tr.appendChild(tdCounter);
 
           tbody.appendChild(tr);
+
+          if (isOpen) {
+            tbody.appendChild(buildDetailRow(charData, data));
+            const openTr = tbody.lastElementChild;
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () {
+                openTr.classList.add('open');
+              });
+            });
+          }
         });
 
         tableChars.appendChild(tbody);

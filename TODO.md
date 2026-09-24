@@ -14,6 +14,7 @@
 **EVOLUTIONS**
 * A l'usage, voir comment améliorer l'onglet équipe :
 1. Avoir quand on clique sur la classe une popup ou une ligne qui se déploie et affiche l'atk CàC, dégats CàC, Atk distance et dégats distance du personnage
+1b. changer largeur colonnes ennemis dans équipe
 2. classement automatique dans l'ordre d'initiative des personnages ? Intéressant
 3. Intégration des ennemis dans le premier tableau ? Pas favorable, cela risque de complexifier...
 

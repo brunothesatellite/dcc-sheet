@@ -403,7 +403,7 @@ L'onglet **Equipe** (premier onglet, fond rouge) est le tableau de bord de vos p
 - **basse résolution / mobile (≤ 600 px)** : l'onglet est masqué — utilisez l'**icône ⚔** ronde en haut à gauche de la barre supérieure ;
 - connexion obligatoire, sinon message « Connectez-vous pour voir l'équipe. ».
 
-<img src="captures/equipe.png" alt="Onglet Équipe : tableau des personnages en expédition avec portraits, ennemis et notes" width="420">
+<img src="captures/equipe.png" alt="Onglet Équipe : tableau des personnages en expédition avec portraits, détail combat déplié, ennemis et notes" width="420">
 
 ### 8.1 Tableau des personnages en expédition
 
@@ -412,7 +412,7 @@ Colonnes :
 | Colonne | Contenu | Modifiable ? |
 |---|---|---|
 | **Nom** | Nom du PJ (portrait + classe dans la colonne voisine) | Clic = **ouvre la fiche** du personnage (l'onglet de sa classe s'ouvre d'abord) |
-| **Classe** | Portrait + nom de classe | Non (repris de la fiche) |
+| **Classe** | Portrait + nom de classe (+ chevron) | Clic = **déplier le détail combat** (§ 8.1b) |
 | **Init.** | Initiative lue dans la fiche | Non (éditez-la dans la fiche) |
 | **AC** | Classe d'armure lue dans la fiche | Non (éditez-la dans la fiche) |
 | **PV** | Points de vie | **Oui** : la valeur est **synchronisée vers la fiche** du PJ (toast disquette) |
@@ -420,6 +420,20 @@ Colonnes :
 | **Tour** | Compteur de tour visuel (§ 8.2) | Oui (§ 8.2) |
 
 > Seuls les PJ **en expédition** apparaissent. Pour en retirer un, passez-le à l'auberge depuis sa classe (§ 5) puis rechargez l'onglet.
+
+### 8.1b Détail combat dépliable
+
+Cliquez sur la **colonne Classe** (portrait + libellé, chevron ▼) d'un personnage pour **déplier** sous sa ligne les stats de combat de sa fiche :
+
+```
+⚔ Att CàC    ⚔ Dég CàC
+🏹 Att Dist.  🏹 Dég Dist.
+```
+
+- Un **seul** personnage est ouvert à la fois ; re-cliquez (chevron ▲) pour replier.
+- Les valeurs sont lues en temps réel dans la fiche (combat étendu) ; un champ non renseigné affiche **`-`**.
+- Clavier : **Entrée** ou **Espace** sur la colonne Classe (focus visible, `aria-expanded`).
+- Le **Nom** reste cliquable pour ouvrir la fiche complète (comportement inchangé).
 
 ### 8.2 Compteur de tour
 
@@ -436,7 +450,7 @@ Les compteurs servent à suivre les rounds ; ils ne sont pas enregistrés (repar
 
 ### 8.3 Gérer les ennemis
 
-Sous la section **Ennemis** : un tableau de **3 lignes vides par défaut** (colonnes Ennemi, Init., AC, ATT, PV, Tour).
+Sous la section **Ennemis** : un tableau de **3 lignes vides par défaut**, colonnes dans l'ordre **Ennemi, AC, ATT, PV, Init., Tour** (AC et Init. étroits — 2 chiffres ; ATT large).
 
 - **+ Ajouter** : ajoute une ligne en fin de tableau.
 - **− Supprimer** : supprime la **dernière** ligne.

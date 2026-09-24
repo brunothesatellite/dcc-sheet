@@ -45,8 +45,9 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 ### Onglet Equipe
 - Tableau des personnages en expedition avec **icone de portrait** dans la colonne Classe (100% hauteur de ligne)
 - Nom cliquable, Init, AC, PV editables, Init combat, **Compteur de tour visuel** (remplissage circulaire par 20%)
+- **Detail combat depliable** : clic sur la colonne Classe (chevron sous le libelle) → ligne de stats sous le personnage (Att/Degats Cac + Att/Degats distance) ; un seul perso ouvert a la fois ; valeur vide = tiret
 - Synchronisation des PV vers la fiche du personnage
-- Tableau des ennemis (ajout/suppression/RAZ)
+- Tableau des ennemis : colonnes **Ennemi, AC, ATT, PV, Init., Tour** (ajout/suppression/RAZ)
 - Compteurs de tour (clic = +1, clic droit / appui long = reset, cycle modulo 5)
 - Notes d'equipe (sauvegardees en base via l'API, inclues dans l'export/import global JSON)
 
@@ -100,7 +101,7 @@ dcc-sheet/
 │   ├── mage.js                 # Fiche Mage (sorts dynamiques)
 │   ├── nain.js                 # Fiche Nain
 │   ├── voleur.js               # Fiche Voleur
-│   └── equipe.js               # Onglet Equipe (tableau persos + portraits + ennemis)
+│   └── equipe.js               # Onglet Equipe (tableau persos + detail combat + ennemis)
 ├── icons/
 │   ├── dcc-pc-tokens/          # 20 PNG tokens officiels DCC
 │   ├── dd-red-box/             # 7 webp illustrations D&D Red Box

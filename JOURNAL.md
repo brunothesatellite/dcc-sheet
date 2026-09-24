@@ -659,3 +659,52 @@ Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts �
 | `captures/choix-portrait.png` | Capture régénérée (layout grille continue) |
 | `MANUAL.md` / `README.md` | Portraits 7 sources, popup grille continue, nav, table statique |
 | `JOURNAL.md` | Cette entrée |
+
+---
+
+## Date : 24 septembre 2026
+
+---
+
+### Equipe — détail combat dépliable sous la ligne personnage
+
+- **Demande** (`TODO.md`) : consulter Attaque/Dégâts CàC et Distance sans popup, sans colonne nouvelle, sans navigation, compact par défaut.
+- **Mockup** `mockup-equipe-detail.html` (validation puis retrait) : layout calqué webapp (portrait + libellé sur **une ligne**, chevron sous le libellé via `.char-class-labels`).
+- **`classes/equipe.js`** :
+  - `expandedCharacterId` (closure module) — un seul perso ouvert ;
+  - colonne **Classe** cliquable (`role=button`, `tabindex`, `aria-expanded`/`aria-controls`, Entrée/Espace) ;
+  - `toggleDetail` / `closeExpanded` — insertion/suppression de `tr.team-detail` (colspan 7) **sans re-render global** (compteurs, notes, PV préservés) ;
+  - collapse animé 250 ms puis retrait ; switch instantané ;
+  - `statCellHtml` : lit `attaque_cac` / `degats_cac` / `att_distance` / `degats_distance` ; **vide → `-`** (plus de faux `+0` / `1d6` placeholder) ;
+  - le **Nom** ouvre toujours la fiche (`switchTab` + `openSheet`).
+- **`style.css`** (ajouts seuls, règles existantes intactes) :
+  - `.char-class-labels`, `.chevron`, focus `aria-expanded`, `.team-detail*` (`grid-template-rows` 0fr→1fr, 250 ms), `.team-stat-*` ;
+  - mobile ≤ 600 px : gaps/paddings/tailles réduits.
+- **Tests** : mini-DOM stub (`test-equipe-detail.js`) — open/switch/close, clavier, stats remplies/vides, nom→fiche, collapse async — **26/26**.
+
+### Equipe — colonnes ennemis réorganisées
+
+- Classe `.team-table-enemies` sur le tableau ennemis uniquement.
+- Ordre : **Ennemi, AC, ATT, PV, Init., Tour** (was : Ennemi, Init., AC, ATT, PV, Tour).
+- Largeurs : AC **9 %**, Init. **9 %** (2 chiffres), ATT **30 %** (espace gagné) ; Ennemi/PV/Tour inchangés.
+- `createEnemyRow` : types d'inputs réalignés (AC number, ATT text, PV number, Init number).
+
+### Clerc & session (depuis v1.6)
+
+- **Sorts du Clerc** : nouveau style grille (`b9848aa`) + **fix numération** (`d960998`).
+- **Session** : durée d'inactivité augmentée (`bf0c37c`, `api/auth.php`).
+- **Bugfix** colonne CLASSE du tableau équipe (`b6a62e2`) + corrections diverses onglet (`2a98353`, `ecb8e58`).
+- **PDF** éditables déplacés à la racine → `pdf-sheets/`.
+- **Capture** `captures/equipe.png` régénérée avec une ligne détail ouverte.
+
+### Fichiers modifies (24 septembre)
+
+| Fichier | Actions |
+|---------|---------|
+| `classes/equipe.js` | Détail combat dépliable, ordre colonnes ennemis, `-` sur champs vides |
+| `style.css` | Chevron, `.team-detail*`, `.team-stat-*`, `.team-table-enemies` |
+| `captures/equipe.png` | Capture à jour (détail ouvert) |
+| `README.md` | Onglet Equipe (détail + colonnes ennemis) |
+| `MANUAL.md` | § 8.1b détail, § 8.1 Classe cliquable, § 8.3 ordre, alt capture |
+| `JOURNAL.md` | Cette entrée |
+

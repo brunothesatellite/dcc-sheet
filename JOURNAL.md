@@ -747,3 +747,50 @@ Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts �
 | `JOURNAL.md` | Cette entrée |
 | `exemples/dcc-persos-2026-09-24.json` | Exemple d'export (commit `719e82a`) |
 
+## Date : 24 septembre 2026 — après-midi
+
+---
+
+### Equipe — section Statistiques (option A)
+
+- **Plan** `PLAN-stats-equipe.md` + **maquette** `mockup-equipe-stats.html` (options A/B comparées ; **A validée** : zone AGI–END–PRE cliquable + un seul chevron sous END ; B écartée).
+- **`classes/equipe.js`** :
+  - `buildStatsSection()` inséré entre Ennemis et Notes (fragment : section-bar + table) ;
+  - helpers `parseStatNum`, `computeColExtremes` (≥ 2 valeurs valides et min ≠ max sinon pas de highlight), `statDisplay` (`-` si vide) ;
+  - colonnes FOR AGI END PRE CHA INT ; min/max en **classe** (`stat-max` / `stat-min`) ;
+  - zone groupe `.stat-group` (+ `-start` / `-end`), chevron **uniquement sous END** (`.stat-chevron-cell`) ;
+  - `toggleStatsDetail` / `closeStatsExpanded` : état `expandedStatsId` **séparé** de `expandedCharacterId` ;
+  - `tr.team-stats-detail` (colspan 7) insérée **juste après la ligne du perso** ; collapse 250 ms (même wrap que le détail combat) ;
+  - détail = `statCellHtml` JdS REF / VIG / VOL (`js_reflexe`, `js_vigueur`, `js_volonte`) ;
+  - section masquée si 0 PJ en expédition.
+- **`style.css`** (ajouts seuls) : `.team-table-stats`, `.stat-max/min` (**texte seul**, pas de fond), `.stat-group*`, `.stat-chevron-cell`, `tr.team-stats-detail`, media mobile.
+  - Ajustements UX demandés : `.char-name` sur les noms stats, headers groupe en `--field-bg`/`--ink`, pas de gras forcé sur `.val`, `font: inherit`, **rouge forcé à l'ouverture supprimé**.
+- **Tests** : `04-equipe` + section/min-max/collapse/clavier/ordre ; `02-css` + sélecteurs stats (pas de fond min/max, pas de rouge aria-expanded).
+
+### Equipe — bugfix : perte des brouillons au changement d'onglet
+
+- **Cause** : `switchTab('equipe')` rappelait `loadEquipe()` → `render()` → `innerHTML = ''` → ennemis / compteurs / notes en debounce effacés.
+- **Fix `script.js`** : panneau marqué `data-equipe-loaded` après le 1er chargement ; rechargement **uniquement** si invalide.
+- **Invalidation** (`invalidateEquipePanel`) sur create / delete / set_active / import (persos ou notes globales).
+
+### Equipe — bouton RAZ Init. combat + Tours
+
+- `tfoot` sous le tableau expédition : `td[colspan=5]` + `td[colspan=2]` contenant le bouton **RAZ**.
+- Confirmation via `window.showModal` (fallback `confirm`) puis :
+  - vide tous les `.init-combat-input` de la table expédition ;
+  - `counter.resetTurn()` sur chaque `.turn-counter` (méthode exposée par `createTurnCounter`).
+- Ennemis non touchés (pas de classe `init-combat-input` hors table PJ).
+
+### Fichiers modifies (24 septembre — stats / bugfix / RAZ)
+
+| Fichier | Actions |
+|---------|---------|
+| `classes/equipe.js` | Section Statistiques, `.init-combat-input`, tfoot RAZ, `resetTurn` |
+| `style.css` | Bloc stats, tfoot RAZ, media stats mobile |
+| `script.js` | `data-equipe-loaded`, `invalidateEquipePanel` |
+| `tests/04-equipe.test.js` | + tests stats + RAZ (confirm true/false) |
+| `tests/02-css.test.js` | + sélecteurs stats |
+| `README.md` / `MANUAL.md` | Stats, RAZ, conservation brouillons onglet |
+| `JOURNAL.md` | Cette entrée |
+| `PLAN-stats-equipe.md` / `mockup-equipe-stats.html` | Créés puis retirés après validation |
+

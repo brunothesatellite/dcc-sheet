@@ -50,10 +50,15 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - Tableau des personnages en expedition avec **icone de portrait** dans la colonne Classe (100% hauteur de ligne)
 - Nom cliquable, Init, AC, PV editables, Init combat, **Compteur de tour visuel** (remplissage circulaire par 20%)
 - **Detail combat depliable** : clic sur la colonne Classe (chevron sous le libelle) → ligne de stats sous le personnage (Att/Degats Cac + Att/Degats distance) ; un seul perso ouvert a la fois ; valeur vide = tiret
+- **Bouton RAZ** sous les colonnes Init. combat + Tour (avec confirmation) : efface les init. combat et remet les compteurs a zero
 - Synchronisation des PV vers la fiche du personnage
+- Tableau des **Statistiques** (entre Ennemis et Notes) : FOR AGI END PRE CHA INT, **vert = max / rouge = min** de colonne (texte seul, ex æquo inclus)
+  - Zone **AGI–END–PRE** groupée + **chevron sous END** → detail des jets de sauvegarde (REF / VIG / VOL) juste sous la ligne
+  - Un seul detail JdS ouvert ; collapse independant du detail combat
 - Tableau des ennemis : colonnes **Ennemi, AC, ATT, PV, Init., Tour** (ajout/suppression/RAZ)
 - Compteurs de tour (clic = +1, clic droit / appui long = reset, cycle modulo 5)
 - Notes d'equipe (sauvegardees en base via l'API, inclues dans l'export/import global JSON)
+- L'onglet Equipe n'est **recharge qu'une fois** par session (brouillons ennemis / compteurs / notes non save preserves au changement d'onglet) ; rechargement auto si la liste des persos change (create / delete / toggle / import)
 
 ### Sauvegarde automatique
 - Debounce 600ms sur tous les champs modifiables
@@ -106,7 +111,7 @@ dcc-sheet/
 │   ├── mage.js                 # Fiche Mage (sorts dynamiques)
 │   ├── nain.js                 # Fiche Nain
 │   ├── voleur.js               # Fiche Voleur
-│   └── equipe.js               # Onglet Equipe (tableau persos + detail combat + ennemis)
+│   └── equipe.js               # Onglet Equipe (persos + detail combat + stats + ennemis)
 ├── icons/
 │   ├── dcc-pc-tokens/          # 20 PNG tokens officiels DCC
 │   ├── dd-red-box/             # 7 webp illustrations D&D Red Box

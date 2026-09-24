@@ -421,6 +421,8 @@ Colonnes :
 
 > Seuls les PJ **en expédition** apparaissent. Pour en retirer un, passez-le à l'auberge depuis sa classe (§ 5) puis rechargez l'onglet.
 
+Sous le tableau, **à cheval sous les colonnes Init. combat et Tour**, un bouton **RAZ** remet à zéro la colonne Init. combat et les compteurs Tour de **tous les PJ**. Une confirmation s'affiche avant d'exécuter. Les ennemis (§ 8.3) ne sont pas concernés.
+
 ### 8.1b Détail combat dépliable
 
 Cliquez sur la **colonne Classe** (portrait + libellé, chevron ▼) d'un personnage pour **déplier** sous sa ligne les stats de combat de sa fiche :
@@ -457,6 +459,18 @@ Sous la section **Ennemis** : un tableau de **3 lignes vides par défaut**, colo
 - **RAZ** : vide le tableau et le réinitialise à **3 lignes vides**.
 
 > Les ennemis et leurs valeurs sont **éphémères** : ils servent au combat en cours et disparaissent au rechargement. Les compteurs de tour fonctionnent comme pour les PJ (§ 8.2).
+
+### 8.3b Section Statistiques
+
+Entre **Ennemis** et **Notes** : un tableau des PJ **en expédition** avec les 6 caractéristiques (**FOR, AGI, END, PRE, CHA, INT**).
+
+- **Vert** = maximum de la colonne · **Rouge** = minimum (ex æquo compris) — couleur sur le **texte** uniquement (pas de fond).
+- Une valeur vide ou non numérique affiche **`-`** et n'entre pas dans le min/max.
+- Les colonnes **AGI / END / PRE** forment une zone groupée. Un **chevron ▼ centré sous END** : cliquez n'importe où sur ce groupe (ou Entrée/Espace au clavier) pour **déplier sous la ligne** les jets de sauvegarde du PJ :
+  ```
+  JdS REF    JdS VIG    JdS VOL
+  ```
+- Un **seul** détail JdS est ouvert à la fois ; re-cliquez (chevron ▲) pour replier. Ce collapse est **indépendant** du détail combat (§ 8.1b) : les deux peuvent coexister.
 
 ### 8.4 Notes d'équipe
 

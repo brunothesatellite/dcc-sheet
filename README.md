@@ -3,6 +3,10 @@
 Application web SPA pour gerer une equipe complete de personnages pour Dungeon Crawl Classics (DCC). Responsive, optimisee pour smartphone.
 Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 
+| Fiche Clerc | Onglet Equipe |
+|:-----------:|:-------------:|
+| <img src="captures/clerc.png" alt="Fiche complète d'un personnage Clerc : identité, défense, combat, caractéristiques, portrait, équipement, sorts et notes" width="420"> | <img src="captures/equipe.png" alt="Onglet Équipe : tableau des personnages en expédition avec portraits, détail combat déplié, ennemis et notes" width="420"> |
+
 ## Fonctionnalites
 
 ### Authentification

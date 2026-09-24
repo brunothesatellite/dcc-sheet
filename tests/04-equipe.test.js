@@ -16,6 +16,15 @@ const CHARACTERS = [
       initiative: '+2',
       classe_armure: '14',
       points_de_vie: '7',
+      force: '11',
+      agilite: '9',
+      endurance: '16',
+      presence: '14',
+      chance: '11',
+      intelligence: '8',
+      js_reflexe: '1',
+      js_vigueur: '3',
+      js_volonte: '3',
     }),
   },
   {
@@ -26,6 +35,15 @@ const CHARACTERS = [
       initiative: '+1',
       classe_armure: '10',
       points_de_vie: '4',
+      force: '6',
+      agilite: '12',
+      endurance: '10',
+      presence: '11',
+      chance: '14',
+      intelligence: '16',
+      js_reflexe: '2',
+      js_vigueur: '1',
+      js_volonte: '',
     }),
   },
 ];
@@ -34,6 +52,8 @@ function counts(container) {
   return {
     details: container.querySelectorAll('tr.team-detail').length,
     expanded: container.querySelectorAll('.char-class[aria-expanded="true"]').length,
+    statsDetails: container.querySelectorAll('tr.team-stats-detail').length,
+    statsExpanded: container.querySelectorAll('.team-table-stats .stat-group[aria-expanded="true"]').length,
   };
 }
 
@@ -140,8 +160,8 @@ async function run() {
   // name click still opens sheet
   keydown(tds[0], 'Enter');
   await delay(10);
-  const names = Array.prototype.slice.call(container.querySelectorAll('.char-name'));
-  r.eq(names.length, 2, 'two name cells');
+    const names = Array.prototype.slice.call(container.querySelectorAll('table.team-table:not(.team-table-enemies):not(.team-table-stats) .char-name'));
+    r.eq(names.length, 2, 'two name cells in expedition table');
   click(names[0]);
   await delay(150);
   r.ok(switched >= 1, 'name click calls switchTab');
@@ -190,7 +210,7 @@ async function run() {
   r.ok(!!notes, 'notes textarea present');
 
   // char table headers
-  const charTable = container.querySelector('table.team-table:not(.team-table-enemies)');
+  const charTable = container.querySelector('table.team-table:not(.team-table-enemies):not(.team-table-stats)');
   r.ok(!!charTable, 'character team table present');
   if (charTable) {
     const ths = Array.prototype.slice.call(charTable.querySelectorAll('thead th')).map(function (th) {
@@ -198,6 +218,114 @@ async function run() {
     });
     r.ok(ths.indexOf('Nom') !== -1 && ths.indexOf('Classe') !== -1, 'character table has Nom + Classe columns');
     r.eq(ths.length, 7, 'character table has 7 columns');
+  }
+
+  // --- Section Statistiques ---
+  const bars = Array.prototype.slice.call(container.querySelectorAll('.section-bar')).map(function (el) {
+    return el.textContent.trim();
+  });
+  r.ok(bars.indexOf('Statistiques') !== -1, 'Statistiques section present');
+  const idxEnn = bars.indexOf('Ennemis');
+  const idxStats = bars.indexOf('Statistiques');
+  const idxNotes = bars.indexOf('Notes');
+  r.ok(idxEnn !== -1 && idxStats !== -1 && idxNotes !== -1, 'Ennemis / Statistiques / Notes all present');
+  r.ok(idxEnn < idxStats && idxStats < idxNotes, 'section order Ennemis < Statistiques < Notes');
+
+  const statsTable = container.querySelector('table.team-table-stats');
+  r.ok(!!statsTable, 'stats table has team-table-stats');
+  if (statsTable) {
+    const sths = Array.prototype.slice.call(statsTable.querySelectorAll('thead th')).map(function (th) {
+      return th.textContent.trim();
+    });
+    r.eq(sths.length, 7, 'stats table has 7 columns');
+    r.eq(sths.join('|'), 'Nom|FOR|AGI|END|PRE|CHA|INT', 'stats column order');
+
+    const statsRows = statsTable.querySelectorAll('tbody tr.stats-char-row');
+    r.eq(statsRows.length, 2, 'one stats row per character');
+    r.eq(counts(container).statsDetails, 0, 'no stats detail initially');
+    r.eq(counts(container).statsExpanded, 0, 'no stats expanded initially');
+
+    // min/max : FOR max=11 Travok, min=6 Sergiu ; INT max=16 Sergiu, min=8 Travok
+    const travokRow = statsRows[0];
+    const sergiuRow = statsRows[1];
+    r.ok(travokRow.querySelectorAll('td')[1].classList.contains('stat-max'), 'Travok FOR is max');
+    r.ok(sergiuRow.querySelectorAll('td')[1].classList.contains('stat-min'), 'Sergiu FOR is min');
+    r.ok(travokRow.querySelectorAll('td')[6].classList.contains('stat-min'), 'Travok INT is min');
+    r.ok(sergiuRow.querySelectorAll('td')[6].classList.contains('stat-max'), 'Sergiu INT is max');
+
+    // group AGI/END/PRE + single chevron under END
+    const groupCells = statsTable.querySelectorAll('tbody .stat-group');
+    r.eq(groupCells.length, 6, '3 group cells x 2 characters');
+    const chevrons = statsTable.querySelectorAll('tbody .stat-chevron-cell .chevron');
+    r.eq(chevrons.length, 2, 'one chevron per character (under END)');
+    r.ok(travokRow.querySelectorAll('td')[2].classList.contains('stat-group-start'), 'AGI is group-start');
+    r.ok(travokRow.querySelectorAll('td')[3].classList.contains('stat-chevron-cell'), 'END has chevron cell');
+    r.ok(travokRow.querySelectorAll('td')[4].classList.contains('stat-group-end'), 'PRE is group-end');
+    r.ok(travokRow.querySelectorAll('td')[0].classList.contains('char-name'), 'stats name uses char-name class');
+
+    // min/max = couleur texte uniquement (pas de fond surligné)
+    const maxTd = travokRow.querySelectorAll('td')[1];
+    r.ok(!maxTd.style.background && maxTd.className.indexOf('background') === -1, 'stat-max has no inline bg');
+
+    // group cells aria
+    groupCells.forEach(function (td) {
+      r.eq(td.getAttribute('role'), 'button', 'stat group role=button');
+      r.eq(td.getAttribute('tabindex'), '0', 'stat group tabindex=0');
+      r.eq(td.getAttribute('aria-expanded'), 'false', 'stat group aria-expanded=false');
+      r.ok(!!td.getAttribute('aria-controls'), 'stat group has aria-controls');
+    });
+
+    // open stats detail via AGI cell
+    click(travokRow.querySelectorAll('td')[2]);
+    r.eq(counts(container).statsDetails, 1, 'open stats -> 1 detail row');
+    r.eq(counts(container).statsExpanded, 3, 'open stats -> 3 group cells expanded');
+    const statsDetail = container.querySelector('tr.team-stats-detail');
+    r.ok(!!statsDetail, 'stats detail row exists');
+    if (statsDetail) {
+      r.ok(statsDetail.previousElementSibling === travokRow, 'detail is directly under character row');
+      const std = statsDetail.querySelector('td');
+      r.eq(std.colSpan, 7, 'stats detail colspan=7');
+      r.ok(std.innerHTML.indexOf('team-detail-wrap') !== -1, 'stats detail has wrap');
+      r.ok(std.innerHTML.indexOf('JdS REF') !== -1, 'stats detail has REF label');
+      r.ok(std.innerHTML.indexOf('JdS VIG') !== -1, 'stats detail has VIG label');
+      r.ok(std.innerHTML.indexOf('JdS VOL') !== -1, 'stats detail has VOL label');
+      r.ok(std.innerHTML.indexOf('>1</span>') !== -1, 'stats detail shows REF 1');
+      r.ok(std.innerHTML.indexOf('>3</span>') !== -1, 'stats detail shows VIG 3');
+    }
+
+    // combat + stats collapses are independent
+    click(tds[0]);
+    r.eq(counts(container).details, 1, 'combat detail opens while stats open');
+    r.eq(counts(container).statsDetails, 1, 'stats detail stays open with combat');
+    click(tds[0]);
+    await delay(320);
+    r.eq(counts(container).details, 0, 'combat closed');
+    r.eq(counts(container).statsDetails, 1, 'stats still open after combat close');
+
+    // switch to Sergiu stats
+    click(sergiuRow.querySelectorAll('td')[2]);
+    r.eq(counts(container).statsDetails, 1, 'switch stats still 1 detail');
+    r.eq(counts(container).statsExpanded, 3, 'switch stats still 3 expanded');
+    const openStats = container.querySelector('.team-table-stats .stat-group[aria-expanded="true"]');
+    r.ok(openStats && openStats.closest('tr') === sergiuRow, 'Sergiu is expanded stats row');
+    const sergiuDetailHtml = container.querySelector('tr.team-stats-detail').innerHTML;
+    r.ok(sergiuDetailHtml.indexOf('>2</span>') !== -1, 'Sergiu REF shows 2');
+    r.ok(sergiuDetailHtml.indexOf('empty') !== -1, 'empty VOL shows empty class');
+
+    // re-click collapses
+    click(sergiuRow.querySelectorAll('td')[3]);
+    r.eq(counts(container).statsExpanded, 0, 're-click collapses stats aria');
+    r.eq(counts(container).statsDetails, 1, 'collapse keeps detail until anim');
+    await delay(320);
+    r.eq(counts(container).statsDetails, 0, 'async collapse removes stats detail');
+
+    // keyboard
+    keydown(travokRow.querySelectorAll('td')[2], 'Enter');
+    r.eq(counts(container).statsDetails, 1, 'keyboard Enter opens stats');
+    keydown(container.querySelector('.team-table-stats .stat-group[aria-expanded="true"]'), ' ');
+    r.eq(counts(container).statsExpanded, 0, 'keyboard Space collapses stats');
+    await delay(320);
+    r.eq(counts(container).statsDetails, 0, 'Space collapse removes stats detail');
   }
 
   return r;

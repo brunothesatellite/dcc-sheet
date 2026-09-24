@@ -2049,6 +2049,109 @@ tr.team-detail.open .team-detail-wrap {
   font-weight: 400;
 }
 
+/* Equipe : section Statistiques (min/max + groupe AGI–END–PRE + detail JdS) */
+.team-table-stats th:nth-child(1),
+.team-table-stats td:nth-child(1) { width: 22%; }
+
+.team-table-stats th:nth-child(n+2),
+.team-table-stats td:nth-child(n+2) { width: 13%; }
+
+.team-table-stats .stat-max {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.team-table-stats .stat-min {
+  color: var(--red);
+  font-weight: 700;
+}
+
+/* Nom stats : même fonte que tableau expédition, sans interaction */
+.team-table-stats .char-name {
+  cursor: default;
+}
+
+.team-table-stats .char-name:hover {
+  color: var(--ink);
+}
+
+.team-table-stats .stat-group {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  line-height: 1.15;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  background: color-mix(in srgb, var(--field-bg) 45%, var(--paper));
+}
+
+.team-table-stats .stat-group.stat-group-start {
+  border-left: 1px solid var(--line);
+  box-shadow: inset 2px 0 0 color-mix(in srgb, var(--ink) 22%, transparent);
+}
+
+.team-table-stats .stat-group.stat-group-end {
+  border-right: 1px solid var(--line);
+  box-shadow: inset -2px 0 0 color-mix(in srgb, var(--ink) 22%, transparent);
+}
+
+.team-table-stats .stat-group .val {
+  display: block;
+  text-align: center;
+  font: inherit;
+}
+
+.team-table-stats .stat-group:hover,
+.team-table-stats .stat-group:focus-visible {
+  filter: brightness(0.97);
+}
+
+.team-table-stats .stat-group:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: -2px;
+}
+
+.team-table-stats .stat-chevron-cell .chevron {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1;
+  margin-top: 2px;
+  text-align: center;
+  transition: color 0.15s;
+}
+
+.team-table-stats .stat-chevron-cell[aria-expanded="true"] .chevron {
+  color: var(--red);
+}
+
+.team-table-stats thead .stat-group {
+  cursor: default;
+  /* même contraste que les autres th (lisibilité clair/sombre) */
+  background: var(--field-bg);
+  color: var(--ink);
+  box-shadow: none;
+}
+
+.team-table-stats thead .stat-group:hover {
+  filter: none;
+}
+
+.team-table tr.team-stats-detail > td {
+  padding: 0;
+  border-top: none;
+  background: var(--field-bg);
+  text-align: left;
+}
+
+.team-table tr.team-stats-detail:nth-child(even) {
+  background: transparent;
+}
+
+tr.team-stats-detail.open .team-detail-wrap {
+  grid-template-rows: 1fr;
+}
+
 .btn-group {
   display: flex;
   gap: 6px;
@@ -2528,6 +2631,11 @@ tr.team-detail.open .team-detail-wrap {
   .portrait-picker-header { font-size: 14px; padding: 10px 12px; }
   .portrait-picker-body { padding: 12px; }
   .portrait-picker-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Equipe stats : mobile */
+@media (max-width: 600px) {
+  .team-table-stats .stat-chevron-cell .chevron { font-size: 9px; }
 }
 
 /* Portrait picker popup */

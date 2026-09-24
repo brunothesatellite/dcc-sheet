@@ -145,8 +145,8 @@ window.DCCModules.equipe = {
       const fields = [
         { tag: 'input', type: 'text', placeholder: 'Nom' },
         { tag: 'input', type: 'number', placeholder: '' },
-        { tag: 'input', type: 'number', placeholder: '' },
         { tag: 'input', type: 'text', placeholder: '' },
+        { tag: 'input', type: 'number', placeholder: '' },
         { tag: 'input', type: 'number', placeholder: '' },
       ];
 
@@ -344,15 +344,15 @@ window.DCCModules.equipe = {
 
       // Table ennemis
       const tableEnemies = document.createElement('table');
-      tableEnemies.className = 'team-table';
+      tableEnemies.className = 'team-table team-table-enemies';
 
       const theadE = document.createElement('thead');
       theadE.innerHTML = '<tr>' +
         '<th style="text-align:left">Ennemi</th>' +
-        '<th>Init.</th>' +
         '<th>AC</th>' +
         '<th>ATT</th>' +
         '<th>PV</th>' +
+        '<th>Init.</th>' +
         '<th>Tour</th>' +
         '</tr>';
       tableEnemies.appendChild(theadE);

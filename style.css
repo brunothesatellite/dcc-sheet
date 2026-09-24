@@ -1930,6 +1930,16 @@ input[type="number"]::-webkit-outer-spin-button {
 .team-table th:nth-child(7),
 .team-table td:nth-child(7) { width: 12%; }
 
+/* Ennemis : Nom, AC, ATT, PV, Init, Tour — AC/Init 2 chiffres, ATT large */
+.team-table-enemies th:nth-child(2),
+.team-table-enemies td:nth-child(2) { width: 9%; }
+
+.team-table-enemies th:nth-child(3),
+.team-table-enemies td:nth-child(3) { width: 30%; }
+
+.team-table-enemies th:nth-child(5),
+.team-table-enemies td:nth-child(5) { width: 9%; }
+
 /* Equipe : dépliage détail combat sous la ligne personnage */
 .team-table .char-class {
   cursor: pointer;

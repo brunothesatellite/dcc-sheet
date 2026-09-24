@@ -13,7 +13,6 @@
 
 **EVOLUTIONS**
 * A l'usage, voir comment améliorer l'onglet équipe :
-1. changer largeur colonnes ennemis dans équipe
 2. classement automatique dans l'ordre d'initiative des personnages ? Intéressant
 3. Intégration des ennemis dans le premier tableau ? Pas favorable, cela risque de complexifier...
 

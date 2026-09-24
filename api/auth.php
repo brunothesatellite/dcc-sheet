@@ -44,6 +44,38 @@ if ($action === 'save_team_notes') {
     jsonResponse(['ok' => true]);
 }
 
+if ($action === 'get_marching_order') {
+    $db = getDB();
+    $user = requireLogin($db);
+    $stmt = $db->prepare('SELECT marching_order FROM users WHERE id = :id');
+    $stmt->bindValue(':id', $user['id'], SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $row = $result->fetchArray(SQLITE3_ASSOC);
+    $order = ($row && $row['marching_order'] !== null && $row['marching_order'] !== '') ? $row['marching_order'] : '{}';
+    jsonResponse(['ok' => true, 'order' => $order]);
+}
+
+if ($action === 'save_marching_order') {
+    $order = $input['order'] ?? null;
+    if ($order === null || !is_array($order)) { jsonError('Positions invalides'); }
+    if (strlen(json_encode($order)) > 2048) { jsonError('Ordre de marche trop volumineux (2 Ko maximum)'); }
+    $seen = [];
+    foreach ($order as $key => $value) {
+        if (!is_int($key) || $key < 1) { jsonError('Positions invalides'); }
+        if (!is_int($value) || $value < 0 || $value > 8) { jsonError('Positions invalides'); }
+        if (isset($seen[$value])) { jsonError('Positions invalides'); }
+        $seen[$value] = true;
+    }
+    $encoded = empty($order) ? '{}' : json_encode($order);
+    $db = getDB();
+    $user = requireLogin($db);
+    $stmt = $db->prepare('UPDATE users SET marching_order = :order WHERE id = :id');
+    $stmt->bindValue(':order', $encoded, SQLITE3_TEXT);
+    $stmt->bindValue(':id', $user['id'], SQLITE3_INTEGER);
+    $stmt->execute();
+    jsonResponse(['ok' => true]);
+}
+
 if ($action === 'register') {
     $pseudo = trim($input['pseudo'] ?? '');
     $password = $input['password'] ?? '';

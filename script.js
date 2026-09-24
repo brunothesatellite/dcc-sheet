@@ -275,6 +275,25 @@
     await api('auth.php', { method: 'POST', body: { action: 'save_team_notes', notes: notes || '' } });
   }
 
+  /* --- Ordre de marche (serveur) --- */
+
+  async function getMarchingOrder() {
+    var res = await api('auth.php', { method: 'GET', data: { action: 'get_marching_order' } });
+    if (res && typeof res.order === 'string') {
+      try {
+        var parsed = JSON.parse(res.order);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+      } catch (e) { /* JSON casse : normalize() reconstruira */ }
+      return {};
+    }
+    if (res && res.order && typeof res.order === 'object' && !Array.isArray(res.order)) return res.order;
+    return {};
+  }
+
+  async function saveMarchingOrder(order) {
+    await api('auth.php', { method: 'POST', body: { action: 'save_marching_order', order: order || {} } });
+  }
+
   async function loadTeamNotesWithMigration() {
     var notes = await getTeamNotes();
 
@@ -326,6 +345,7 @@
       }
 
       var fullCharacters = [];
+      var exportEntries = [];
       for (var i = 0; i < characters.length; i++) {
         var c = characters[i];
         var detail = await api('characters.php', { method: 'GET', data: { action: 'get', id: c.id } });
@@ -336,6 +356,7 @@
             is_active: detail.character.is_active,
             data: JSON.parse(detail.character.data || '{}'),
           });
+          exportEntries.push({ id: detail.character.id, is_active: detail.character.is_active });
         }
       }
 
@@ -349,6 +370,14 @@
       try {
         exportObj.team_notes = await getTeamNotes();
       } catch (e) { /* export des personnages maintenu meme si les notes echouent */ }
+
+      try {
+        if (window.DCCMarching) {
+          var orderMap = await getMarchingOrder();
+          var exportOrder = window.DCCMarching.buildExportMap(exportEntries, orderMap);
+          if (Object.keys(exportOrder).length > 0) exportObj.marching_order = exportOrder;
+        }
+      } catch (e) { /* export maintenu meme si l'ordre de marche echoue */ }
 
       var json = JSON.stringify(exportObj, null, 2);
       var blob = new Blob([json], { type: 'application/json' });
@@ -404,13 +433,21 @@
           await api('characters.php', { method: 'POST', body: { action: 'delete', id: existing.characters[i].id } });
         }
 
+        var createdIds = [];
         for (var j = 0; j < obj.characters.length; j++) {
           var c = obj.characters[j];
           var res = await api('characters.php', {
             method: 'POST',
-            body: { action: 'create', class: c.class, name: c.name || 'Importe' },
+            body: {
+              action: 'create',
+              class: c.class,
+              name: c.name || 'Importe',
+              /* Statut conservé : un perso exporté à l'auberge repart inactif */
+              is_active: (c.is_active === 0 || c.is_active === false) ? 0 : 1,
+            },
           });
           if (res.character) {
+            createdIds[j] = res.character.id;
             await saveCharacter(res.character.id, c.data || {}, c.name);
           }
         }
@@ -420,6 +457,34 @@
             await saveTeamNotes(typeof obj.team_notes === 'string' ? obj.team_notes : '');
           } catch (e) {
             showToast('Erreur sauvegarde des notes', 'error');
+          }
+        }
+
+        /* Ordre de marche : remap index du fichier → nouveaux ids ;
+           invalide/absent/doublon → reconstruction complete.
+           L'expédition = persos actifs : validation et reconstruction
+           portent sur les ids actifs seuls (les inactifs vont à l'auberge) */
+        if (window.DCCMarching) {
+          try {
+            var activeIds = [];
+            for (var a = 0; a < createdIds.length; a++) {
+              if (createdIds[a] === null || createdIds[a] === undefined) continue;
+              var srcChar = obj.characters[a];
+              if (srcChar && (srcChar.is_active === 0 || srcChar.is_active === false)) continue;
+              activeIds.push(createdIds[a]);
+            }
+            var importedOrder = null;
+            if (Object.prototype.hasOwnProperty.call(obj, 'marching_order')) {
+              importedOrder = window.DCCMarching.remapImport(obj.marching_order, createdIds);
+            }
+            if (!importedOrder || !window.DCCMarching.validateImported(importedOrder, activeIds)) {
+              importedOrder = window.DCCMarching.rebuild(activeIds.map(function (id) {
+                return { id: id, is_active: 1 };
+              }));
+            }
+            if (activeIds.length > 0) await saveMarchingOrder(importedOrder);
+          } catch (e) {
+            showToast('Erreur sauvegarde ordre de marche', 'error');
           }
         }
 
@@ -643,7 +708,13 @@
 
   function invalidateEquipePanel() {
     var panel = $('[data-class="equipe"].tab-panel');
-    if (panel) panel.removeAttribute('data-equipe-loaded');
+    if (panel) {
+      panel.removeAttribute('data-equipe-loaded');
+      /* La composition va changer : retrait aussi de la signature d'ids pour
+         que le prochain chargement re-rende sur place (comme après import)
+         au lieu de déclencher location.reload() sur « composition modifiée » */
+      panel.removeAttribute('data-expedition-ids');
+    }
   }
 
   function expeditionIdsAttr(chars) {
@@ -721,14 +792,39 @@
         notes = await loadTeamNotesWithMigration();
       } catch (e) { /* notes indisponibles : on affiche la tableau quand meme */ }
 
+      /* Ordre de marche : lecture + normalisation (auto-reparation) */
+      var marchingOrder = null;
+      if (window.DCCMarching) {
+        try {
+          var rawOrder = await getMarchingOrder();
+          var normalized = window.DCCMarching.normalize(rawOrder, allChars);
+          marchingOrder = normalized.order;
+          if (normalized.changed) {
+            try {
+              await saveMarchingOrder(normalized.order);
+            } catch (e) { /* echec : reessai au prochain chargement */ }
+          }
+        } catch (e) { /* lecture echouee : grille reconstruite localement */ }
+      }
+
       if (window.DCCModules && window.DCCModules.equipe) {
-        window.DCCModules.equipe.render(panel, allChars, syncPVFromEquipe, notes, saveTeamNotes);
+        window.DCCModules.equipe.render(panel, allChars, syncPVFromEquipe, notes, saveTeamNotes,
+          marchingOrder, onSaveMarchingOrder);
         panel.setAttribute('data-equipe-loaded', '1');
         panel.setAttribute('data-expedition-ids', freshIds);
       }
     } catch (err) {
       panel.removeAttribute('data-equipe-loaded');
       panel.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px">Erreur de chargement.</div>';
+    }
+  }
+
+  async function onSaveMarchingOrder(order) {
+    try {
+      await saveMarchingOrder(order);
+      showToastSave();
+    } catch (e) {
+      showToast('Erreur sauvegarde ordre de marche', 'error');
     }
   }
 

@@ -868,6 +868,42 @@ input[type="number"]::-webkit-outer-spin-button {
   margin-top: 0;
 }
 
+/* Sections repliables (Ordre de marche) */
+button.section-bar.collapse-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  transition: filter .2s;
+}
+button.section-bar.collapse-toggle:hover { filter: brightness(1.4); }
+button.section-bar.collapse-toggle:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
+button.section-bar.collapse-toggle .chev {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  transition: transform .3s cubic-bezier(.4, 0, .2, 1);
+  transform: rotate(-90deg); /* replié : pointe vers la droite */
+}
+button.section-bar.collapse-toggle[aria-expanded="true"] .chev {
+  transform: rotate(0deg); /* déplié : pointe vers le bas */
+}
+.section-bar.collapsed { border-radius: var(--radius); }
+
+.collapsible {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows .35s cubic-bezier(.4, 0, .2, 1);
+}
+.collapsible.collapsed { grid-template-rows: 0fr; }
+.collapsible > .collapsible-inner { overflow: hidden; min-height: 0; }
+
 /* --------------------------------------------------------------------------
    14. Stat Rows
    -------------------------------------------------------------------------- */
@@ -1909,6 +1945,138 @@ input[type="number"]::-webkit-outer-spin-button {
   vertical-align: middle;
 }
 
+/* --- Ordre de marche : grille 3x3 --- */
+.marching-panel { padding: 12px 10px 14px; }
+.marching-arrow {
+  width: min(300px, 100%);
+  margin: 0 auto;
+  text-align: center;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ink);
+  font-weight: 700;
+}
+.marching-grid {
+  width: min(300px, 100%);
+  margin: 6px auto 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.marching-slot {
+  position: relative;
+  aspect-ratio: 1;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  background: var(--field-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 4px 4px;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: pan-y; /* défilement possible tant que l'appui long n'a pas eu lieu */
+  cursor: default;
+}
+.marching-slot.occupied { background: var(--paper); cursor: grab; }
+body.marching-active .marching-slot.occupied { cursor: grabbing; }
+
+.marching-portrait {
+  width: 58%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(0, 0, 0, .18);
+  flex: none;
+  pointer-events: none;
+}
+.marching-portrait-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--input-border);
+  color: #fff;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(14px, 4.5vw, 20px);
+}
+.marching-name {
+  max-width: 100%;
+  font-size: 11px;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ink);
+  pointer-events: none;
+}
+.marching-meta { text-align: center; font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+/* Mode réorganisation */
+.marching-slot.dragging-src { opacity: .35; border-style: dashed; }
+.marching-grid.marching-dragging .marching-slot {
+  outline: 2px dashed var(--green);
+  outline-offset: -3px;
+  transition: outline-color .15s, background .15s;
+}
+.marching-grid.marching-dragging .marching-slot.drop-target {
+  outline: 2px solid var(--green);
+  background: rgba(39, 174, 96, .16);
+}
+.marching-grid.marching-dragging .marching-slot.occupied:not(.dragging-src)::after {
+  content: "\21C4"; /* ⇄ */
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  font-size: 12px;
+  color: var(--green);
+  font-weight: 700;
+}
+
+/* Carte soulevée pendant le drag */
+.marching-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9999;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 4px 4px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, .35);
+  user-select: none;
+  overflow: visible;
+}
+.marching-ghost .marching-name-overlay {
+  position: absolute;
+  left: 34%;
+  top: 34%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, .75);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 99px;
+  white-space: nowrap;
+  max-width: 92%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .4);
+}
+
 .team-table th:nth-child(1),
 .team-table td:nth-child(1) { width: 20%; text-align: left; }
 
@@ -2623,6 +2791,9 @@ tr.team-stats-detail.open .team-detail-wrap {
   .team-table input { font-size: 11px; padding: 3px 2px; }
   .team-portrait { height: 40px; width: 40px; }
   .char-card-portrait { height: 40px; width: 40px; }
+  .marching-name { font-size: 10px; }
+  .marching-grid { gap: 4px; }
+  .marching-panel { padding: 10px 8px 12px; }
   .team-table tbody tr { height: 40px; }
   .turn-counter { width: 30px; height: 30px; font-size: 13px; }
   .team-table .char-name { font-size: 11px; }

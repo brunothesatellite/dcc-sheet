@@ -27,12 +27,18 @@ function getDB() {
         password_hash TEXT NOT NULL,
         created_at TEXT DEFAULT (datetime(\'now\')),
         last_activity_at TEXT DEFAULT NULL,
-        team_notes TEXT NOT NULL DEFAULT \'\'
+        team_notes TEXT NOT NULL DEFAULT \'\',
+        marching_order TEXT NOT NULL DEFAULT \'{}\'
     )');
     try {
         $db->exec('ALTER TABLE users ADD COLUMN team_notes TEXT NOT NULL DEFAULT \'\'');
     } catch (Exception $e) {
-        // Colonne déjà presente sur une base existante
+        // Colonne deja presente sur une base existante
+    }
+    try {
+        $db->exec('ALTER TABLE users ADD COLUMN marching_order TEXT NOT NULL DEFAULT \'{}\'');
+    } catch (Exception $e) {
+        // Colonne deja presente sur une base existante
     }
     $db->exec('CREATE TABLE IF NOT EXISTS characters (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

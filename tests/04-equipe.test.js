@@ -93,6 +93,7 @@ async function run() {
     r.fail('equipe module not loaded');
     return r;
   }
+  env.load('marching-order.js');
 
   const container = env.document.getElementById('root');
   let savePvCalls = 0;
@@ -410,6 +411,8 @@ async function run() {
   f0.points_de_vie = '9';
   f0.initiative = '+5';
   f0.attaque_cac = '+2';
+  f0.portrait_source = 'shadow';
+  f0.portrait_index = '3';
   freshChars[0].data = JSON.stringify(f0);
   const f1 = JSON.parse(freshChars[1].data);
   f1.classe_armure = '13';
@@ -429,6 +432,18 @@ async function run() {
   const tds2 = Array.prototype.slice.call(container.querySelectorAll('.char-class'));
   click(tds2[0]);
   r.eq(counts(container).details, 1, 'combat detail open before resync');
+
+  // grille ordre de marche AVANT resync : nom / portrait de la 1re fiche encore visibles
+  const marchBefore = container.querySelector('.marching-slot.occupied .marching-name');
+  r.ok(!!marchBefore && marchBefore.textContent === 'Travok', 'grille avant resync: ancien nom');
+  const marchImgBefore = container.querySelector('.marching-slot.occupied img.marching-portrait');
+  r.ok(!!marchImgBefore && marchImgBefore.getAttribute('src') === 'icons/dcc/x.png',
+    'grille avant resync: ancien portrait');
+
+  // stub dépendant des arguments pour rendre le changement de portrait observable
+  env.window.getPortraitSrc = function (source, cls, index) {
+    return { src: 'icons/' + source + '/' + cls + '-' + index + '.png', source: source, index: 0, label: '' };
+  };
 
   const resyncOk = mod.resync(freshChars);
   r.eq(resyncOk, true, 'resync same composition returns true');
@@ -451,9 +466,80 @@ async function run() {
   const statsNameAfter = container.querySelector('table.team-table-stats tbody .char-name');
   r.ok(!!statsNameAfter && statsNameAfter.textContent === 'Travok Maj', 'stats section rebuilt with fresh name');
 
+  // --- Bug #1 : nom + portrait modifiés dans la fiche → grille ordre de marche rafraîchie ---
+  const marchAfter = container.querySelector('.marching-slot.occupied .marching-name');
+  r.ok(!!marchAfter && marchAfter.textContent === 'Travok Maj', 'resync: nom mis à jour dans la grille');
+  r.ok(!!marchAfter && marchAfter.title === 'Travok Maj', 'resync: infobulle nom à jour dans la grille');
+  const marchImgAfter = container.querySelector('.marching-slot.occupied img.marching-portrait');
+  r.ok(!!marchImgAfter && marchImgAfter.getAttribute('src') === 'icons/shadow/clerc-3.png',
+    'resync: portrait (source+index) mis à jour dans la grille');
+  const tableImgAfter = rows2[0].querySelector('img.team-portrait');
+  r.ok(!!tableImgAfter && tableImgAfter.getAttribute('src') === 'icons/shadow/clerc-3.png',
+    'resync: portrait mis à jour dans la colonne Classe');
+
   const extra = { id: 99, name: 'Extra', class: 'mage', data: '{}' };
   r.eq(mod.resync(freshChars.concat([extra])), false, 'composition change returns false (→ rechargement)');
   r.eq(container.querySelectorAll('tr[data-char-id]').length, 2, 'failed resync does not mutate rows');
+
+  // --- Section Ordre de marche (grille 3×3 + repli) ---
+  let marchSaves = 0;
+  mod.render(container, freshChars, function () {}, '', function () {},
+    { 1: 1, 2: 0 }, function () { marchSaves += 1; });
+
+  const marchToggle = container.querySelector('button.section-bar.collapse-toggle');
+  r.ok(!!marchToggle, 'section Ordre de marche presente (bouton)');
+  if (marchToggle) {
+    r.eq(marchToggle.getAttribute('aria-expanded'), 'true', 'section ouverte par defaut');
+    r.eq(marchToggle.getAttribute('aria-controls'), 'marching-panel', 'aria-controls -> panneau');
+    r.ok(!!marchToggle.querySelector('svg.chev'), 'chevron present');
+    r.ok(marchToggle.textContent.indexOf('Ordre de marche') !== -1, 'intitule Ordre de marche');
+  }
+
+  const marchPanel = container.querySelector('.collapsible#marching-panel');
+  r.ok(!!marchPanel, 'panneau repliable present');
+  if (marchPanel) r.ok(!marchPanel.classList.contains('collapsed'), 'panneau ouvert par defaut');
+
+  const slots = container.querySelectorAll('.marching-slot');
+  r.eq(slots.length, 9, 'grille 3x3 = 9 slots');
+  r.eq(slots[0].dataset.pos, '0', 'slot 0 en premiere position');
+  r.eq(slots[8].dataset.pos, '8', 'slot 8 en derniere position');
+
+  const occupied = container.querySelectorAll('.marching-slot.occupied');
+  r.eq(occupied.length, 2, '2 cases occupees');
+  if (occupied.length === 2) {
+    r.eq(occupied[0].dataset.id, '2', 'ordre fourni respecte (pos0 = id2 Sergiu)');
+    r.eq(occupied[1].dataset.id, '1', 'ordre fourni respecte (pos1 = id1 Travok Maj)');
+    const marchNames = container.querySelectorAll('.marching-name');
+    r.eq(marchNames.length, 2, 'noms affiches dans la grille');
+    r.eq(marchNames[0].textContent, 'Sergiu', 'nom du perso en pos0');
+    r.ok(marchNames[0].title === 'Sergiu', 'infobulle = nom complet');
+    r.eq(container.querySelectorAll('.marching-slot img.marching-portrait').length, 2,
+      'portraits img dans les cases occupees');
+  }
+
+  r.ok(!!container.querySelector('.marching-arrow'), 'fleche direction presente');
+  const marchMeta = container.querySelector('.marching-meta');
+  r.ok(!!marchMeta, 'meta presence presente');
+  if (marchMeta) r.ok(marchMeta.textContent.indexOf('2 perso') !== -1, 'meta: 2 persos');
+
+  // toggle replie / déplie
+  if (marchToggle && marchPanel) {
+    click(marchToggle);
+    r.eq(marchToggle.getAttribute('aria-expanded'), 'false', 'clic -> replie (aria-expanded=false)');
+    r.ok(marchPanel.classList.contains('collapsed'), 'clic -> panneau .collapsed');
+    r.ok(marchToggle.classList.contains('collapsed'), 'clic -> bouton .collapsed');
+    click(marchToggle);
+    r.eq(marchToggle.getAttribute('aria-expanded'), 'true', 'clic -> deplie (aria-expanded=true)');
+    r.ok(!marchPanel.classList.contains('collapsed'), 'clic -> panneau ouvert');
+  }
+
+  // aucun drag simule (jsdom sans PointerEvent) ; structure suffit
+  r.eq(marchSaves, 0, 'aucune sauvegarde sans drag');
+
+  // section absente si 0 PJ
+  mod.render(container, [], function () {}, '', function () {});
+  r.ok(!container.querySelector('.marching-grid'), 'aucune grille sans personnage');
+  r.eq(container.querySelectorAll('.marching-slot').length, 0, '0 slot sans personnage');
 
   return r;
 }

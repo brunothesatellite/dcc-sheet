@@ -9,6 +9,8 @@ const suites = [
   require('./03-modules.test'),
   require('./04-equipe.test'),
   require('./05-export.test'),
+  require('./06-marching-order.test'),
+  require('./07-restore.test'),
 ];
 
 function pad(s, n) {

@@ -38,12 +38,15 @@ if ($action === 'get') {
 if ($action === 'create') {
     $class = $input['class'] ?? '';
     $name = trim($input['name'] ?? 'Sans nom');
+    $isActive = (int)($input['is_active'] ?? 1);
+    if ($isActive !== 0 && $isActive !== 1) { jsonError('is_active invalide'); }
     $validClasses = ['clerc','elfe','guerrier','halfelin','mage','nain','voleur'];
     if (!in_array($class, $validClasses)) { jsonError('Classe invalide'); }
-    $stmt = $db->prepare('INSERT INTO characters (user_id, name, class, is_active, data) VALUES (:uid, :name, :class, 1, \'{}\')');
+    $stmt = $db->prepare('INSERT INTO characters (user_id, name, class, is_active, data) VALUES (:uid, :name, :class, :active, \'{}\')');
     $stmt->bindValue(':uid', $user['id'], SQLITE3_INTEGER);
     $stmt->bindValue(':name', $name, SQLITE3_TEXT);
     $stmt->bindValue(':class', $class, SQLITE3_TEXT);
+    $stmt->bindValue(':active', $isActive, SQLITE3_INTEGER);
     $stmt->execute();
     $id = $db->lastInsertRowID();
     $stmt = $db->prepare('SELECT * FROM characters WHERE id = :id');

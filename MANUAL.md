@@ -29,7 +29,7 @@ Manuel d'utilisation de l'application web **DCC Fiches de Personnage** : créez 
 - gérer les **7 classes** de personnages officielles de Dungeon Crawl Classics(Clerc, Elfe, Guerrier, Halfelin, Mage, Nain, Voleur) ;
 - créer **zéro à plusieurs personnages** par classe ;
 - remplir des **fiches fidèles aux feuilles officielles DCC** (PDF éditables fournis dans le dépôt) ;
-- suivre l'**équipe en expédition** (avec possibilité de laisser des personnages à l'**auberge**) dans un tableau de combat avec ennemis et compteurs de tour ;
+- suivre l'**équipe en expédition** (avec possibilité de laisser des personnages à l'**auberge**) dans un tableau de combat avec ennemis et compteurs de tour, et d'organiser leur **ordre de marche** dans une grille 3×3 ;
 - choisir un **portrait** parmi 7 sources : tokens officiels DCC, illustrations D&D Red Box 1983, silhouettes Leremy Gan, portraits Shadowdark, planches Jeff Stevens, portraits Gonzo ou portraits Old School.
 
 **Aucune installation** : l'application s'ouvre dans un navigateur moderne (Chrome, Firefox, Edge, Safari). Elle est optimisée pour smartphone mais fonctionne sur grand écran. Pour fonctionner elle nécessite seulement un serveur web avec **php** activé (et le module **sqlite3**). Voir **[README.md](./README.md)** pour plus d'informations sur le déploiement de l'application sur un serveur.
@@ -84,8 +84,8 @@ Une fois connecté, votre **avatar** (la première lettre de votre pseudo) rempl
 | Action | Effet |
 |---|---|
 | **Bienvenue {pseudo}** | En-tête du menu |
-| **Exporter tout (JSON)** | Télécharge tous vos personnages **et vos notes d'équipe** dans un fichier |
-| **Importer tout (JSON)** | Remplace **tous** vos personnages (et vos notes, si le fichier en contient) par ceux d'un fichier |
+| **Exporter tout (JSON)** | Télécharge tous vos personnages, vos **notes d'équipe** et votre **ordre de marche** dans un fichier |
+| **Importer tout (JSON)** | Remplace **tous** vos personnages (et vos notes / ordre de marche, si le fichier en contient) par ceux d'un fichier |
 | **Changer le mot de passe** | Ouvre le formulaire de changement (§ 2.4) |
 | **Supprimer le compte** | Suppression définitive (§ 2.5) |
 | **Deconnexion** | Ferme la session et renvoie à la page de connexion |
@@ -215,7 +215,7 @@ Le fichier contient la classe, le nom, le statut et **toutes les données de la 
 **Exporter toute la collection** :
 1. Ouvrez le **menu utilisateur** (avatar).
 2. Cliquez sur **Exporter tout (JSON)**.
-3. Un fichier `dcc-persos-AAAA-MM-JJ.json` est téléchargé, contenant **tous** vos personnages **et vos notes d'équipe**.
+3. Un fichier `dcc-persos-AAAA-MM-JJ.json` est téléchargé, contenant **tous** vos personnages **vos notes d'équipe** et votre **ordre de marche**.
 4. Si vous n'avez aucun personnage, une popup le signale.
 
 **Importer une collection** :
@@ -225,8 +225,10 @@ Le fichier contient la classe, le nom, le statut et **toutes les données de la 
 4. Confirmez l'avertissement **« Cela remplacera tous vos personnages actuels. Cette action est irreversible. »** (bouton rouge).
 5. **Tous** vos personnages actuels sont supprimés, puis le contenu du fichier est recréé ; un toast annonce le nombre importé.
 6. Si le fichier contient le champ **`team_notes`** (même vide), vos **notes d'équipe** sont remplacées par son contenu ; les anciens exports, dépourvus de ce champ, **laissent vos notes actuelles intactes**.
+7. **Le statut de chaque personnage est conservé** : un PJ exporté **à l'auberge** repart **à l'auberge** (il n'apparaît ni dans l'onglet Équipe, ni dans l'ordre de marche) ; un PJ en expédition repart en expédition.
+8. Si le fichier contient le champ **`marching_order`**, votre **ordre de marche** est restauré sur les personnages **en expédition** ; si le champ est **absent** ou **invalide** (positions en doublon, personnage inconnu), l'ordre est **reconstruit automatiquement** (gauche→droite, haut→bas).
 
-> **Usage recommandé** : l'export global sert de **sauvegarde externe** régulière et de transfert entre deux navigateurs/machines — fiches **et** notes d'équipe.
+> **Usage recommandé** : l'export global sert de **sauvegarde externe** régulière et de transfert entre deux navigateurs/machines — fiches, notes d'équipe **et** ordre de marche.
 
 ### 4.7 Ordre d'affichage des cartes
 
@@ -439,6 +441,28 @@ Cliquez sur la **colonne Classe** (portrait + libellé, chevron ▼) d'un person
 - Clavier : **Entrée** ou **Espace** sur la colonne Classe (focus visible, `aria-expanded`).
 - Le **Nom** reste cliquable pour ouvrir la fiche complète (comportement inchangé).
 
+### 8.1c Ordre de marche (grille 3×3)
+
+Tout en haut de l'onglet, une section repliable **Ordre de marche** place vos PJ en expédition dans une **grille 3×3** (portrait + nom, **9 maximum** ; au-delà, le pied de section indique « X hors grille »). La **flèche ⬆** au-dessus de la grille donne la direction du groupe.
+
+<img src="captures/equipe-nomarching.png" alt="Onglet Équipe complet avec la section Ordre de marche repliée en haut" width="420">
+
+*Ici, la section **Ordre de marche** est repliée : un clic sur sa barre la rouvre pour afficher la grille.*
+
+**Réorganiser l'ordre** :
+- **souris** : maintenez le clic gauche sur un personnage et déplacez-le ;
+- **tactile** : **appui long (~0,4 s)** sur le personnage puis glissez (avant ce délai, le défilement de la page reste normal) ;
+- déposez sur une **case vide** pour déplacer, sur une **case occupée** pour **échanger instantanément** les deux personnages (badge ⇄ sur les cases pendant le déplacement) ;
+- largué hors de la grille = annulation.
+
+<img src="captures/marching-order.png" alt="Zoom sur la section Ordre de marche avec un portrait en cours de glisser-déposer vers une autre case" width="420">
+
+*Déplacement en cours : le portrait suit le pointeur et les cases de destination sont surlignées (badge ⇄ sur une case occupée pour échanger).*
+
+Chaque changement est **sauvegardé immédiatement** en base (toast disquette ; « Erreur sauvegarde ordre de marche » en cas d'échec). L'en-tête de la section se **replie/déplie** (chevron ▼, ouverte par défaut) ; noms et portraits se **resynchronisent** avec les fiches comme le reste de l'onglet.
+
+**Auto-réparation** : à chaque affichage, l'ordre est validé (9 cases au plus, aucune position en doublon, aucun personnage disparu de l'expédition) ; toute anomalie **reconstruit** automatiquement l'ordre (gauche→droite, haut→bas) et le resauvegarde. Les **cases vides** entre les personnages sont normales (dépôt possible dessus) et l'ordre qui en résulte est conservé tel quel. L'ordre voyage aussi dans l'**export/import global JSON** (§ 4.6, annexe A).
+
 ### 8.2 Compteur de tour
 
 Un cercle par ligne (PJ et ennemis) qui se remplit visuellement par paliers de **20 %**.
@@ -503,6 +527,7 @@ Si le thème ne « tient » pas après un rechargement : videz le cache du navig
 | Onglet actif | localStorage | Non |
 | Fiches de personnages | **Base de données serveur** | Oui (export JSON) |
 | Notes d'équipe | **Base de données serveur** | Oui (export JSON) |
+| Ordre de marche | **Base de données serveur** | Oui (export JSON) |
 
 ### Comportement mobile (< 600 px)
 
@@ -585,6 +610,7 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
   "version": 1,
   "exported_at": "2026-09-22T18:00:00.000Z",
   "team_notes": "Session 3 : descendedre dans les catacombes, garder la potion pour Travok.",
+  "marching_order": { "0": 1, "1": 0 },
   "characters": [
     { "name": "Travok", "class": "clerc", "is_active": 1, "data": { "nom": "Travok", "dieu": "AHRIMAN" } },
     { "name": "Sergiu", "class": "mage", "is_active": 1, "data": { "nom": "Sergiu" } }
@@ -594,8 +620,10 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 
 - `characters` : **tableau non vide**, chaque entrée avec au minimum `class`.
 - `team_notes` : notes d'équipe (texte libre, **champ optionnel**).
+- `marching_order` : positions d'ordre de marche des personnages **en expédition** — `{"<index dans characters[]>": position 0..8}` (**champ optionnel** ; les clés sont les index du tableau `characters`, les ids DB n'étant pas stables après un import).
 - L'import **remplace intégralement** la collection existante (après confirmation).
 - Fichier **sans** `team_notes` (anciens exports) : les notes actuelles sont **conservées** ; fichier **avec** `team_notes` (même vide) : les notes sont **remplacées**.
+- Fichier **sans** `marching_order`, ou ordre **invalide** (doublon, hors bornes) : l'ordre est **reconstruit** (gauche→droite, haut→bas) — jamais d'erreur bloquante.
 
 ---
 

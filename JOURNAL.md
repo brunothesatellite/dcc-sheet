@@ -838,3 +838,101 @@ Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts �
 | `README.md` / `MANUAL.md` / `TODO.md` | Comportement resync + synchro PV |
 | `JOURNAL.md` | Cette entrée |
 
+## Date : 24 septembre 2026 — Ordre de marche (grille 3×3)
+
+---
+
+- **Demande** : implémenter la fonctionnalité « Ordre de marche » de l'onglet Équipe selon `PLAN-MARCHING.md` (validé), sans commit.
+- **Comportement livré** :
+  - section **repliable** « Ordre de marche » en haut de l'onglet Équipe (bouton `section-bar.collapse-toggle` + chevron SVG animé, ouverte par défaut, `aria-expanded/controls`, repli animé `grid-template-rows: 1fr→0fr`) — affichée seulement si ≥ 1 PJ en expédition ;
+  - **grille 3×3** : 9 cases (portrait réel via `getPortraitSrc` + nom sur 1 ligne avec `title`), cases vides non déplaçables, flèche ⬆ direction du groupe, méta « n persos · k/9 affichés · X hors grille » ;
+  - **drag & drop unifié Pointer Events** : souris = déplacement dès 4 px ; tactile = **appui long 400 ms** (SLOP 8 px annule le timer → défilement normal, `touch-action: pan-y`, `touchmove` non-passif bloqué pendant le drag) ; ghost centré pointeur avec **nom superposé** + `scale(1.06)`, cibles surlignées (outline vert + badge ⇄ sur occupée), **swap instantané** sur case occupée, largué hors grille = annulation ; drop → sauvegarde serveur + re-rendu de la seule grille ;
+  - **persistance** : `users.marching_order TEXT NOT NULL DEFAULT '{}'` (CREATE + ALTER protégé), API `get_marching_order` / `save_marching_order` (`requireLogin`, validation stricte : clés ≥ 1, valeurs entières 0..8 uniques, plafond 2 Ko → 400 « Positions invalides ») ;
+  - **auto-réparation** : `DCCMarching.normalize()` à chaque `loadEquipe` — invariant `k = min(n,9)` entrées, ids ⊆ expédition, positions bijectives sur {0..k‑1} ; **toute anomalie → reconstruction** (gauche→droite, haut→bas) + resauvegarde ; idempotente ;
+  - **export/import** : champ top-level optionnel `marching_order: {"<index dans characters[]>": pos}` (persos `is_active=1` uniquement, **pas de bump `version`**) ; import : `createdIds[i]` → `remapImport` → `validateImported` → sinon reconstruction complète ; rétrocompatible (anciens fichiers sans champ = ordre reconstruit) ;
+  - **bug critique TODO corrigé** : `resync()` rafraîchit désormais la grille (noms/portraits modifiés dans les fiches → visibles dans l'ordre de marche sans rechargement).
+- **`marching-order.js` (nouveau)** : module pur `window.DCCMarching` — `normalize`, `isValid`, `rebuild`, `validateImported`, `buildExportMap`, `remapImport`.
+- **`classes/equipe.js`** : signature `render(..., marchingOrder, onSaveMarching)` (params 6‑7 optionnels), `initMarchingMap`, section + grille + drag (cleanup inter-renders via `_cleanupMarchDrag`, listeners `document` retirés proprement).
+- **`script.js`** : helpers `getMarchingOrder` / `saveMarchingOrder`, `onSaveMarchingOrder` (save + `showToastSave`, erreur → toast), `loadEquipe` fetch → normalize → save si `changed`, export `marching_order` pendant la boucle, import `createdIds` + remap/validation/reconstruction.
+- **Tests** : nouvelle suite `06-marching-order` (50 assertions : normalize valable/anomalies/k=min(n,9)/idempotence, `buildExportMap` index keys + actifs seuls, `remapImport` bornes, `validateImported`, round-trip) + extension `04-equipe` (section, 9 slots, ordre fourni respecté, toggle aria/classe, portraits, méta, 0 PJ → pas de grille). **428/428 OK** (contre 348 avant).
+- **Docs** : MANUAL (§ 4.6 item 7 + bouton export, § 8.1c nouveau, annexe A `marching_order`, table « ce que le navigateur mémorise », présentation), README (bullet Onglet Équipe, arborescence, 2 endpoints), TODO (marching order livré, bug critique corrigé), JOURNAL (cette entrée).
+
+### Fichiers modifies (24 septembre — ordre de marche)
+
+| Fichier | Actions |
+|---------|---------|
+| `marching-order.js` | **Nouveau** — module pur `DCCMarching` |
+| `index.html` | `<script src="marching-order.js">` avant `script.js` |
+| `api/db.php` | Colonne `users.marching_order` + ALTER protégé |
+| `api/auth.php` | Actions `get_marching_order` / `save_marching_order` |
+| `script.js` | Helpers ordre, export/import `marching_order`, `loadEquipe`, `onSaveMarchingOrder` |
+| `classes/equipe.js` | Section repliable, grille 3×3, drag Pointer Events, refresh grille au `resync` |
+| `style.css` | Styles repliable (toggle/chevron/collapsible) + grille/ghost/drag + mobile 600px |
+| `tests/06-marching-order.test.js` | **Nouvelle** suite (50 assertions) |
+| `tests/04-equipe.test.js` | + assertions section Ordre de marche |
+| `tests/run.js` | Enregistrement suite 06 |
+| `README.md` / `MANUAL.md` / `TODO.md` | Docs fonctionnelles + API |
+| `JOURNAL.md` | Cette entrée |
+
+
+## Date : 24 septembre 2026 — Bug : ordre de marche non restauré au reload (+ import JSON)
+
+---
+
+- **Demande** : « le marching order semble bien sauvé en base et exporté en json mais il n'est pas restauré quand je recharge la page, et vérifie aussi le cas de l'import json ».
+- **Diagnostic instrumenté** :
+  - aller-retour serveur réel (`php -S` + API `save_marching_order` → `get_marching_order`) : identique octet à octet, la chaîne serveur est bonne ;
+  - **harnais d'intégration `07-restore`** (vrai `script.js` démarré dans jsdom sur le `index.html` réel, `fetch` moké, onglet actif = Équipe) : le rechargement simple restituait déjà l'ordre → le bug exigeait une donnée particulière ;
+  - **inspection de la base du joueur** : `{"44":1,"45":2,"46":0,"47":5,"48":7,"49":3}` — position **7** alors que la case 4 est vide ; entre deux instantanés la valeur a changé (`48:4` → `48:7`) : drag réel en cours, preuve que la sauvegarde marche ;
+  - **racine** : le drag & drop dépose explicitement sur **case vide** (grille 3×3, 6 PJs → 3 cases vides), le **serveur** n'exige que l'unicité des positions (0..8, plan §2) et l'**export** propage les trous — mais `isValid()` client imposait **{0..k‑1} contigu** (plan §1 « aucun trou ») : ordre sauvegardé ✓ exporté ✓ puis **rejeté au `loadEquipe` → reconstruction par défaut + resauvegarde = écrasement silencieux de l'ordre** au prochain affichage.
+- **Correctifs** :
+  - `marching-order.js` : `isValid()` n'exige plus la contiguïté — invariant = k = min(n,9) entrées, ids ⊆ expédition, positions **entières uniques 0..8** (trous = cases vides autorisés) ; entrée manquante, doublon, id hors expédition, valeur hors plage restent des anomalies → reconstruction ;
+  - `script.js` : `invalidateEquipePanel()` retire aussi `data-expedition-ids` → après import, re-rendu sur place au lieu du `location.reload()` constaté par le harnais ;
+  - `PLAN-MARCHING.md` §1 et §3 : amendement de spécification (le §1 contredisait §2 et le code de drag).
+- **Tests** : `06` — l'ordre troué est désormais **valide** (assertion « trou de position → false » inversée + cas réel `48:7` conservé sans écrasement) ; **nouvelle suite `07-restore`** (29 assertions) — (a) rechargement sur les **vraies données du joueur** (6 PJs, cases 0/1/2/3/5/7 occupées, case 4 vide, **0 réécriture**), (b) parcours **import JSON** complet (bouton menu, fichier, modale de confirmation, 6 suppressions, remap index → nouveaux ids `{"60":1,"61":0}`, notes d'équipe, re-rendu). Preuve A/R : bug réintroduit → `06` (‑5) et `07` (‑6) échouent ; correctif en place → **467/467 OK** (contre 434).
+- **Nettoyage** : personnages/utilisateur de test (`tmptest1`, Alpha, Beta) retirés de la base.
+
+### Fichiers modifies (24 septembre — restauration ordre de marche)
+
+| Fichier | Actions |
+|---------|---------|
+| `marching-order.js` | `isValid()` : contiguïté retirée (trous autorisés) + commentaire d'en-tête |
+| `script.js` | `invalidateEquipePanel()` : retrait aussi de `data-expedition-ids` |
+| `tests/06-marching-order.test.js` | Assertion trou inversée + 4 assertions ordre troué |
+| `tests/07-restore.test.js` | **Nouvelle** suite d'intégration (29 assertions) |
+| `tests/run.js` | Enregistrement suite 07 |
+| `PLAN-MARCHING.md` | Amendement invariant §1 + §3 |
+| `README.md` | Liste des suites de tests |
+| `TODO.md` / `JOURNAL.md` | Cette entrée |
+
+## Date : 24 septembre 2026 — Bug : persos inactifs réactivés par l'import JSON
+
+---
+
+- **Demande** : « les personnages non actifs sont bien sauvés en base et en export json, mais si je fais un export / import json, ils sont de nouveau actifs » (bug suivant de la liste TODO).
+- **Racine** : `importAllCharacters()` recréait chaque perso via `action=create` **sans** le champ `is_active`, et `api/characters.php` imposait `is_active = 1` en dur dans l'INSERT — donc tous les persos repartaient **en expédition** (y compris ceux à l'auberge), ce qui faussait aussi la composition de l'expédition pour l'ordre de marche.
+- **Correctifs** :
+  - `api/characters.php` : `create` accepte un **`is_active` optionnel** (coercé puis validé strictement 0/1 → sinon 400 « is_active invalide »), défaut 1 pour rétrocompatibilité ;
+  - `script.js` (import) : transmet `is_active: 0/1` déduit du fichier (anciens exports sans champ → actif, comportement inchangé) ;
+  - `script.js` (import, ordre de marche) : `realIds` → **`activeIds`** (ids des persos actifs seuls) pour `validateImported` / `rebuild` / la garde de sauvegarde — l'expédition = actifs, le remap reste indexés sur `createdIds` complet (les clés d'export sont des index de fichier, inactifs compris).
+- **Tests** : suite `07-restore` étendue au cas **3 persos dont 1 à l'auberge** : statut conservé à la création (`creates[1].is_active === 0`), ordre remappé sur les ids actifs (`{"60":1,"62":0}`), grille = actifs seuls (Bobby absent), méta « 2 persos ». **473/473 OK** (contre 467).
+- **Vérification serveur réelle** (php -S + API) : `is_active:0` → 0, `is_active:1` → 1, absent → 1 (défaut), `is_active:5` → **400** ; comptes/utilisateurs de test nettoyés de la base.
+- **Docs** : MANUAL § 4.6 (nouvel item « statut conservé », ordre de marche limité aux expéditions), README (table API `create`), TODO (bug corrigé), JOURNAL (cette entrée).
+
+### Fichiers modifies (24 septembre — statut auberge à l'import)
+
+| Fichier | Actions |
+|---------|---------|
+| `api/characters.php` | `create` : `is_active` optionnel validé 0/1 |
+| `script.js` | Import : transmet `is_active`, `activeIds` pour l'ordre |
+| `tests/07-restore.test.js` | Import avec perso inactif (+6 assertions) |
+| `README.md` / `MANUAL.md` / `TODO.md` | Docs |
+| `JOURNAL.md` | Cette entrée |
+
+## Date : 24 septembre 2026 — Release v1.10 (captures Manuel + purge des plans)
+
+---
+
+- **Captures Manuel** : `equipe.png` mise à jour par l'utilisateur (intégralité de l'onglet) ; deux nouvelles captures intégrées au **§ 8.1c** : `equipe-nomarching.png` (section Ordre de marche repliée, dans son contexte d'onglet) et `marching-order.png` (zoom sur la section avec un portrait en cours de glisser-déposer).
+- **Purge** : `PLAN-MARCHING.md` et `MARCHING-ORDER.md` **supprimés** — la spécification est désormais absorbée par le code, le Manuel § 8.1c et les amendements consignés dans ce JOURNAL ; références nettoyées (`TODO.md`, maquette `maquettes/marching-order.html`).
+- **Contenu de la release v1.9.1 → v1.10** : fonctionnalité complète **Ordre de marche** (section repliable, grille 3×3, drag & drop unifié souris/tactile, persistance `users.marching_order`, export/import `marching_order`) + correctifs — grille non resynchronisée au `resync`, taille des cases 360→300 px, **ordre troué écrasé au rechargement** (invariant amendé : trous = cases vides autorisés), **persos inactifs réactivés par l'import** (`create`/import avec `is_active` conservé), import re-rendu sur place sans `location.reload()` ; suites de tests `06-marching-order` et `07-restore` (intégration jsdom + vraies données joueur) — **473/473 OK**.

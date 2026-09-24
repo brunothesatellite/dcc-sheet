@@ -1,13 +1,22 @@
 window.DCCModules = window.DCCModules || {};
 
 window.DCCModules.equipe = {
-  render(container, characters, onSavePV, initialNotes, onSaveNotes) {
+  render(container, characters, onSavePV, initialNotes, onSaveNotes, marchingOrder, onSaveMarching) {
     const CLASS_LABELS = {
       clerc: 'Clerc', elfe: 'Elfe', guerrier: 'Guerrier',
       halfelin: 'Halfelin', mage: 'Mage', nain: 'Nain', voleur: 'Voleur'
     };
     let expandedCharacterId = null;
     let expandedStatsId = null;
+
+    /* --- Ordre de marche : état --- */
+    const onSaveMarchingCb = typeof onSaveMarching === 'function' ? onSaveMarching : null;
+    let marchingMap = initMarchingMap(marchingOrder);
+    let marchGrid = null;
+    let marchMeta = null;
+    let pending = null;
+    let drag = null;
+    let ghost = null;
 
     const STAT_COLS = [
       { key: 'force', label: 'FOR' },
@@ -402,8 +411,340 @@ window.DCCModules.equipe = {
       return tr;
     }
 
+    /* ------------------------------------------------------------------
+       Ordre de marche — grille 3×3 + drag & drop unifié (Pointer Events)
+       · souris  : déplacement dès que le curseur bouge (clic maintenu)
+       · tactile : appui long ~400 ms AVANT d'activer le déplacement ;
+                   le défilement reste possible tant que le timer n'a pas
+                   expiré (touch-action: pan-y + annulation si l'utilisateur
+                   bouge avant les 400 ms)
+    ------------------------------------------------------------------ */
+
+    const LONG_PRESS_MS = 400;
+    const DRAG_SLOP = 8;
+    const MOUSE_SLOP = 4;
+
+    function initMarchingMap(raw) {
+      if (window.DCCMarching) {
+        return window.DCCMarching.normalize(raw, characters).order;
+      }
+      const map = {};
+      characters.forEach(function (c, i) {
+        if (i < 9) map[c.id] = i;
+      });
+      return map;
+    }
+
+    function charAtPos(pos) {
+      for (let i = 0; i < characters.length; i++) {
+        if (marchingMap[characters[i].id] === pos) return characters[i];
+      }
+      return null;
+    }
+
+    function renderMarchingGrid() {
+      if (!marchGrid) return;
+      marchGrid.innerHTML = '';
+      for (let pos = 0; pos < 9; pos++) {
+        const slot = document.createElement('div');
+        slot.className = 'marching-slot';
+        slot.dataset.pos = String(pos);
+        const ch = charAtPos(pos);
+        if (ch) {
+          slot.classList.add('occupied');
+          slot.dataset.id = String(ch.id);
+          const data = parsedDataOf(ch);
+          let portrait = null;
+          if (window.getPortraitSrc) {
+            try {
+              const pr = window.getPortraitSrc(data.portrait_source || 'dcc', ch.class, data.portrait_index);
+              if (pr && pr.src) {
+                portrait = document.createElement('img');
+                portrait.className = 'marching-portrait';
+                portrait.alt = '';
+                portrait.src = pr.src;
+              }
+            } catch (e) { portrait = null; }
+          }
+          if (!portrait) {
+            portrait = document.createElement('div');
+            portrait.className = 'marching-portrait marching-portrait-fallback';
+            portrait.textContent = (ch.name || '?').charAt(0).toUpperCase();
+          }
+          const nameEl = document.createElement('div');
+          nameEl.className = 'marching-name';
+          nameEl.textContent = ch.name || 'Sans nom';
+          nameEl.title = ch.name || '';
+          slot.appendChild(portrait);
+          slot.appendChild(nameEl);
+        }
+        marchGrid.appendChild(slot);
+      }
+      if (marchMeta) {
+        const n = characters.length;
+        const shown = Math.min(n, 9);
+        marchMeta.textContent = n + ' perso' + (n > 1 ? 's' : '') + ' en expédition · ' +
+          shown + '/9 affiché' + (shown > 1 ? 's' : '') +
+          (n > 9 ? ' · ' + (n - 9) + ' hors grille' : '');
+      }
+    }
+
+    function buildMarchingSection() {
+      const frag = document.createDocumentFragment();
+
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'section-bar collapse-toggle';
+      toggle.id = 'marching-toggle';
+      toggle.setAttribute('aria-expanded', 'true');
+      toggle.setAttribute('aria-controls', 'marching-panel');
+      const label = document.createElement('span');
+      label.textContent = 'Ordre de marche';
+      const chev = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      chev.setAttribute('class', 'chev');
+      chev.setAttribute('viewBox', '0 0 16 16');
+      chev.setAttribute('aria-hidden', 'true');
+      chev.setAttribute('focusable', 'false');
+      const chevPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      chevPath.setAttribute('d', 'M3 5.5 L8 10.5 L13 5.5');
+      chevPath.setAttribute('fill', 'none');
+      chevPath.setAttribute('stroke', 'currentColor');
+      chevPath.setAttribute('stroke-width', '2.2');
+      chevPath.setAttribute('stroke-linecap', 'round');
+      chevPath.setAttribute('stroke-linejoin', 'round');
+      chev.appendChild(chevPath);
+      toggle.appendChild(label);
+      toggle.appendChild(chev);
+
+      const collapsible = document.createElement('div');
+      collapsible.className = 'collapsible';
+      collapsible.id = 'marching-panel';
+      const inner = document.createElement('div');
+      inner.className = 'collapsible-inner';
+      const panel = document.createElement('div');
+      panel.className = 'marching-panel';
+
+      const arrow = document.createElement('div');
+      arrow.className = 'marching-arrow';
+      arrow.title = 'Direction du groupe';
+      arrow.textContent = '⬆';
+
+      const grid = document.createElement('div');
+      grid.className = 'marching-grid';
+      grid.setAttribute('aria-label', 'Grille d\'ordre de marche 3 par 3');
+
+      const meta = document.createElement('div');
+      meta.className = 'marching-meta';
+
+      panel.appendChild(arrow);
+      panel.appendChild(grid);
+      panel.appendChild(meta);
+      inner.appendChild(panel);
+      collapsible.appendChild(inner);
+
+      toggle.addEventListener('click', function () {
+        const open = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', open ? 'false' : 'true');
+        collapsible.classList.toggle('collapsed', open);
+        toggle.classList.toggle('collapsed', open);
+      });
+
+      grid.addEventListener('pointerdown', onMarchPointerDown);
+      grid.addEventListener('pointermove', onMarchPointerMove, { passive: false });
+      grid.addEventListener('pointerup', onMarchPointerUp);
+      grid.addEventListener('pointercancel', onMarchPointerCancel);
+      grid.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+      frag.appendChild(toggle);
+      frag.appendChild(collapsible);
+
+      marchGrid = grid;
+      marchMeta = meta;
+      return frag;
+    }
+
+    function slotFromPoint(x, y) {
+      const el = document.elementFromPoint(x, y);
+      return el && el.closest ? el.closest('.marching-slot') : null;
+    }
+
+    function onMarchPointerDown(e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      const slot = e.target && e.target.closest ? e.target.closest('.marching-slot') : null;
+      if (!slot || !slot.dataset.id) return; /* cases vides : non déplaçables */
+      e.preventDefault();
+      try { slot.setPointerCapture(e.pointerId); } catch (err) {}
+
+      pending = {
+        id: slot.dataset.id,
+        slot: slot,
+        pointerId: e.pointerId,
+        pointerType: e.pointerType,
+        startX: e.clientX,
+        startY: e.clientY,
+        fromPos: parseInt(slot.dataset.pos, 10),
+        timer: null,
+        active: false
+      };
+
+      if (pending.pointerType !== 'mouse') {
+        pending.timer = setTimeout(function () {
+          if (pending && !pending.active) activateMarchDrag(pending.startX, pending.startY);
+        }, LONG_PRESS_MS);
+      }
+    }
+
+    function onMarchPointerMove(e) {
+      if (!pending && !drag) return;
+      if (pending && !pending.active) {
+        const dx = e.clientX - pending.startX;
+        const dy = e.clientY - pending.startY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (pending.pointerType === 'mouse') {
+          if (dist > MOUSE_SLOP) activateMarchDrag(pending.startX, pending.startY);
+          else return;
+        } else {
+          /* Tactile avant appui long : bouger = défilement → annuler le timer */
+          if (dist > DRAG_SLOP) { clearMarchPending(); return; }
+          return;
+        }
+      }
+      if (drag) {
+        moveMarchGhost(e.clientX, e.clientY);
+        updateMarchTarget(e.clientX, e.clientY);
+        if (e.cancelable) e.preventDefault();
+      }
+    }
+
+    function activateMarchDrag(x, y) {
+      if (!pending || pending.active) return;
+      const p = pending;
+      clearTimeout(p.timer);
+      p.active = true;
+      drag = p;
+
+      const slot = p.slot;
+      slot.classList.add('dragging-src');
+      if (marchGrid) marchGrid.classList.add('marching-dragging');
+      document.body.classList.add('marching-active');
+      if (navigator.vibrate) { try { navigator.vibrate(15); } catch (e) {} }
+
+      /* Portrait flottant = carte soulevée, avec nom superposé */
+      const ch = characters.filter(function (c) { return String(c.id) === p.id; })[0];
+      ghost = document.createElement('div');
+      ghost.className = 'marching-ghost';
+      ghost.style.width = slot.offsetWidth + 'px';
+      ghost.style.height = slot.offsetHeight + 'px';
+      const portraitClone = slot.querySelector('.marching-portrait');
+      if (portraitClone) ghost.appendChild(portraitClone.cloneNode(true));
+      const overlay = document.createElement('div');
+      overlay.className = 'marching-name-overlay';
+      overlay.textContent = ch ? (ch.name || '') : '';
+      ghost.appendChild(overlay);
+      document.body.appendChild(ghost);
+
+      moveMarchGhost(x, y);
+      updateMarchTarget(x, y);
+      document.addEventListener('touchmove', onMarchTouchMove, { passive: false });
+    }
+
+    function moveMarchGhost(x, y) {
+      if (!ghost) return;
+      const w = ghost.offsetWidth;
+      const h = ghost.offsetHeight;
+      /* centré sur le pointeur + légère remontée pour ne pas masquer la cible */
+      const gx = x - w / 2;
+      const gy = y - h / 2 - (pending && pending.pointerType !== 'mouse' ? 14 : 0);
+      ghost.style.transform = 'translate3d(' + gx + 'px,' + gy + 'px,0) scale(1.06)';
+    }
+
+    function updateMarchTarget(x, y) {
+      if (!marchGrid) return;
+      const prev = marchGrid.querySelector('.marching-slot.drop-target');
+      if (prev) prev.classList.remove('drop-target');
+      const slot = slotFromPoint(x, y);
+      if (slot && drag && slot !== drag.slot) slot.classList.add('drop-target');
+    }
+
+    function onMarchPointerUp(e) {
+      if (pending && !pending.active) { clearMarchPending(); return; } /* simple tap */
+      if (!drag) return;
+
+      const target = slotFromPoint(e.clientX, e.clientY);
+      const fromPos = drag.fromPos;
+      const id = drag.id;
+      cleanupMarchDrag();
+
+      if (!target) { renderMarchingGrid(); return; }          /* relâché hors grille */
+      const toPos = parseInt(target.dataset.pos, 10);
+      if (isNaN(toPos) || toPos === fromPos) { renderMarchingGrid(); return; } /* sans changement */
+
+      const occupant = charAtPos(toPos);
+      if (occupant && String(occupant.id) !== id) {
+        /* Case occupée → échange instantané, sans confirmation */
+        marchingMap[occupant.id] = fromPos;
+        marchingMap[id] = toPos;
+      } else {
+        /* Case vide → simple déplacement */
+        marchingMap[id] = toPos;
+      }
+      if (onSaveMarchingCb) onSaveMarchingCb(Object.assign({}, marchingMap));
+      renderMarchingGrid();
+    }
+
+    function onMarchPointerCancel() {
+      if (drag) { cleanupMarchDrag(); renderMarchingGrid(); }
+      else clearMarchPending();
+    }
+
+    function clearMarchPending() {
+      if (pending) {
+        clearTimeout(pending.timer);
+        if (!pending.active) {
+          try { pending.slot.releasePointerCapture(pending.pointerId); } catch (e) {}
+        }
+      }
+      pending = null;
+    }
+
+    function cleanupMarchDrag() {
+      if (drag) {
+        clearTimeout(drag.timer);
+        try { drag.slot.releasePointerCapture(drag.pointerId); } catch (e) {}
+        drag.slot.classList.remove('dragging-src');
+      }
+      if (marchGrid) {
+        marchGrid.classList.remove('marching-dragging');
+        const t = marchGrid.querySelector('.marching-slot.drop-target');
+        if (t) t.classList.remove('drop-target');
+      }
+      document.body.classList.remove('marching-active');
+      if (ghost && ghost.parentNode) ghost.parentNode.removeChild(ghost);
+      ghost = null;
+      drag = null;
+      pending = null;
+      document.removeEventListener('touchmove', onMarchTouchMove);
+    }
+
+    /* Bloque le défilement de la page UNIQUEMENT pendant un drag actif */
+    function onMarchTouchMove(e) {
+      if (drag && e.cancelable) e.preventDefault();
+    }
+
     function render() {
+      /* Un render précédent peut laisser un listener document (drag en cours) */
+      const prevCleanup = window.DCCModules.equipe._cleanupMarchDrag;
+      if (typeof prevCleanup === 'function') prevCleanup();
+      window.DCCModules.equipe._cleanupMarchDrag = cleanupMarchDrag;
       container.innerHTML = '';
+      marchGrid = null;
+      marchMeta = null;
+
+      // Section Ordre de marche (hors scope si 0 PJ)
+      if (characters.length > 0) {
+        container.appendChild(buildMarchingSection());
+        renderMarchingGrid();
+      }
 
       // Section personnages actifs
       const sectionChars = document.createElement('div');
@@ -784,6 +1125,7 @@ window.DCCModules.equipe = {
       });
 
       characters = freshChars.slice();
+      renderMarchingGrid(); /* noms/portraits fraîches, positions conservées */
 
       /* Statistiques agrégées : reconstruction (min/max recalculés sur les
          valeurs fraîches, détail déplié conservé via expandedStatsId) */

@@ -47,6 +47,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - Affiche aussi dans les **cartes de la liste** (a gauche du nom) et dans l'**onglet Equipe** (colonne Classe)
 
 ### Onglet Equipe
+- **Ordre de marche** (section repliable en haut) : grille 3x3 (portraits + noms, 9 persos max) ; drag & drop unifie souris (clic maintenu) / tactile (appui long ~0,4 s) ; case vide = deplacement, case occupee = echange instantane ; sauvegarde immediate en base + auto-reparation (doublon / id perdu → reconstruction gauche→droite) ; inclus dans l'export/import JSON (`marching_order`)
 - Tableau des personnages en expedition avec **icone de portrait** dans la colonne Classe (100% hauteur de ligne)
 - Nom cliquable, Init, AC, PV editables, Init combat, **Compteur de tour visuel** (remplissage circulaire par 20%)
 - **Detail combat depliable** : clic sur la colonne Classe (chevron sous le libelle) → ligne de stats sous le personnage (Att/Degats Cac + Att/Degats distance) ; un seul perso ouvert a la fois ; valeur vide = tiret
@@ -98,6 +99,7 @@ dcc-sheet/
 ├── gonzo-icons.js              # Catalogue d'icones Gonzo (30 images, 7 classes)
 ├── osr-icons.js                # Catalogue d'icones Old School (17 images, 7 classes)
 ├── portrait-icons.js           # Registre des sources de portraits (getPortraitSrc)
+├── marching-order.js           # Logique pure ordre de marche (normalize, export, import)
 ├── api/
 │   ├── db.php                  # SQLite3 + helpers (users, characters, session)
 │   ├── auth.php                # Authentification (login, register, logout, change_password, delete_account)
@@ -111,7 +113,7 @@ dcc-sheet/
 │   ├── mage.js                 # Fiche Mage (sorts dynamiques)
 │   ├── nain.js                 # Fiche Nain
 │   ├── voleur.js               # Fiche Voleur
-│   └── equipe.js               # Onglet Equipe (persos + detail combat + stats + ennemis)
+│   └── equipe.js               # Onglet Equipe (persos + ordre de marche + detail combat + stats + ennemis)
 ├── icons/
 │   ├── dcc-pc-tokens/          # 20 PNG tokens officiels DCC
 │   ├── dd-red-box/             # 7 webp illustrations D&D Red Box
@@ -129,7 +131,7 @@ dcc-sheet/
 ├── tests/                      # Suite de non-regression (node tests/run.js)
 │   ├── run.js                  # Orchestrateur + rapport tests/report.md
 │   ├── helpers/                # assert + environnement jsdom
-│   └── *.test.js               # syntaxe, CSS, modules, equipe, export
+│   └── *.test.js               # syntaxe, CSS, modules, equipe, export, ordre de marche, restauration
 └── deploy/
     ├── build.bat               # Script de build
     ├── _build.ps1              # Script PowerShell de build
@@ -151,6 +153,8 @@ dcc-sheet/
 | `delete_account` | POST | — | Supprime le compte, les personnages et la session |
 | `get_team_notes` | GET | — | Retrouve les notes d'equipe `{ok, notes}` |
 | `save_team_notes` | POST | `notes` | Sauvegarde les notes d'equipe (100 Ko max) |
+| `get_marching_order` | GET | — | Retrouve l'ordre de marche `{ok, order}` (JSON texte, defaut `{}`) |
+| `save_marching_order` | POST | `order` | Sauvegarde l'ordre de marche `{ok}` (positions 0..8 uniques, 2 Ko max) |
 
 ### Personnages (`api/characters.php`)
 
@@ -158,7 +162,7 @@ dcc-sheet/
 |--------|---------|------------|-------------|
 | `list` | GET | `class` (optionnel), `is_active` (optionnel) | Liste les personnages (inclut les donnees JSON) |
 | `get` | GET | `id` | Recupere un personnage par son ID |
-| `create` | POST | `class`, `name` | Cree un personnage (data initialise a `{}`) |
+| `create` | POST | `class`, `name`, `is_active` (optionnel, 0/1, defaut 1) | Cree un personnage (data initialise a `{}`) |
 | `save` | POST | `id`, `data` (optionnel), `name` (optionnel) | Sauvegarde les donnees JSON et/ou le nom |
 | `set_active` | POST | `id`, `is_active` | Active/desactive un personnage (0/1) |
 | `delete` | POST | `id` | Supprime un personnage |

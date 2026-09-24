@@ -424,6 +424,7 @@
         }
 
         showToast('Import reussi (' + obj.characters.length + ' persos)', 'success');
+        invalidateEquipePanel();
         await switchTab(activeTab);
       } catch (err) {
         await showModal({ title: 'Erreur', message: 'Erreur lors de l\'import : ' + err.message, type: 'alert' });
@@ -574,7 +575,11 @@
         panel = el('div', { className: 'tab-panel active', 'data-class': 'equipe' });
         $('#main-content').appendChild(panel);
       }
-      await loadEquipe(panel);
+      // Ne recharger que la 1re fois (ou après invalidation persos) :
+      // re-render = innerHTML = '' → perd brouillons ennemis / compteurs / notes non save
+      if (panel.getAttribute('data-equipe-loaded') !== '1') {
+        await loadEquipe(panel);
+      }
       return;
     }
 
@@ -633,9 +638,15 @@
      8b. Equipe Tab
      ======================================================================== */
 
+  function invalidateEquipePanel() {
+    var panel = $('[data-class="equipe"].tab-panel');
+    if (panel) panel.removeAttribute('data-equipe-loaded');
+  }
+
   async function loadEquipe(panel) {
     if (!currentUser) {
       panel.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px">Connectez-vous pour voir l\'équipe.</div>';
+      panel.removeAttribute('data-equipe-loaded');
       return;
     }
 
@@ -658,8 +669,10 @@
 
       if (window.DCCModules && window.DCCModules.equipe) {
         window.DCCModules.equipe.render(panel, allChars, syncPVFromEquipe, notes, saveTeamNotes);
+        panel.setAttribute('data-equipe-loaded', '1');
       }
     } catch (err) {
+      panel.removeAttribute('data-equipe-loaded');
       panel.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px">Erreur de chargement.</div>';
     }
   }
@@ -876,6 +889,7 @@
       });
 
       if (res.character) {
+        invalidateEquipePanel();
         openSheet(cls, res.character);
         showToastSave();
       }
@@ -917,6 +931,7 @@
         body: { action: 'delete', id: charData.id },
       });
 
+      invalidateEquipePanel();
       loadClassCharacters(cls, false);
     } catch (err) {
       console.error('Erreur suppression:', err);
@@ -932,6 +947,7 @@
         body: { action: 'set_active', id: charId, is_active: isActive ? 1 : 0 },
       });
 
+      invalidateEquipePanel();
       showToastSave();
 
       if (!activeSheets[activeTab]) {
@@ -1422,6 +1438,7 @@
 
         if (res.character) {
           await saveCharacter(res.character.id, obj.data, obj.name);
+          invalidateEquipePanel();
           openSheet(cls, { ...res.character, data: JSON.stringify(obj.data) });
           showToastSave();
         }

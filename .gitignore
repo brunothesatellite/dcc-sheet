@@ -5,3 +5,6 @@ data/dcc.db-shm
 .DS_Store
 Thumbs.db
 deploy/dcc-sheet/
+node_modules/
+tests/report.md
+package-lock.json

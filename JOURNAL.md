@@ -708,3 +708,42 @@ Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts �
 | `MANUAL.md` | § 8.1b détail, § 8.1 Classe cliquable, § 8.3 ordre, alt capture |
 | `JOURNAL.md` | Cette entrée |
 
+## Date : 24 septembre 2026 11:24
+
+### Suite de tests de non-régression
+
+- **Objectif** : suite automatisée lancable par l'utilisateur ou l'agent après chaque grosse évolution, avec rapport final.
+- **Stack** : Node.js + **jsdom** (seule devDependency) ; zéro framework de test.
+- **Lancement** : `npm test` / `node tests/run.js` / **`test.bat`** (Windows : vérifie Node, installe les deps si besoin, pause en fin).
+- **Rapport** : console + `tests/report.md` (gitignoré) ; exit 0 = OK, 1 = échec.
+
+### Suites
+
+| Suite | Couverture |
+|-------|------------|
+| `01-syntax` | `node --check` (18 JS) + `php -l` (SKIP si PHP absent du PATH) + scripts `index.html` + modules classes |
+| `02-css` | Accolades équilibrées, sélecteurs critiques (détail Équipe, portraits, sorts, mobile 600px), `.char-class-content` flex row |
+| `03-modules` | 7 classes : `render` + clés `data-key` prefixées + roundtrip `collectSheetData` (auto-save) + `collectData` |
+| `04-equipe` | Port des 26 tests stub → jsdom : toggle détail, aria, clavier, stats `-`, ordre colonnes ennemis, boutons +/−/RAZ, collapse async |
+| `05-export` | Les 2 JSON `exemples/` : shape, classes valides, ≥ 3 classes distinctes |
+
+### Verif release
+
+- Dernier run : **216/216 OK**, 6 skip (`php -l`), ~4 s.
+- Skill release : étape **2.5** ajoutée (tests AVANT commit/push).
+- Build déploiement : exclut `tests/`, `node_modules/`, `package.json`, `package-lock.json`, `test.bat`, `.opencode/`.
+
+### Fichiers modifies (24 septembre — tests)
+
+| Fichier | Actions |
+|---------|---------|
+| `package.json` | Créé (script `test` + devDep jsdom) |
+| `test.bat` | Créé (lanceur Windows) |
+| `tests/**` | Créé (run.js, 5 suites, helpers) |
+| `.gitignore` | + `node_modules/`, `tests/report.md`, `package-lock.json` |
+| `.opencode/skills/release/SKILL.md` | Étape 2.5 tests non-régression |
+| `README.md` | Structure `tests/` + `test.bat`, § Tests, dépendances |
+| `deploy/_build.ps1` | Exclusions build (tests, node_modules, package*, test.bat, .opencode) |
+| `JOURNAL.md` | Cette entrée |
+| `exemples/dcc-persos-2026-09-24.json` | Exemple d'export (commit `719e82a`) |
+

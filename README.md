@@ -76,6 +76,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 ```
 dcc-sheet/
 ├── index.html                  # SPA principale
+├── test.bat                    # Lanceur Windows des tests de non-regression
 ├── script.js                   # Gestionnaire central (tabs, auth, CRUD, auto-save, nav, portraits)
 ├── style.css                   # Styles principaux (themes, layout, responsive, portraits)
 ├── style-auth.css              # Styles des pages d'authentification
@@ -116,6 +117,10 @@ dcc-sheet/
 ├── change-password.php         # Page de changement de mot de passe
 ├── data/                       # Base SQLite3 (auto-creee)
 │   └── dcc.db
+├── tests/                      # Suite de non-regression (node tests/run.js)
+│   ├── run.js                  # Orchestrateur + rapport tests/report.md
+│   ├── helpers/                # assert + environnement jsdom
+│   └── *.test.js               # syntaxe, CSS, modules, equipe, export
 └── deploy/
     ├── build.bat               # Script de build
     ├── _build.ps1              # Script PowerShell de build
@@ -184,6 +189,18 @@ start.bat
 
 Ouvrir `http://localhost:8000` dans un navigateur.
 
+### Tests de non-regression
+
+```bash
+npm install   # une seule fois (devDeps : jsdom)
+npm test      # ou : node tests/run.js
+```
+
+Sous Windows, double-cliquer sur **`test.bat`** a la racine du projet (installe les deps si besoin, lance les tests, affiche le resultat).
+
+Rapport ecrit dans `tests/report.md` ; exit code 0 = OK, 1 = echec.  
+`php -l` est execute automatiquement si PHP est dans le PATH (sinon SKIP).
+
 ### Deploiement Synology NAS
 
 1. Copier les fichiers dans `/volume1/web/dcc-sheet/`
@@ -204,6 +221,7 @@ Cree un dossier `deploy/dcc-sheet/` avec tous les fichiers necessaires (exclut .
 
 - **Backend** : PHP 7.4+ avec SQLite3
 - **Frontend** : Aucune dependance externe (vanilla JS)
+- **Tests** : Node.js + jsdom (devDependency uniquement)
 - **Fonts** : Google Fonts (Barlow Condensed + Inter)
 - **Base de donnees** : SQLite3 (auto-creee dans `data/dcc.db`)
 

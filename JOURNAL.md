@@ -936,3 +936,26 @@ Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts �
 - **Captures Manuel** : `equipe.png` mise à jour par l'utilisateur (intégralité de l'onglet) ; deux nouvelles captures intégrées au **§ 8.1c** : `equipe-nomarching.png` (section Ordre de marche repliée, dans son contexte d'onglet) et `marching-order.png` (zoom sur la section avec un portrait en cours de glisser-déposer).
 - **Purge** : `PLAN-MARCHING.md` et `MARCHING-ORDER.md` **supprimés** — la spécification est désormais absorbée par le code, le Manuel § 8.1c et les amendements consignés dans ce JOURNAL ; références nettoyées (`TODO.md`, maquette `maquettes/marching-order.html`).
 - **Contenu de la release v1.9.1 → v1.10** : fonctionnalité complète **Ordre de marche** (section repliable, grille 3×3, drag & drop unifié souris/tactile, persistance `users.marching_order`, export/import `marching_order`) + correctifs — grille non resynchronisée au `resync`, taille des cases 360→300 px, **ordre troué écrasé au rechargement** (invariant amendé : trous = cases vides autorisés), **persos inactifs réactivés par l'import** (`create`/import avec `is_active` conservé), import re-rendu sur place sans `location.reload()` ; suites de tests `06-marching-order` et `07-restore` (intégration jsdom + vraies données joueur) — **473/473 OK**.
+
+---
+
+## Date : 25 septembre 2026 — Release v2.1 (filtrage des dossiers de portraits + build différentiel)
+
+- **Filtrage des dossiers de portraits absents** (`2ed7922`) : nouvelle endpoint `api/icons.php` (`action=list`, protégée `requireLogin`) qui liste les sous-dossiers de `icons/` via `scandir` (triés, sûrs vis-à-vis de `.gitignore`) ; côté client `getAvailableIconDirs()` (cache promesse par session, échec réseau → `null`) + `getPortraitFolder(ps)` (1er chemin image, ignore `meta`) ; `showPortraitPicker` filtre les **dossiers entiers** avant construction du DOM (1 requête lazy à la 1ʳᵉ ouverture de la popup). **Option B assumée** : les persos d'un dossier absent **ne sont pas renumérotés** (`getPortraitSrc` / `initPortraits` intacts) — image brisée, comportement voulu ; la popup échoue ouverte complète si l'endpoint tombe (tolérance).
+- **Exclusion des maquettes du build** (`efe7ad4`) : `maquettes/` retiré de la copie de déploiement.
+- **Capture équipe** (`e787efb`) : `captures/equipe.png` corrigée par l'utilisateur.
+- **Build différentiel** (non commis au moment des faits) : `deploy/_build.ps1` réécrit avec `param([switch]$Diff)` + helper `Test-Excluded` partagé — mode normal **inchangé** (build complet vérifié, 153 fichiers), mode `-Diff` : tag source via `git describe --tags --abbrev=0`, `git diff --name-status <tag>` (tag → working tree, inclut staged et WIP) + `git ls-files --others` pour les untracked, copie A/M hors exclusions vers `deploy/dcc-sheet-diff/`, D listés « à supprimer manuellement sur le serveur », rapport `CHANGES.txt` généré ; nouvelle entrée `deploy/build-diff.bat` ; `.gitignore` + `deploy/dcc-sheet-diff/`.
+- **Skill release enrichie** : étape 4 — le changelog GitHub inclut la **liste des fichiers Modified/Added/Deleted** depuis l'ancien tag ; étape 5 — lancer `deploy\build-diff.bat` après le tag et annoncer le dossier diff.
+- **Tests** : suite `08-portrait-picker` (30 tests : dossier absent filtré, échec endpoint → popup complète, clic sélection attend `srcInput.value === 'gonzo'` via chaîne de promesses) + `tests/helpers/env.js` stubbe `window.getPortraitSrc`, harnais 08 patche `head.appendChild` (jsdom ne charge pas les `<script src>` dynamiques). **504/504 OK** avec `PHP_BIN` (php -l couvre `api/icons.php`).
+
+### Fichiers modifiés (25 septembre — filtrage portraits + build différentiel)
+
+| Fichier | Action |
+|---------|--------|
+| `api/icons.php` | Nouveau — liste des dossiers `icons/` présents |
+| `script.js` | `getAvailableIconDirs`, `getPortraitFolder`, filtre dans `showPortraitPicker` |
+| `tests/08-portrait-picker.test.js` | Nouveau — 30 tests |
+| `tests/run.js`, `tests/helpers/env.js` | Enregistrement + stub portrait |
+| `deploy/_build.ps1`, `deploy/build-diff.bat` | Mode `-Diff` + entrée batch |
+| `.gitignore`, `README.md`, `MANUAL.md`, `.opencode/skills/release/SKILL.md` | Docs / filtre / exclusion |
+| `captures/equipe.png` | Capture corrigée (utilisateur) |

@@ -5,6 +5,7 @@ data/dcc.db-shm
 .DS_Store
 Thumbs.db
 deploy/dcc-sheet/
+deploy/dcc-sheet-diff/
 node_modules/
 maquettes/
 tests/report.md

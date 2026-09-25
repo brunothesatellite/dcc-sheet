@@ -41,6 +41,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 ### Portrait
 - 7 sources d'images : **DCC** (tokens officiels, 20 images), **D&D Red Box 1983** (7 illustrations), **Leremy Gan** (7 silhouettes), **Shadowdark** (12 images), **Jeff Stevens** (8 planches), **Gonzo** (30 images) et **Old School** (17 images)
 - **Popup « Choisir un portrait »** : clic sur le portrait dans la fiche → grille continue (3 colonnes, 2 sur mobile), libellé de source au-dessus du premier portrait de chaque section
+- **Filtrage des dossiers absents** : si le dossier d'une source n'est pas present sur le serveur (licence / copyright), la source entiere n'apparait pas dans la popup (1 requete lazy `api/icons.php` mise en cache par session ; echec de l'endpoint → popup complete) ; les persos deja dotes d'un tel portrait gardent leur source + index (image brisee, comportement voulu)
 - Portrait courant surligne (bordure accent) et scroll automatique vers lui
 - Fermeture : bouton X, bouton Fermer, clic en dehors, ou touche Echap
 - Choix sauvegarde avec le personnage en base, propage dans les imports/exports JSON individuels et globaux
@@ -103,7 +104,8 @@ dcc-sheet/
 ├── api/
 │   ├── db.php                  # SQLite3 + helpers (users, characters, session)
 │   ├── auth.php                # Authentification (login, register, logout, change_password, delete_account)
-│   └── characters.php          # CRUD personnages (list, get, create, save, set_active, delete)
+│   ├── characters.php          # CRUD personnages (list, get, create, save, set_active, delete)
+│   └── icons.php               # Dossiers de portraits presents sur le serveur (action=list)
 ├── classes/
 │   ├── bloc_commun.js          # Bloc commun + portrait (identite, combat, stats, portrait, equipement)
 │   ├── clerc.js                # Fiche Clerc (sorts dynamiques, grille 2 colonnes)
@@ -133,8 +135,9 @@ dcc-sheet/
 │   ├── helpers/                # assert + environnement jsdom
 │   └── *.test.js               # syntaxe, CSS, modules, equipe, export, ordre de marche, restauration
 └── deploy/
-    ├── build.bat               # Script de build
-    ├── _build.ps1              # Script PowerShell de build
+    ├── build.bat               # Script de build (build complet)
+    ├── build-diff.bat          # Build differentiel (fichiers modifies depuis le dernier tag)
+    ├── _build.ps1              # Script PowerShell de build (-Diff = differentiel)
     ├── start.bat               # Lanceur PHP dev server
     └── dcc-sheet/              # Dossier de deploiement (genere par build.bat)
 ```
@@ -166,6 +169,12 @@ dcc-sheet/
 | `save` | POST | `id`, `data` (optionnel), `name` (optionnel) | Sauvegarde les donnees JSON et/ou le nom |
 | `set_active` | POST | `id`, `is_active` | Active/desactive un personnage (0/1) |
 | `delete` | POST | `id` | Supprime un personnage |
+
+### Portraits (`api/icons.php`)
+
+| Action | Methode | Parametres | Description |
+|--------|---------|------------|-------------|
+| `list` | GET | — | Sous-dossiers presents dans `icons/` `{ok, dirs}` (protège la popup portraits, 1 requete / session) |
 
 ### Requetes / Reponses
 
@@ -229,6 +238,15 @@ build.bat
 ```
 
 Cree un dossier `deploy/dcc-sheet/` avec tous les fichiers necessaires (exclut .git, captures, data, docs, PDFs, maquettes).
+
+**Build differentiel** :
+
+```bash
+cd deploy
+build-diff.bat
+```
+
+Cree `deploy/dcc-sheet-diff/` avec uniquement les fichiers **modifies / ajoutes depuis le dernier tag** (meme exclusions que le build complet) + `CHANGES.txt` (listes Modified / Added / Deleted ; les suppressions sont a retirer manuellement sur le serveur). Le tag source est detecte dynamiquement (`git describe --tags --abbrev=0`).
 
 ## Dependances
 

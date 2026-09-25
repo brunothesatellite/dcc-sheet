@@ -381,6 +381,8 @@ Sept sources sont disponibles :
 1. Ouvrez la fiche, cliquez sur le portrait.
 2. La popup **« Choisir un portrait »** s'ouvre : grille continue de portraits ronds (3 colonnes, 2 sur mobile), le **nom de chaque source** s'affiche **au-dessus du premier portrait** de cette source.
 3. Le portrait courant est **surligné** (bordure accent) et la liste s'y **défile automatiquement**.
+
+> **Dossier absent sur le serveur** : si les images d'une source ne sont pas installées (licence / copyright), cette **source entière n'apparaît pas** dans la popup. Les personnages déjà dotés d'un portrait de cette source le conservent (leur index aussi) : seule une **image brisée** s'affiche tant que les images ne sont pas installées.
 4. Cliquez sur une image : la popup se ferme, l'image et le choix sont **sauvegardés automatiquement** (toast disquette).
 5. Pour annuler : bouton **✕** (en-tête), bouton **FERMER** (pied), clic en dehors de la fenêtre, ou touche **Échap**.
 

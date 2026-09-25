@@ -11,6 +11,7 @@ const suites = [
   require('./05-export.test'),
   require('./06-marching-order.test'),
   require('./07-restore.test'),
+  require('./08-portrait-picker.test'),
 ];
 
 function pad(s, n) {

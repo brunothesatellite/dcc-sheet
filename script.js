@@ -223,6 +223,32 @@
     }
   }
 
+  /* Dossiers de portraits reels sur le serveur (cache 1 requete / session).
+     null = indisponible → aucune source masquee (affichage complet). */
+  var iconDirsPromise = null;
+  function getAvailableIconDirs() {
+    if (!iconDirsPromise) {
+      iconDirsPromise = api('icons.php', { method: 'GET', data: { action: 'list' } })
+        .then(function (res) { return Array.isArray(res.dirs) ? res.dirs : null; })
+        .catch(function () { return null; });
+    }
+    return iconDirsPromise;
+  }
+
+  /* Dossier (sous "icons/") d'un catalogue : premier chemin image trouvé. */
+  function getPortraitFolder(ps) {
+    for (var key in ps) {
+      if (key === 'meta') continue;
+      var entry = ps[key];
+      var first = Array.isArray(entry) ? entry[0] : entry;
+      if (typeof first === 'string') {
+        var last = first.lastIndexOf('/');
+        if (last !== -1) return first.slice(0, last);
+      }
+    }
+    return '';
+  }
+
   /* =========================================================================
      6. Auth
      ======================================================================== */
@@ -1170,7 +1196,8 @@
   }
 
   function showPortraitPicker(cls, currentSource, currentIndex) {
-    return new Promise(function (resolve) {
+    return getAvailableIconDirs().then(function (dirs) {
+      return new Promise(function (resolve) {
       var overlay = document.createElement('div');
       overlay.className = 'portrait-picker-overlay';
 
@@ -1201,6 +1228,13 @@
       grid.className = 'portrait-picker-grid';
 
       window.PortraitSources.forEach(function (ps) {
+        /* Dossier absent sur le serveur → source entière masquée
+           (les index de clic restent ceux du catalogue complet) */
+        if (dirs) {
+          var folder = getPortraitFolder(ps);
+          var bare = folder.replace(/^icons\//, '');
+          if (bare && dirs.indexOf(bare) === -1) return;
+        }
         var entry = ps[cls];
         if (!entry) return;
         var images = Array.isArray(entry) ? entry : [entry];
@@ -1269,6 +1303,7 @@
         overlay.remove();
         resolve(result);
       }
+      });
     });
   }
 

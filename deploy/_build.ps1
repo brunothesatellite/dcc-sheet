@@ -3,7 +3,7 @@ param([switch]$Diff)
 $deployDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $src = Split-Path -Parent $deployDir
 
-$excludeDirs = @('.git','maquettes', 'captures','deploy','data','exemples','node_modules','tests','.opencode')
+$excludeDirs = @('.git','maquettes', 'captures','tools', 'deploy','data','exemples','node_modules','tests','.opencode')
 $excludeFiles = @('*.log','.gitignore','.DS_Store','Thumbs.db','*.md','TODO.md','BUGFIX.md','JOURNAL.md','PLAN.md','PLAN_DB.md','PROMPT.md','README.md','LICENSE','DCC_Fiche_*','maquette_*','package.json','package-lock.json','test.bat')
 
 function Test-Excluded($rel) {

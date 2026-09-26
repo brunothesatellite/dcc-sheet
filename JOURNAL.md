@@ -959,3 +959,25 @@ Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts �
 | `deploy/_build.ps1`, `deploy/build-diff.bat` | Mode `-Diff` + entrée batch |
 | `.gitignore`, `README.md`, `MANUAL.md`, `.opencode/skills/release/SKILL.md` | Docs / filtre / exclusion |
 | `captures/equipe.png` | Capture corrigée (utilisateur) |
+
+---
+
+## Date : 26 septembre 2026 — Release v2.2 (noms tronqués dans l'onglet Équipe + nom des stats cliquable + pre-gens)
+
+- **Noms tronqués (ellipsis)** : la colonne **Nom** des tableaux de l'onglet Équipe (PJ en expédition **et** Statistiques) débordait dans la colonne voisine — `white-space: nowrap` dans un `table-layout: fixed` à 20 % / 22 % sans `overflow`. Correctif sur `.team-table .char-name` (`style.css`) : `overflow: hidden; text-overflow: ellipsis; max-width: 100%`, avec **`title` = nom complet** posé sur la cellule (également mis à jour par le `resync`) pour lire le nom entier au survol.
+- **Nom cliquable dans « Statistiques »** : le nom de la colonne 1 ouvre désormais la fiche du PJ, **identiquement au tableau des PJ en expédition** (`switchTab(classe)` puis `openSheet` après 100 ms, données fraîches via `tr._charData`) ; suppression de l'override `.team-table-stats .char-name { cursor: default }` et de son `:hover` neutralisé. Le clic n'affecte pas le détail JdS (collapse indépendant conservé).
+- **`exemples/Travok.json` supprimé** : fichier d'**import** (format `{version, class, name, data}`) laissé dans le dossier d'exemples d'**export** → `05-export` plantait sur `obj.characters.length` (`Cannot read properties of undefined`).
+- **Pre-gens du module *Jungle Tomb of the Mummy Bride*** : ajout des dossiers `pregens/` (**10 fiches au format import individuel**, en anglais, fidèles au PDF) et `tools/` (`pregens_to_json.py` + `pregens_overrides.json`) — extraction par pages textuelles impaires, champs par classe issus de `classes/*.js`, `--check` valide le schéma (0 problème ; 3 alertes assumées : mods `18 → +3` des pre-gens conservés tels qu'imprimés). PDF d'entrée et `Travok2.json` ajoutés à `.gitignore`.
+- **Tests** : `02-css` +4 (bloc `.char-name` : ellipsis / overflow / nowrap), `04-equipe` +4 (clic sur le nom stats → `switchTab` + `openSheet` après timeout, `title`, pas d'ouverture du détail JdS). **505/505 OK** (`php -l` SKIP : PHP absent du PATH).
+
+### Fichiers modifiés (26 septembre — onglet Équipe + pre-gens)
+
+| Fichier | Action |
+|---------|--------|
+| `style.css` | `.char-name` : `overflow: hidden` + `text-overflow: ellipsis` ; override `cursor: default` des stats supprimé |
+| `classes/equipe.js` | Nom stats cliquable (ouvre la fiche) ; `title` = nom complet (stats + expédition + resync) |
+| `tests/02-css.test.js`, `tests/04-equipe.test.js` | +8 assertions |
+| `pregens/` | Nouveau — 10 fiches pre-générées (JSON import) |
+| `tools/` | Nouveau — `pregens_to_json.py`, `pregens_overrides.json` |
+| `.gitignore` | Exclut le PDF source et `Travok2.json` |
+| `README.md`, `MANUAL.md` | Onglet Équipe (§ 8.1 / § 8.3b), structure, pre-gens |

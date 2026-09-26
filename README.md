@@ -24,6 +24,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - Creation rapide (bouton "+ Nouveau")
 - Import / Export individuel au format JSON
 - Import / Export global (tous les personnages + notes d equipe d un coup)
+- **10 fiches pre-generees** fournies dans `pregens/` (module *Jungle Tomb of the Mummy Bride*) au format **Import JSON individuel** (§ 4.5 du manuel)
 - Suppression avec confirmation custom (modal)
 - Toggle "En expedition" / "A l'auberge" (statut actif/inactif)
 - Cartes de personnages avec **portrait**, nom, niveau, et toggle
@@ -50,11 +51,12 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 ### Onglet Equipe
 - **Ordre de marche** (section repliable en haut) : grille 3x3 (portraits + noms, 9 persos max) ; drag & drop unifie souris (clic maintenu) / tactile (appui long ~0,4 s) ; case vide = deplacement, case occupee = echange instantane ; sauvegarde immediate en base + auto-reparation (doublon / id perdu → reconstruction gauche→droite) ; inclus dans l'export/import JSON (`marching_order`)
 - Tableau des personnages en expedition avec **icone de portrait** dans la colonne Classe (100% hauteur de ligne)
-- Nom cliquable, Init, AC, PV editables, Init combat, **Compteur de tour visuel** (remplissage circulaire par 20%)
+- Nom cliquable (**ouvre la fiche**), nom trop long **tronque avec ...** (infobulle = nom complet), Init, AC, PV editables, Init combat, **Compteur de tour visuel** (remplissage circulaire par 20%)
 - **Detail combat depliable** : clic sur la colonne Classe (chevron sous le libelle) → ligne de stats sous le personnage (Att/Degats Cac + Att/Degats distance) ; un seul perso ouvert a la fois ; valeur vide = tiret
 - **Bouton RAZ** sous les colonnes Init. combat + Tour (avec confirmation) : efface les init. combat et remet les compteurs a zero
 - Synchronisation des PV vers la fiche du personnage
 - Tableau des **Statistiques** (entre Ennemis et Notes) : FOR AGI END PRE CHA INT, **vert = max / rouge = min** de colonne (texte seul, ex æquo inclus)
+  - **Nom cliquable** = ouvre la fiche du personnage (comme le tableau des PJ en expédition)
   - Zone **AGI–END–PRE** groupée + **chevron sous END** → detail des jets de sauvegarde (REF / VIG / VOL) juste sous la ligne
   - Un seul detail JdS ouvert ; collapse independant du detail combat
 - Tableau des ennemis : colonnes **Ennemi, AC, ATT, PV, Init., Tour** (ajout/suppression/RAZ avec confirmation)
@@ -134,6 +136,8 @@ dcc-sheet/
 │   ├── run.js                  # Orchestrateur + rapport tests/report.md
 │   ├── helpers/                # assert + environnement jsdom
 │   └── *.test.js               # syntaxe, CSS, modules, equipe, export, ordre de marche, restauration
+├── pregens/                    # 10 fiches pre-generees (JSON au format import individuel)
+├── tools/                      # Conversion PDF -> JSON des pre-gens (pregens_to_json.py + overrides)
 └── deploy/
     ├── build.bat               # Script de build (build complet)
     ├── build-diff.bat          # Build differentiel (fichiers modifies depuis le dernier tag)

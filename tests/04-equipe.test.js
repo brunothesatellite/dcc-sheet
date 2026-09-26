@@ -290,6 +290,17 @@ async function run() {
     r.ok(travokRow.querySelectorAll('td')[4].classList.contains('stat-group-end'), 'PRE is group-end');
     r.ok(travokRow.querySelectorAll('td')[0].classList.contains('char-name'), 'stats name uses char-name class');
 
+    // clic sur le nom stats = ouvre la fiche (comme le tableau expédition)
+    const switchedBefore = switched;
+    const openedBefore = opened;
+    const statsNameCell = travokRow.querySelectorAll('td')[0];
+    r.eq(statsNameCell.title, statsNameCell.textContent, 'stats name has title (ellipsis -> infobulle)');
+    click(statsNameCell);
+    r.eq(switched, switchedBefore + 1, 'stats name click calls switchTab');
+    r.eq(counts(container).statsDetails, 0, 'stats name click does not open stats detail');
+    await delay(150);
+    r.eq(opened, openedBefore + 1, 'stats name click calls openSheet after timeout');
+
     // min/max = couleur texte uniquement (pas de fond surligné)
     const maxTd = travokRow.querySelectorAll('td')[1];
     r.ok(!maxTd.style.background && maxTd.className.indexOf('background') === -1, 'stat-max has no inline bg');

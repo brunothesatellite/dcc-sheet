@@ -311,10 +311,20 @@ window.DCCModules.equipe = {
         const tr = document.createElement('tr');
         tr.className = 'stats-char-row';
         tr.setAttribute('data-id', charData.id);
+        tr._charData = charData;
 
         const tdName = document.createElement('td');
         tdName.className = 'char-name';
         tdName.textContent = charData.name || 'Sans nom';
+        tdName.title = charData.name || 'Sans nom';
+        tdName.style.cursor = 'pointer';
+        tdName.addEventListener('click', function () {
+          const cd = tr._charData || charData;
+          window.switchTab(cd.class);
+          setTimeout(function () {
+            window.openSheet(cd.class, cd);
+          }, 100);
+        });
         tr.appendChild(tdName);
 
         let groupIndex = 0;
@@ -790,6 +800,7 @@ window.DCCModules.equipe = {
           const tdName = document.createElement('td');
           tdName.className = 'char-name';
           tdName.textContent = charData.name || 'Sans nom';
+          tdName.title = charData.name || 'Sans nom';
           tdName.style.cursor = 'pointer';
           tdName.addEventListener('click', function () {
             const cd = tr._charData || charData;
@@ -1093,7 +1104,10 @@ window.DCCModules.equipe = {
         tr._charData = fresh;
 
         const tdName = tr.children[0];
-        if (tdName) tdName.textContent = fresh.name || 'Sans nom';
+        if (tdName) {
+          tdName.textContent = fresh.name || 'Sans nom';
+          tdName.title = fresh.name || 'Sans nom';
+        }
 
         const tdClass = tr.children[1];
         if (tdClass) {

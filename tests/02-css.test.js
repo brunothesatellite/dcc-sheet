@@ -40,6 +40,15 @@ module.exports = function suite() {
     r.ok(blockMatch[0].indexOf('flex-direction: column') === -1, '.char-class-content is not column');
   }
 
+
+  // nom : pas de debordement hors colonne (ellipsis si trop long)
+  const nameBlock = css.match(/\.team-table \.char-name \{[^}]+\}/);
+  r.ok(!!nameBlock, '.char-name block found');
+  if (nameBlock) {
+    r.ok(nameBlock[0].indexOf('text-overflow: ellipsis') !== -1, '.char-name uses text-overflow: ellipsis');
+    r.ok(nameBlock[0].indexOf('overflow: hidden') !== -1, '.char-name hides overflow');
+    r.ok(nameBlock[0].indexOf('white-space: nowrap') !== -1, '.char-name keeps nowrap');
+  }
   const media = css.match(/@media \(max-width: 600px\) \{/g) || [];
   r.ok(media.length >= 1, 'has mobile media query (got ' + media.length + ')');
 

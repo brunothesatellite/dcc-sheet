@@ -415,7 +415,7 @@ Colonnes :
 
 | Colonne | Contenu | Modifiable ? |
 |---|---|---|
-| **Nom** | Nom du PJ (portrait + classe dans la colonne voisine) | Clic = **ouvre la fiche** du personnage (l'onglet de sa classe s'ouvre d'abord) |
+| **Nom** | Nom du PJ (portrait + classe dans la colonne voisine) | Clic = **ouvre la fiche** du personnage (l'onglet de sa classe s'ouvre d'abord) ; nom trop long = **troncature « … »** (survolez pour lire le nom complet) |
 | **Classe** | Portrait + nom de classe (+ chevron) | Clic = **déplier le détail combat** (§ 8.1b) |
 | **Init.** | Initiative lue dans la fiche | Non (éditez-la dans la fiche) |
 | **AC** | Classe d'armure lue dans la fiche | Non (éditez-la dans la fiche) |
@@ -493,6 +493,7 @@ Sous la section **Ennemis** : un tableau de **3 lignes vides par défaut**, colo
 Entre **Ennemis** et **Notes** : un tableau des PJ **en expédition** avec les 6 caractéristiques (**FOR, AGI, END, PRE, CHA, INT**).
 
 - **Vert** = maximum de la colonne · **Rouge** = minimum (ex æquo compris) — couleur sur le **texte** uniquement (pas de fond).
+- La colonne **Nom** est **cliquable** : clic = ouvre la fiche du PJ (onglet de sa classe), exactement comme dans le tableau des PJ en expédition (§ 8.1) ; un nom trop long est **tronqué « … »** avec infobulle.
 - Une valeur vide ou non numérique affiche **`-`** et n'entre pas dans le min/max.
 - Les colonnes **AGI / END / PRE** forment une zone groupée. Un **chevron ▼ centré sous END** : cliquez n'importe où sur ce groupe (ou Entrée/Espace au clavier) pour **déplier sous la ligne** les jets de sauvegarde du PJ :
   ```

@@ -1908,6 +1908,9 @@ button.section-bar.collapse-toggle[aria-expanded="true"] .chev {
   font-size: 20px;
   text-align: left;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
   cursor: pointer;
   color: var(--ink);
 }
@@ -2234,14 +2237,7 @@ tr.team-detail.open .team-detail-wrap {
   font-weight: 700;
 }
 
-/* Nom stats : même fonte que tableau expédition, sans interaction */
-.team-table-stats .char-name {
-  cursor: default;
-}
-
-.team-table-stats .char-name:hover {
-  color: var(--ink);
-}
+/* Nom stats : même comportement que le tableau expédition (clic = fiche) */
 
 .team-table-stats .stat-group {
   cursor: pointer;

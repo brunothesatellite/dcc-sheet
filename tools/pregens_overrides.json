@@ -1,0 +1,12 @@
+{
+  "burglar-deianira": {
+    "replace": {
+      "Blowgun 1d20+3 missile fire (1d3/1d": "Blowgun 1d20+3 missile fire (1d3/1d5)"
+    }
+  },
+  "knight-langlar-greenshadow": {
+    "replace": {
+      "Longword 1d20": "Longsword 1d20"
+    }
+  }
+}

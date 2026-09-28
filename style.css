@@ -1427,6 +1427,7 @@ button.section-bar.collapse-toggle[aria-expanded="true"] .chev {
   gap: 5px;
   min-height: 24px;
   padding: 2px 0;
+  min-width: 0;
 }
 
 .sort-cell .btn-spell-del {

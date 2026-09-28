@@ -3053,6 +3053,12 @@ html:not(.has-spell-reader) .spell-lookup,
   color: var(--header-text);
 }
 
+.spell-viewer-names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 .spell-viewer-title {
   font-family: var(--font-heading);
   font-size: 17px;
@@ -3061,6 +3067,19 @@ html:not(.has-spell-reader) .spell-lookup,
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
+}
+
+/* Nom saisi en anglais, affiche sous le titre francais */
+.spell-viewer-sub {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-style: italic;
+  opacity: 0.75;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .spell-viewer-close {

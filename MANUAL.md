@@ -365,10 +365,11 @@ Les listes de sorts du Mage (2 lignes par sort), de l'Elfe (2 lignes par sort + 
 - Une **loupe** s'affiche **à gauche du nom** de chaque sort **renseigné** (Mage, Elfe, Clerc) ; une ligne de sort vide n'a pas d'icône.
 - Un clic sur la loupe ouvre une **popup plein écran**, dans le thème de la fiche, avec le **texte complet du sort** (stats, description, table de résultats) et un **défilement infini** : le parchemin se poursuit vers le haut comme vers le bas.
 - La lecture démarre **pile sur le sort cliqué**. Le **numéro de page éventuellement saisi dans le champ est ignoré** (il peut rester : `Boule de feu 203` fonctionne).
+- **Les noms peuvent être écrits en anglais** (`Fireball`, `Blessing`…) : le sort est retrouvé grâce au fichier de traductions du lecteur, la popup s'ouvre sur le **titre français** du livre et fait apparaître **le nom anglais saisi en sous-titre**. Sans ce fichier, un nom anglais reste introuvable.
 - **Côté Elfe, ligne « Invoquer un Patron »** : deux icônes
   - la **loupe** → le sort générique *Invoquer un Patron* ;
   - la **loupe rouge** → les sorts du **patron** saisi dans « Patron(s) » (champ vide : message invitant à le renseigner).
-- Si le nom n'est pas reconnu, une modale **« Sort introuvable »** demande de **vérifier le nom du sort**. Accents, majuscules et espaces sont sans importance et les petites fautes de frappe sont tolérées.
+- Si le nom n'est pas reconnu, une modale **« Sort introuvable »** demande de **vérifier le nom du sort** (« français ou anglais » si le fichier de traductions est présent). Accents, majuscules et espaces sont sans importance et les petites fautes de frappe sont tolérées.
 - Fermeture : bouton **✕** ou touche **Échap**.
 
 <img src="captures/sort1.png" alt="Popup de consultation d'un sort : en-tête « Projectile magique », carrousel de stats (Niveau, Portée, Durée, Temps d'incantation, Jet de sauvegarde) puis les sections Général, Manifestation, Corruption et Revers" width="380">

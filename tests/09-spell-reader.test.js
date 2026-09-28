@@ -4,6 +4,7 @@
    - détection du dossier frère par chargement de content/anchors.js ;
    - icône de recherche à gauche des noms de sorts renseignés (mage/elfe/clerc) ;
    - résolution du nom (numéro de page ignoré, singulier/pluriel, accents) ;
+   - noms saisis en anglais → traduction via spell-translation.js (FR/EN) ;
    - popup plein écran avec chargement de la page du sort + ancre ;
    - messages d'erreur si sort ou patron introuvable ;
    - sans dossier frère : aucune détection, aucune popup. */
@@ -106,7 +107,7 @@ function patchHead(env, opts) {
 function createHarness(opts) {
   const options = opts || {};
   const env = createEnv();
-  const state = { modals: [], heads: [] };
+  const state = { modals: [], heads: [], fetchCalls: [] };
   const errors = [];
   try {
     env.dom.virtualConsole.on('jsdomError', function (e) {
@@ -122,6 +123,11 @@ function createHarness(opts) {
   env.window.scheduleSave = function () {};
 
   if (options.reader !== false) env.window.DCC_ANCHORS = options.anchors || ANCHORS;
+  if (options.translations !== undefined) env.window.DCC_SPELL_TRANSLATIONS = options.translations;
+  // jsdom n'expose pas fetch : par defaut on simule un lecteur sans traduction
+  env.window.fetch = options.fetch
+    ? function (url) { state.fetchCalls.push(String(url)); return options.fetch(url); }
+    : undefined;
   patchHead(env, options);
 
   const origAppend = env.document.head.appendChild.bind(env.document.head);
@@ -398,6 +404,154 @@ async function testWithoutReader(r) {
   }
 }
 
+/* ---------------------------------------------------------
+   Traductions FR <-> EN (spell-translation.js du dossier frère)
+   --------------------------------------------------------- */
+const TRADUCTIONS = {
+  'Boule de feu': 'Fireball',
+  'Bénédiction': 'Blessing',
+  'Projectile magique': 'Magic Missile',
+  'Invoquer un Patron': 'Invoke Patron',
+};
+
+async function testTranslations(r) {
+  const h = createHarness({ translations: TRADUCTIONS });
+  h.env.load('spell-reader.js');
+  const R = h.env.window.DCCSpellReader;
+  await R.ensureReady();
+
+  r.eq(R.translate('Fireball'), 'Boule de feu', 'nom anglais → nom français');
+  r.eq(R.translate('magic missile'), 'Projectile magique', 'casse ignorée dans la traduction');
+  r.eq(R.translate('Boule de feu'), null, 'nom français : aucune traduction anglaise attendue');
+
+  const hit = R.resolve('Fireball');
+  r.ok(hit && hit.id === 's203-bouledefeu' && hit.page === 203,
+    'Fireball → Boule de feu (got ' + JSON.stringify(hit) + ')');
+
+  const hit2 = R.resolve('Fireball 203');
+  r.ok(hit2 && hit2.id === 's203-bouledefeu',
+    'numéro de page retiré avant la traduction (got ' + JSON.stringify(hit2) + ')');
+
+  const hit3 = R.resolve('Blessing');
+  r.ok(hit3 && hit3.id === 's255-benediction',
+    'Blessing → Bénédiction (got ' + JSON.stringify(hit3) + ')');
+
+  r.ok(R.resolve('Boule de feu'), 'nom français inchangé par la traduction');
+  r.ok(R.resolve('charme-serpent'), 'singulier/pluriel toujours fonctionnel');
+
+  const typo = R.resolve('Firebal');
+  r.ok(typo && typo.id === 's203-bouledefeu',
+    'faute de frappe sur un nom anglais tolérée (got ' + JSON.stringify(typo) + ')');
+
+  r.eq(R.resolve('Teleport'), null, 'nom anglais inconnu → null');
+}
+
+async function testPopupWithEnglishName(r) {
+  const h = createHarness({ translations: TRADUCTIONS });
+  h.env.load('spell-reader.js');
+  await h.env.window.DCCSpellReader.ensureReady();
+  h.env.loadClass('mage');
+  const container = h.env.document.getElementById('root');
+  h.env.window.DCCModules.mage.render(container, '7', { sort_nom_1: 'Fireball' });
+
+  const btn = container.querySelector('.sort-name .spell-lookup');
+  if (!r.ok(!!btn, 'icône présente pour un nom anglais')) return;
+  click(btn);
+  const opened = await waitFor(function () {
+    return !!h.env.document.querySelector('.spell-viewer-overlay .sv-pages [data-loaded-page="203"]');
+  });
+  r.ok(opened, 'popup ouverte depuis un nom anglais');
+  if (!opened) return;
+
+  const overlay = h.env.document.querySelector('.spell-viewer-overlay');
+  r.eq(overlay.querySelector('.spell-viewer-title').textContent, 'Boule de feu',
+    'titre = nom français du livre');
+  const sub = overlay.querySelector('.spell-viewer-sub');
+  r.ok(!sub.hidden && sub.textContent === 'Fireball',
+    'sous-titre = nom anglais saisi (got ' + JSON.stringify(sub.textContent) + ')');
+  click(overlay.querySelector('.spell-viewer-close'));
+  await delay(20);
+
+  // nom français : aucun sous-titre
+  const h2 = createHarness({ translations: TRADUCTIONS });
+  h2.env.load('spell-reader.js');
+  await h2.env.window.DCCSpellReader.ensureReady();
+  h2.env.loadClass('mage');
+  const c2 = h2.env.document.getElementById('root');
+  h2.env.window.DCCModules.mage.render(c2, '8', { sort_nom_1: 'Boule de feu' });
+  const btn2 = c2.querySelector('.sort-name .spell-lookup');
+  if (!r.ok(!!btn2, 'icône présente (nom français)')) return;
+  click(btn2);
+  const opened2 = await waitFor(function () {
+    return !!h2.env.document.querySelector('.spell-viewer-overlay .sv-pages [data-loaded-page="203"]');
+  });
+  if (opened2) {
+    const ov2 = h2.env.document.querySelector('.spell-viewer-overlay');
+    r.eq(ov2.querySelector('.spell-viewer-title').textContent, 'Boule de feu', 'titre français');
+    r.ok(ov2.querySelector('.spell-viewer-sub').hidden,
+      'pas de sous-titre quand la saisie est déjà en français');
+    click(ov2.querySelector('.spell-viewer-close'));
+    await delay(20);
+  }
+}
+
+async function testTranslationLoading(r) {
+  const SRC = 'export const spellTranslations = {\n' +
+    '  // Mage\n' +
+    '  "Projectile magique": "Magic Missile",\n' +
+    '  "Bénédiction": "Blessing"\n' +
+    '};';
+  const h = createHarness({
+    fetch: function () {
+      return Promise.resolve({ ok: true, text: function () { return Promise.resolve(SRC); } });
+    },
+  });
+  h.env.load('spell-reader.js');
+  const R = h.env.window.DCCSpellReader;
+  await R.ensureReady();
+
+  r.eq(h.state.fetchCalls.length, 1, 'une seule requête pour les traductions (got ' + h.state.fetchCalls.length + ')');
+  r.ok(/spell-translation\.js$/.test(h.state.fetchCalls[0] || ''),
+    'URL du fichier de traduction (got ' + JSON.stringify(h.state.fetchCalls[0]) + ')');
+  r.eq(R.translate('Magic Missile'), 'Projectile magique', 'module ES parsé depuis le texte');
+  r.ok(R.resolve('Blessing') && R.resolve('Blessing').id === 's255-benediction',
+    'résolution via le fichier chargé');
+
+  // échec du chargement : le lecteur reste utilisable, sans traduction
+  const h2 = createHarness({ fetch: function () { return Promise.reject(new Error('404')); } });
+  h2.env.load('spell-reader.js');
+  await h2.env.window.DCCSpellReader.ensureReady();
+  r.ok(h2.env.window.DCCSpellReader.isAvailable(), 'lecteur disponible malgré l\'échec des traductions');
+  r.eq(h2.env.window.DCCSpellReader.translate('Fireball'), null, 'aucune traduction après échec');
+}
+
+async function testWithoutTranslations(r) {
+  const h = createHarness();
+  h.env.load('spell-reader.js');
+  const R = h.env.window.DCCSpellReader;
+  await R.ensureReady();
+
+  r.ok(R.isAvailable(), 'lecteur disponible sans fichier de traduction');
+  r.eq(h.state.fetchCalls.length, 0, 'aucune requête sans fetch (got ' + h.state.fetchCalls.length + ')');
+  r.eq(R.resolve('Fireball'), null, 'nom anglais non résolu sans traduction');
+
+  h.env.loadClass('mage');
+  const container = h.env.document.getElementById('root');
+  h.env.window.DCCModules.mage.render(container, '7', { sort_nom_1: 'Fireball' });
+  const btn = container.querySelector('.sort-name .spell-lookup');
+  if (!r.ok(!!btn, 'icône présente')) return;
+  click(btn);
+  const modalShown = await waitFor(function () { return h.state.modals.length > 0; });
+  r.ok(modalShown, 'modale affichée pour un nom anglais sans traduction');
+  if (modalShown) {
+    r.eq(h.state.modals[0].title, 'Sort introuvable', 'titre de la modale');
+    r.ok(h.state.modals[0].message.indexOf('Vérifiez le nom du sort') !== -1,
+      'message demande de vérifier le nom (got ' + JSON.stringify(h.state.modals[0].message) + ')');
+    r.ok(h.state.modals[0].message.indexOf('anglais') === -1,
+      'pas de mention de l\'anglais sans fichier de traduction');
+  }
+}
+
 async function run() {
   const r = createReporter('09-spell-reader');
   await testResolution(r);
@@ -406,6 +560,10 @@ async function run() {
   await testUnknownSpell(r);
   await testPatron(r);
   await testWithoutReader(r);
+  await testTranslations(r);
+  await testPopupWithEnglishName(r);
+  await testTranslationLoading(r);
+  await testWithoutTranslations(r);
   return r;
 }
 

@@ -1030,3 +1030,49 @@ Depuis une fiche (Mage, Elfe, Clerc), cliquer une icône à gauche d'un nom de s
 | `captures/sort1.png`, `captures/sort2.png` | **Nouveaux** — captures de la popup (texte + table de résultats) |
 | `JOURNAL.md` | Cette entrée |
 
+
+---
+
+## Date : 28 septembre 2026 - Noms de sorts en anglais (traductions FR/EN)
+
+### Objectif
+
+Les sorts peuvent être saisis en anglais (pregens anglais, habitude du joueur). Utiliser `dcc-spells-reader/spell-translation.js` (130 paires `Français -> anglais`, déjà commité côté lecteur) pour retrouver le **nom français** du livre et afficher sa description.
+
+### Contraintes
+
+- Le fichier est un **module ES** (`export const spellTranslations`) : il ne peut pas être chargé en `<script classique>` -> **lu en texte** (`fetch` + extraction des paires par expression régulière), **une seule requête mémorisée** (`transPromise`).
+- Présence facultative : `window.DCC_SPELL_TRANSLATIONS` (injection directe, tests) > `fetch` ; sans `fetch` ou si la requête échoue -> **comportement antérieur strictement conservé**.
+- Chargé uniquement après la détection du dossier frère (`ensureReady`) : aucune requête inutile si le lecteur est absent.
+
+### Implémentation (`spell-reader.js`)
+
+- `parseTranslations` / `buildTranslations` -> table `transFrom` : `slug(EN) -> nom français`.
+- `toFrench(q)` : exact puis **distance d'édition <= 2** (garde : saisie >= 6 caractères) -> faute de frappe anglaise.
+- `lookup(raw)` remplace la résolution simple, ordre explicite :
+  1. **nom exactement présent dans le livre** (aucune ambiguïté) ;
+  2. **nom anglais connu** -> français canonique ;
+  3. résolution directe (singulier/pluriel, préfixe, mots-clés, faute française) ;
+  4. **faute de frappe sur un nom anglais**.
+  `resolve(raw)` reste l'enveloppe publique retournant l'ancre (compatibilité).
+- **Ordre volontaire** : l'étape 1 avant la traduction évite qu'un nom français court (« Force ») soit pris pour une faute de frappe de « Forget » -> « Oubli » (bug repéré en smoke : p.187 au lieu de p.175).
+- Affichage : `viewerLabels()` -> titre = **nom français du livre** si traduction, sinon la saisie telle quelle ; sous-titre `.spell-viewer-sub` = nom anglais saisi (masqué si identique).
+- Message « Sort introuvable » : mention « français ou anglais » **seulement si** le fichier de traductions est chargé.
+- API : `lookup`, `translate`, `loadTranslations`, `setTranslations` ; `setAnchors` réinitialise aussi les traductions.
+
+### Validation
+
+- **Suite : `614/614 OK`** (`09-spell-reader` 64 -> **95** : résolution EN par injection directe, numéro de page, faute de frappe anglaise, popup titre/sous-titre FR/EN, chargement par `fetch` (URL + parsing du module ES), échec réseau toléré, sans traduction -> modale sans mention anglaise ; `02-css` +3 sélecteurs).
+- **Smoke sur les vraies données** : **130/130** paires du fichier réel - chaque nom anglais résout **la même page** que son équivalent français (0 divergence), `Fireball 203`, `Firebal` (faute), `Teleport` (inconnu -> null) ; popup depuis « Fireball » : titre `Boule de feu`, sous-titre `Fireball`, ancre + `.stats`, 3 pages en défilement infini.
+- HTTP : `http://localhost:8000/dcc-spells-reader/spell-translation.js` -> **200** (`application/javascript`).
+
+### Fichiers modifiés (28 septembre - traductions FR/EN)
+
+| Fichier | Action |
+|---------|--------|
+| `spell-reader.js` | Chargement/parsing des traductions, `lookup()`, sous-titre, API |
+| `style.css` | `.spell-viewer-names`, `.spell-viewer-sub` |
+| `tests/09-spell-reader.test.js` | 4 nouvelles fonctions de test (+31 assertions) |
+| `tests/02-css.test.js` | +3 sélecteurs |
+| `README.md`, `MANUAL.md` | Section « Définition des sorts », § 6.3b |
+| `JOURNAL.md` | Cette entrée |

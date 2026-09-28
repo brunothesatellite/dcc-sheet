@@ -4,6 +4,8 @@
    Ouvre le texte HTML d'un sort (plein ecran, scroll infini)
    a partir du dossier frere ../dcc-spells-reader.
    Si ce dossier n'est pas accessible, aucune icone n'apparait.
+   Les noms saisis en anglais sont traduits en francais via
+   ../dcc-spells-reader/spell-translation.js avant resolution.
    ============================================================ */
 (function () {
   'use strict';
@@ -14,6 +16,8 @@
   var index = null;        // slug -> [ { page, id, title }, ... ] (ordre du livre)
   var readyPromise = null;
   var pageCache = {};
+  var transFrom = {};      // slug(EN) -> nom francais canonique
+  var transPromise = null; // chargement de spell-translation.js (une seule fois)
 
   /* ---------------------------------------------------------
      Chargement de script (la reussite = dossier present)
@@ -101,14 +105,60 @@
     return true;
   }
 
+  /* ---------------------------------------------------------
+     Traductions FR <-> EN (dossier frere, optionnel)
+     --------------------------------------------------------- */
+  function parseTranslations(text) {
+    var out = {};
+    var re = /"((?:[^"\\]|\\.)*)"\s*:\s*"((?:[^"\\]|\\.)*)"/g;
+    var m;
+    while ((m = re.exec(String(text || '')))) out[m[1]] = m[2];
+    return out;
+  }
+
+  function buildTranslations(map) {
+    transFrom = {};
+    if (!map || typeof map !== 'object') return false;
+    Object.keys(map).forEach(function (fr) {
+      var en = slugify(map[fr]);
+      if (en) transFrom[en] = fr;
+    });
+    return Object.keys(transFrom).length > 0;
+  }
+
+  /* Le fichier du lecteur est un module ES (export const) : on le lit en
+     texte et on en extrait les paires, pour rester compatible avec un simple
+     chargement sans bundler. Priorite a window.DCC_SPELL_TRANSLATIONS. */
+  function loadTranslations() {
+    if (transPromise) return transPromise;
+    if (window.DCC_SPELL_TRANSLATIONS && typeof window.DCC_SPELL_TRANSLATIONS === 'object') {
+      buildTranslations(window.DCC_SPELL_TRANSLATIONS);
+      transPromise = Promise.resolve(true);
+      return transPromise;
+    }
+    if (typeof window.fetch !== 'function') {
+      transPromise = Promise.resolve(false);
+      return transPromise;
+    }
+    transPromise = window.fetch(BASE + '/spell-translation.js')
+      .then(function (res) { return res && res.ok ? res.text() : ''; })
+      .then(function (txt) { return buildTranslations(parseTranslations(txt)); })
+      .catch(function () { return false; });
+    return transPromise;
+  }
+
   function ensureReady() {
     if (readyPromise) return readyPromise;
     if (window.DCC_ANCHORS) {
-      readyPromise = Promise.resolve(enable(window.DCC_ANCHORS));
+      var ok = enable(window.DCC_ANCHORS);
+      readyPromise = ok
+        ? loadTranslations().then(function () { return true; })
+        : Promise.resolve(false);
       return readyPromise;
     }
     readyPromise = loadScript(BASE + '/content/anchors.js').then(function (ok) {
-      return enable(ok ? window.DCC_ANCHORS : null);
+      if (!ok || !enable(window.DCC_ANCHORS)) return false;
+      return loadTranslations().then(function () { return true; });
     });
     return readyPromise;
   }
@@ -159,16 +209,29 @@
     return prev[n];
   }
 
-  function fuzzyMatch(q) {
+  function fuzzyKeys(q, keys) {
     var best = 3;
     var out = [];
-    Object.keys(index).forEach(function (k) {
+    keys.forEach(function (k) {
       if (k.length < 6 || Math.abs(k.length - q.length) > 2) return;
       var d = editDistance(q, k);
       if (d < best) { best = d; out = [k]; }
       else if (d === best && d < 3) out.push(k);
     });
     return out;
+  }
+
+  function fuzzyMatch(q) {
+    return fuzzyKeys(q, Object.keys(index));
+  }
+
+  /* Nom anglais (ou faute de frappe dessus) -> nom francais du livre */
+  function toFrench(q) {
+    if (!q || q.length < 6) return null;
+    if (transFrom[q]) return transFrom[q];
+    var near = fuzzyKeys(q, Object.keys(transFrom));
+    if (near.length) return transFrom[near[0]];
+    return null;
   }
 
   function candidates(q, name) {
@@ -199,12 +262,43 @@
   }
 
   function resolve(raw) {
+    var l = lookup(raw);
+    return l ? l.hit : null;
+  }
+
+  /* Resolution complete : renvoie l'ancre + le libelle canonique.
+     Un nom saisi en anglais est traduit en francais d'abord (le livre est
+     en francais), la saisie d'origine est conservee pour l'affichage. */
+  function lookup(raw) {
     if (!index) return null;
-    var name = cleanName(raw);
-    var q = slugify(name);
+    var typed = cleanName(raw);
+    var q = slugify(typed);
     if (!q) return null;
-    var pool = candidates(q, name);
-    if (!pool.length) return null;
+
+    // 1. nom deja present tel quel dans le livre (aucune ambiguite)
+    if (index[q]) return refine(index[q].slice(), q, typed, typed, null);
+
+    // 2. nom anglais connu -> francais canonique
+    var fr = transFrom[q];
+    if (fr) {
+      var pool = candidates(slugify(fr), fr);
+      if (pool.length) return refine(pool, slugify(fr), fr, typed, fr);
+    }
+
+    // 3. resolution directe (singulier/pluriel, prefixe, mots-cles, fautes de frappe)
+    var direct = candidates(q, typed);
+    if (direct.length) return refine(direct, q, typed, typed, null);
+
+    // 4. faute de frappe sur un nom anglais
+    fr = toFrench(q);
+    if (fr) {
+      var alt = candidates(slugify(fr), fr);
+      if (alt.length) return refine(alt, slugify(fr), fr, typed, fr);
+    }
+    return null;
+  }
+
+  function refine(pool, q, name, typed, translated) {
     if (pool.length > 1) {
       var bySlug = pool.filter(function (a) { return slugify(a.title) === q; });
       if (bySlug.length) pool = bySlug;
@@ -213,7 +307,13 @@
       });
       if (byTitle.length) pool = byTitle;
     }
-    return pool[0];
+    return { hit: pool[0], typed: typed, name: translated || typed, translated: !!translated };
+  }
+
+  /* Libelle affiche en en-tete + eventuel nom d'origine (anglais) */
+  function viewerLabels(l) {
+    var title = l.translated ? (l.hit.title || l.name) : l.typed;
+    return { title: title, sub: slugify(l.typed) === slugify(title) ? '' : l.typed };
   }
 
   /* ---------------------------------------------------------
@@ -239,7 +339,7 @@
     });
   }
 
-  function openViewer(title, page, id) {
+  function openViewer(title, page, id, sub) {
     if (document.querySelector('.spell-viewer-overlay')) return;
 
     var overlay = document.createElement('div');
@@ -247,7 +347,10 @@
     overlay.innerHTML =
       '<div class="spell-viewer">' +
         '<div class="spell-viewer-header">' +
-          '<span class="spell-viewer-title"></span>' +
+          '<div class="spell-viewer-names">' +
+            '<span class="spell-viewer-title"></span>' +
+            '<span class="spell-viewer-sub" hidden></span>' +
+          '</div>' +
           '<button type="button" class="spell-viewer-close" aria-label="Fermer">&times;</button>' +
         '</div>' +
         '<div class="spell-viewer-body">' +
@@ -261,6 +364,11 @@
       '</div>';
 
     overlay.querySelector('.spell-viewer-title').textContent = title;
+    var subEl = overlay.querySelector('.spell-viewer-sub');
+    if (sub) {
+      subEl.textContent = sub;
+      subEl.hidden = false;
+    }
 
     var body = overlay.querySelector('.spell-viewer-body');
     var pages = overlay.querySelector('.sv-pages');
@@ -401,13 +509,15 @@
     if (!name) return;
     ensureReady().then(function (ok) {
       if (!ok) return;
-      var hit = resolve(name);
-      if (!hit) {
+      var l = lookup(name);
+      if (!l) {
         notify('Sort introuvable',
-          'Sort introuvable : « ' + name + ' ». V\u00e9rifiez le nom du sort.');
+          'Sort introuvable : « ' + name + ' ». V\u00e9rifiez le nom du sort'
+          + (Object.keys(transFrom).length ? ' (fran\u00e7ais ou anglais).' : '.'));
         return;
       }
-      openViewer(name, hit.page, hit.id);
+      var lab = viewerLabels(l);
+      openViewer(lab.title, l.hit.page, l.hit.id, lab.sub);
     });
   }
 
@@ -431,9 +541,10 @@
     ensureReady().then(function (ok) {
       if (!ok) return;
       for (var i = 0; i < variants.length; i++) {
-        var hit = resolve(variants[i]);
-        if (hit) {
-          openViewer(variants[i], hit.page, hit.id);
+        var l = lookup(variants[i]);
+        if (l) {
+          var lab = viewerLabels(l);
+          openViewer(lab.title, l.hit.page, l.hit.id, lab.sub);
           return;
         }
       }
@@ -480,7 +591,26 @@
     slugify: slugify,
     cleanName: cleanName,
     resolve: resolve,
+    lookup: lookup,
+    translate: function (raw) {
+      var q = slugify(cleanName(raw));
+      if (!q) return null;
+      if (transFrom[q]) return transFrom[q];
+      if (index && index[q]) return null; // deja un nom francais du livre
+      return toFrench(q);
+    },
     ensureReady: ensureReady,
+    loadTranslations: loadTranslations,
+    setTranslations: function (map) {
+      window.DCC_SPELL_TRANSLATIONS = map;
+      transPromise = null;
+      transFrom = {};
+      if (map && typeof map === 'object') {
+        buildTranslations(map);
+        transPromise = Promise.resolve(true);
+      }
+      return transPromise;
+    },
     isAvailable: isAvailable,
     openSpell: openSpell,
     openPatron: openPatron,
@@ -488,6 +618,8 @@
       window.DCC_ANCHORS = anchors;
       index = null;
       readyPromise = null;
+      transPromise = null;
+      transFrom = {};
       return ensureReady();
     }
   };

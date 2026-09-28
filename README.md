@@ -44,7 +44,8 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - **Loupe a gauche de chaque nom de sort renseigne** (Mage, Elfe, Clerc ; ligne vide = pas d'icone) ; sur les lignes fixes de l'Elfe : loupe sur *Lier un patron*, **loupe + loupe patron** sur *Invoquer un Patron* (lit le champ « Patron(s) » au moment du clic)
 - **Popup plein ecran** dans le theme de la fiche : texte HTML complet du sort (stats, description, table de resultats), **defilement infini** (haut + bas, plages 127-303 / 322-356, trou 304-321 saute), demarrage sur le sort clique ; bouton « page scannee » masque
 - **Nom ignore le numero de page** (`Boule de feu 203`), accents/casse/spaces sans importance, singulier/pluriel et petites fautes de frappe toleres ; echec → modale **« Sort introuvable »** (verifier le nom du sort)
-- Fermeture : bouton X ou touche Echap ; suite `09-spell-reader` + smoke sur les donnees reelles (144/144 noms resolus)
+- **Noms en anglais** : `../dcc-spells-reader/spell-translation.js` (module ES lu en texte, 130 paires FR/EN) traduit la saisie avant resolution — la popup ouvre le **titre francais** du livre et affiche le **nom anglais saisi en sous-titre** ; fichier absent ou erreur reseau → comportement precedent, inchange (1 seule requete `fetch`, memorisee)
+- Fermeture : bouton X ou touche Echap ; suite `09-spell-reader` (95 assertions) + smoke sur les donnees reelles (144/144 noms resolus, 130/130 traductions FR et EN sans divergence de page)
 
 ### Portrait
 - 7 sources d'images : **DCC** (tokens officiels, 20 images), **D&D Red Box 1983** (7 illustrations), **Leremy Gan** (7 silhouettes), **Shadowdark** (12 images), **Jeff Stevens** (8 planches), **Gonzo** (30 images) et **Old School** (17 images)

@@ -5,6 +5,8 @@
    - icône de recherche à gauche des noms de sorts renseignés (mage/elfe/clerc) ;
    - résolution du nom (numéro de page ignoré, singulier/pluriel, accents) ;
    - noms saisis en anglais → traduction via spell-translation.js (FR/EN) ;
+   - calage de l'ancre : compensation exacte d'une insertion au-dessus,
+     recalage apres swap de polices, aucun recalage force apres scroll ;
    - popup plein écran avec chargement de la page du sort + ancre ;
    - messages d'erreur si sort ou patron introuvable ;
    - sans dossier frère : aucune détection, aucune popup. */
@@ -65,7 +67,10 @@ const PAGES = {
   132: page(132, 'Charme-Personne'),
   141: page(141, 'Invoquer un Patron'),
   143: page(143, 'Lier un Patron'),
+  202: page(202, 'Sort voisin 202'),
   203: page(203, 'Boule de feu'),
+  204: page(204, 'Sort voisin 204'),
+  205: page(205, 'Sort voisin 205'),
   255: page(255, 'Bénédiction'),
   270: page(270, 'Charme-serpents'),
   322: page(322, 'BOBUGBUBILZ', 'h2'),
@@ -552,6 +557,164 @@ async function testWithoutTranslations(r) {
   }
 }
 
+/* ---------------------------------------------------------
+   Calage de l'ancre (scroll) : jsdom ne calcule pas la mise en
+   page - on la simule : chaque page = pageHeight px, le titre du
+   sort est situe a anchorOffset px dans sa page, le conteneur
+   scrollable est .spell-viewer-body.
+   --------------------------------------------------------- */
+function fakeLayout(env, opts) {
+  const options = opts || {};
+  const model = {
+    pageHeight: options.pageHeight || 1000,
+    anchorOffset: options.anchorOffset || 40,
+  };
+  const proto = env.window.Element.prototype;
+  const doc = env.document;
+
+  function viewerBody() { return doc.querySelector('.spell-viewer-body'); }
+  function pagesBox() { return doc.querySelector('.sv-pages'); }
+  function scrollTop() { const b = viewerBody(); return b ? b.scrollTop : 0; }
+
+  function contentTop(el) {
+    if (el.classList.contains('sv-sentinel-top')) return 0;
+    if (el.classList.contains('sv-sentinel-bottom')) {
+      const p = pagesBox();
+      return p ? p.children.length * model.pageHeight : 0;
+    }
+    const page = el.closest('[data-loaded-page]');
+    if (page) {
+      const p = pagesBox();
+      const idx = p ? Array.prototype.indexOf.call(p.children, page) : 0;
+      return idx * model.pageHeight + (el.classList.contains('spell-title') ? model.anchorOffset : 0);
+    }
+    return 0;
+  }
+
+  Object.defineProperty(proto, 'clientHeight', { configurable: true, get: function () { return 900; } });
+  Object.defineProperty(proto, 'scrollTop', {
+    configurable: true,
+    get: function () { return this.__scrollTop || 0; },
+    set: function (v) { this.__scrollTop = v; },
+  });
+  Object.defineProperty(proto, 'scrollHeight', {
+    configurable: true,
+    get: function () {
+      if (!this.classList || !this.classList.contains('spell-viewer-body')) return 0;
+      const p = pagesBox();
+      const st = this.querySelector('.sv-status');
+      // hauteur reelle du bloc "Chargement..." (padding 10+10, 12px x 1.5)
+      const status = st && !st.hidden ? 38 : 0;
+      return (p ? p.children.length : 0) * model.pageHeight + status;
+    },
+  });
+  Object.defineProperty(proto, 'getBoundingClientRect', {
+    configurable: true,
+    value: function () {
+      const isBody = this.classList && this.classList.contains('spell-viewer-body');
+      const top = isBody ? 0 : contentTop(this) - scrollTop();
+      const h = (this.classList && this.classList.contains('spell-title')) ? 24 : 1;
+      return { top: top, bottom: top + h, left: 0, right: 320, width: 320, height: h };
+    },
+  });
+
+  // Google Fonts : promesse que l'on resout a la demande (display=swap)
+  let resolveFonts;
+  doc.fonts = { ready: new Promise(function (res) { resolveFonts = res; }) };
+  model.resolveFonts = function () { resolveFonts(); };
+  return model;
+}
+
+function loadedPages(doc) {
+  const nodes = doc.querySelectorAll('.spell-viewer-overlay .sv-pages > [data-loaded-page]');
+  return Array.prototype.map.call(nodes, function (n) { return n.getAttribute('data-loaded-page'); });
+}
+
+async function openMageSpell(h, name) {
+  h.env.loadClass('mage');
+  const container = h.env.document.getElementById('root');
+  h.env.window.DCCModules.mage.render(container, '7', { sort_nom_1: name });
+  const btn = container.querySelector('.sort-name .spell-lookup');
+  if (!btn) return null;
+  click(btn);
+  const opened = await waitFor(function () {
+    return h.env.document.querySelectorAll('.spell-viewer-overlay .sv-pages > [data-loaded-page]').length > 0;
+  });
+  return opened ? h.env.document.querySelector('.spell-viewer-body') : null;
+}
+
+async function testAnchorAlignment(r) {
+  // Le sort est en haut de page : la page precedente est inseree au-dessus.
+  // Le scrollTop final doit correspondre exactement a la position du titre,
+  // sans le decalage ajoute par le bloc "Chargement...".
+  const h = createHarness();
+  h.env.load('spell-reader.js');
+  await h.env.window.DCCSpellReader.ensureReady();
+  const layout = fakeLayout(h.env);
+
+  const body = await openMageSpell(h, 'Boule de feu 203');
+  if (!r.ok(!!body, 'popup ouverte')) return;
+  const pages = await waitFor(function () { return loadedPages(h.env.document).length >= 2; }, 1500);
+  r.ok(pages, 'page precedente inseree au-dessus (got ' + loadedPages(h.env.document).join(',') + ')');
+  if (!pages) return;
+
+  r.eq(loadedPages(h.env.document).slice(0, 2).join(','), '202,203', 'ordre des pages');
+  const expected = layout.pageHeight + layout.anchorOffset; // 1 page au-dessus + offset du titre
+  r.eq(body.scrollTop, expected,
+    'scrollTop calé exactement sur le titre, sans derive (got ' + body.scrollTop + ', attendu ' + expected + ')');
+}
+
+async function testAnchorAfterFonts(r) {
+  // Substitution de police (Google Fonts display=swap) apres le scroll :
+  // le titre bouge, l'ancre doit etre recalcée si l'utilisateur n'a pas defile.
+  const h = createHarness();
+  h.env.load('spell-reader.js');
+  await h.env.window.DCCSpellReader.ensureReady();
+  const layout = fakeLayout(h.env);
+
+  const body = await openMageSpell(h, 'Boule de feu 203');
+  if (!r.ok(!!body, 'popup ouverte')) return;
+  // On attend la fin du chargement initial (page precedente + page du sort) :
+  // mesurer avant ferait entrer la compensation de loadUp() dans l'ecart attendu.
+  const aligned = await waitFor(function () { return loadedPages(h.env.document).length >= 2; }, 1500);
+  if (!aligned) { r.ok(false, 'page rendue'); return; }
+  await delay(30);
+
+  const before = body.scrollTop;
+  const oldOffset = layout.anchorOffset;
+  layout.anchorOffset = 300;   // le changement de police a deplace le titre
+  layout.resolveFonts();
+  await delay(30);
+  const expected = before + (300 - oldOffset);
+  r.eq(body.scrollTop, expected,
+    'ancre recalée apres chargement des polices (got ' + body.scrollTop + ', attendu ' + expected + ')');
+}
+
+async function testNoReanchorAfterUserScroll(r) {
+  // Si l'utilisateur a deja fait defiler, un nouveau recalage (polices,
+  // insertion au-dessus) ne doit surtout pas le ramener au sort.
+  const h = createHarness();
+  h.env.load('spell-reader.js');
+  await h.env.window.DCCSpellReader.ensureReady();
+  const layout = fakeLayout(h.env);
+
+  const body = await openMageSpell(h, 'Boule de feu 203');
+  if (!r.ok(!!body, 'popup ouverte')) return;
+  // Meme stabilisation que ci-dessus : la page precedente ne doit plus bouger
+  // une fois l'utilisateur defile.
+  const aligned = await waitFor(function () { return loadedPages(h.env.document).length >= 2; }, 1500);
+  if (!aligned) { r.ok(false, 'page rendue'); return; }
+  await delay(30);
+
+  const before = body.scrollTop;
+  body.scrollTop = before + 500;   // l'utilisateur a fait glisser la lecture
+  layout.anchorOffset = 300;
+  layout.resolveFonts();
+  await delay(30);
+  r.eq(body.scrollTop, before + 500,
+    'aucun recalage force apres un scroll utilisateur (got ' + body.scrollTop + ')');
+}
+
 async function run() {
   const r = createReporter('09-spell-reader');
   await testResolution(r);
@@ -564,6 +727,9 @@ async function run() {
   await testPopupWithEnglishName(r);
   await testTranslationLoading(r);
   await testWithoutTranslations(r);
+  await testAnchorAlignment(r);
+  await testAnchorAfterFonts(r);
+  await testNoReanchorAfterUserScroll(r);
   return r;
 }
 

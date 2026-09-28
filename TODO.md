@@ -3,7 +3,7 @@
 
 **BUGS**
 *Critique*
-* Parfois quand j'ouvre un sort la page n'est pas parfaitement ouverte sur le début du sort (exemple Mage / Rayon Brulant)
+* N/A
 
 *Majeur*
 * N/A

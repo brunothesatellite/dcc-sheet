@@ -380,6 +380,7 @@
     var busyTop = false, busyBottom = false, closed = false, started = false;
     var io = null;
     var prevOverflow = document.body.style.overflow;
+    var anchorScroll = null; // position attendue tant que l'utilisateur n'a pas defile
 
     function setStatus(txt) {
       status.textContent = txt || '';
@@ -419,14 +420,22 @@
       if (n === null) return Promise.resolve(false);
       busyTop = true;
       setStatus('Chargement…');
-      var before = body.scrollHeight;
       return loadPage(n).then(function (html) {
         busyTop = false;
         setStatus('');
         if (closed || !html) return false;
+        // Mesure APRES l'effacement du status : celui-ci (dans le flux) fausserait
+        // la compensation d'environ sa propre hauteur (~38 px de decalage).
+        // NB : .spell-viewer-body porte overflow-anchor:none (style.css) : sinon le
+        // navigateur epingle deja la vue et la compensation serait doublee (ecart
+        // d'une page entiere, reAnchor() le prenant pour un defilement utilisateur).
+        var before = body.scrollHeight;
         insert(n, html, 'top');
         first = n;
-        body.scrollTop += body.scrollHeight - before;
+        var delta = body.scrollHeight - before;
+        body.scrollTop += delta;
+        if (anchorScroll !== null) anchorScroll += delta;
+        reAnchor();
         return true;
       });
     }
@@ -451,14 +460,38 @@
       step();
     }
 
+    function anchorTarget() {
+      return id ? overlay.querySelector('#' + id) : null;
+    }
+
+    /* Ecart (px) entre le debut du sort et le haut de la zone de lecture.
+       Geometrie par rapport au conteneur : ne depend pas de l'offsetParent. */
+    function anchorGap() {
+      var target = anchorTarget();
+      if (!target || !target.getBoundingClientRect || !body.getBoundingClientRect) return null;
+      return target.getBoundingClientRect().top - body.getBoundingClientRect().top;
+    }
+
     function scrollToAnchor() {
-      var target = id ? overlay.querySelector('#' + id) : null;
-      if (!target) return;
+      var target = anchorTarget();
+      if (!target) return false;
       if (typeof target.scrollIntoView === 'function') {
         target.scrollIntoView({ block: 'start' });
       } else {
-        body.scrollTop = target.offsetTop || 0;
+        var gap = anchorGap();
+        if (gap === null) return false;
+        body.scrollTop += gap;
       }
+      anchorScroll = body.scrollTop;
+      return true;
+    }
+
+    /* Recalibre l'ancre apres une insertion au-dessus ou un swap de polices
+       (Google Fonts), uniquement si l'utilisateur n'a pas defile entre temps. */
+    function reAnchor() {
+      if (closed || !started || anchorScroll === null) return;
+      if (Math.abs(body.scrollTop - anchorScroll) > 2) return;
+      scrollToAnchor();
     }
 
     function close() {
@@ -499,6 +532,12 @@
       scrollToAnchor();
       maybeLoad();
     });
+
+    // Google Fonts (display=swap) : si la substitution de la police a lieu apres
+    // le scroll, le debut du sort a bouge - on recale tant qu'on n'a pas defile.
+    if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
+      document.fonts.ready.then(function () { reAnchor(); });
+    }
   }
 
   /* ---------------------------------------------------------

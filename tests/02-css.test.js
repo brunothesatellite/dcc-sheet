@@ -45,6 +45,17 @@ module.exports = function suite() {
     r.ok(css.indexOf(sel) !== -1, 'CSS selector present: ' + sel);
   });
 
+  // La popup doit desactiver l'ancrage de defilement du navigateur : sinon le
+  // recale manuel de loadUp() (scrollTop += delta) est double par le navigateur
+  // et la popup s'ouvre en decalage d'une page entiere.
+  const svBody = css.match(/\.spell-viewer-body \{[^}]+\}/);
+  r.ok(!!svBody, '.spell-viewer-body block found');
+  if (svBody) {
+    r.ok(svBody[0].indexOf('overflow-anchor: none') !== -1,
+      '.spell-viewer-body disables scroll anchoring (overflow-anchor: none)');
+    r.ok(svBody[0].indexOf('overflow-y: auto') !== -1, '.spell-viewer-body is the scroll container');
+  }
+
   const blockMatch = css.match(/\.team-table \.char-class-content \{[^}]+\}/);
   r.ok(!!blockMatch, '.char-class-content block found');
   if (blockMatch) {

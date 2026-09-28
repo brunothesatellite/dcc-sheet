@@ -1076,3 +1076,95 @@ Les sorts peuvent être saisis en anglais (pregens anglais, habitude du joueur).
 | `tests/02-css.test.js` | +3 sélecteurs |
 | `README.md`, `MANUAL.md` | Section « Définition des sorts », § 6.3b |
 | `JOURNAL.md` | Cette entrée |
+
+---
+
+## Date : 28 septembre 2026 - Correctif : calage de l'ancre dans la popup (« Rayon brûlant »)
+
+### Symptôme
+
+Parfois, l'ouverture d'un sort ne se fait pas exactement sur son début (exemple : Mage / **Rayon brûlant**, ancre `rayonbrulant|197` — le `<h3>` est à ~284 octets du début de la page, donc scrollTop ≈ 40 px à l'ouverture).
+
+### Causes (analyse du code, aucune donnée manquante)
+
+1. **Décalage systématique de ~38 px dans `loadUp()`** : `var before = body.scrollHeight` était mesuré **après** `setStatus('Chargement…')` — le bloc `.sv-status` est dans le flux (padding 10+10, 12px × 1.5 ≈ 38 px) — puis le status était masqué **avant** `insert` et la mesure finale. La compensation `scrollTop +=` était donc trop courte d'environ la hauteur du status. Déclenchement : uniquement si le sentinel du haut est visible à l'ouverture (`visible()` : `r.bottom > -300`), c'est-à-dire quand l'ancre est **près du haut de la page** → insertion de la page précédente au-dessus → **« parfois »** ; cumulable (second `loadUp` via l'IntersectionObserver `rootMargin: 400px`).
+2. **Swap typographique** : `.spell-viewer .page` utilise Inter/Barlow chargés par Google Fonts en `display=swap` (`index.html:8-9`). Si la substitution survient **après** le `scrollIntoView`, tout ce qui **précède** le titre change de hauteur et la position n'est jamais ré-alignée.
+3. **Repli de mesure faux** : `body.scrollTop = target.offsetTop` — `offsetTop` est relatif à l'`offsetParent` (ici `.spell-viewer-overlay`, `position: fixed`) → erreur ≈ hauteur d'en-tête + marge colonne. Ne sert qu'en l'absence de `scrollIntoView` (jsdom), mais pèse sur la robustesse et les tests.
+
+**Non-causes vérifiées** : `scroll-behavior: smooth` (`style.css:69`) n'est posé que sur `html` (non hérité) ; **176/176** ancres ont leur `id` réellement présent dans leur page ; pages texte pures (aucune image à charger).
+
+### Correctif (`spell-reader.js`)
+
+- **`loadUp()`** : capture de `before` **après** `setStatus('')`, juste avant `insert` → compensation exacte ; `anchorScroll` (position attendue) suit le même delta ; appel de `reAnchor()`.
+- **`anchorScroll`** : position mémorisée à chaque `scrollToAnchor()` — c'est la référence « l'utilisateur n'a pas défilé ».
+- **`reAnchor()`** : re-calibre l'ancre **uniquement** si `|scrollTop - anchorScroll| ≤ 2 px` (aucun scroll utilisateur entre-temps), appelé (a) après chaque insertion au-dessus, (b) après `document.fonts.ready` (si l'API existe).
+- **`anchorGap()`** : `target.getBoundingClientRect().top - body.getBoundingClientRect().top` — indépendant de l'`offsetParent`, remplace le repli `offsetTop`.
+
+### Validation
+
+- **Suite : `622/622 OK`** (`09-spell-reader` 95 → **103**) — 3 nouveaux tests avec **simulation de mise en page** (`fakeLayout` : hauteur de page, offset du titre, `scrollHeight` avec/sans status, rects dépendants du `scrollTop`, `document.fonts` résoluble) :
+  - *calage* : insertion de la page 202 au-dessus de la 203 → `scrollTop` **exactement** `1000 + 40` (drift nul) ;
+  - *polices* : déplacement du titre après `fonts.ready` → recalage de `+260 px` ;
+  - *scroll utilisateur* : `+500 px` avant `fonts.ready` → **aucun** recalage forcé.
+- **Test de non-régression** : en réintégrant l'ancien code, **2 tests échouent** (`got 1002, attendu 1040` → dérive de 38 px mesurée ; `got 1300, attendu 1262`) — puis code restauré, **622/622 OK**.
+- **Reste** : vérification manuelle sur `localhost:8000` (Mage « Rayon brûlant », sort milieu/bas de page, scroll manuel avant chargement, 375 px, thème sombre).
+
+### Fichiers modifiés (28 septembre - calage de l'ancre)
+
+| Fichier | Action |
+|---------|--------|
+| `spell-reader.js` | Mesure `loadUp` corrigée, `anchorScroll`/`anchorGap`/`reAnchor`, hook `document.fonts.ready` |
+| `tests/09-spell-reader.test.js` | Fixtures 202/204/205, `fakeLayout`, 3 tests de calage (+8) |
+| `JOURNAL.md` | Cette entrée |
+
+---
+
+## Date : 28 septembre 2026 - Correctif : décalage d'une page entière (double compensation du scroll)
+
+### Symptôme (inchangé malgré le correctif précédent)
+
+L'ouverture se fait parfois **en décalage d'une page entière** : la popup affiche la fin de la p.197 puis l'en-tête « PAGE 198 » au lieu du début de « Rayon brûlant ». Même comportement sur « Appel de familier » et « Runes des mortels ». Le correctif « 38 px » n'a rien changé.
+
+### Cause racine (mesurée en navigateur réel : Chrome headless + CDP)
+
+Instrumentation de la popup sur `http://localhost:8000/dcc-sheet/index.html` (MutationObserver sur les insertions + écoute `scroll` + échantillonnage de `scrollTop`/`scrollHeight`/`gap`/`document.fonts`) :
+
+| t | événement | scrollTop | scrollH | pages |
+|---|-----------|-----------|---------|-------|
+| 26 ms | p.197 insérée + `scrollIntoView` → **calage correct** | **55** | 2670 | 197 |
+| 35 ms | p.196 insérée au-dessus (`loadUp`) | **4301** | 4755 | 196+197 |
+| 44 ms | p.198 insérée en bas | 4301 | 5572 | 196+197+198 |
+
+`4301 = 55 + 2 × 2123` : le décalage a été compensé **deux fois**.
+
+1. **Double compensation (cause racine)** — le navigateur pratique l'**ancrage de défilement** (`overflow-anchor: auto` par défaut) : quand une page est insérée au-dessus, Chrome/Edge/Firefox épingle **déjà** la vue (`scrollTop += 2123` automatiquement). `loadUp()` ajoute **sa propre** compensation (`scrollTop += delta`) → `+4246` au lieu de `+2123` → la vue pointe la fin de la p.197 et la p.198 (exactement la capture d'écran).
+2. **`reAnchor()` ne rattrape pas** — `anchorScroll` n'est incrémenté que du `delta` manuel (2140) alors que `scrollTop` réel vaut 4301 → `|4301 − 2140| = 2161 > 2` → le garde-fou conclut à tort « l'utilisateur a défilé » et **refuse le recalage**. Le correctif précédent était donc non seulement insuffisant, mais **neutralisé** par sa propre cause.
+3. Pourquoi **`dcc-spells-reader` n'a jamais le problème** : son lecteur ne touche **jamais** `scrollTop` — après chaque insertion il rappelle `scrollIntoView()` (`keepAnchorInPlace()`, `dcc-spells-reader/script.js:458`) → position absolue, insensible à l'ancrage.
+
+**Cause « 38 px » (mesure du `before` faussée par `.sv-status`) confirmée mais non suffisante** : elle explique une erreur de ~38 px, pas une page entière. Swap des polices Google Fonts : **non causale** ici (`document.fonts` déjà résolues par la page principale, `scrollH` inchangé).
+
+### Correctif
+
+- **`style.css`** : `.spell-viewer-body { overflow-anchor: none; }` → le navigateur ne compense plus, la compensation manuelle de `loadUp()` redevient exacte et déterministe (Chrome/Firefox gèrent la propriété ; Safari n'a pas d'ancrage).
+- **`spell-reader.js`** : commentaire de liaison dans `loadUp()` — le calcul du `delta` est **conditionné** à cette règle CSS.
+- **`tests/02-css.test.js`** : 3 assertions de non-régression (bloc `.spell-viewer-body` trouvé, `overflow-anchor: none`, `overflow-y: auto`).
+
+### Validation
+
+- **Suite : `625/625 OK`, 7 skip** (+3 assertions CSS ; `02-css` 46 → 49).
+- **Navigateur réel (Chrome headless, fichiers servis, sans injection)** :
+  - « Rayon brûlant » (p.197) : `oa=none`, `scrollTop 55 → 2178 = 55 + 2123` (compensation **unique**), **`gap = 6 px` stable** sur 3 s ;
+  - « Appel de familier » (p.131, p.130 insérée au-dessus) : **`gap = 6 px`** ;
+  - « Runes des mortels » (p.157, p.156 insérée au-dessus) : **`gap = 6 px`** ;
+  - **sans** la règle : `gap = -2117` (décalage d'une page) — reproduit sur les 3 sorts.
+- **Test flaky éliminé** (`09-spell-reader`) : `testAnchorAfterFonts` et `testNoReanchorAfterUserScroll` mesuraient **avant** la fin du `loadUp` initial (la p.202 arrivait pendant `delay(30)` → `+1000 px`, échec 1 fois sur 5). Les deux tests attendent désormais **2 pages chargées** + 30 ms → **6/6 OK**.
+
+### Fichiers modifiés (28 septembre - double compensation)
+
+| Fichier | Action |
+|---------|--------|
+| `style.css` | `overflow-anchor: none` sur `.spell-viewer-body` |
+| `spell-reader.js` | Commentaire de liaison dans `loadUp()` |
+| `tests/02-css.test.js` | +3 assertions (`02-css` 46 → 49) |
+| `tests/09-spell-reader.test.js` | Stabilisation de 2 tests (attente des 2 pages) |
+| `JOURNAL.md` | Cette entrée |

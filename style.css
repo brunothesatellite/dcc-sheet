@@ -3102,6 +3102,10 @@ html:not(.has-spell-reader) .spell-lookup,
 .spell-viewer-body {
   flex: 1;
   overflow-y: auto;
+  /* Ancrage de defilement du navigateur DESACTIVE : il epingle deja la vue quand
+     une page est inseree au-dessus, ce qui cumule avec la compensation manuelle
+     de loadUp() (scrollTop += delta) et decale la popup d'une page entiere. */
+  overflow-anchor: none;
   -webkit-overflow-scrolling: touch;
   background: var(--bg);
 }

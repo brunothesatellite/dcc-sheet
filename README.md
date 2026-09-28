@@ -39,6 +39,13 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - **Nain** : Infravision, Competences souterraines, Coup de bouclier, Arme Chance
 - **Voleur** : 14 competences voleur en grille (De de chance, Escalade, Crocheter, Pieges, etc.)
 
+### Definition des sorts (dossier frere dcc-spells-reader)
+- **Detection automatique** : au demarrage, chargement de `../dcc-spells-reader/content/anchors.js` (1 requete = presence du dossier frere + index des ancres) ; si le dossier est absent ou non accessible HTTP, **aucune icone n'apparait** et la fiche reste identique (aucun PHP, aucune configuration)
+- **Loupe a gauche de chaque nom de sort renseigne** (Mage, Elfe, Clerc ; ligne vide = pas d'icone) ; sur les lignes fixes de l'Elfe : loupe sur *Lier un patron*, **loupe + loupe patron** sur *Invoquer un Patron* (lit le champ « Patron(s) » au moment du clic)
+- **Popup plein ecran** dans le theme de la fiche : texte HTML complet du sort (stats, description, table de resultats), **defilement infini** (haut + bas, plages 127-303 / 322-356, trou 304-321 saute), demarrage sur le sort clique ; bouton « page scannee » masque
+- **Nom ignore le numero de page** (`Boule de feu 203`), accents/casse/spaces sans importance, singulier/pluriel et petites fautes de frappe toleres ; echec → modale **« Sort introuvable »** (verifier le nom du sort)
+- Fermeture : bouton X ou touche Echap ; suite `09-spell-reader` + smoke sur les donnees reelles (144/144 noms resolus)
+
 ### Portrait
 - 7 sources d'images : **DCC** (tokens officiels, 20 images), **D&D Red Box 1983** (7 illustrations), **Leremy Gan** (7 silhouettes), **Shadowdark** (12 images), **Jeff Stevens** (8 planches), **Gonzo** (30 images) et **Old School** (17 images)
 - **Popup « Choisir un portrait »** : clic sur le portrait dans la fiche → grille continue (3 colonnes, 2 sur mobile), libellé de source au-dessus du premier portrait de chaque section
@@ -91,6 +98,7 @@ dcc-sheet/
 ├── index.html                  # SPA principale
 ├── test.bat                    # Lanceur Windows des tests de non-regression
 ├── script.js                   # Gestionnaire central (tabs, auth, CRUD, auto-save, nav, portraits)
+├── spell-reader.js             # Definition des sorts (detection dcc-spells-reader, resolution, popup plein ecran)
 ├── style.css                   # Styles principaux (themes, layout, responsive, portraits)
 ├── style-auth.css              # Styles des pages d'authentification
 ├── favicon.svg                 # Favicon SVG

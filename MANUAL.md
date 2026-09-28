@@ -348,7 +348,7 @@ Les listes de sorts du Mage (2 lignes par sort), de l'Elfe (2 lignes par sort + 
 3. Les sorts sont **renumérotés automatiquement** ; il reste toujours au moins une ligne vide.
 
 **Côté Elfe**
-- Les 2 premières lignes sont **figées** : *Lier un patron* et *Invoquer un Patron* (2 lignes chacune, comme les autres sorts) — elles n'ont ni bouton ✕ ni champs modifiables, à l'exception du blanc **`___ /jour`** d'*Invoquer un Patron*.
+- Les 2 premières lignes sont **figées** : *Lier un patron* et *Invoquer un Patron* (2 lignes chacune, comme les autres sorts) — elles n'ont ni bouton ✕ ni champs modifiables, à l'exception du blanc **`___ /jour`** d'*Invoquer un Patron*. Elles portent en revanche les **loupes de recherche** de la § 6.3b (dont une double sur *Invoquer un Patron*).
 - Les lignes libres commencent à la **3e position** : les sorts ajoutés/supprimés sont numérotés à partir de 3.
 
 **Côté Clerc**
@@ -357,6 +357,26 @@ Les listes de sorts du Mage (2 lignes par sort), de l'Elfe (2 lignes par sort + 
 - Les sorts saisis dans l'ancienne grille 3 × 7 sont **migrés automatiquement** à l'ouverture (ordre de lecture actuel conservé).
 
 > Les classes sans liste de sorts (Guerrier, Halfelin, Nain, Voleur) n'affichent pas cette section.
+
+### 6.3b Consulter la définition d'un sort (loupe)
+
+> **Disponibilité** : cette fonction n'apparaît que si le dossier **`dcc-spells-reader`** est installé **au même niveau** que `dcc-sheet` sur le serveur. Sinon : aucune loupe, la fiche reste strictement identique.
+
+- Une **loupe** s'affiche **à gauche du nom** de chaque sort **renseigné** (Mage, Elfe, Clerc) ; une ligne de sort vide n'a pas d'icône.
+- Un clic sur la loupe ouvre une **popup plein écran**, dans le thème de la fiche, avec le **texte complet du sort** (stats, description, table de résultats) et un **défilement infini** : le parchemin se poursuit vers le haut comme vers le bas.
+- La lecture démarre **pile sur le sort cliqué**. Le **numéro de page éventuellement saisi dans le champ est ignoré** (il peut rester : `Boule de feu 203` fonctionne).
+- **Côté Elfe, ligne « Invoquer un Patron »** : deux icônes
+  - la **loupe** → le sort générique *Invoquer un Patron* ;
+  - la **loupe rouge** → les sorts du **patron** saisi dans « Patron(s) » (champ vide : message invitant à le renseigner).
+- Si le nom n'est pas reconnu, une modale **« Sort introuvable »** demande de **vérifier le nom du sort**. Accents, majuscules et espaces sont sans importance et les petites fautes de frappe sont tolérées.
+- Fermeture : bouton **✕** ou touche **Échap**.
+
+<img src="captures/sort1.png" alt="Popup de consultation d'un sort : en-tête « Projectile magique », carrousel de stats (Niveau, Portée, Durée, Temps d'incantation, Jet de sauvegarde) puis les sections Général, Manifestation, Corruption et Revers" width="380">
+<img src="captures/sort2.png" alt="Popup de consultation d'un sort : table de résultats de l'essai de lancement (2 colonnes : jet de d20 et effet)" width="380">
+
+*La popup s'ouvre pile sur le sort : stats en haut, texte du sort, puis la table de résultats ; le défilement continue sur les pages voisines.*
+
+> En cas d'échec, comparez le nom tapé avec celui du livre, **sans son numéro de page**.
 
 ---
 

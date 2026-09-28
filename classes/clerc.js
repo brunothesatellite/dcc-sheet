@@ -34,6 +34,7 @@ window.DCCModules.clerc = {
     function spellCell(n, val) {
       return `
         <div class="sort-cell" data-spell="${n}">
+          ${bc.spellLookup('spell', !String(val ?? '').trim())}
           <input type="text" data-key="${k('sort_' + n)}" value="${val}" placeholder="Nom du sort (n° page)">
           <button type="button" class="btn-spell-del" data-del="${n}">&#10005;</button>
         </div>`;

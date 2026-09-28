@@ -32,7 +32,7 @@ window.DCCModules.elfe = {
       return `
         <tr data-spell="${n}">
           <td class="row-num" rowspan="2">${n}</td>
-          <td class="sort-name"><input type="text" data-key="${k('sort_nom_' + n)}" value="${v('sort_nom_' + n)}"></td>
+          <td class="sort-name">${bc.spellLookup('spell', !String(v('sort_nom_' + n) ?? '').trim())}<input type="text" data-key="${k('sort_nom_' + n)}" value="${v('sort_nom_' + n)}"></td>
           <td><input type="text" data-key="${k('sort_niveau_' + n)}" value="${v('sort_niveau_' + n)}" placeholder="1-5"></td>
           <td><input type="text" data-key="${k('sort_test_' + n)}" value="${v('sort_test_' + n)}"></td>
           <td class="row-del" rowspan="2"><button type="button" class="btn-spell-del" data-del="${n}">&#10005;</button></td>
@@ -109,7 +109,7 @@ window.DCCModules.elfe = {
           <tbody>
             <tr class="row-fixed">
               <td class="row-num" rowspan="2">1</td>
-              <td class="sort-fixed">Lier un patron</td>
+              <td class="sort-fixed">${bc.spellLookup('spell', false, 'Lier un patron')}Lier un patron</td>
               <td>1</td>
               <td></td>
               <td class="row-del" rowspan="2"></td>
@@ -119,7 +119,7 @@ window.DCCModules.elfe = {
             </tr>
             <tr class="row-fixed">
               <td class="row-num" rowspan="2">2</td>
-              <td class="sort-fixed">Invoquer un Patron</td>
+              <td class="sort-fixed">${bc.spellLookup('spell', false, 'Invoquer un Patron')}${bc.spellLookup('patron', false)}Invoquer un Patron</td>
               <td>1</td>
               <td></td>
               <td class="row-del" rowspan="2"></td>
@@ -256,10 +256,11 @@ window.DCCModules.elfe = {
   },
 
   _spellRowHTML(charId, n, k, v) {
+    const bc = window.DCCModules.blocCommun;
     return `
       <tr data-spell="${n}">
         <td class="row-num" rowspan="2">${n}</td>
-        <td class="sort-name"><input type="text" data-key="${k('sort_nom_' + n)}" value="${v('sort_nom_' + n)}"></td>
+        <td class="sort-name">${bc.spellLookup('spell', !String(v('sort_nom_' + n) ?? '').trim())}<input type="text" data-key="${k('sort_nom_' + n)}" value="${v('sort_nom_' + n)}"></td>
         <td><input type="text" data-key="${k('sort_niveau_' + n)}" value="${v('sort_niveau_' + n)}" placeholder="1-5"></td>
         <td><input type="text" data-key="${k('sort_test_' + n)}" value="${v('sort_test_' + n)}"></td>
         <td class="row-del" rowspan="2"><button type="button" class="btn-spell-del" data-del="${n}">&#10005;</button></td>

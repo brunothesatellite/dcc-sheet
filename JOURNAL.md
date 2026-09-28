@@ -981,3 +981,52 @@ Verifs : `node --check classes/clerc.js` OK ; tests manuels (migration 8 sorts �
 | `tools/` | Nouveau — `pregens_to_json.py`, `pregens_overrides.json` |
 | `.gitignore` | Exclut le PDF source et `Travok2.json` |
 | `README.md`, `MANUAL.md` | Onglet Équipe (§ 8.1 / § 8.3b), structure, pre-gens |
+
+---
+
+## Date : 28 septembre 2026 - Définition des sorts intégrée à la fiche (branche `evol-spell-detail`)
+
+### Objectif
+
+Depuis une fiche (Mage, Elfe, Clerc), cliquer une icône à gauche d'un nom de sort renseigné pour lire sa définition complète dans le lecteur de sorts **`dcc-spells-reader`** (déjà déployé comme **dossier frère** à la racine du serveur), sans quitter la fiche — en tenant compte de l'absence possible de ce dossier sur d'autres installations.
+
+### Décisions
+
+| Sujet | Décision |
+|-------|----------|
+| Détection | **Un seul `fetch`** : `../dcc-spells-reader/content/anchors.js` apporte à la fois la présence du dossier et l'index des ancres (176 `slug\|page`) ; échec → tout reste masqué, **jamais d'erreur console bruyante** |
+| Portée des icônes | Tout, **y compris les 2 lignes fixes de l'elfe** ; « Invoquer un Patron » = **2 recherches** (sort générique + sorts du patron choisi dans le champ `patron`, lu au clic) |
+| Bouton « page scannée » | **Masqué** (`.spell-viewer .page-img-btn { display: none }`) |
+| Typographie popup | **Thème dcc-sheet** (Inter/Barlow, `--font-*`), aucune police ajoutée |
+| Numéro de page dans le champ | **Ignoré** par la résolution (`cleanName` retire `203`, `p. 203`, `(page 203)`) |
+| Nom inconnu | Modale **« Sort introuvable »** → vérifier le nom du sort |
+
+### Implémentation
+
+- **`spell-reader.js`** (nouveau) : `loadScript` → `buildIndex`/`enable` (classe `html.has-spell-reader`) ; `cleanName` + `slugify` (identique au reader) ; cascade de résolution **exact → singulier/pluriel → préfixe/contenance → tokens → distance d'édition ≤ 2** (Levenshtein, dernier filet) ; `openSpell` / `openPatron` (variants : nom, nom entre parenthèses, nom avant parenthèse) ; popup `.spell-viewer-overlay` (z-index **3000**) avec `IntersectionObserver` (repli listener `scroll` sans IO) et sentinelles haut/bas, chargement lazy `content/N.js` avec cache, **compensation `scrollTop`** lors d'un ajout au-dessus, ancrage `scrollIntoView` sur l'id du sort, verrou `body.style.overflow = 'hidden'` restauré à la fermeture ; événements **délégués au `document`** : `input` (toggle `[hidden]` selon `data-key` ~ `/sort_(?:nom_)?\d+$/`) et `click` (`[data-lookup]`) ; API `window.DCCSpellReader = {slugify, cleanName, resolve, ensureReady, isAvailable, openSpell, openPatron, setAnchors}`.
+- **`classes/bloc_commun.js`** : `spellLookup(kind, hidden, name)` génère le bouton SVG (loupe / étoile pour le patron) — helper unique partagé par les 3 classes.
+- **`classes/mage.js`** (`spellRow` + `_spellRowHTML`), **`classes/elfe.js`** (lignes fixes : *Lier un patron* → 1 icône ; *Invoquer un Patron* → icône sort **+** icône patron), **`classes/clerc.js`** (`spellCell`, bouton avant l'input dans `.sort-cell`).
+- **`index.html`** : `<script src="spell-reader.js">` après `script.js`.
+- **`style.css`** (bloc 13 « Consultation des sorts ») : cachette `html:not(.has-spell-reader) .spell-lookup, .spell-lookup[hidden]`, styles d'icône, `.dtd`… `td.sort-name/.sort-fixed` en flex, popup complète (colonne 520 px, sentinels, status), et **port du CSS `.page` du reader (≈ 5,7 Ko) scopé sous `.spell-viewer`** — évite les collisions de classes génériques (`.row`, `.stat`, `.stats`) avec la fiche ; `@media (max-width: 599px)` cartes `table.stackable`.
+
+### Validation
+
+- **Suite complète : `580/580 OK`** (`node tests\run.js`) — suite **`09-spell-reader`** (64 assertions : icônes sur les 3 classes, bascule à la saisie, popup ouverture/croix/Échap, modales, cas dossier absent…) + `02-css` +10 sélecteurs critiques. Les tests **ne dépendent jamais** du dossier frère (fixtures via patch de `head.appendChild`).
+- **Smoke sur les vraies données** (hors suite) : détection = true, **144/144 noms de `data.js` résolus**, pages concordantes (3 « anomalies » = placeholders `(Sort de Patron)***` à `page: null`, sans impact) ; popup ouverte sur le contenu réel : ancre `#s203-bouledefeu`, `.stats`, `table.results-tbl`, titre, **pages 202 → 210 en défilement infini** (les deux sentinelles chargent), `.page-img-btn` masqué.
+- **HTTP** (`php -S localhost:8000 -t D:\VS_Code_Workspaces`, en cours depuis `deploy\start.bat`) : `index.html`, `spell-reader.js`, `style.css`, `dcc-spells-reader/content/anchors.js` et `content/203.js` → **200** ; chemin relatif `../dcc-spells-reader/...` donc valide.
+- **Reste à faire** : vérification manuelle navigateur (375 px, thème sombre, elfe avec/sans patron, lecture hors ligne du dossier frère) ; **rien n'a été commité** (attente d'instruction).
+
+### Fichiers modifiés (28 septembre — définition des sorts)
+
+| Fichier | Action |
+|---------|--------|
+| `spell-reader.js` | **Nouveau** — détection, résolution de nom, popup plein écran, scroll infini |
+| `classes/bloc_commun.js` | `spellLookup()` : générateur d'icône partagé |
+| `classes/mage.js`, `classes/elfe.js`, `classes/clerc.js` | Icônes dans les lignes de sorts + 2 lignes fixes de l'elfe |
+| `index.html` | Chargement de `spell-reader.js` |
+| `style.css` | Bloc 13 : `.spell-lookup`, popup `.spell-viewer`, CSS `.page` scopé |
+| `tests/09-spell-reader.test.js`, `tests/run.js`, `tests/02-css.test.js` | Nouvelle suite (+64) + 10 sélecteurs CSS |
+| `README.md`, `MANUAL.md` | § « Définition des sorts », structure, § 6.3 / 6.3b |
+| `captures/sort1.png`, `captures/sort2.png` | **Nouveaux** — captures de la popup (texte + table de résultats) |
+| `JOURNAL.md` | Cette entrée |
+

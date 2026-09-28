@@ -12,6 +12,7 @@ const suites = [
   require('./06-marching-order.test'),
   require('./07-restore.test'),
   require('./08-portrait-picker.test'),
+  require('./09-spell-reader.test'),
 ];
 
 function pad(s, n) {

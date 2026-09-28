@@ -182,5 +182,18 @@ window.DCCModules.blocCommun = {
 
       </div>
       `;
+  },
+
+  /* Bouton d'icône de recherche de définition de sort (voir spell-reader.js)
+     kind  : 'spell' (nom de sort) ou 'patron' (sorts du patron)
+     hidden: champ de nom vide -> bouton masqué
+     name  : nom figé à rechercher (lignes fixes sans champ éditable) */
+  spellLookup(kind, hidden, name) {
+    const patron = kind === 'patron';
+    const label = patron ? 'Voir les sorts du patron' : 'Voir la définition de ce sort';
+    const path = patron
+      ? 'M8 1.6l1.9 3.9 4.3.6-3.1 3 .7 4.3L8 11.5l-3.8 1.9.7-4.3-3.1-3 4.3-.6z'
+      : 'M7.2 1.5a5.4 5.4 0 0 0-3.9 9.2l-1.4 1.4 1.3 1.3 1.4-1.4A5.4 5.4 0 1 0 7.2 1.5zm0 1.9a3.5 3.5 0 1 1 0 7 3.5 3.5 0 0 1 0-7z';
+    return `<button type="button" class="spell-lookup${patron ? ' spell-lookup-patron' : ''}" data-lookup="${patron ? 'patron' : 'spell'}"${name ? ` data-name="${name}"` : ''} title="${label}" aria-label="${label}"${hidden ? ' hidden' : ''}><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" focusable="false"><path fill="currentColor" d="${path}"></path></svg></button>`;
   }
 };

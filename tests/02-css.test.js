@@ -28,6 +28,15 @@ module.exports = function suite() {
     '.team-table-stats .stat-group',
     '.team-table-stats .stat-chevron-cell .chevron',
     'tr.team-stats-detail.open .team-detail-wrap',
+    '.spell-lookup',
+    'html:not(.has-spell-reader) .spell-lookup',
+    '.spell-lookup[hidden]',
+    '.spell-viewer-overlay',
+    '.spell-viewer-header',
+    '.spell-viewer .page',
+    '.spell-viewer .page h3.spell-title',
+    '.spell-viewer table.stackable',
+    '@media (max-width: 599px)',
   ];
   critical.forEach(function (sel) {
     r.ok(css.indexOf(sel) !== -1, 'CSS selector present: ' + sel);

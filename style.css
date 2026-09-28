@@ -2962,3 +2962,376 @@ tr.team-stats-detail.open .team-detail-wrap {
   background: var(--accent);
   color: #fff;
 }
+/* =========================================================================
+   13. Consultation des sorts (dossier frere dcc-spells-reader)
+   ======================================================================== */
+
+/* Icône : masquee tant que le lecteur n'est pas detecte, et masquee
+   lorsque le champ de nom est vide */
+html:not(.has-spell-reader) .spell-lookup,
+.spell-lookup[hidden] {
+  display: none;
+}
+
+.spell-lookup {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.spell-lookup:hover,
+.spell-lookup:focus-visible {
+  color: var(--accent);
+  background: var(--field-bg);
+  border-color: var(--line);
+  outline: none;
+}
+
+.spell-lookup-patron {
+  color: var(--tab-active);
+}
+
+.spell-lookup-patron:hover,
+.spell-lookup-patron:focus-visible {
+  color: var(--header-text);
+  background: var(--tab-active);
+  border-color: var(--tab-active);
+}
+
+.dtable td.sort-name {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dtable td.sort-name input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+}
+
+.dtable td.sort-fixed {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* --- Popup plein ecran --- */
+.spell-viewer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  background: var(--bg);
+}
+
+.spell-viewer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.spell-viewer-header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--header-bg);
+  color: var(--header-text);
+}
+
+.spell-viewer-title {
+  font-family: var(--font-heading);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spell-viewer-close {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.spell-viewer-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.spell-viewer-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--bg);
+}
+
+.spell-viewer-column {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 10px 8px 48px;
+}
+
+.sv-sentinel {
+  height: 1px;
+}
+
+.sv-status {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  padding: 10px;
+}
+
+/* --- Contenu de page (reprise du dcc-spells-reader) --- */
+.spell-viewer .page {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto 6px;
+  padding: 8px 14px 16px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.spell-viewer .page p {
+  margin: 0 0 0.6em;
+  text-align: justify;
+  hyphens: auto;
+}
+
+.spell-viewer .page .dropcap::first-letter {
+  float: left;
+  font-family: var(--font-heading);
+  font-size: 2.3em;
+  line-height: 0.95;
+  padding: 3px 6px 0 0;
+  color: var(--tab-active);
+}
+
+.spell-viewer .page-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.spell-viewer .page-num {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.spell-viewer .page-img-btn {
+  display: none;
+}
+
+.spell-viewer .page h3.spell-title {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--accent);
+  margin: 16px 0 6px;
+  scroll-margin-top: 6px;
+}
+
+.spell-viewer .page h2.patron-title {
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--tab-active);
+  text-align: center;
+  margin: 18px 0 8px;
+  scroll-margin-top: 6px;
+}
+
+.spell-viewer .page h2.section {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink);
+  margin: 18px 0 8px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--line);
+  scroll-margin-top: 6px;
+}
+
+.spell-viewer .stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 12px;
+}
+
+.spell-viewer .stat {
+  background: var(--field-bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 3px 9px;
+  font-size: 13px;
+}
+
+.spell-viewer .stat b {
+  color: var(--tab-active);
+  font-weight: 600;
+}
+
+.spell-viewer .row {
+  display: block;
+  margin: 0 0 9px;
+}
+
+.spell-viewer .row-label {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--tab-active);
+  margin-bottom: 2px;
+}
+
+.spell-viewer .row-body p:last-child {
+  margin-bottom: 0;
+}
+
+.spell-viewer .table-wrap {
+  overflow-x: auto;
+  margin: 8px 0 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.spell-viewer table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.spell-viewer table.data th,
+.spell-viewer table.data td {
+  border: 1px solid var(--line);
+  padding: 5px 7px;
+  vertical-align: top;
+  text-align: left;
+}
+
+.spell-viewer table.data thead th {
+  background: var(--field-bg);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.spell-viewer table.data td.range,
+.spell-viewer table.data tbody th {
+  background: var(--field-bg);
+  color: var(--ink);
+  white-space: nowrap;
+  width: 1%;
+}
+
+.spell-viewer table.data.results-tbl td.range {
+  width: 76px;
+  font-weight: 700;
+}
+
+.spell-viewer table.data td.cell p:last-child {
+  margin-bottom: 0;
+}
+
+/* --- Tableaux a colonnes empilées sous 600 px --- */
+@media (max-width: 599px) {
+  .spell-viewer .page {
+    max-width: none;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    padding: 8px 10px 16px;
+  }
+
+  .spell-viewer-column {
+    padding: 0 0 48px;
+  }
+
+  .spell-viewer table.stackable,
+  .spell-viewer table.stackable tbody,
+  .spell-viewer table.stackable tr,
+  .spell-viewer table.stackable td {
+    display: block;
+    width: auto;
+  }
+
+  .spell-viewer table.stackable thead {
+    display: none;
+  }
+
+  .spell-viewer table.stackable tr {
+    margin-bottom: 8px;
+    padding: 5px 6px;
+    background: var(--field-bg);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+  }
+
+  .spell-viewer table.stackable td {
+    border: none;
+    padding: 3px 5px;
+    white-space: normal;
+  }
+
+  .spell-viewer table.stackable td.range {
+    width: auto;
+    background: none;
+    border-bottom: 1px dashed var(--line);
+    color: var(--tab-active);
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+
+  .spell-viewer table.stackable td[data-label]:empty {
+    display: none;
+  }
+
+  .spell-viewer table.stackable td[data-label]::before {
+    content: attr(data-label) " : ";
+    color: var(--tab-active);
+    font-weight: 600;
+  }
+
+  .spell-viewer table.data.results-tbl td.range {
+    width: 68px;
+  }
+}
+

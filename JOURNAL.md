@@ -1225,3 +1225,48 @@ Sur la fiche **clerc**, la loupe de consultation était posée **à l'intérieur
 |---------|--------|
 | `style.css` | `.sort-cell` + `min-width: 0` ; `.dtable td.sort-name` + `.dtable td.sort-fixed` → `border: none` |
 | `JOURNAL.md` | Cette entrée |
+
+---
+
+## Date : 28 septembre 2026 - Correctif : scroll infini de la popup de sorts (performance + fiabilite)
+
+### Symptome
+
+L'ouverture d'un sort (ex. Clerc / Benediction) se centrait correctement sur le sort, mais seules les pages 253-255 s'affichaient. La suite (fin du sort + pages suivantes) manquait ou apparaissait tres longtemps apres. Le scroll infini facon parchemin ne se declenchait pas automatiquement.
+
+### Causes racines (analyse comparative avec dcc-spells-reader)
+
+| Aspect | dcc-spells-reader (fonctionne) | spell-reader.js (bugue) |
+|---|---|---|
+| Au demarrage | Pre-charge 8 pages en parallele (p-2 a p+5) | Charge 1 seule page |
+| Detection scroll | Seuil position : scrollTop + clientHeight >= scrollHeight - 800 | Seuil visibilite getBoundingClientRect avec marge 300px |
+| Chargement | 3 pages par batch (fire-and-forget) | 1 page sequentielle (attend la precedente) |
+| Cache | Map avec dedup de promesses | Objet simple, pas de dedup |
+| Garde | Seuil naturel (position) | guard > 6 artificiel |
+
+1. visible() seuil trop faible : avec une page de ~2000px de haut, le sentinel bas est a r.top ~ 2060px (viewport). Verification 2060 < 800 + 300 = 1100 -> false. Ni maybeLoad() ni l'IntersectionObserver (rootMargin: 400px) ne se declenchent -> aucune page suivante chargee.
+2. Chargement sequentiel : chaque loadDown() attend onload du <script> avant de lancer le suivant -> 3 pages = 3 round-trips sequentiels.
+3. Pas de dedup de promesses : loadPage(n) appele 2x cree 2 <script> tags pour la meme page.
+4. Aucun pre-chargement : 1 page seule au demarrage, contrairement aux 8 pages du lecteur.
+
+### Correctif (spell-reader.js)
+
+- pagePromises (remplace pageCache) : cache la promesse elle-meme -> 1 seul <script> par page, meme en cas d'appels concurrents.
+- insert(n, html) ordonne : insertion par numero de page (pas append/prepend), anti-doublon (data-loaded-page), compensation scrollTop quand insertion au-dessus de la position courante, reAnchor() systematique.
+- loadDown / loadUp simplifies : compensation deleguee a insert, first/last recalcules depuis le DOM, retour !!insert() pour gerer les doublons.
+- maybeLoadMore() (remplace maybeLoad + visible) : seuil par position de scroll (800px du bas / 800px du haut, comme le lecteur), 3 pages par batch.
+- preloadAround(pageNum) : pre-charge p-2 a p+5 en parallele au demarrage (comme scrollToPage() du lecteur).
+- scroll listener remplace l'IntersectionObserver.
+- Conserve : overflow-anchor: none (style.css), anchorScroll/reAnchor() (calage de l'ancre), scrollToAnchor(), compensation scrollTop dans insert.
+
+### Validation
+
+- Suite : 629/629 OK, 7 skip (inchangee - les tests ne dependent pas du dossier frere).
+- node --check spell-reader.js OK.
+
+### Fichiers modifies (28 septembre - scroll infini)
+
+| Fichier | Action |
+|---------|--------|
+| spell-reader.js | pagePromises, insert ordonne, maybeLoadMore (seuil 800px), preloadAround, scroll listener |
+| JOURNAL.md | Cette entree |

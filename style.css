@@ -1467,10 +1467,7 @@ button.section-bar.collapse-toggle[aria-expanded="true"] .chev {
   line-height: 1.4;
 }
 
-.dtable td.sort-name input,
-.sort-cell input {
-  font-weight: 700;
-}
+
 
 .dtable td.sort-fixed {
   text-align: left;
@@ -2994,6 +2991,7 @@ html:not(.has-spell-reader) .spell-lookup,
   display: flex;
   align-items: center;
   gap: 5px;
+  border: none;
 }
 
 .dtable td.sort-name input,

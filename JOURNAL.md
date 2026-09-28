@@ -1199,3 +1199,29 @@ Sur la fiche **clerc**, la loupe de consultation était posée **à l'intérieur
 | `style.css` | `.sort-cell` conteneur neutre ; `.sort-cell input` partagé avec `td.sort-name input` |
 | `tests/02-css.test.js` | +4 assertions (`02-css` 49 → 53) |
 | `JOURNAL.md` | Cette entrée |
+
+---
+
+## Date : 28 septembre 2026 - Correctifs CSS : débordement des sorts (Clerc) et bordure des noms de sorts (Mage/Elfe)
+
+### Sorts du Clerc : débordement de la colonne de droite
+
+- **Symptôme** : les sorts de la colonne droite de la grille `.sorts-grid` débordaient de la page (champ texte et bouton ✕ hors cadre).
+- **Cause** : `.sort-cell` (grid item) avait `min-width: auto` par défaut (CSS Grid) → la cellule ne rétrécissait pas en dessous de la largeur intrinsèque de son contenu.
+- **Correctif** : ajout de `min-width: 0` sur `.sort-cell` (`style.css`).
+
+### Noms de sorts Mage/Elfe : bordure noire en trop
+
+- **Symptôme** : les `<td class="sort-name">` et `<td class="sort-fixed">` portaient la bordure `1.5px solid var(--ink)` de `.dtable td`, créant un encadré noir et gras autour du nom de sort, plus visible que les autres champs (niveau, test).
+- **Correctif** : ajout de `border: none` sur `.dtable td.sort-name` et `.dtable td.sort-fixed` (`style.css`). Seule la bordure de l'input (`1px solid var(--input-border)`) reste visible.
+
+### Merge branche `evol-spell-detail` dans `main`
+
+- Fast-forward de `main` sur `evol-spell-detail` (8 commits : détail des sorts, traductions EN/FR, calage ancre, double compensation scroll, loupe clerc).
+
+### Fichiers modifiés (28 septembre — correctifs CSS sorts + merge)
+
+| Fichier | Action |
+|---------|--------|
+| `style.css` | `.sort-cell` + `min-width: 0` ; `.dtable td.sort-name` + `.dtable td.sort-fixed` → `border: none` |
+| `JOURNAL.md` | Cette entrée |

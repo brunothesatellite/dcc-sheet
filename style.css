@@ -1418,36 +1418,15 @@ button.section-bar.collapse-toggle[aria-expanded="true"] .chev {
   gap: 3px 6px;
 }
 
+/* Cellule = simple conteneur (comme le td de la table mage/elfe) : la loupe et
+   la ✕ restent HORS du champ texte, qui est uniquement l'input encadre.
+   Le champ lui-meme partage les regles de td.sort-name (cf. bloc 13). */
 .sort-cell {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   min-height: 24px;
-  padding: 3px 8px;
-  background: var(--field-bg);
-  border: 1px solid var(--input-border);
-  border-radius: var(--radius-sm);
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.sort-cell:focus-within {
-  border-color: var(--tab-active);
-  box-shadow: 0 0 0 2px rgba(192, 57, 43, 0.15);
-}
-
-.sort-cell input {
-  flex: 1;
-  min-width: 0;
-  border: none;
-  background: transparent;
   padding: 2px 0;
-  font-size: 11px;
-}
-
-.sort-cell input:focus {
-  background: transparent;
-  box-shadow: none;
-  outline: none;
 }
 
 .sort-cell .btn-spell-del {
@@ -1472,7 +1451,8 @@ button.section-bar.collapse-toggle[aria-expanded="true"] .chev {
 }
 
 .dtable td.sort-notes textarea,
-.dtable td.sort-name input {
+.dtable td.sort-name input,
+.sort-cell input {
   width: 100%;
   border: 1px solid var(--input-border);
   background: var(--field-bg);
@@ -1486,7 +1466,8 @@ button.section-bar.collapse-toggle[aria-expanded="true"] .chev {
   line-height: 1.4;
 }
 
-.dtable td.sort-name input {
+.dtable td.sort-name input,
+.sort-cell input {
   font-weight: 700;
 }
 
@@ -3014,7 +2995,8 @@ html:not(.has-spell-reader) .spell-lookup,
   gap: 5px;
 }
 
-.dtable td.sort-name input {
+.dtable td.sort-name input,
+.sort-cell input {
   flex: 1 1 auto;
   min-width: 0;
   width: auto;

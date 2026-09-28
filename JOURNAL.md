@@ -1168,3 +1168,34 @@ Instrumentation de la popup sur `http://localhost:8000/dcc-sheet/index.html` (Mu
 | `tests/02-css.test.js` | +3 assertions (`02-css` 46 → 49) |
 | `tests/09-spell-reader.test.js` | Stabilisation de 2 tests (attente des 2 pages) |
 | `JOURNAL.md` | Cette entrée |
+
+---
+
+## Date : 28 septembre 2026 - Ergonomie : la loupe des sorts de clerc hors du champ texte
+
+### Symptôme
+
+Sur la fiche **clerc**, la loupe de consultation était posée **à l'intérieur** du champ texte : `.sort-cell` portait elle-même le fond `--field-bg` et la bordure, l'`input` étant sans bordure (`border: none; background: transparent`) → l'icône partageait le même aplat que le texte saisi. Sur **mage**/**elfe**, le champ est l'`input` encadré et la loupe est **dehors**, dans la gouttière du `td`.
+
+**Mesure (Chrome headless, `.sort-cell` vs `td.sort-name`)** : aucun chevauchement géométrique dans les deux cas (icône 20 px puis input) — l'écart est purement visuel : champ = cellule (clerc) vs champ = input encadré (mage/elfe).
+
+### Correctif (`style.css` — CSS seul, structure HTML/JS inchangée)
+
+- **`.sort-cell`** : devient un simple conteneur flex (fond et bordure supprimés, `gap: 5px`, `padding: 2px 0`) ; suppression de `.sort-cell:focus-within` → le retour de focus se fait sur le champ, comme en mage.
+- **`.sort-cell input`** : **ajouté aux 3 règles partagées** de `.dtable td.sort-name input` (champ encadré `--input-border`/`--field-bg` + `font-weight: 700` + `flex: 1 1 auto; width: auto`) → une seule source de vérité : le futur item TODO « encadré gras du nom de sort » s'appliquera automatiquement au clerc.
+- `.sort-cell .btn-spell-del` inchangé (`margin-left: auto`).
+
+### Validation
+
+- **Suite : `629/629 OK`, 7 skip** (`02-css` 49 → **53** : cellule sans fond, partage de la règle de champ, bordure du champ).
+- **Mesure navigateur** : cellule clerc `bg: transparent, border: 0px` ; input `border: 1px, bg: --field-bg` (**identique au mage**) ; icône hors du champ (x 0→20, input à x 25) ; `overlap: null`.
+- **Capture** : loupe à gauche sur le fond de la fiche, champ encadré, ✕ à droite → disposition identique mage/elfe.
+- Aucun autre usage de `.sort-cell` (JS clerc et sélecteurs de tests inchangés).
+
+### Fichiers modifiés (28 septembre - loupe clerc)
+
+| Fichier | Action |
+|---------|--------|
+| `style.css` | `.sort-cell` conteneur neutre ; `.sort-cell input` partagé avec `td.sort-name input` |
+| `tests/02-css.test.js` | +4 assertions (`02-css` 49 → 53) |
+| `JOURNAL.md` | Cette entrée |

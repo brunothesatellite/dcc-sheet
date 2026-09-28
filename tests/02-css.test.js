@@ -56,6 +56,21 @@ module.exports = function suite() {
     r.ok(svBody[0].indexOf('overflow-y: auto') !== -1, '.spell-viewer-body is the scroll container');
   }
 
+  // Cellule de sort du clerc : la loupe ne doit pas empieter sur le champ
+  // texte -> la cellule n'est qu'un conteneur, le champ est l'input encadre
+  // (meme disposition que td.sort-name du mage / de l'elfe).
+  const sortCell = css.match(/\.sort-cell \{[^}]+\}/);
+  r.ok(!!sortCell, '.sort-cell block found');
+  if (sortCell) {
+    r.ok(sortCell[0].indexOf('background') === -1, '.sort-cell is a plain container (no background)');
+  }
+  const sharedField = css.match(/\.dtable td\.sort-notes textarea,\s*\.dtable td\.sort-name input,\s*\.sort-cell input \{[^}]+\}/);
+  r.ok(!!sharedField, 'clerc field shares the mage/elfe input rule');
+  if (sharedField) {
+    r.ok(sharedField[0].indexOf('border: 1px solid var(--input-border)') !== -1,
+      'shared rule gives the field its border');
+  }
+
   const blockMatch = css.match(/\.team-table \.char-class-content \{[^}]+\}/);
   r.ok(!!blockMatch, '.char-class-content block found');
   if (blockMatch) {

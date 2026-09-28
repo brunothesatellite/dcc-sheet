@@ -15,7 +15,7 @@
 
   var index = null;        // slug -> [ { page, id, title }, ... ] (ordre du livre)
   var readyPromise = null;
-  var pageCache = {};
+  var pagePromises = {};   // n -> Promise<html|null> (dedup : 1 seul <script> par page)
   var transFrom = {};      // slug(EN) -> nom francais canonique
   var transPromise = null; // chargement de spell-translation.js (une seule fois)
 
@@ -331,12 +331,12 @@
      Popup plein ecran + scroll infini
      --------------------------------------------------------- */
   function loadPage(n) {
-    if (pageCache[n] !== undefined) return Promise.resolve(pageCache[n]);
-    return loadScript(BASE + '/content/' + n + '.js').then(function (ok) {
-      var html = (ok && window.DCC_PAGES && window.DCC_PAGES[n]) || null;
-      pageCache[n] = html;
-      return html;
-    });
+    if (!pagePromises[n]) {
+      pagePromises[n] = loadScript(BASE + '/content/' + n + '.js').then(function (ok) {
+        return (ok && window.DCC_PAGES && window.DCC_PAGES[n]) || null;
+      });
+    }
+    return pagePromises[n];
   }
 
   function openViewer(title, page, id, sub) {
@@ -377,8 +377,8 @@
     var sentinelBottom = overlay.querySelector('.sv-sentinel-bottom');
 
     var first = null, last = null;
-    var busyTop = false, busyBottom = false, closed = false, started = false;
-    var io = null;
+    var closed = false, started = false;
+    var loadingDown = false, loadingUp = false;
     var prevOverflow = document.body.style.overflow;
     var anchorScroll = null; // position attendue tant que l'utilisateur n'a pas defile
 
@@ -387,77 +387,105 @@
       status.hidden = !txt;
     }
 
-    function insert(n, html, where) {
+    /* Insertion ordonnee par numero de page + compensation du scroll quand
+       la page est ajoutee au-dessus de la position courante.
+       NB : .spell-viewer-body porte overflow-anchor:none (style.css) : sinon le
+       navigateur epingle deja la vue et la compensation serait doublee. */
+    function insert(n, html) {
+      if (pages.querySelector('[data-loaded-page="' + n + '"]')) return null;
       var wrap = document.createElement('div');
       wrap.innerHTML = html;
       var node = wrap.firstElementChild;
       if (!node) return null;
       node.setAttribute('data-loaded-page', n);
-      if (where === 'top' && pages.firstElementChild) pages.insertBefore(node, pages.firstElementChild);
-      else pages.appendChild(node);
+      var children = pages.children;
+      var refNode = null;
+      for (var i = 0; i < children.length; i++) {
+        var pn = parseInt(children[i].getAttribute('data-loaded-page') || '0', 10);
+        if (pn > n) { refNode = children[i]; break; }
+      }
+      if (refNode) {
+        var before = body.scrollHeight;
+        pages.insertBefore(node, refNode);
+        var delta = body.scrollHeight - before;
+        body.scrollTop += delta;
+        if (anchorScroll !== null) anchorScroll += delta;
+      } else {
+        pages.appendChild(node);
+      }
+      if (pages.firstElementChild) first = parseInt(pages.firstElementChild.getAttribute('data-loaded-page'), 10);
+      if (pages.lastElementChild) last = parseInt(pages.lastElementChild.getAttribute('data-loaded-page'), 10);
+      reAnchor();
       return node;
     }
 
     function loadDown() {
-      if (closed || busyBottom || last === null) return Promise.resolve(false);
+      if (closed || last === null || loadingDown) return Promise.resolve(false);
       var n = nextPage(last);
       if (n === null) return Promise.resolve(false);
-      busyBottom = true;
+      loadingDown = true;
       setStatus('Chargement…');
       return loadPage(n).then(function (html) {
-        busyBottom = false;
+        loadingDown = false;
         setStatus('');
         if (closed || !html) return false;
-        insert(n, html, 'bottom');
-        last = n;
-        return true;
+        return !!insert(n, html);
       });
     }
 
     function loadUp() {
-      if (closed || busyTop || first === null) return Promise.resolve(false);
+      if (closed || first === null || loadingUp) return Promise.resolve(false);
       var n = prevPage(first);
       if (n === null) return Promise.resolve(false);
-      busyTop = true;
+      loadingUp = true;
       setStatus('Chargement…');
       return loadPage(n).then(function (html) {
-        busyTop = false;
+        loadingUp = false;
         setStatus('');
         if (closed || !html) return false;
-        // Mesure APRES l'effacement du status : celui-ci (dans le flux) fausserait
-        // la compensation d'environ sa propre hauteur (~38 px de decalage).
-        // NB : .spell-viewer-body porte overflow-anchor:none (style.css) : sinon le
-        // navigateur epingle deja la vue et la compensation serait doublee (ecart
-        // d'une page entiere, reAnchor() le prenant pour un defilement utilisateur).
-        var before = body.scrollHeight;
-        insert(n, html, 'top');
-        first = n;
-        var delta = body.scrollHeight - before;
-        body.scrollTop += delta;
-        if (anchorScroll !== null) anchorScroll += delta;
-        reAnchor();
-        return true;
+        return !!insert(n, html);
       });
     }
 
-    function visible(el) {
-      var h = body.clientHeight || 0;
-      if (h <= 0 || !el || !el.getBoundingClientRect) return false;
-      var r = el.getBoundingClientRect();
-      return r.top < h + 300 && r.bottom > -300;
+    /* Chargement par position de scroll (comme dcc-spells-reader) :
+       seuil 800 px du bas / 800 px du haut, 3 pages par batch. */
+    function maybeLoadMore() {
+      if (closed || !started) return;
+      var st = body.scrollTop;
+      var sh = body.scrollHeight;
+      var ch = body.clientHeight;
+      if (st + ch >= sh - 800) {
+        (function () {
+          var cnt = 0;
+          (function stepDown() {
+            if (closed || cnt >= 3) return;
+            loadDown().then(function (more) { if (more) { cnt++; stepDown(); } });
+          })();
+        })();
+      }
+      if (st < 800) {
+        (function () {
+          var cnt = 0;
+          (function stepUp() {
+            if (closed || cnt >= 3) return;
+            loadUp().then(function (more) { if (more) { cnt++; stepUp(); } });
+          })();
+        })();
+      }
     }
 
-    function maybeLoad() {
-      if (closed || !started) return;
-      var guard = 0;
-      function step() {
-        if (closed || guard++ > 6) return;
-        if (visible(sentinelBottom)) {
-          loadDown().then(function (more) { if (more) step(); });
-        }
+    /* Pre-chargement des pages voisines (p-2 .. p+5) en parallele,
+       comme scrollToPage() du lecteur. */
+    function preloadAround(pageNum) {
+      for (var p = pageNum - 2; p <= pageNum + 5; p++) {
+        if (p === pageNum || !inRange(p)) continue;
+        (function (n) {
+          loadPage(n).then(function (html) {
+            if (closed || !html) return;
+            insert(n, html);
+          });
+        })(p);
       }
-      if (visible(sentinelTop)) loadUp();
-      step();
     }
 
     function anchorTarget() {
@@ -497,7 +525,7 @@
     function close() {
       if (closed) return;
       closed = true;
-      if (io) io.disconnect();
+      body.removeEventListener('scroll', maybeLoadMore);
       document.removeEventListener('keydown', onKey);
       overlay.remove();
       document.body.style.overflow = prevOverflow;
@@ -512,13 +540,7 @@
     document.body.appendChild(overlay);
     document.body.style.overflow = 'hidden';
 
-    if (typeof window.IntersectionObserver === 'function') {
-      io = new window.IntersectionObserver(maybeLoad, { root: body, rootMargin: '400px 0px' });
-      io.observe(sentinelTop);
-      io.observe(sentinelBottom);
-    } else {
-      body.addEventListener('scroll', maybeLoad);
-    }
+    body.addEventListener('scroll', maybeLoadMore);
 
     loadPage(page).then(function (html) {
       if (closed) return;
@@ -526,11 +548,12 @@
         setStatus('Page indisponible.');
         return;
       }
-      insert(page, html, 'bottom');
+      insert(page, html);
       first = last = page;
       started = true;
       scrollToAnchor();
-      maybeLoad();
+      preloadAround(page);
+      maybeLoadMore();
     });
 
     // Google Fonts (display=swap) : si la substitution de la police a lieu apres

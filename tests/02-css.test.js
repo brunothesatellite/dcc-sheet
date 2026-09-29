@@ -40,6 +40,10 @@ module.exports = function suite() {
     '.spell-viewer .page h3.spell-title',
     '.spell-viewer table.stackable',
     '@media (max-width: 599px)',
+    '.patron-pick-overlay',
+    '.patron-pick',
+    '.patron-pick-item',
+    '.patron-pick-item.is-unresolved',
   ];
   critical.forEach(function (sel) {
     r.ok(css.indexOf(sel) !== -1, 'CSS selector present: ' + sel);
@@ -114,6 +118,21 @@ module.exports = function suite() {
   r.ok(!!thGroup, 'thead .stat-group block found');
   if (thGroup) {
     r.ok(thGroup[0].indexOf('var(--field-bg)') !== -1, 'thead group uses --field-bg');
+  }
+
+  // Popup de choix du patron : carte centrée, au-dessus de la popup pleine page
+  const pickOverlay = css.match(/\.patron-pick-overlay \{[^}]+\}/);
+  r.ok(!!pickOverlay, '.patron-pick-overlay block found');
+  if (pickOverlay) {
+    r.ok(pickOverlay[0].indexOf('position: fixed') !== -1, '.patron-pick-overlay is fixed');
+    r.ok(pickOverlay[0].indexOf('z-index: 3100') !== -1,
+      '.patron-pick-overlay above the spell viewer (3100 > 3000)');
+  }
+  const pickItem = css.match(/\.patron-pick-item \{[^}]+\}/);
+  r.ok(!!pickItem, '.patron-pick-item block found');
+  if (pickItem) {
+    r.ok(pickItem[0].indexOf('cursor: pointer') !== -1, '.patron-pick-item is clickable');
+    r.ok(pickItem[0].indexOf('background: transparent') !== -1, '.patron-pick-item starts transparent');
   }
 
   return r;

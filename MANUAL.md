@@ -369,6 +369,10 @@ Les listes de sorts du Mage (2 lignes par sort), de l'Elfe (2 lignes par sort + 
 - **Côté Elfe, ligne « Invoquer un Patron »** : deux icônes
   - la **loupe** → le sort générique *Invoquer un Patron* ;
   - la **loupe rouge** → les sorts du **patron** saisi dans « Patron(s) » (champ vide : message invitant à le renseigner).
+- **Si « Patron(s) » contient plusieurs patrons** (séparés par `;`, `/`, `+` ou ` et ` — **la virgule ne sépare jamais** : certains noms de patrons en contiennent, par exemple « Ithha, prince élémentaire du vent »), la loupe rouge ouvre d'abord une **petite fenêtre de sélection** listant les patrons saisis. Cliquez celui dont vous voulez la description : la popup plein écran s'ouvre alors sur son entrée.
+  - une saisie **inconnue** du livre reste **affichée en gris** dans la liste ; cliquée, elle déclenche la modale **« Patron introuvable »** ;
+  - fermeture sans choix : bouton **✕** ou touche **Échap** (rien ne s'ouvre) ;
+  - **un seul patron** dans le champ : comportement inchangé, l'ouverture est directe.
 - Si le nom n'est pas reconnu, une modale **« Sort introuvable »** demande de **vérifier le nom du sort** (« français ou anglais » si le fichier de traductions est présent). Accents, majuscules et espaces sont sans importance et les petites fautes de frappe sont tolérées.
 - Fermeture : bouton **✕** ou touche **Échap**.
 
@@ -376,6 +380,10 @@ Les listes de sorts du Mage (2 lignes par sort), de l'Elfe (2 lignes par sort + 
 <img src="captures/sort2.png" alt="Popup de consultation d'un sort : table de résultats de l'essai de lancement (2 colonnes : jet de d20 et effet)" width="380">
 
 *La popup s'ouvre pile sur le sort : stats en haut, texte du sort, puis la table de résultats ; le défilement continue sur les pages voisines.*
+
+<img src="captures/popup-selection-patron.png" alt="Popup « Choisir un patron » au-dessus de la fiche Elfe : le champ Patron(s) contient « Ithha, prince du Vent élémentaire; Bobugbubilz » et la liste propose les deux patrons séparément" width="380">
+
+*Champ « Patron(s) » rempli avec `Ithha, prince du Vent élémentaire; Bobugbubilz` : la virgule fait partie du premier patron (aucune coupure), le point-virgule sépare — la liste « Choisir un patron » propose donc bien les deux entrées.*
 
 > En cas d'échec, comparez le nom tapé avec celui du livre, **sans son numéro de page**.
 

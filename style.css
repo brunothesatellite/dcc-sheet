@@ -3276,6 +3276,108 @@ html:not(.has-spell-reader) .spell-lookup,
   margin-bottom: 0;
 }
 
+/* --- Choix d'un patron : "Patron(s)" en contient plusieurs --- */
+.patron-pick-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.patron-pick {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 360px;
+  max-height: calc(100vh - 32px);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px var(--shadow);
+  overflow: hidden;
+  animation: modal-scale-in 0.2s ease;
+}
+
+.patron-pick-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--header-bg);
+  color: var(--header-text);
+}
+
+.patron-pick-title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.patron-pick-close {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.patron-pick-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.patron-pick-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+}
+
+.patron-pick-list li + li {
+  margin-top: 2px;
+}
+
+.patron-pick-item {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.patron-pick-item:hover,
+.patron-pick-item:focus-visible {
+  background: var(--field-bg);
+  border-color: var(--input-border);
+  outline: none;
+}
+
+/* Patron saisi qui ne correspond a aucune page : visible mais grise */
+.patron-pick-item.is-unresolved {
+  color: var(--muted);
+  font-weight: 600;
+  font-style: italic;
+}
+
 /* --- Tableaux a colonnes empilées sous 600 px --- */
 @media (max-width: 599px) {
   .spell-viewer .page {

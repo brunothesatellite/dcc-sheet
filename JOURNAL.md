@@ -1270,3 +1270,44 @@ L'ouverture d'un sort (ex. Clerc / Benediction) se centrait correctement sur le 
 |---------|--------|
 | spell-reader.js | pagePromises, insert ordonne, maybeLoadMore (seuil 800px), preloadAround, scroll listener |
 | JOURNAL.md | Cette entree |
+
+## Date : 29 septembre 2026 12:45 - Elfe : plusieurs patrons dans "Patron(s)" (popup de selection)
+
+### Besoin
+
+Le champ "Patron(s)" de la fiche Elfe peut contenir plusieurs patrons. L'etoile rouge de la ligne fixe "Invoquer un Patron" (`.spell-lookup-patron`) ouvrait directement le premier patron resolu : impossible de consulter le second. Attendu : si le champ contient plusieurs patrons et que le dossier frere `dcc-spells-reader` est present (etoile visible), un clic ouvre d'abord une **petite popup de selection** listant les patrons saisis, puis la description du patron choisi.
+
+### Decisions
+
+1. Mini-overlay dediee dans `spell-reader.js` + CSS (bloc lecteur) : aucun changement de `script.js` / `showModal`.
+2. Separateurs de decoupage : `;` `/` `+` et le mot "et". **La virgule n'est jamais un separateur** : elle fait partie de certains noms de patrons ("YDDGRRL, LA RACINE DU MONDE", "ITHHA, PRINCE ELEMENTAIRE DU VENT").
+3. Une entree inconnue du livre est affichee mais grisee (`.is-unresolved`) ; le clic dessus ouvre la modale "Patron introuvable".
+4. Une seule entree apres decoupage : ouverture directe, comportement avant le changement strictement conserve.
+
+### Correctif
+
+- `spell-reader.js` :
+  - `parsePatrons(raw)` (exporte dans `window.DCCSpellReader`) : normalise les espaces, decoupe sur `; / + et`, trim, ignore les vides, dedoublonne par `slugify(cleanName(...))` ;
+  - `openPatron(btn)` : champ vide -> modale "Patron manquant" (inchange) ; `entries.length > 1` -> `ensureReady()` puis `openPatronPicker(entries)` ; sinon chemin d'avant (variante sans parenthese en secours, `lookup`, `openViewer`, modale "Patron introuvable") ;
+  - `openPatronPicker(entries)` : overlay `.patron-pick-overlay` > `.patron-pick` (role dialog, aria-modal), entete avec titre + croix, liste `<ul>` d'un `<button>` par patron (libelle = texte saisi), `lookup()` a l'ouverture pour griser les introuvables ; clic resolu -> fermeture puis `viewerLabels()` + `openViewer()` ; clic non resolu -> fermeture puis modale "Patron introuvable" ; fermeture par croix, clic hors carte, touche Echap (listener retire a la fermeture) ; focus sur le premier item.
+- `style.css` (bloc lecteur) : `.patron-pick-overlay` (fixe, z-index 3100 > 3000 du viewer), `.patron-pick` (carte `var(--paper)`, animation `modal-scale-in`), `.patron-pick-head/-title/-close`, `.patron-pick-list`, `.patron-pick-item` (bouton pleine largeur, hover/focus), `.patron-pick-item.is-unresolved` (gris, italique).
+- Docs : `README.md` (bullets "Definition des sorts"), `MANUAL.md` § 6.3b, cette entree.
+
+### Validation
+
+- `node tests\run.js` : **679/679 OK, 7 skip** (base 629 + 40 assertions `testPatronPicker` + 10 `02-css`).
+- `09-spell-reader` : decoupage unitaire (separateurs, virgule jamais separatrice, doublons, vides), 2 patrons -> selection -> page 330, entree inconnue grisee -> modale, Echap/croix sans choix, un seul patron -> ouverture directe sans selection ; les 3 scenarios du patron (vide / inconnu / resolu) restent verts.
+- `02-css` : presence des selecteurs `.patron-pick*`, overlay fixe, z-index 3100, item cliquable et transparent ; equilibre des accolades conserve.
+- `node --check spell-reader.js` OK ; commentaires ASCII preserves.
+
+### Fichiers modifies (29 septembre - plusieurs patrons elfe)
+
+| Fichier | Action |
+|---------|--------|
+| spell-reader.js | `parsePatrons()`, `openPatronPicker()`, routage de `openPatron()`, export |
+| style.css | Styles `.patron-pick*` (bloc lecteur) |
+| tests/09-spell-reader.test.js | `testPatronPicker()` (40 assertions) |
+| tests/02-css.test.js | Selecteurs + blocs CSS du picker (10 assertions) |
+| README.md, MANUAL.md | Documentation du cas multi-patrons (+ capture dans § 6.3b) |
+| captures/popup-selection-patron.png | Capture de la popup de selection (ajoutee au MANUEL) |
+| JOURNAL.md | Cette entree |

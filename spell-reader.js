@@ -316,6 +316,29 @@
     return { title: title, sub: slugify(l.typed) === slugify(title) ? '' : l.typed };
   }
 
+  /* Decoupage du champ "Patron(s)" : plusieurs patrons separes par
+     ; / + ou le mot "et". La virgule n'est JAMAIS un separateur : elle fait
+     partie de certains noms de patrons ("YDDGRRL, LA RACINE DU MONDE",
+     "ITHHA, PRINCE ELEMENTAIRE DU VENT").
+     Renvoie la liste des patrons saisis (doublons retires) : 1 = ouverture
+     directe, 2 et + = popup de selection. */
+  function parsePatrons(raw) {
+    var base = String(raw == null ? '' : raw).replace(/\s+/g, ' ').trim();
+    if (!base) return [];
+    var parts = base.split(/\s*(?:;|\/|\+|\bet\b)\s*/i);
+    var out = [];
+    var seen = Object.create(null);
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i].trim();
+      if (!p) continue;
+      var key = slugify(cleanName(p));
+      if (!key || seen[key]) continue;
+      seen[key] = true;
+      out.push(p);
+    }
+    return out;
+  }
+
   /* ---------------------------------------------------------
      Messages
      --------------------------------------------------------- */
@@ -583,22 +606,103 @@
     });
   }
 
+  /* Petite popup de choix : le champ "Patron(s)" contient plusieurs patrons,
+     on demande lequel decrire avant d'ouvrir la popup plein ecran.
+     Une entree qui ne correspond a aucune page reste affichee (grisee) :
+     dessus, la modale "Patron introuvable" previent de la faute de saisie. */
+  function openPatronPicker(entries) {
+    if (!entries || entries.length < 2) return;
+    if (document.querySelector('.patron-pick-overlay')) return;
+
+    var overlay = document.createElement('div');
+    overlay.className = 'patron-pick-overlay';
+    overlay.innerHTML =
+      '<div class="patron-pick" role="dialog" aria-modal="true" aria-label="Choisir un patron">' +
+        '<div class="patron-pick-head">' +
+          '<span class="patron-pick-title">Choisir un patron</span>' +
+          '<button type="button" class="patron-pick-close" aria-label="Fermer">&times;</button>' +
+        '</div>' +
+        '<ul class="patron-pick-list"></ul>' +
+      '</div>';
+
+    var list = overlay.querySelector('.patron-pick-list');
+    var closed = false;
+
+    function close() {
+      if (closed) return;
+      closed = true;
+      document.removeEventListener('keydown', onKey);
+      overlay.remove();
+    }
+
+    function onKey(e) {
+      if (e.key === 'Escape') close();
+    }
+
+    function pick(entry, l) {
+      if (closed) return;
+      close();
+      if (!l) {
+        notify('Patron introuvable',
+          'Patron introuvable : \u00ab ' + entry + ' \u00bb. V\u00e9rifiez le champ \u00ab Patron(s) \u00bb.');
+        return;
+      }
+      var lab = viewerLabels(l);
+      openViewer(lab.title, l.hit.page, l.hit.id, lab.sub);
+    }
+
+    for (var i = 0; i < entries.length; i++) {
+      var entry = entries[i];
+      var l = lookup(entry);
+      var li = document.createElement('li');
+      var item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'patron-pick-item' + (l ? '' : ' is-unresolved');
+      item.textContent = entry;
+      (function (name, hit) {
+        item.addEventListener('click', function () { pick(name, hit); });
+      })(entry, l);
+      li.appendChild(item);
+      list.appendChild(li);
+    }
+
+    overlay.querySelector('.patron-pick-close').addEventListener('click', close);
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) close();
+    });
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(overlay);
+
+    var first = list.querySelector('.patron-pick-item');
+    if (first && typeof first.focus === 'function') first.focus();
+  }
+
   function openPatron(btn) {
     var scope = (btn.closest && btn.closest('.sheet-page')) || document;
     var input = scope.querySelector('input[data-key$="-patron"]');
     var base = String((input && input.value) || '').replace(/\s+/g, ' ').trim();
 
-    var variants = [];
-    if (base) {
-      variants.push(base);
-      var cut = base.split(/[(\n]/)[0].trim();
-      if (cut && cut !== base) variants.push(cut);
-    }
-    if (!variants.length) {
+    if (!base) {
       notify('Patron manquant',
         'Renseignez le champ \u00ab Patron(s) \u00bb pour afficher les sorts de votre patron.');
       return;
     }
+
+    var entries = parsePatrons(base);
+    if (!entries.length) entries = [base];
+
+    // Plusieurs patrons saisis : on laisse l'utilisateur choisir lequel.
+    if (entries.length > 1) {
+      ensureReady().then(function (ok) {
+        if (ok) openPatronPicker(entries);
+      });
+      return;
+    }
+
+    // Un seul patron : ouverture directe (variante sans parenthese en secours).
+    var variants = [entries[0]];
+    var cut = entries[0].split(/[(\n]/)[0].trim();
+    if (cut && cut !== entries[0]) variants.push(cut);
 
     ensureReady().then(function (ok) {
       if (!ok) return;
@@ -676,6 +780,7 @@
     isAvailable: isAvailable,
     openSpell: openSpell,
     openPatron: openPatron,
+    parsePatrons: parsePatrons,
     setAnchors: function (anchors) {
       window.DCC_ANCHORS = anchors;
       index = null;

@@ -9,7 +9,7 @@
 * N/A
 
 *Mineur*
-* Gérer les patrons multiples pour l'Elfe (séparés par des virgules, faire plusieurs étoiles pour invoquer chaque patron)
+* N/A
 
 
 **EVOLUTIONS**

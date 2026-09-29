@@ -8,6 +8,8 @@
    - calage de l'ancre : compensation exacte d'une insertion au-dessus,
      recalage apres swap de polices, aucun recalage force apres scroll ;
    - popup plein écran avec chargement de la page du sort + ancre ;
+   - plusieurs patrons dans « Patron(s) » : popup de sélection du patron,
+     entrée inconnue affichée grise, virgule jamais séparatrice ;
    - messages d'erreur si sort ou patron introuvable ;
    - sans dossier frère : aucune détection, aucune popup. */
 
@@ -383,6 +385,166 @@ async function testPatron(r) {
   }
 }
 
+/* ---------------------------------------------------------
+   Plusieurs patrons dans « Patron(s) » : popup de sélection
+   --------------------------------------------------------- */
+async function testPatronPicker(r) {
+  // --- découpage unitaire du champ
+  const h0 = createHarness();
+  h0.env.load('spell-reader.js');
+  await h0.env.window.DCCSpellReader.ensureReady();
+  const R = h0.env.window.DCCSpellReader;
+
+  if (r.ok(typeof R.parsePatrons === 'function', 'DCCSpellReader.parsePatrons exposé')) {
+    r.eq(R.parsePatrons('Bobugbubilz ; Azi Dahaka').length, 2, 'séparateur point-virgule');
+    r.eq(R.parsePatrons('Bobugbubilz / Azi Dahaka').length, 2, 'séparateur slash');
+    r.eq(R.parsePatrons('Bobugbubilz + Azi Dahaka').length, 2, 'séparateur +');
+    r.eq(R.parsePatrons('Bobugbubilz et Azi Dahaka').length, 2, 'séparateur « et »');
+    r.eq(R.parsePatrons('Bobugbubilz et Azi Dahaka et Sezrekan').length, 3, 'plusieurs « et »');
+    r.eq(R.parsePatrons('Bobugbubilz, Azi Dahaka').length, 1,
+      'la virgule ne sépare jamais (décision)');
+    r.eq(R.parsePatrons('Ithha, prince élémentaire du vent').length, 1,
+      'nom de patron contenant une virgule intact');
+    r.eq(R.parsePatrons('Bobugbubilz ; bobugbubilz').length, 1, 'doublons retirés');
+    r.eq(R.parsePatrons('  Bobugbubilz ;; Azi Dahaka ; ').length, 2, 'espaces et vides ignorés');
+    r.eq(R.parsePatrons('').length, 0, 'champ vide → aucune entrée');
+  }
+
+  // --- deux patrons : étoile → popup de choix, puis description du choisi
+  const h = createHarness();
+  h.env.load('spell-reader.js');
+  await h.env.window.DCCSpellReader.ensureReady();
+  h.env.loadClass('elfe');
+  const container = h.env.document.getElementById('root');
+  h.env.window.DCCModules.elfe.render(container, '9', { patron: 'Bobugbubilz ; Azi Dahaka' });
+
+  const btn = container.querySelector('.spell-lookup-patron');
+  if (r.ok(!!btn, 'icône patron présente')) {
+    click(btn);
+    const pickShown = await waitFor(function () {
+      return !!h.env.document.querySelector('.patron-pick-overlay');
+    });
+    r.ok(pickShown, 'popup de sélection ouverte (2 patrons)');
+    if (pickShown) {
+      r.ok(!h.env.document.querySelector('.spell-viewer-overlay'),
+        'description pas encore ouverte avant le choix');
+      const items = h.env.document.querySelectorAll('.patron-pick-item');
+      r.eq(items.length, 2, 'deux patrons proposés (got ' + items.length + ')');
+      r.eq(items[0].textContent, 'Bobugbubilz', 'libellé 1 = texte saisi');
+      r.eq(items[1].textContent, 'Azi Dahaka', 'libellé 2 = texte saisi');
+      r.ok(!items[1].classList.contains('is-unresolved'), 'patron connu non grisé');
+
+      click(items[1]);
+      const opened = await waitFor(function () {
+        return !!h.env.document.querySelector('.spell-viewer-overlay .sv-pages [data-loaded-page="330"]');
+      });
+      r.ok(opened, 'description du patron choisi ouverte (page 330)');
+      r.ok(!h.env.document.querySelector('.patron-pick-overlay'),
+        'popup de sélection refermée après le choix');
+      const overlay = h.env.document.querySelector('.spell-viewer-overlay');
+      if (overlay) {
+        r.eq(overlay.querySelector('.spell-viewer-title').textContent, 'Azi Dahaka',
+          'titre = patron choisi');
+        r.ok(!!overlay.querySelector('#s330-azidahaka'), 'ancre du patron présente');
+        click(overlay.querySelector('.spell-viewer-close'));
+        await delay(20);
+      }
+    }
+  }
+
+  // --- patron inconnu : proposé, grisé, modale au clic
+  const h2 = createHarness();
+  h2.env.load('spell-reader.js');
+  await h2.env.window.DCCSpellReader.ensureReady();
+  h2.env.loadClass('elfe');
+  const c2 = h2.env.document.getElementById('root');
+  h2.env.window.DCCModules.elfe.render(c2, '11', { patron: 'Bobugbubilz ; Krâsh-Typoxx' });
+  const btn2 = c2.querySelector('.spell-lookup-patron');
+  if (r.ok(!!btn2, 'icône patron présente (patron inconnu)')) {
+    click(btn2);
+    const pickShown = await waitFor(function () {
+      return !!h2.env.document.querySelector('.patron-pick-overlay');
+    });
+    r.ok(pickShown, 'popup de sélection ouverte (mélange valable/invalide)');
+    if (pickShown) {
+      const items = h2.env.document.querySelectorAll('.patron-pick-item');
+      r.eq(items.length, 2, 'les deux entrées sont proposées (got ' + items.length + ')');
+      r.ok(!items[0].classList.contains('is-unresolved'), 'patron résolu non grisé');
+      r.ok(items[1].classList.contains('is-unresolved'), 'patron inconnu grisé');
+
+      click(items[1]);
+      const modalShown = await waitFor(function () { return h2.state.modals.length > 0; });
+      r.ok(modalShown, 'modale après clic sur l\'entrée grise');
+      if (modalShown) {
+        r.ok(h2.state.modals[0].title === 'Patron introuvable',
+          'titre "Patron introuvable" (got ' + JSON.stringify(h2.state.modals[0].title) + ')');
+        r.ok(h2.state.modals[0].message.indexOf('Krâsh-Typoxx') !== -1,
+          'le nom saisi figure dans le message');
+      }
+      r.ok(!h2.env.document.querySelector('.patron-pick-overlay'),
+        'popup de sélection refermée');
+      r.ok(!h2.env.document.querySelector('.spell-viewer-overlay'),
+        'aucune description ouverte pour une entrée inconnue');
+    }
+  }
+
+  // --- fermeture sans choix : Echap puis croix
+  const h3 = createHarness();
+  h3.env.load('spell-reader.js');
+  await h3.env.window.DCCSpellReader.ensureReady();
+  h3.env.loadClass('elfe');
+  const c3 = h3.env.document.getElementById('root');
+  h3.env.window.DCCModules.elfe.render(c3, '12', { patron: 'Bobugbubilz ; Azi Dahaka' });
+  const btn3 = c3.querySelector('.spell-lookup-patron');
+  if (r.ok(!!btn3, 'icône patron présente (fermeture)')) {
+    click(btn3);
+    const opened1 = await waitFor(function () {
+      return !!h3.env.document.querySelector('.patron-pick-overlay');
+    });
+    if (opened1) {
+      h3.env.document.dispatchEvent(
+        new h3.env.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      r.ok(!h3.env.document.querySelector('.patron-pick-overlay'), 'Echap ferme la sélection');
+
+      click(btn3);
+      const opened2 = await waitFor(function () {
+        return !!h3.env.document.querySelector('.patron-pick-overlay');
+      });
+      if (opened2) {
+        click(h3.env.document.querySelector('.patron-pick-close'));
+        r.ok(!h3.env.document.querySelector('.patron-pick-overlay'), 'croix ferme la sélection');
+      }
+    }
+    r.ok(!h3.env.document.querySelector('.spell-viewer-overlay'),
+      'aucune description ouverte si on ferme sans choisir');
+    r.eq(h3.state.modals.length, 0, 'aucune modale si on ferme sans choisir (got '
+      + h3.state.modals.length + ')');
+  }
+
+  // --- une seule entrée après nettoyage : ouverture directe, sans sélection
+  const h4 = createHarness();
+  h4.env.load('spell-reader.js');
+  await h4.env.window.DCCSpellReader.ensureReady();
+  h4.env.loadClass('elfe');
+  const c4 = h4.env.document.getElementById('root');
+  h4.env.window.DCCModules.elfe.render(c4, '13', { patron: 'Bobugbubilz ;' });
+  const btn4 = c4.querySelector('.spell-lookup-patron');
+  if (r.ok(!!btn4, 'icône patron présente (un seul patron)')) {
+    click(btn4);
+    const opened = await waitFor(function () {
+      return !!h4.env.document.querySelector('.spell-viewer-overlay .sv-pages [data-loaded-page="322"]');
+    });
+    r.ok(opened, 'un seul patron : ouverture directe (page 322)');
+    r.ok(!h4.env.document.querySelector('.patron-pick-overlay'),
+      'aucune popup de sélection pour un seul patron');
+    const overlay = h4.env.document.querySelector('.spell-viewer-overlay');
+    if (overlay) {
+      click(overlay.querySelector('.spell-viewer-close'));
+      await delay(20);
+    }
+  }
+}
+
 async function testWithoutReader(r) {
   const h = createHarness({ reader: false });
   h.env.load('spell-reader.js');
@@ -722,6 +884,7 @@ async function run() {
   await testPopup(r);
   await testUnknownSpell(r);
   await testPatron(r);
+  await testPatronPicker(r);
   await testWithoutReader(r);
   await testTranslations(r);
   await testPopupWithEnglishName(r);

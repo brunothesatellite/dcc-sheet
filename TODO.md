@@ -3,7 +3,7 @@
 
 **BUGS**
 *Critique*
-* N/A
+* Dans l'onglet Equipe : sauver dans le localstorage l'inti et rounds de l'équipe, ainsi que la configuration des ennemis (noms, valeurs, etc. et round)
 
 *Majeur*
 * N/A

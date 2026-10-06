@@ -106,6 +106,43 @@ window.DCCModules.equipe = {
       return d;
     }
 
+    /* ------------------------------------------------------------------
+       Overlay "tete de mort" (PV courants <= 0) sur les portraits.
+       Les helpers de dead-overlay.js sont optionnels : sans ce fichier,
+       aucun wrap ni overlay (chargeurs partiels, tests isoles).
+    ------------------------------------------------------------------ */
+    function deadOverlay() {
+      return window.DCCDeadOverlay || null;
+    }
+
+    function applyDead(portrait, pv) {
+      const D = deadOverlay();
+      if (D && portrait) D.apply(portrait, D.isDead(pv));
+    }
+
+    /* Pose/retire l'overlay sur les deux portraits d'un perso :
+       case d'ordre de marche + colonne Classe (expedition). */
+    function refreshDeadOverlay(id, pv) {
+      const D = deadOverlay();
+      if (!D) return;
+      const dead = D.isDead(pv);
+      const tr = container.querySelector('tr[data-char-id="' + id + '"]');
+      if (tr) D.apply(tr.querySelector('img.team-portrait'), dead);
+      const slot = marchGrid ? marchGrid.querySelector('.marching-slot[data-id="' + id + '"]') : null;
+      if (slot) D.apply(slot.querySelector('.marching-portrait'), dead);
+    }
+
+    /* Le modele suit la saisie : un re-render ulterieur (drag, resync) ne
+       doit pas repartir d'une ancienne valeur de PV. */
+    function setModelPV(id, value) {
+      characters.forEach(function (c) {
+        if (String(c.id) !== String(id)) return;
+        const d = parsedDataOf(c);
+        d.points_de_vie = value;
+        c.data = JSON.stringify(d);
+      });
+    }
+
     function buildDetailRow(charData, data) {
       const trD = document.createElement('tr');
       trD.className = 'team-detail';
@@ -487,6 +524,7 @@ window.DCCModules.equipe = {
           nameEl.title = ch.name || '';
           slot.appendChild(portrait);
           slot.appendChild(nameEl);
+          applyDead(portrait, data.points_de_vie);
         }
         marchGrid.appendChild(slot);
       }
@@ -645,7 +683,8 @@ window.DCCModules.equipe = {
       ghost.className = 'marching-ghost';
       ghost.style.width = slot.offsetWidth + 'px';
       ghost.style.height = slot.offsetHeight + 'px';
-      const portraitClone = slot.querySelector('.marching-portrait');
+      const portraitClone = slot.querySelector('.portrait-holder') ||
+        slot.querySelector('.marching-portrait');
       if (portraitClone) ghost.appendChild(portraitClone.cloneNode(true));
       const overlay = document.createElement('div');
       overlay.className = 'marching-name-overlay';
@@ -829,7 +868,10 @@ window.DCCModules.equipe = {
             var portraitResult = window.getPortraitSrc(data.portrait_source || 'dcc', charData.class, data.portrait_index);
             img.src = portraitResult.src;
           }
-          if (img.src) classContent.appendChild(img);
+          if (img.src) {
+            classContent.appendChild(img);
+            applyDead(img, data.points_de_vie);
+          }
           const classLabels = document.createElement('span');
           classLabels.className = 'char-class-labels';
           const classLabel = document.createElement('span');
@@ -870,7 +912,14 @@ window.DCCModules.equipe = {
           const inputPV = document.createElement('input');
           inputPV.type = 'number';
           inputPV.value = data.points_de_vie || '';
+          inputPV.setAttribute('aria-label', 'PV de ' + (charData.name || 'Sans nom'));
+          const syncDeadFromInput = function () {
+            setModelPV(charData.id, inputPV.value);
+            refreshDeadOverlay(charData.id, inputPV.value);
+          };
+          inputPV.addEventListener('input', syncDeadFromInput);
           inputPV.addEventListener('change', function () {
+            syncDeadFromInput();
             if (onSavePV) {
               onSavePV(charData.id, inputPV.value);
             }
@@ -1127,6 +1176,7 @@ window.DCCModules.equipe = {
         const tdPV = tr.children[4];
         const inputPV = tdPV ? tdPV.querySelector('input') : null;
         if (inputPV) inputPV.value = data.points_de_vie || '';
+        refreshDeadOverlay(fresh.id, data.points_de_vie);
 
         if (expandedCharacterId === fresh.id) {
           const oldDetail = document.getElementById('team-detail-' + fresh.id);

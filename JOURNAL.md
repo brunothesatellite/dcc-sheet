@@ -1311,3 +1311,47 @@ Le champ "Patron(s)" de la fiche Elfe peut contenir plusieurs patrons. L'etoile 
 | README.md, MANUAL.md | Documentation du cas multi-patrons (+ capture dans § 6.3b) |
 | captures/popup-selection-patron.png | Capture de la popup de selection (ajoutee au MANUEL) |
 | JOURNAL.md | Cette entree |
+
+## Date : 6 octobre 2026 - Overlay "tete de mort" sur les portraits (PV <= 0)
+
+### Besoin
+
+Quand un personnage a <= 0 PV courants, un overlay "tete de mort rouge" doit s'afficher au dessus de son portrait : dans sa fiche de personnage et dans l'onglet Equipe (ordre de marche + personnages en expedition). Il disparait des que les PV redeviennent > 0. Extension demandee en cours de route : la meme pastille dans la liste des cartes de la classe, qu'il soit en expedition ou a l'auberge.
+
+### Decisions
+
+1. Helper autonome `dead-overlay.js`, charge par `index.html` avant `script.js` : `window.DCCDeadOverlay = { isDead(pv), apply(portrait, dead), applyIn(root, selector, dead) }`. Les deux consommateurs verifient la presence du helper -> aucun plantage sans lui (tests isoles, chargements partiels) : ni wrap, ni overlay.
+2. Une seule technique pour les 4 contextes : `apply()` enveloppe le portrait dans un `.portrait-holder` (`position: relative`) puis pose/retire le `.dead-overlay` (idempotent). Fiche 280 px, carte 50 px, colonne Classe 50 px et case d'ordre de marche en % beneficient du meme calage.
+3. `isDead(pv)` : numerique <= 0 -> mort ; `''` / null / non numerique -> vivant (aucun faux positif sur champ PV vide).
+4. Overlay en `pointer-events: none` : le clic sur le portrait (popup de choix) et le drag & drop de l'ordre de marche restent intacts ; le fantome de drag clone le holder -> le crane reste visible pendant le deplacement.
+5. Cote Equipe, le modele suit la saisie (`setModelPV`) : un re-render (drag, resynchronisation) ne repart jamais d'une ancienne valeur de PV.
+
+### Correctif
+
+- `dead-overlay.js` (nouveau) : `toPV/isDead` (trim + `Number`, `isFinite`), `holderOf` (enveloppe `span.portrait-holder` si le portrait n'est pas deja dedans), `apply` (pose/retrait du SVG cr crane, `aria-hidden="true"`), `applyIn`.
+- `index.html` : `<script src="dead-overlay.js">` apres `marching-order.js`, avant `script.js`.
+- `style.css` : `.portrait-holder` (ancre, `flex: none`), `.dead-overlay` (absolu, voile sombre 72 % + crane `var(--red)` avec `drop-shadow`, animation `dead-pop`), `.marching-slot/.marching-ghost .portrait-holder` (58 % + `aspect-ratio: 1`, portrait interne `100 %` pour conserver les anciennes dimensions).
+- `classes/equipe.js` : helpers internes `deadOverlay()`, `applyDead()`, `refreshDeadOverlay(id, pv)` (grille + tableau en une passe), `setModelPV(id, pv)` ; pose au rendu de la grille d'ordre de marche et de la colonne Classe ; champ PV sur `input` **et** `change` (2 portraits synchronises + sauvegarde inchangee) ; `resync()` met a jour l'overlay ; le clone de drag part du `.portrait-holder`.
+- `script.js` : `applySheetDeadOverlay(cls, pv)` appele (a) a l'ouverture de la fiche (`openSheet`), (b) a chaque saisie du champ `-points_de_vie` (`bindAutoSave`), (c) depuis `syncPVFromEquipe` (edition depuis l'onglet Equipe alors que la fiche est ouverte) ; `createCharCard()` pose l'overlay sur le portrait de la carte (expedition **et** auberge) -- la liste est re-fetchee a chaque affichage, donc toujours juste.
+- Docs : `README.md` (arborescence), `MANUAL.md` (7.2, 8.1, 10), `TODO.md` (bug remis en N/A), cette entree.
+
+### Validation
+
+- `node tests\run.js` : **757/757 OK, 7 skip** (base 679 + 68 assertions `10-dead-overlay` + 10 `02-css`).
+- `10-dead-overlay` : helper (regles de mort, pose/retrait idempotent, holder conserve) ; Equipe (grille + colonne Classe aux 4 cas, synchro `input`/`change`, re-render, resync, rendu **sans** le helper) ; fiche (overlay pose a l'ouverture, bascules 8 -> retire / -1 -> pose / 0 -> maintenu, holder unique) ; liste des cartes (expedition a 0 PV overlayee, auberge a 7 PV non, bascule 5 -> retire / 0 -> pose a l'auberge).
+- `02-css` : selecteurs `.portrait-holder` / `.dead-overlay` / `.marching-slot .portrait-holder`, `position: relative` + `position: absolute`, `pointer-events: none` ; equilibre des accolades conserve.
+- `01-syntax` : `node --check dead-overlay.js` OK ; `index.html` reference un script existant.
+
+### Fichiers modifies (6 octobre - overlay tete de mort)
+
+| Fichier | Action |
+|---------|--------|
+| dead-overlay.js | Nouveau - helper `isDead`/`apply` + crane SVG |
+| index.html | Chargement de `dead-overlay.js` |
+| style.css | `.portrait-holder`, `.dead-overlay`, holder de l'ordre de marche |
+| classes/equipe.js | Overlay grille + colonne Classe, synchro PV, resync, fantome |
+| script.js | Fiche (ouverture / saisie / sync PV) + cartes de la liste |
+| tests/10-dead-overlay.test.js | Nouvelle suite (68 assertions) |
+| tests/run.js, tests/02-css.test.js | Enregistrement de la suite + selecteurs CSS |
+| README.md, MANUAL.md, TODO.md | Documentation |
+| JOURNAL.md | Cette entree |

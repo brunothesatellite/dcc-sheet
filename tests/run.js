@@ -13,6 +13,7 @@ const suites = [
   require('./07-restore.test'),
   require('./08-portrait-picker.test'),
   require('./09-spell-reader.test'),
+  require('./10-dead-overlay.test'),
 ];
 
 function pad(s, n) {

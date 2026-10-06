@@ -44,6 +44,9 @@ module.exports = function suite() {
     '.patron-pick',
     '.patron-pick-item',
     '.patron-pick-item.is-unresolved',
+    '.portrait-holder',
+    '.dead-overlay',
+    '.marching-slot .portrait-holder',
   ];
   critical.forEach(function (sel) {
     r.ok(css.indexOf(sel) !== -1, 'CSS selector present: ' + sel);
@@ -133,6 +136,20 @@ module.exports = function suite() {
   if (pickItem) {
     r.ok(pickItem[0].indexOf('cursor: pointer') !== -1, '.patron-pick-item is clickable');
     r.ok(pickItem[0].indexOf('background: transparent') !== -1, '.patron-pick-item starts transparent');
+  }
+
+  // Overlay "tete de mort" : ancre positionnee + aucun interception de clic
+  // (portrait cliquable, drag & drop de l'ordre de marche preserves)
+  const holderBlock = css.match(/\.portrait-holder \{[^}]+\}/);
+  r.ok(!!holderBlock, '.portrait-holder block found');
+  if (holderBlock) {
+    r.ok(holderBlock[0].indexOf('position: relative') !== -1, '.portrait-holder is the positioning context');
+  }
+  const deadBlock = css.match(/\.dead-overlay \{[^}]+\}/);
+  r.ok(!!deadBlock, '.dead-overlay block found');
+  if (deadBlock) {
+    r.ok(deadBlock[0].indexOf('position: absolute') !== -1, '.dead-overlay is absolute');
+    r.ok(deadBlock[0].indexOf('pointer-events: none') !== -1, '.dead-overlay never blocks clicks');
   }
 
   return r;

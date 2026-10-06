@@ -425,6 +425,8 @@ Sept sources sont disponibles :
 - Dans l'onglet **Équipe** : colonne **Classe**.
 - La source et l'index choisis sont enregistrés **dans la fiche** : ils survivent à la déconnexion et suivent l'export/import JSON (§ 4.4, [annexe A](#annexe-a--format-json-dexportimport)).
 
+**Overlay « tête de mort »** : dès que les **PV courants** du personnage tombent à **0 ou moins**, un **crâne rouge** s'affiche **par-dessus son portrait** — dans la **liste des cartes** de sa classe (en expédition **ou** à l'auberge), dans sa fiche, dans la colonne **Classe** de l'onglet Équipe et dans la grille d'**ordre de marche**. Il disparaît **automatiquement** dès que ses PV repassent au-dessus de 0 (saisie dans la fiche ou dans le tableau de l'Équipe, § 8.1).
+
 ---
 
 ## 8. Onglet Équipe (suivi de partie)
@@ -451,6 +453,8 @@ Colonnes :
 | **PV** | Points de vie | **Oui** : sauvegarde immédiate en base + **synchronisation vers la fiche** du PJ, même déjà ouverte (toast disquette) |
 | **Init. combat** | Initiative d'ordre de combat | Oui, mais **non enregistrée** (remise à zéro à chaque rechargement complet de la page) : usage de combat ponctuel |
 | **Tour** | Compteur de tour visuel (§ 8.2) | Oui (§ 8.2) |
+
+> **PV à 0 ou moins** : un **crâne rouge** recouvre alors le portrait du personnage dans ce tableau **et** dans la grille d'ordre de marche (§ 8.1c), ainsi que dans sa propre fiche (§ 7.2). Dès que ses PV repassent au-dessus de 0, l'overlay disparaît partout.
 
 > Seuls les PJ **en expédition** apparaissent. Pour en retirer un, passez-le à l'auberge depuis sa classe (§ 5) : à votre retour sur l'onglet Équipe, la page est **rechargée automatiquement** (les champs non sauvegardés sont alors effacés, comme en F5).
 
@@ -580,6 +584,7 @@ Si le thème ne « tient » pas après un rechargement : videz le cache du navig
 | Toast **« Erreur sauvegarde »** | Envoi échoué (réseau/serveur) | Rechargez la page, vérifiez la connexion ; rechargez ensuite la fiche pour vérifier les dernières valeurs |
 | Toast **« Import reussi (N persos) »** | Import terminé | Vérifiez les onglets |
 | Spinner prolongé | Serveur lent | Patientez ; en cas de blocage, rechargez |
+| **Crâne rouge** par-dessus un portrait | PV du personnage à **0 ou moins** (liste des cartes, fiche, Équipe, ordre de marche) | Soignez le PJ : l'overlay disparaît dès que ses PV repassent au-dessus de 0 |
 | Message **« Erreur de chargement. »** dans un onglet | Session expirée ou serveur injoignable | Reconnectez-vous (§ 2.2) puis rechargez |
 
 ### Sessions et connexion

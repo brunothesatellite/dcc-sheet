@@ -113,6 +113,7 @@ dcc-sheet/
 ├── osr-icons.js                # Catalogue d'icones Old School (17 images, 7 classes)
 ├── portrait-icons.js           # Registre des sources de portraits (getPortraitSrc)
 ├── marching-order.js           # Logique pure ordre de marche (normalize, export, import)
+├── dead-overlay.js             # Overlay "tete de mort" sur les portraits (PV courants <= 0)
 ├── api/
 │   ├── db.php                  # SQLite3 + helpers (users, characters, session)
 │   ├── auth.php                # Authentification (login, register, logout, change_password, delete_account)

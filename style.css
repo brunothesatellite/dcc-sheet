@@ -1314,6 +1314,53 @@ button.section-bar.collapse-toggle[aria-expanded="true"] .chev {
   transform: scale(1.05);
 }
 
+/* --- Overlay "tete de mort" (PV courants <= 0) sur les portraits ---
+   Le portrait est enveloppe dans .portrait-holder (position:relative) : c'est
+   l'ancre de l'overlay, quelle que soit la contexte (fiche, tableau, grille). */
+.portrait-holder {
+  position: relative;
+  display: block;
+  line-height: 0;
+  flex: none;
+}
+
+.dead-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* clics et drag transmisses au portrait/slot */
+  z-index: 3;
+}
+
+/* Voile sombre : le crane reste lisible sur n'importe quel portrait */
+.dead-overlay::before {
+  content: "";
+  position: absolute;
+  width: 72%;
+  height: 72%;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, .5);
+}
+
+.dead-overlay svg {
+  position: relative;
+  width: 62%;
+  height: 62%;
+  color: var(--red);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .65));
+  animation: dead-pop .18s ease-out;
+}
+
+@keyframes dead-pop {
+  from { opacity: 0; transform: scale(.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 .dtable {
   width: 100%;
   border-collapse: collapse;
@@ -1985,6 +2032,18 @@ body.marching-active .marching-slot.occupied { cursor: grabbing; }
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: clamp(14px, 4.5vw, 20px);
+}
+/* Le holder reprend la taille du portrait (le portrait n'est plus un item flex
+   direct de la case) : l'overlay "tete de mort" s'y aligne donc exactement. */
+.marching-slot .portrait-holder,
+.marching-ghost .portrait-holder {
+  width: 58%;
+  aspect-ratio: 1;
+}
+.marching-slot .portrait-holder .marching-portrait,
+.marching-ghost .portrait-holder .marching-portrait {
+  width: 100%;
+  height: 100%;
 }
 .marching-name {
   max-width: 100%;

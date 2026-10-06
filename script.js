@@ -884,6 +884,7 @@
         var sView = sPanel ? $('.view-sheet', sPanel) : null;
         var pvInput = sView ? sView.querySelector('input[data-key$="-points_de_vie"]') : null;
         if (pvInput) pvInput.value = newPV;
+        applySheetDeadOverlay(sheetCls, newPV);
       }
 
       showToastSave();
@@ -993,7 +994,13 @@
     if (window.getPortraitSrc) {
       var portraitResult = window.getPortraitSrc(parsed.portrait_source || 'dcc', cls, parsed.portrait_index);
       if (portraitResult.src) {
-        nameRow.appendChild(el('img', { className: 'char-card-portrait', src: portraitResult.src, alt: '' }));
+        var cardPortrait = el('img', { className: 'char-card-portrait', src: portraitResult.src, alt: '' });
+        nameRow.appendChild(cardPortrait);
+        /* PV courants <= 0 : meme "tete de mort" que sur la fiche et dans
+           l'onglet Equipe (expedition comme auberge, la carte est commune) */
+        if (window.DCCDeadOverlay) {
+          window.DCCDeadOverlay.apply(cardPortrait, window.DCCDeadOverlay.isDead(parsed.points_de_vie));
+        }
       }
     }
     nameRow.appendChild(name);
@@ -1195,6 +1202,19 @@
     });
   }
 
+  /* =========================================================================
+     10b. Overlay "tete de mort" sur le portrait de la fiche
+          (PV courants <= 0 ; retire des que les PV redeviennent > 0)
+     ======================================================================== */
+
+  function applySheetDeadOverlay(cls, pv) {
+    if (!window.DCCDeadOverlay) return;
+    var panel = $('[data-class="' + cls + '"].tab-panel');
+    var viewSheet = panel ? $('.view-sheet', panel) : null;
+    var img = viewSheet ? viewSheet.querySelector('.portrait-area img[data-portrait-img]') : null;
+    if (img) window.DCCDeadOverlay.apply(img, window.DCCDeadOverlay.isDead(pv));
+  }
+
   function showPortraitPicker(cls, currentSource, currentIndex) {
     return getAvailableIconDirs().then(function (dirs) {
       return new Promise(function (resolve) {
@@ -1345,6 +1365,10 @@
     await loadClassModule(cls, sheetBody, charData);
     initPortraits(cls, charData.id, sheetBody);
     bindAutoSave(cls, charData.id);
+
+    var sheetData = {};
+    try { sheetData = JSON.parse(charData.data || '{}'); } catch (e) {}
+    applySheetDeadOverlay(cls, sheetData.points_de_vie);
   }
 
   function createSheetHeader(cls, charData) {
@@ -1525,6 +1549,10 @@
     inputs.forEach(function (input) {
       var handler = function () {
         scheduleSave(cls, charId);
+        var key = input.getAttribute('data-key') || '';
+        if (/-points_de_vie$/.test(key)) {
+          applySheetDeadOverlay(cls, input.value);
+        }
       };
       input.addEventListener('input', handler);
       input.addEventListener('change', handler);

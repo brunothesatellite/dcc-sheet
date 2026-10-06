@@ -215,7 +215,7 @@ Le fichier contient la classe, le nom, le statut et **toutes les données de la 
 **Exporter toute la collection** :
 1. Ouvrez le **menu utilisateur** (avatar).
 2. Cliquez sur **Exporter tout (JSON)**.
-3. Un fichier `dcc-persos-AAAA-MM-JJ.json` est téléchargé, contenant **tous** vos personnages **vos notes d'équipe** et votre **ordre de marche**.
+3. Un fichier `dcc-persos-AAAA-MM-JJ.json` est téléchargé, contenant **tous** vos personnages, **vos notes d'équipe**, votre **ordre de marche** et votre **état combat de l'équipe** (Init. combat, tours, ennemis).
 4. Si vous n'avez aucun personnage, une popup le signale.
 
 **Importer une collection** :
@@ -227,8 +227,9 @@ Le fichier contient la classe, le nom, le statut et **toutes les données de la 
 6. Si le fichier contient le champ **`team_notes`** (même vide), vos **notes d'équipe** sont remplacées par son contenu ; les anciens exports, dépourvus de ce champ, **laissent vos notes actuelles intactes**.
 7. **Le statut de chaque personnage est conservé** : un PJ exporté **à l'auberge** repart **à l'auberge** (il n'apparaît ni dans l'onglet Équipe, ni dans l'ordre de marche) ; un PJ en expédition repart en expédition.
 8. Si le fichier contient le champ **`marching_order`**, votre **ordre de marche** est restauré sur les personnages **en expédition** ; si le champ est **absent** ou **invalide** (positions en doublon, personnage inconnu), l'ordre est **reconstruit automatiquement** (gauche→droite, haut→bas).
+9. Si le fichier contient le champ **`team_state`**, votre **état combat de l'équipe** (Init. combat, tours, ennemis) est restauré, les clés étant **remappées** sur les personnages recréés ; si le champ est **absent** (anciens exports) ou **invalide**, cet état est **remis à zéro** (Init. combat et tours vides, aucun ennemi) — l'import remplace tout.
 
-> **Usage recommandé** : l'export global sert de **sauvegarde externe** régulière et de transfert entre deux navigateurs/machines — fiches, notes d'équipe **et** ordre de marche.
+> **Usage recommandé** : l'export global sert de **sauvegarde externe** régulière et de transfert entre deux navigateurs/machines — fiches, notes d'équipe, ordre de marche **et** état combat de l'équipe.
 
 ### 4.7 Ordre d'affichage des cartes
 
@@ -451,16 +452,16 @@ Colonnes :
 | **Init.** | Initiative lue dans la fiche | Non (éditez-la dans la fiche) |
 | **AC** | Classe d'armure lue dans la fiche | Non (éditez-la dans la fiche) |
 | **PV** | Points de vie | **Oui** : sauvegarde immédiate en base + **synchronisation vers la fiche** du PJ, même déjà ouverte (toast disquette) |
-| **Init. combat** | Initiative d'ordre de combat | Oui, mais **non enregistrée** (remise à zéro à chaque rechargement complet de la page) : usage de combat ponctuel |
-| **Tour** | Compteur de tour visuel (§ 8.2) | Oui (§ 8.2) |
+| **Init. combat** | Initiative d'ordre de combat | **Oui** : sauvegarde **automatique en base** (pause ~0,6 s, toast disquette), restaurée au prochain affichage et **incluse dans l'export JSON** |
+| **Tour** | Compteur de tour visuel (§ 8.2) | **Oui** (§ 8.2) : sauvegarde automatique en base comme l'Init. combat |
 
 > **PV à 0 ou moins** : un **crâne rouge** recouvre alors le portrait du personnage dans ce tableau **et** dans la grille d'ordre de marche (§ 8.1c), ainsi que dans sa propre fiche (§ 7.2). Dès que ses PV repassent au-dessus de 0, l'overlay disparaît partout.
 
-> Seuls les PJ **en expédition** apparaissent. Pour en retirer un, passez-le à l'auberge depuis sa classe (§ 5) : à votre retour sur l'onglet Équipe, la page est **rechargée automatiquement** (les champs non sauvegardés sont alors effacés, comme en F5).
+> Seuls les PJ **en expédition** apparaissent. Pour en retirer un, passez-le à l'auberge depuis sa classe (§ 5) : à votre retour sur l'onglet Équipe, la page est **rechargée automatiquement** (votre état combat est alors relu en base, comme en F5).
 
-Sous le tableau, **à cheval sous les colonnes Init. combat et Tour**, un bouton **RAZ** remet à zéro la colonne Init. combat et les compteurs Tour de **tous les PJ**. Une confirmation s'affiche avant d'exécuter. Les ennemis (§ 8.3) ne sont pas concernés.
+Sous le tableau, **à cheval sous les colonnes Init. combat et Tour**, un bouton **RAZ** remet à zéro la colonne Init. combat et les compteurs Tour de **tous les PJ**. Une confirmation s'affiche avant d'exécuter, puis la remise à zéro est **propagée en base** (et dans l'export). Les ennemis (§ 8.3) ne sont pas concernés.
 
-**Synchronisation automatique** : chaque fois que vous affichez à nouveau l'onglet Équipe (retour depuis une fiche ou un autre onglet), les valeurs issues des fiches — **Nom, Initiative, AC, PV, détail combat, statistiques** — sont resynchronisées avec la base **sans recharger l'onglet** : vos champs non sauvegardés (Init. combat, compteurs de tour, tableau des ennemis) sont conservés. Si la **composition** de l'expédition a changé (personnage ajouté, supprimé ou basculé à l'auberge), la page est **rechargée entièrement** à la place. Les PV sont toujours synchronisés dans les deux sens (§ tableau ci-dessus) ; en cas d'échec réseau, l'affichage actuel est conservé.
+**Synchronisation automatique** : chaque fois que vous affichez à nouveau l'onglet Équipe (retour depuis une fiche ou un autre onglet), les valeurs issues des fiches — **Nom, Initiative, AC, PV, détail combat, statistiques** — sont resynchronisées avec la base **sans recharger l'onglet** : votre état combat affiché (Init. combat, compteurs de tour, tableau des ennemis) est **conservé**, puisque cet état est déjà en base et que la prochaine saisie le ré-écrira. Si la **composition** de l'expédition a changé (personnage ajouté, supprimé ou basculé à l'auberge), la page est **rechargée entièrement** à la place : l'état combat est alors relu depuis la base. Les PV sont toujours synchronisés dans les deux sens (§ tableau ci-dessus) ; en cas d'échec réseau, l'affichage actuel est conservé.
 
 ### 8.1b Détail combat dépliable
 
@@ -509,7 +510,7 @@ Un cercle par ligne (PJ et ennemis) qui se remplit visuellement par paliers de *
   - ordinateur : **clic droit** sur le cercle ;
   - mobile : **appui long** (~0,5 s) sur le cercle.
 
-Les compteurs servent à suivre les rounds ; ils ne sont pas enregistrés (repartent à 0 au rechargement).
+Les compteurs servent à suivre les rounds : ils sont **enregistrés en base** (et inclus dans l'export JSON) — chaque clic est propagé après la même pause ~0,6 s que l'Init. combat, avec toast disquette. Un **RAZ** (clic droit / appui long) remet le compteur à 0 et l'écrit aussi en base.
 
 ### 8.3 Gérer les ennemis
 
@@ -517,9 +518,9 @@ Sous la section **Ennemis** : un tableau de **3 lignes vides par défaut**, colo
 
 - **+ Ajouter** : ajoute une ligne en fin de tableau.
 - **− Supprimer** : supprime la **dernière** ligne.
-- **RAZ** : demande confirmation, puis vide le tableau et le réinitialise à **3 lignes vides**.
+- **RAZ** : demande confirmation, puis vide le tableau et le réinitialise à **3 lignes vides** ; le tableau vidé est **propagé en base**.
 
-> Les ennemis et leurs valeurs sont **éphémères** : ils servent au combat en cours et disparaissent au rechargement. Les compteurs de tour fonctionnent comme pour les PJ (§ 8.2).
+> Les ennemis sont **sauvegardés en base** et **inclus dans l'export global JSON** : ils sont restaurés au prochain affichage de l'onglet. Seules les **lignes renseignées** sont conservées (les lignes entièrement vides sont ignorées) : après un rechargement, vous retrouvez vos ennemis déclarés, complétés s'il en manque pour retomber à 3 lignes. Les compteurs de tour fonctionnent comme pour les PJ (§ 8.2).
 
 ### 8.3b Section Statistiques
 
@@ -564,6 +565,7 @@ Si le thème ne « tient » pas après un rechargement : videz le cache du navig
 | Fiches de personnages | **Base de données serveur** | Oui (export JSON) |
 | Notes d'équipe | **Base de données serveur** | Oui (export JSON) |
 | Ordre de marche | **Base de données serveur** | Oui (export JSON) |
+| État combat de l'équipe (Init. combat, tours, ennemis) | **Base de données serveur** | Oui (export JSON) |
 
 ### Comportement mobile (< 600 px)
 
@@ -596,7 +598,7 @@ Si le thème ne « tient » pas après un rechargement : videz le cache du navig
 ### Sauvegarder vos données hors ligne
 
 1. Menu utilisateur → **Exporter tout (JSON)**.
-2. Conservez le fichier `dcc-persos-….json` (clé USB, autre machine…) : il contient vos personnages **et** vos notes d'équipe.
+2. Conservez le fichier `dcc-persos-….json` (clé USB, autre machine…) : il contient vos personnages, vos notes d'équipe, l'ordre de marche et l'état combat de l'équipe.
 3. Pour restaurer : **Importer tout (JSON)** sur le compte cible (remplacement complet, § 4.6).
 
 Les exports **individuels** (bouton **Export** des fiches) servent au transfert d'un PJ précis entre comptes : réimportez-les depuis **Import** dans l'onglet de la bonne classe.
@@ -648,6 +650,11 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
   "exported_at": "2026-09-22T18:00:00.000Z",
   "team_notes": "Session 3 : descendedre dans les catacombes, garder la potion pour Travok.",
   "marching_order": { "0": 1, "1": 0 },
+  "team_state": {
+    "init_combat": { "0": "14", "1": "11" },
+    "tours": { "0": 3 },
+    "ennemis": [{ "nom": "Gobelin", "ac": "14", "att": "+2", "pv": "5", "init": "9", "tour": 1 }]
+  },
   "characters": [
     { "name": "Travok", "class": "clerc", "is_active": 1, "data": { "nom": "Travok", "dieu": "AHRIMAN" } },
     { "name": "Sergiu", "class": "mage", "is_active": 1, "data": { "nom": "Sergiu" } }
@@ -658,9 +665,11 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 - `characters` : **tableau non vide**, chaque entrée avec au minimum `class`.
 - `team_notes` : notes d'équipe (texte libre, **champ optionnel**).
 - `marching_order` : positions d'ordre de marche des personnages **en expédition** — `{"<index dans characters[]>": position 0..8}` (**champ optionnel** ; les clés sont les index du tableau `characters`, les ids DB n'étant pas stables après un import).
+- `team_state` : état combat de l'équipe — `init_combat` et `tours` en `{"<index dans characters[]>": valeur}` (même astuce d'index que `marching_order`), `ennemis` en tableau `{nom, ac, att, pv, init, tour}` **seulement pour les lignes renseignées** (**champ optionnel**, **omis si tout est vide**).
 - L'import **remplace intégralement** la collection existante (après confirmation).
 - Fichier **sans** `team_notes` (anciens exports) : les notes actuelles sont **conservées** ; fichier **avec** `team_notes` (même vide) : les notes sont **remplacées**.
 - Fichier **sans** `marching_order`, ou ordre **invalide** (doublon, hors bornes) : l'ordre est **reconstruit** (gauche→droite, haut→bas) — jamais d'erreur bloquante.
+- Fichier **sans** `team_state`, ou état **invalide** : l'état combat est **remis à zéro** (Init. combat et tours vides, aucun ennemi).
 
 ---
 
@@ -691,7 +700,7 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 | **PX** | Points d'expérience |
 | **JS Ref / Vig / Vol** | Jets de sauvegarde : Réflexes, Vigueur, Volonté |
 | **Init.** | Initiative (jet d'entrée en combat) |
-| **Init. combat** | Colonne éphémère d'ordre de combat (onglet Équipe) |
+| **Init. combat** | Initiative d'ordre de combat dans l'onglet Équipe (sauvegardée en base) |
 | **CAC** | Corps à corps |
 | **HFA** | Hauts faits d'armes (Guerrier, Nain) |
 | **Critique / Table critique** | Zone et table de confirmation des coups critiques |

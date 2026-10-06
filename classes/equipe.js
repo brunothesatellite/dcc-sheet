@@ -1,13 +1,83 @@
 window.DCCModules = window.DCCModules || {};
 
 window.DCCModules.equipe = {
-  render(container, characters, onSavePV, initialNotes, onSaveNotes, marchingOrder, onSaveMarching) {
+  render(container, characters, onSavePV, initialNotes, onSaveNotes, marchingOrder, onSaveMarching,
+    initialState, onSaveTeamState) {
     const CLASS_LABELS = {
       clerc: 'Clerc', elfe: 'Elfe', guerrier: 'Guerrier',
       halfelin: 'Halfelin', mage: 'Mage', nain: 'Nain', voleur: 'Voleur'
     };
     let expandedCharacterId = null;
     let expandedStatsId = null;
+
+    /* --- État combat (Init. combat, tours, ennemis) -----------------------
+       Persistance via team-state.js (optionnel, comme dead-overlay.js) :
+       sans ce fichier ou sans callback, pas de sauvegarde (comportement
+       historique — chargeurs partiels, tests isolés).
+
+       L'état est RELU dans le DOM au moment de la sauvegarde : aucun
+       bookkeeping d'index, donc un ajout/suppression de ligne, une RAZ ou une
+       resync ne peuvent pas désynchroniser ce qui part en base. */
+    const teamStateEnabled = !!(window.DCCTeamState &&
+      typeof window.DCCTeamState.sanitize === 'function' &&
+      typeof onSaveTeamState === 'function');
+    const teamStateInitial = window.DCCTeamState
+      ? window.DCCTeamState.normalize(initialState, characters)
+      : null;
+    let teamStateTimer = null;
+    let enemyBody = null;
+
+    function snapshotTeamState() {
+      const raw = { init_combat: {}, tours: {}, ennemis: [] };
+      container.querySelectorAll('tr[data-char-id]').forEach(function (tr) {
+        const id = tr.getAttribute('data-char-id');
+        const input = tr.querySelector('.init-combat-input');
+        if (input && String(input.value).trim() !== '') raw.init_combat[id] = String(input.value).trim();
+        const counter = tr.querySelector('.turn-counter');
+        if (counter && typeof counter.getTurn === 'function') {
+          const turn = counter.getTurn();
+          if (turn > 0) raw.tours[id] = turn;
+        }
+      });
+      if (enemyBody) {
+        enemyBody.querySelectorAll('tr').forEach(function (tr) {
+          raw.ennemis.push({
+            nom: cellValue(tr, 0),
+            ac: cellValue(tr, 1),
+            att: cellValue(tr, 2),
+            pv: cellValue(tr, 3),
+            init: cellValue(tr, 4),
+            tour: (function () {
+              const c = tr.children[5] ? tr.children[5].querySelector('.turn-counter') : null;
+              return c && typeof c.getTurn === 'function' ? c.getTurn() : 0;
+            })(),
+          });
+        });
+      }
+      /* sanitize() filtre les lignes d'ennemis entièrement vides et borne tout */
+      return window.DCCTeamState.sanitize(raw);
+    }
+
+    function cellValue(tr, index) {
+      const td = tr.children[index];
+      const input = td ? td.querySelector('input') : null;
+      return input ? String(input.value).trim() : '';
+    }
+
+    /* Debounce identique aux notes d'équipe (600 ms) ; aucune écriture si
+       l'état n'a pas changé → le serveur reçoit la même charge à chaque fois,
+       pas de toast inutile en pleine combat (le callback central gère le toast
+       et l'erreur). */
+    function scheduleTeamStateSave() {
+      if (!teamStateEnabled) return;
+      clearTimeout(teamStateTimer);
+      teamStateTimer = setTimeout(function () {
+        const payload = snapshotTeamState();
+        Promise.resolve(onSaveTeamState(payload)).catch(function () {
+          if (window.showToast) window.showToast('Erreur sauvegarde état équipe', 'error');
+        });
+      }, 600);
+    }
 
     /* --- Ordre de marche : état --- */
     const onSaveMarchingCb = typeof onSaveMarching === 'function' ? onSaveMarching : null;
@@ -42,15 +112,32 @@ window.DCCModules.equipe = {
         counter.style.setProperty('--fill', pct + '%');
       }
 
+      function getTurn() {
+        var n = parseInt(counter.textContent || '0', 10);
+        return isFinite(n) && n > 0 ? n : 0;
+      }
+
+      /* Restauration depuis la base : valeur + remplissage (aucune notification,
+         ce n'est pas une action utilisateur) */
+      function setTurn(turn) {
+        var n = turn > 0 ? turn : 0;
+        counter.textContent = String(n);
+        updateFill(n);
+      }
+
+      /* Changement utilisateur (clic / clic droit / appui long) → notifier */
+      function notifyTurnChange() {
+        if (typeof counter.onTurnChange === 'function') counter.onTurnChange(getTurn());
+      }
+
       function reset() {
-        counter.textContent = '0';
-        updateFill(0);
+        setTurn(0);
+        notifyTurnChange();
       }
 
       function increment() {
-        var n = parseInt(counter.textContent || '0') + 1;
-        counter.textContent = n;
-        updateFill(n);
+        setTurn(getTurn() + 1);
+        notifyTurnChange();
       }
 
       counter.addEventListener('click', function (e) {
@@ -59,6 +146,8 @@ window.DCCModules.equipe = {
       });
 
       counter.resetTurn = reset;
+      counter.setTurn = setTurn;
+      counter.getTurn = getTurn;
 
       counter.addEventListener('contextmenu', function (e) {
         e.preventDefault();
@@ -431,15 +520,16 @@ window.DCCModules.equipe = {
       return fragment;
     }
 
-    function createEnemyRow() {
+    /* rowState = ligne sauvegardée ({nom, ac, att, pv, init, tour}) ou null */
+    function createEnemyRow(rowState) {
       const tr = document.createElement('tr');
 
       const fields = [
-        { tag: 'input', type: 'text', placeholder: 'Nom' },
-        { tag: 'input', type: 'number', placeholder: '' },
-        { tag: 'input', type: 'text', placeholder: '' },
-        { tag: 'input', type: 'number', placeholder: '' },
-        { tag: 'input', type: 'number', placeholder: '' },
+        { key: 'nom', tag: 'input', type: 'text', placeholder: 'Nom', label: 'Nom de l\'ennemi' },
+        { key: 'ac', tag: 'input', type: 'number', placeholder: '', label: 'Classe d\'armure (AC)' },
+        { key: 'att', tag: 'input', type: 'text', placeholder: '', label: 'Attaque (ATT)' },
+        { key: 'pv', tag: 'input', type: 'number', placeholder: '', label: 'Points de vie (PV)' },
+        { key: 'init', tag: 'input', type: 'number', placeholder: '', label: 'Initiative' },
       ];
 
       fields.forEach(function (f) {
@@ -447,12 +537,22 @@ window.DCCModules.equipe = {
         const input = document.createElement(f.tag);
         input.type = f.type;
         input.placeholder = f.placeholder;
+        input.className = 'enemy-field enemy-' + f.key;
+        input.setAttribute('aria-label', f.label);
+        if (rowState && rowState[f.key] !== undefined && rowState[f.key] !== null) {
+          input.value = rowState[f.key];
+        }
+        input.addEventListener('input', scheduleTeamStateSave);
+        input.addEventListener('change', scheduleTeamStateSave);
         td.appendChild(input);
         tr.appendChild(td);
       });
 
       const tdCounter = document.createElement('td');
-      tdCounter.appendChild(createTurnCounter());
+      const counter = createTurnCounter();
+      counter.onTurnChange = scheduleTeamStateSave;
+      if (rowState) counter.setTurn(rowState.tour || 0);
+      tdCounter.appendChild(counter);
       tr.appendChild(tdCounter);
 
       return tr;
@@ -788,6 +888,7 @@ window.DCCModules.equipe = {
       container.innerHTML = '';
       marchGrid = null;
       marchMeta = null;
+      enemyBody = null;
 
       // Section Ordre de marche (hors scope si 0 PJ)
       if (characters.length > 0) {
@@ -927,18 +1028,29 @@ window.DCCModules.equipe = {
           tdPV.appendChild(inputPV);
           tr.appendChild(tdPV);
 
-          // Init combat (not saved)
+          // Init. combat (sauvegardé en base, pré-rempli depuis team-state)
           const tdInitCombat = document.createElement('td');
           const inputInit = document.createElement('input');
           inputInit.type = 'number';
           inputInit.placeholder = '';
           inputInit.className = 'init-combat-input';
+          if (teamStateInitial && teamStateInitial.init_combat[String(charData.id)]) {
+            inputInit.value = teamStateInitial.init_combat[String(charData.id)];
+          }
+          inputInit.setAttribute('aria-label', 'Init. combat de ' + (charData.name || 'Sans nom'));
+          inputInit.addEventListener('input', scheduleTeamStateSave);
+          inputInit.addEventListener('change', scheduleTeamStateSave);
           tdInitCombat.appendChild(inputInit);
           tr.appendChild(tdInitCombat);
 
-          // Compteur de tour
+          // Compteur de tour (sauvegardé en base)
           const tdCounter = document.createElement('td');
-          tdCounter.appendChild(createTurnCounter());
+          const turnCounter = createTurnCounter();
+          turnCounter.onTurnChange = scheduleTeamStateSave;
+          if (teamStateInitial && teamStateInitial.tours[String(charData.id)]) {
+            turnCounter.setTurn(teamStateInitial.tours[String(charData.id)]);
+          }
+          tdCounter.appendChild(turnCounter);
           tr.appendChild(tdCounter);
 
           tbody.appendChild(tr);
@@ -990,6 +1102,7 @@ window.DCCModules.equipe = {
           tableChars.querySelectorAll('.turn-counter').forEach(function (counter) {
             if (typeof counter.resetTurn === 'function') counter.resetTurn();
           });
+          scheduleTeamStateSave(); /* RAZ propagée en base */
         });
         tdRaz.appendChild(btnRazInit);
         trFoot.appendChild(tdRaz);
@@ -1042,11 +1155,16 @@ window.DCCModules.equipe = {
       tableEnemies.appendChild(theadE);
 
       const tbodyE = document.createElement('tbody');
+      enemyBody = tbodyE;
 
-      // 3 lignes vides par défaut
-      for (let i = 0; i < 3; i++) {
-        tbodyE.appendChild(createEnemyRow());
-      }
+      /* Lignes sauvegardées (seules les renseignées sont persistées) ; au
+         minimum 3 lignes pour pouvoir en déclarer d'autres. */
+      const savedEnemies = teamStateInitial ? teamStateInitial.ennemis.slice() : [];
+      const wantedRows = Math.max(3, savedEnemies.length);
+      while (savedEnemies.length < wantedRows) savedEnemies.push(null);
+      savedEnemies.forEach(function (row) {
+        tbodyE.appendChild(createEnemyRow(row));
+      });
 
       tableEnemies.appendChild(tbodyE);
       container.appendChild(tableEnemies);
@@ -1054,11 +1172,13 @@ window.DCCModules.equipe = {
       // Event listeners boutons
       btnAdd.addEventListener('click', function () {
         tbodyE.appendChild(createEnemyRow());
+        scheduleTeamStateSave();
       });
 
       btnRemove.addEventListener('click', function () {
         if (tbodyE.lastElementChild) {
           tbodyE.removeChild(tbodyE.lastElementChild);
+          scheduleTeamStateSave();
         }
       });
 
@@ -1080,6 +1200,7 @@ window.DCCModules.equipe = {
         for (let i = 0; i < 3; i++) {
           tbodyE.appendChild(createEnemyRow());
         }
+        scheduleTeamStateSave(); /* table vidé → ennemis effacés en base */
       });
 
       // Section Statistiques (hors scope si 0 PJ)
@@ -1133,9 +1254,9 @@ window.DCCModules.equipe = {
 
     /* Resynchronisation sur place (retour sur l'onglet Équipe) : met à jour les
        valeurs issues des personnages en base (nom, classe, portrait, initiative,
-       AC, PV, détails dépliés, statistiques agrégées) SANS re-render → les
-       champs non sauvegardés (Init. combat, compteurs de tour, tableau des
-       ennemis, notes) et les états dépliés sont préservés.
+       AC, PV, détails dépliés, statistiques agrégées) SANS re-render → l'état
+       combat affiché (Init. combat, compteurs de tour, tableau des ennemis,
+       notes) est conservé : il est en base, la prochaine saisie le ré-écrira.
        Retourne false si la composition a changé (appelant → rechargement
        complet de la page). */
     window.DCCModules.equipe.resync = function (freshChars) {

@@ -1355,3 +1355,70 @@ Quand un personnage a <= 0 PV courants, un overlay "tete de mort rouge" doit s'a
 | tests/run.js, tests/02-css.test.js | Enregistrement de la suite + selecteurs CSS |
 | README.md, MANUAL.md, TODO.md | Documentation |
 | JOURNAL.md | Cette entree |
+
+## Date : 6 octobre 2026 - Equipe : etat combat sauvegarde en base + export/import JSON
+
+### Besoin
+
+Dans l'onglet Equipe, la section expedition (INIT. COMBAT + TOUR de chaque perso) et la section Ennemis (nom, AC, ATT, PV, INIT., Tour par ligne) ne vivaient que dans le DOM : perdus a chaque rechargement de page, a chaque changement de composition (`location.reload()`), et absents de l'export JSON. Ils doivent etre **sauvegardes en base** (comme `team_notes` et `marching_order`) et **inclus dans l'export/import global**.
+
+### Decisions (arbitrages valides avec l'utilisateur)
+
+1. Persistance : nouvelle colonne `users.team_state TEXT NOT NULL DEFAULT '{}'` (CREATE + `ALTER TABLE` protege), motif identique a `team_notes` / `marching_order`.
+2. **Ennemis** : seules les lignes **renseignees** sont ecrites (lignes entierement vides filtreees a l'ecriture, cote client **et** cote serveur) ; l'affichage garde un plancher de 3 lignes.
+3. **Import ancien fichier sans `team_state`** (ou etat invalide) : remise a zero complete de l'etat combat — l'import remplace tout.
+4. **Sauvegarde** : automatique, debounce 600 ms + toast disquette (meme rythme que les notes) ; aucune ecriture au simple affichage.
+5. **Lecture du DOM au moment de la sauvegarde** (snapshot) plutot qu'un modele maintenu a jour : pas de bookkeeping d'index, donc un ajout/suppression de ligne, une RAZ ou une resync ne peuvent pas desynchroniser ce qui part en base.
+
+### Realisation
+
+- `team-state.js` (nouveau, logique pure, pattern `marching-order.js`) : `sanitize` (chaines tronquees, tours entiers > 0, lignes d'ennemis vides ignorees, cles numeriques seulement), `normalize(state, chars)` (purge des ids absents : perso supprime / bascule a l'auberge), `buildExport(state, entries)` (**cles = index dans `characters[]`**, les ids DB n'etant pas stables entre comptes), `remapImport(exportState, idByIndex)` (index du fichier -> nouveaux ids ; invalide -> `null` -> remise a zero), `isEmpty`.
+- `api/db.php` : colonne `team_state` au CREATE + `ALTER TABLE` try/catch pour les bases existantes.
+- `api/auth.php` : `get_team_state` (GET) / `save_team_state` (POST, `requireLogin`, nettoyage serveur — init <= 20 car., champs ennemis <= 120 car., tour entier 0..9999, 50 lignes max, 32 Ko max, lignes entierement vides ignorees ; entrees invalides **ignorees** au lieu de bloquer).
+- `script.js` : `getTeamState`/`saveTeamState`, `onSaveTeamState` (save + `showToastSave`, erreur -> toast), `loadEquipe` (fetch -> `normalize` -> passage a `equipe.render(..., initialState, onSaveTeamState)`), export `team_state` (champ absent si rien a exporter, echec API non bloquant), import (remap index -> `createdIds` puis ecriture, apres l'ordre de marche ; absent/invalide -> etat vide).
+- `classes/equipe.js` : signature `render(..., initialState, onSaveTeamState)` ; `createTurnCounter()` gagne `setTurn(n)` / `getTurn()` / `counter.onTurnChange` (notification sur action utilisateur seulement) ; `createEnemyRow(rowState)` pre-remplit et etiquette les champs (`aria-label`) ; saisie init., clic tour, ajout/suppression de ligne, **RAZ init./tours** et **RAZ ennemis** declenchent `scheduleTeamStateSave()` (debounce 600 ms ; module optionnel : sans `team-state.js` ou sans callback, aucune sauvegarde, comportement historique conserve) ; ids inconnus ignores a l'affichage et purges a la prochaine ecriture ; `resync` conserve l'affichage (etat deja en base, la prochaine saisie re-ecrit).
+- `index.html` : `team-state.js` charge apres `marching-order.js`, avant `script.js`.
+
+### Validation
+
+- `node tests\run.js` : **846/846 OK, 7 skip** (base 759 + 73 `11-team-state` + 14 `07-restore`).
+- `11-team-state` (nouvelle) : logique pure (`sanitize` idempotent, `normalize`, `buildExport` index -> ids, `remapImport` ids -> index, `isEmpty`) ; Equipe (pre-remplissage init/tours/ennemis, debounce = 1 ecriture apres 600 ms, payloads reels, filtre des lignes vides, ajout/suppression de ligne, les 2 RAZ, resync conservee, id inconnu ignore) ; rendu **sans** `team-state.js` (aucune ecriture, pas de plantage).
+- `07-restore` : rechargement -> etat combat restaure depuis la base **sans ecriture parasite** ; import d'un fichier avec `team_state` -> remap sur les nouveaux ids (`60`/`61`/`62`) puis affiche dans le tableau ; import d'un fichier **sans** `team_state` -> remise a zero complete (`{}`).
+- Vérification visuelle : aucun navigateur connecte a la session -> a faire sur `http://localhost:8000` (saisir une init., cliquer un tour, declarer un ennemi -> toast puis recharger : tout est la ; ajouter/supprimer/RAZ idem).
+
+### Fichiers modifies (6 octobre - etat combat equipe)
+
+| Fichier | Action |
+|---------|--------|
+| team-state.js | Nouveau - logique pure (sanitize, normalize, export par index, remap d'import) |
+| api/db.php | Colonne `users.team_state` + ALTER protege |
+| api/auth.php | Actions `get_team_state` / `save_team_state` (nettoyage serveur) |
+| script.js | Helpers + `onSaveTeamState`, `loadEquipe`, export/import `team_state` |
+| classes/equipe.js | Signature render, `setTurn`/`getTurn`, lignes d'ennemis pre-remplies, debounce |
+| index.html | Chargement de `team-state.js` |
+| tests/11-team-state.test.js | Nouvelle suite (73 assertions) |
+| tests/07-restore.test.js | Rechargement + 2 parcours d'import (avec / sans `team_state`) |
+| tests/run.js | Enregistrement de la suite |
+| README.md, MANUAL.md, TODO.md | Documentation |
+| JOURNAL.md | Cette entree |
+
+## Date : 6 octobre 2026 — Release v2.6 (etat combat de l'equipe + overlay tete de mort)
+
+### Effectue depuis la derniere release (v2.5)
+
+- **`6d42959`** — `deploy/gen-spell-content.bat` + `deploy/_gen-spell-content.ps1` : generation du zip `dcc-spells-reader-minimal.zip` (pack minimal : `spell-translation.js`, `content/anchors.js`, pages `127..303` + `322..356`) pour recreer le voisinage `../dcc-spells-reader` attendu par `spell-reader.js`.
+- **`482998f`** — `TODO.md` : roadmap « onglet Level 0 » (generation d'un niveau 0 avec retirage, edition, conversion en niveau 1).
+- **`4f1074f`** — `TODO.md` : remontee en critique du bug « etat combat de l'Equipe non sauvegarde » (traite ci-dessus, remis en N/A).
+- **`783af04`** — overlay **tete de mort** sur les portraits quand PV courants <= 0 (fiche, cartes de liste expedition/auberge, Equipe colonne Classe + ordre de marche) — entree du 6 octobre ci-dessus.
+- **A cette release (non encore commis)** — etat combat de l'onglet Equipe sauvegarde en base + export/import `team_state` (entree du 6 octobre ci-dessus) ; libelle `Dés(s) d'action` corrigé en `Dé(s) d'action` (`classes/bloc_commun.js`).
+
+### Documentation de release
+
+- `README.md` : overlay tete de mort (section Portrait), etat combat + export/import (section Onglet Equipe), `team-state.js` dans l'arborescence, 2 endpoints (`get_team_state` / `save_team_state`), pack minimal des sorts (section Build), libelle `Dé(s) d'action`.
+- `MANUAL.md` : § 4.6 (export/import + item `team_state`), § 8.1 (Init. combat / Tour / RAZ / resync), § 8.2 (compteurs enregistres), § 8.3 (ennemis sauvegardes, lignes renseignees seulement), tableau « Ce que le navigateur memorise », annexe A (`team_state`), glossaire.
+- `TODO.md` : bug critique → N/A.
+
+### Validation
+
+- `node tests\run.js` : **846/846 OK, 7 skip** (11 suites : `11-team-state` 73 assertions nouvelle, `07-restore` +14).
+- Vérification visuelle a faire sur `http://localhost:8000` (aucun navigateur connecte a la session de travail).

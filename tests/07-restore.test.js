@@ -45,6 +45,7 @@ function createHarness() {
     gets: 0,
     saves: [],
     savesNotes: [],
+    savesState: [],
     creates: [],
     deletes: [],
     nextId: 60,
@@ -52,6 +53,13 @@ function createHarness() {
        case 7 avec case 4 vide — ordre troué que la restauration doit
        conserver tel quel (regression du bug « pas restauré au reload ») */
     order: '{"44":1,"45":2,"46":0,"47":5,"48":7,"49":3}',
+    /* Etat combat en base : init. combat de Travok (46), tour de Sergiu (49)
+       et un ennemi declare */
+    teamState: {
+      init_combat: { '46': '12' },
+      tours: { '49': 3 },
+      ennemis: [{ nom: 'Gobelin', ac: '14', att: '+2', pv: '5', init: '9', tour: 1 }],
+    },
     chars: [
       { id: 44, name: 'Alovnek', class: 'guerrier', is_active: 1, data: '{}' },
       { id: 45, name: 'Dom', class: 'halfelin', is_active: 1, data: '{}' },
@@ -88,6 +96,12 @@ function createHarness() {
         data = { ok: true, notes: '' };
       } else if (action === 'save_team_notes') {
         state.savesNotes.push(body.notes);
+        data = { ok: true };
+      } else if (action === 'get_team_state') {
+        data = { ok: true, state: state.teamState };
+      } else if (action === 'save_team_state') {
+        state.savesState.push(body.state);
+        state.teamState = body.state;
         data = { ok: true };
       }
     } else if (u.indexOf('api/characters.php') !== -1) {
@@ -129,6 +143,7 @@ function createHarness() {
 
   function loadAll() {
     env.load('marching-order.js');
+    env.load('team-state.js');
     env.load('script.js');
     env.load('classes/equipe.js');
   }
@@ -188,6 +203,20 @@ async function testReload(r) {
   const toggle = h.env.document.querySelector('#marching-toggle');
   r.ok(toggle, 'rechargement: bouton de repli present');
   r.eq(toggle ? toggle.getAttribute('aria-expanded') : null, 'true', 'rechargement: panneau ouvert par defaut');
+
+  /* Etat combat (init. combat, tours, ennemis) restaure depuis la base */
+  const row46 = h.env.document.querySelector('tr[data-char-id="46"]');
+  r.ok(!!row46, 'rechargement: ligne Travok presente dans le tableau expedition');
+  r.eq(row46 ? row46.querySelector('.init-combat-input').value : null, '12',
+    'rechargement: init. combat restauree depuis la base');
+  const row49 = h.env.document.querySelector('tr[data-char-id="49"]');
+  r.eq(row49 ? row49.querySelector('.turn-counter').textContent : null, '3',
+    'rechargement: tour restaure depuis la base');
+  const firstEnemy = h.env.document.querySelector('table.team-table-enemies tbody tr td input');
+  r.eq(firstEnemy ? firstEnemy.value : null, 'Gobelin',
+    'rechargement: ennemi declare restaure');
+  r.eq(h.state.savesState.length, 0,
+    'rechargement: aucune ecriture d etat combat (pas d ecrasement silencieux)');
 }
 
 async function testImport(r) {
@@ -226,6 +255,12 @@ async function testImport(r) {
       { name: 'Beta', class: 'mage', is_active: 1, data: {} },
     ],
     marching_order: { '0': 1, '2': 0 },
+    /* Etat combat : init/tours indexes par position dans characters[] */
+    team_state: {
+      init_combat: { '0': '14', '1': '5' },
+      tours: { '2': 1 },
+      ennemis: [{ nom: 'Orc', ac: '12', att: '+1', pv: '7', init: '11', tour: 0 }],
+    },
   };
 
   Object.defineProperty(capturedInput, 'files', {
@@ -257,6 +292,12 @@ async function testImport(r) {
   r.eq(JSON.stringify(h.state.saves[0] || {}), '{"60":1,"62":0}',
     'import: ordre remappe sur les ids actifs (index fichier 0 et 2)');
   r.eq(h.state.savesNotes.length, 1, 'import: notes d equipe restaurees');
+  r.eq(h.state.savesState.length, 1, 'import: etat combat ecrit une seule fois');
+  r.eq(JSON.stringify(h.state.savesState[0] || {}), JSON.stringify({
+    init_combat: { '60': '14', '61': '5' },
+    tours: { '62': 1 },
+    ennemis: [{ nom: 'Orc', ac: '12', att: '+1', pv: '7', init: '11', tour: 0 }],
+  }), 'import: etat remappe sur les nouveaux ids (index fichier -> ids 60/61/62)');
 
   if (restored) {
     const slots = h.slots();
@@ -269,12 +310,76 @@ async function testImport(r) {
     const metaEl = h.env.document.querySelector('.marching-meta');
     r.ok(metaEl && metaEl.textContent.indexOf('2 persos') !== -1,
       'import: meta compte 2 persos en expedition (inactif exclu)');
+
+    const importedRow = h.env.document.querySelector('tr[data-char-id="60"]');
+    r.ok(!!importedRow, 'import: ligne du perso restaure rendue');
+    r.eq(importedRow ? importedRow.querySelector('.init-combat-input').value : null, '14',
+      'import: init. combat affichee depuis l\'etat restaure');
   }
+}
+
+/* Import d'un fichier plus ancien, SANS team_state : l'import remplace tout
+   -> etat combat remis a zero (init/tours vides, aucun ennemi). */
+async function testImportWithoutTeamState(r) {
+  const h = createHarness();
+
+  let capturedInput = null;
+  const origClick = h.env.window.HTMLInputElement.prototype.click;
+  h.env.window.HTMLInputElement.prototype.click = function () {
+    if (this.type === 'file') { capturedInput = this; return; }
+    return origClick.apply(this, arguments);
+  };
+
+  h.loadAll();
+
+  const shown = await waitFor(function () { return h.env.document.querySelectorAll('.marching-slot').length === 9; }, 6000);
+  r.ok(shown, 'import sans team_state: grille initiale rendue' + h.modalText() + h.errorsSuffix());
+  if (!shown) return;
+
+  const importBtn = h.env.document.querySelector('#user-menu button[data-action="import-all"]');
+  r.ok(!!importBtn, 'import sans team_state: bouton present');
+  if (!importBtn) return;
+  importBtn.click();
+
+  const gotInput = await waitFor(function () { return capturedInput !== null; }, 2000);
+  if (!gotInput) { r.fail('import sans team_state: selecteur de fichier cree'); return; }
+
+  const payload = {
+    version: 1,
+    characters: [
+      { name: 'Alpha', class: 'clerc', is_active: 1, data: {} },
+      { name: 'Beta', class: 'mage', is_active: 1, data: {} },
+    ],
+    marching_order: { '0': 0, '1': 1 },
+    /* pas de team_state : fichier anterieur a cette fonctionnalite */
+  };
+
+  Object.defineProperty(capturedInput, 'files', {
+    value: [{ text: async function () { return JSON.stringify(payload); } }],
+    configurable: true,
+  });
+  capturedInput.dispatchEvent(new h.env.window.Event('change'));
+
+  const gotConfirm = await waitFor(function () {
+    return h.env.document.querySelector('#modal-actions .modal-btn-danger');
+  }, 3000);
+  r.ok(gotConfirm, 'import sans team_state: modale de confirmation' + h.modalText());
+  if (!gotConfirm) return;
+  h.env.document.querySelector('#modal-actions .modal-btn-danger').click();
+
+  const done = await waitFor(function () { return h.state.savesState.length >= 1; }, 6000);
+  r.ok(done, 'import sans team_state: etat combat ecrit' + h.modalText() + h.errorsSuffix());
+  if (!done) return;
+
+  r.eq(JSON.stringify(h.state.savesState[0]), JSON.stringify({
+    init_combat: {}, tours: {}, ennemis: [],
+  }), 'import sans team_state: remise a zero complete de l\'etat combat');
 }
 
 module.exports = async function suite() {
   const r = createReporter('07-restore');
   await testReload(r);
   await testImport(r);
+  await testImportWithoutTeamState(r);
   return r;
 };

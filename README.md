@@ -56,22 +56,24 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - Fermeture : bouton X, bouton Fermer, clic en dehors, ou touche Echap
 - Choix sauvegarde avec le personnage en base, propage dans les imports/exports JSON individuels et globaux
 - Affiche aussi dans les **cartes de la liste** (a gauche du nom) et dans l'**onglet Equipe** (colonne Classe)
+- **Crane rouge (PV <= 0)** : overlay "tete de mort" pose au dessus du portrait quand les PV courants sont <= 0 — fiche, cartes de la liste (expedition **et** auberge), onglet Equipe (colonne Classe **et** grille d'ordre de marche) ; il disparait des que les PV repassent au dessus de 0
 
 ### Onglet Equipe
 - **Ordre de marche** (section repliable en haut) : grille 3x3 (portraits + noms, 9 persos max) ; drag & drop unifie souris (clic maintenu) / tactile (appui long ~0,4 s) ; case vide = deplacement, case occupee = echange instantane ; sauvegarde immediate en base + auto-reparation (doublon / id perdu → reconstruction gauche→droite) ; inclus dans l'export/import JSON (`marching_order`)
 - Tableau des personnages en expedition avec **icone de portrait** dans la colonne Classe (100% hauteur de ligne)
-- Nom cliquable (**ouvre la fiche**), nom trop long **tronque avec ...** (infobulle = nom complet), Init, AC, PV editables, Init combat, **Compteur de tour visuel** (remplissage circulaire par 20%)
+- Nom cliquable (**ouvre la fiche**), nom trop long **tronque avec ...** (infobulle = nom complet), Init, AC, PV editables, Init combat et **Compteur de tour visuel** (remplissage circulaire par 20%) — **etat combat sauvegarde en base** (debounce 600 ms)
 - **Detail combat depliable** : clic sur la colonne Classe (chevron sous le libelle) → ligne de stats sous le personnage (Att/Degats Cac + Att/Degats distance) ; un seul perso ouvert a la fois ; valeur vide = tiret
-- **Bouton RAZ** sous les colonnes Init. combat + Tour (avec confirmation) : efface les init. combat et remet les compteurs a zero
+- **Bouton RAZ** sous les colonnes Init. combat + Tour (avec confirmation) : efface les init. combat, remet les compteurs a zero et **propage la remise a zero en base**
 - Synchronisation des PV vers la fiche du personnage
 - Tableau des **Statistiques** (entre Ennemis et Notes) : FOR AGI END PRE CHA INT, **vert = max / rouge = min** de colonne (texte seul, ex æquo inclus)
   - **Nom cliquable** = ouvre la fiche du personnage (comme le tableau des PJ en expédition)
   - Zone **AGI–END–PRE** groupée + **chevron sous END** → detail des jets de sauvegarde (REF / VIG / VOL) juste sous la ligne
   - Un seul detail JdS ouvert ; collapse independant du detail combat
-- Tableau des ennemis : colonnes **Ennemi, AC, ATT, PV, Init., Tour** (ajout/suppression/RAZ avec confirmation)
-- Compteurs de tour (clic = +1, clic droit / appui long = reset, cycle modulo 5)
+- Tableau des ennemis : colonnes **Ennemi, AC, ATT, PV, Init., Tour** (ajout/suppression/RAZ avec confirmation) — **sauvegarde en base, seules les lignes renseignees sont conservees**
+- Compteurs de tour (clic = +1, clic droit / appui long = reset, cycle modulo 5) — **sauvegardes en base**
+- **Etat combat en base** : Init. combat, tours et ennemis sont ecrits dans `users.team_state` (debounce 600 ms + toast), restaurs au prochain affichage et **inclus dans l'export/import global JSON** (`team_state`, remap des index vers les nouveaux ids ; fichier ancien sans le champ = remise a zero)
 - Notes d'equipe (sauvegardees en base via l'API, inclues dans l'export/import global JSON)
-- L'onglet Equipe n'est **recharge qu'une fois** par session ; a chaque retour sur l'onglet, les valeurs persos (nom, initiative, AC, PV, details, stats) sont **resynchronisees sur place** depuis la base avec preservation des brouillons (Init. combat / compteurs / ennemis) ; **rechargement complet de la page** si la composition change (create / delete / toggle / import) ; PV synchronises bidirectionnellement Equipe <-> fiche ouverte
+- L'onglet Equipe n'est **recharge qu'une fois** par session ; a chaque retour sur l'onglet, les valeurs persos (nom, initiative, AC, PV, details, stats) sont **resynchronisees sur place** depuis la base, l'**etat combat** (Init. combat / compteurs / ennemis) affiche est conserve car il est deja en base ; **rechargement complet de la page** si la composition change (create / delete / toggle / import) — l'etat combat est alors relu en base ; PV synchronises bidirectionnellement Equipe <-> fiche ouverte
 
 ### Sauvegarde automatique
 - Debounce 600ms sur tous les champs modifiables
@@ -113,6 +115,7 @@ dcc-sheet/
 ├── osr-icons.js                # Catalogue d'icones Old School (17 images, 7 classes)
 ├── portrait-icons.js           # Registre des sources de portraits (getPortraitSrc)
 ├── marching-order.js           # Logique pure ordre de marche (normalize, export, import)
+├── team-state.js               # Logique pure etat combat equipe (init, tours, ennemis, export, import)
 ├── dead-overlay.js             # Overlay "tete de mort" sur les portraits (PV courants <= 0)
 ├── api/
 │   ├── db.php                  # SQLite3 + helpers (users, characters, session)
@@ -153,6 +156,8 @@ dcc-sheet/
     ├── build.bat               # Script de build (build complet)
     ├── build-diff.bat          # Build differentiel (fichiers modifies depuis le dernier tag)
     ├── _build.ps1              # Script PowerShell de build (-Diff = differentiel)
+    ├── gen-spell-content.bat   # Zip du package minimal dcc-spells-reader (voir ci-dessous)
+    ├── _gen-spell-content.ps1  # Script PowerShell du pack minimal des sorts
     ├── start.bat               # Lanceur PHP dev server
     └── dcc-sheet/              # Dossier de deploiement (genere par build.bat)
 ```
@@ -173,6 +178,8 @@ dcc-sheet/
 | `save_team_notes` | POST | `notes` | Sauvegarde les notes d'equipe (100 Ko max) |
 | `get_marching_order` | GET | — | Retrouve l'ordre de marche `{ok, order}` (JSON texte, defaut `{}`) |
 | `save_marching_order` | POST | `order` | Sauvegarde l'ordre de marche `{ok}` (positions 0..8 uniques, 2 Ko max) |
+| `get_team_state` | GET | — | Retrouve l'etat combat de l'equipe `{ok, state}` (init. combat, tours, ennemis) |
+| `save_team_state` | POST | `state` | Sauvegarde l'etat combat de l'equipe `{ok}` (nettoyage serveur, 32 Ko max) |
 
 ### Personnages (`api/characters.php`)
 
@@ -262,6 +269,15 @@ build-diff.bat
 ```
 
 Cree `deploy/dcc-sheet-diff/` avec uniquement les fichiers **modifies / ajoutes depuis le dernier tag** (meme exclusions que le build complet) + `CHANGES.txt` (listes Modified / Added / Deleted ; les suppressions sont a retirer manuellement sur le serveur). Le tag source est detecte dynamiquement (`git describe --tags --abbrev=0`).
+
+**Pack minimal des sorts** :
+
+```bash
+cd deploy
+gen-spell-content.bat
+```
+
+Genere `deploy/dcc-spells-reader-minimal.zip` a partir du dossier frere `../dcc-spells-reader` : uniquement `spell-translation.js`, `content/anchors.js` et les pages `content/127..303` + `322..356` utilisees par `spell-reader.js` (le trou 304-321 est saute). Le zip contient un dossier `dcc-spells-reader/` a sa racine : en le decompressant **a cote** de `dcc-sheet`, on recree le voisinage attendu. Sortie ignoree par git (`.gitignore`).
 
 ## Dependances
 

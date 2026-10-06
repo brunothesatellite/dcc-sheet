@@ -28,7 +28,8 @@ function getDB() {
         created_at TEXT DEFAULT (datetime(\'now\')),
         last_activity_at TEXT DEFAULT NULL,
         team_notes TEXT NOT NULL DEFAULT \'\',
-        marching_order TEXT NOT NULL DEFAULT \'{}\'
+        marching_order TEXT NOT NULL DEFAULT \'{}\',
+        team_state TEXT NOT NULL DEFAULT \'{}\'
     )');
     try {
         $db->exec('ALTER TABLE users ADD COLUMN team_notes TEXT NOT NULL DEFAULT \'\'');
@@ -37,6 +38,11 @@ function getDB() {
     }
     try {
         $db->exec('ALTER TABLE users ADD COLUMN marching_order TEXT NOT NULL DEFAULT \'{}\'');
+    } catch (Exception $e) {
+        // Colonne deja presente sur une base existante
+    }
+    try {
+        $db->exec('ALTER TABLE users ADD COLUMN team_state TEXT NOT NULL DEFAULT \'{}\'');
     } catch (Exception $e) {
         // Colonne deja presente sur une base existante
     }

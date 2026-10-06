@@ -3,7 +3,7 @@
 
 **BUGS**
 *Critique*
-* Dans l'onglet Equipe : sauver dans la BD l'init et rounds de l'équipe, ainsi que la configuration des ennemis (noms, valeurs, etc. et round)
+* N/A — État combat de l'onglet Équipe (Init. combat, tours, ennemis) désormais en base (`users.team_state`) + export/import JSON `team_state` (livré le 6 octobre 2026)
 
 
 *Majeur*

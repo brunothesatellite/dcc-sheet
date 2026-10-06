@@ -320,6 +320,18 @@
     await api('auth.php', { method: 'POST', body: { action: 'save_marching_order', order: order || {} } });
   }
 
+  /* --- Etat combat de l'equipe (serveur) : init. combat, tours, ennemis --- */
+
+  async function getTeamState() {
+    var res = await api('auth.php', { method: 'GET', data: { action: 'get_team_state' } });
+    if (res && res.state && typeof res.state === 'object' && !Array.isArray(res.state)) return res.state;
+    return {};
+  }
+
+  async function saveTeamState(state) {
+    await api('auth.php', { method: 'POST', body: { action: 'save_team_state', state: state || {} } });
+  }
+
   async function loadTeamNotesWithMigration() {
     var notes = await getTeamNotes();
 
@@ -404,6 +416,16 @@
           if (Object.keys(exportOrder).length > 0) exportObj.marching_order = exportOrder;
         }
       } catch (e) { /* export maintenu meme si l'ordre de marche echoue */ }
+
+      /* Etat combat de l'equipe : init. combat/tours indexes (ids non stables),
+         ennemis tels quels. Champ absent si rien a exporter. */
+      try {
+        if (window.DCCTeamState) {
+          var rawTeamState = await getTeamState();
+          var exportState = window.DCCTeamState.buildExport(rawTeamState, exportEntries);
+          if (exportState) exportObj.team_state = exportState;
+        }
+      } catch (e) { /* export maintenu meme si l'etat echoue */ }
 
       var json = JSON.stringify(exportObj, null, 2);
       var blob = new Blob([json], { type: 'application/json' });
@@ -511,6 +533,22 @@
             if (activeIds.length > 0) await saveMarchingOrder(importedOrder);
           } catch (e) {
             showToast('Erreur sauvegarde ordre de marche', 'error');
+          }
+        }
+
+        /* Etat combat (init. combat, tours, ennemis) : remap index du fichier
+           vers les nouveaux ids ; absent/invalide → remise à zéro (l'import
+           remplace tout, comme pour un jeu neuf) */
+        if (window.DCCTeamState) {
+          try {
+            var importedState = null;
+            if (Object.prototype.hasOwnProperty.call(obj, 'team_state')) {
+              importedState = window.DCCTeamState.remapImport(obj.team_state, createdIds);
+            }
+            if (!importedState) importedState = window.DCCTeamState.sanitize(null);
+            await saveTeamState(importedState);
+          } catch (e) {
+            showToast('Erreur sauvegarde état équipe', 'error');
           }
         }
 
@@ -762,7 +800,8 @@
   }
 
   /* Resynchronisation sans re-render : les valeurs persos viennent de la base,
-     les champs non sauvegardés (Init. combat, tours, ennemis) sont préservés.
+     l'état combat (Init. combat, tours, ennemis) affiché est préservé — il est
+     en base, la prochaine saisie le ré-écrira.
      Composition changée → rechargement complet de la page. */
   async function resyncEquipe(panel) {
     if (!window.DCCModules || !window.DCCModules.equipe ||
@@ -798,8 +837,8 @@
 
       if (prevIds !== null && alreadyRendered) {
         if (prevIds !== freshIds) {
-          /* Composition modifiée : rechargement complet (perte des champs
-             non sauvegardés, comme un rafraîchissement de page) */
+          /* Composition modifiée : rechargement complet (relecture de l'état
+             combat en base, comme un rafraîchissement de page) */
           location.reload();
           return;
         }
@@ -833,9 +872,17 @@
         } catch (e) { /* lecture echouee : grille reconstruite localement */ }
       }
 
+      /* Etat combat : Init. combat, tours, ennemis déclarés */
+      var teamState = null;
+      if (window.DCCTeamState) {
+        try {
+          teamState = window.DCCTeamState.normalize(await getTeamState(), allChars);
+        } catch (e) { /* lecture échouée : état à zéro */ }
+      }
+
       if (window.DCCModules && window.DCCModules.equipe) {
         window.DCCModules.equipe.render(panel, allChars, syncPVFromEquipe, notes, saveTeamNotes,
-          marchingOrder, onSaveMarchingOrder);
+          marchingOrder, onSaveMarchingOrder, teamState, onSaveTeamState);
         panel.setAttribute('data-equipe-loaded', '1');
         panel.setAttribute('data-expedition-ids', freshIds);
       }
@@ -851,6 +898,15 @@
       showToastSave();
     } catch (e) {
       showToast('Erreur sauvegarde ordre de marche', 'error');
+    }
+  }
+
+  async function onSaveTeamState(state) {
+    try {
+      await saveTeamState(state);
+      showToastSave();
+    } catch (e) {
+      showToast('Erreur sauvegarde état équipe', 'error');
     }
   }
 

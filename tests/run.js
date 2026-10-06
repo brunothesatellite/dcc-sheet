@@ -14,6 +14,7 @@ const suites = [
   require('./08-portrait-picker.test'),
   require('./09-spell-reader.test'),
   require('./10-dead-overlay.test'),
+  require('./11-team-state.test'),
 ];
 
 function pad(s, n) {

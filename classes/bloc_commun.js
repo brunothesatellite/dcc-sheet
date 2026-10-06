@@ -45,7 +45,7 @@ window.DCCModules.blocCommun = {
             <div class="combat-box">
               <div class="section-bar">Combat</div>
               <div class="combat-field"><label>Initiative:</label><input type="text" data-key="${k('initiative')}" value="${v('initiative')}" placeholder="0"></div>
-              <div class="combat-field"><label>Dés(s) d'action:</label><input type="text" data-key="${k('des_action')}" value="${v('des_action')}" placeholder="1d20"></div>
+              <div class="combat-field"><label>Dé(s) d'action:</label><input type="text" data-key="${k('des_action')}" value="${v('des_action')}" placeholder="1d20"></div>
               <div class="combat-field"><label>Attaque:</label><input type="text" data-key="${k('attaque')}" value="${v('attaque')}" placeholder="+0"></div>
               <div class="combat-field"><label>Dés critique:</label><input type="text" data-key="${k('des_critique')}" value="${v('des_critique')}" placeholder="d20"></div>
               <div class="combat-field"><label>Table critique:</label><input type="text" data-key="${k('table_critique')}" value="${v('table_critique')}"></div>

@@ -217,7 +217,7 @@ window.DCCModules.equipe = {
       if (!D) return;
       const dead = D.isDead(pv);
       const tr = container.querySelector('tr[data-char-id="' + id + '"]');
-      if (tr) D.apply(tr.querySelector('img.team-portrait'), dead);
+      if (tr) D.apply(tr.querySelector('.team-portrait'), dead);
       const slot = marchGrid ? marchGrid.querySelector('.marching-slot[data-id="' + id + '"]') : null;
       if (slot) D.apply(slot.querySelector('.marching-portrait'), dead);
     }
@@ -607,10 +607,15 @@ window.DCCModules.equipe = {
             try {
               const pr = window.getPortraitSrc(data.portrait_source || 'dcc', ch.class, data.portrait_index);
               if (pr && pr.src) {
-                portrait = document.createElement('img');
-                portrait.className = 'marching-portrait';
-                portrait.alt = '';
-                portrait.src = pr.src;
+                if (window.DCCPortraitGuard && window.DCCPortraitGuard.isMissing(pr.source)) {
+                  /* Dossier absent : placeholder, aucune requete */
+                  portrait = window.DCCPortraitGuard.placeholder('marching-portrait');
+                } else {
+                  portrait = document.createElement('img');
+                  portrait.className = 'marching-portrait';
+                  portrait.alt = '';
+                  portrait.src = pr.src;
+                }
               }
             } catch (e) { portrait = null; }
           }
@@ -963,14 +968,21 @@ window.DCCModules.equipe = {
           tdClass.setAttribute('aria-controls', detailId);
           const classContent = document.createElement('div');
           classContent.className = 'char-class-content';
-          const img = document.createElement('img');
-          img.className = 'team-portrait';
-          img.alt = '';
+          const guard = window.DCCPortraitGuard;
+          let portraitResult = null;
           if (window.getPortraitSrc) {
-            var portraitResult = window.getPortraitSrc(data.portrait_source || 'dcc', charData.class, data.portrait_index);
-            img.src = portraitResult.src;
+            portraitResult = window.getPortraitSrc(data.portrait_source || 'dcc', charData.class, data.portrait_index);
           }
-          if (img.src) {
+          const missing = !!(portraitResult && guard && guard.isMissing && guard.isMissing(portraitResult.source));
+          const img = missing
+            ? guard.placeholder('team-portrait')
+            : document.createElement('img');
+          if (!missing) {
+            img.className = 'team-portrait';
+            img.alt = '';
+            if (portraitResult) img.src = portraitResult.src;
+          }
+          if (missing || img.src) {
             classContent.appendChild(img);
             applyDead(img, data.points_de_vie);
           }
@@ -1282,11 +1294,13 @@ window.DCCModules.equipe = {
 
         const tdClass = tr.children[1];
         if (tdClass) {
-          const img = tdClass.querySelector('img.team-portrait');
-          if (img && window.getPortraitSrc) {
+          const portraitNode = tdClass.querySelector('.team-portrait');
+          /* Seul un <img> (portrait réel) peut changer de source ; le
+             placeholder reste en place tant que le dossier est absent. */
+          if (portraitNode && portraitNode.tagName === 'IMG' && window.getPortraitSrc) {
             try {
               const pr = window.getPortraitSrc(data.portrait_source || 'dcc', fresh.class, data.portrait_index);
-              if (pr && pr.src) img.src = pr.src;
+              if (pr && pr.src) portraitNode.src = pr.src;
             } catch (e) { /* portrait inchangé */ }
           }
           const label = tdClass.querySelector('.char-class-labels span');

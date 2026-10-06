@@ -241,9 +241,10 @@ function testRoll(r, env, R) {
     r.ok(d.equipement.split('\n').length >= 4,
       tag + ' équipement : 3 objets tirés + métier (' + d.equipement.split('\n').length + ' lignes)');
 
-    /* Trésor : 5d12 */
-    const m = /^5d12 pc = (\d+) pc$/.exec(d.tresor);
-    r.ok(!!m, tag + ' trésor format 5d12 (' + d.tresor + ')');
+    /* Trésor : 5d12 tirés, affichés sous forme de total seul « N pc » */
+    const m = /^(\d+) pc$/.exec(d.tresor);
+    r.ok(!!m, tag + ' trésor = total seul (« N pc ») — got ' + JSON.stringify(d.tresor));
+    r.eq(d.tresor.indexOf('5d12'), -1, tag + ' pas de détail des dés dans le trésor');
     if (m) {
       const total = parseInt(m[1], 10);
       r.ok(total >= 5 && total <= 60, tag + ' trésor entre 5 et 60 (' + total + ')');
@@ -274,7 +275,31 @@ function testRoll(r, env, R) {
 }
 
 /* ------------------------------------------------------------------ *
- * 6. Promotion niveau 0 → niveau 1
+ * 6. Puissance (somme des 6 modificateurs)
+ * ------------------------------------------------------------------ */
+function testPower(r, env, R) {
+  r.eq(R.powerOf({}), 0, 'powerOf({}) = 0');
+  r.eq(R.powerOf(null), 0, 'powerOf(null) = 0');
+  r.eq(R.powerOf({ force: '' }), 0, 'valeur vide = 0');
+  r.eq(R.powerOf({
+    force: '18', agilite: '3', endurance: '17', presence: '5', chance: '8', intelligence: '16',
+  }), 1, 'barème complet : +3 -3 +2 -2 -1 +2 = +1');
+  r.eq(R.powerOf({
+    force: '13', agilite: '14', endurance: '15', presence: '16', chance: '17', intelligence: '18',
+  }), 10, 'toutes les valeurs hautes = +10');
+  r.eq(R.powerOf({
+    force: '3', agilite: '3', endurance: '3', presence: '3', chance: '3', intelligence: '3',
+  }), -18, 'toutes les valeurs basses = -18');
+
+  /* Sur un tirage réel : identique à la somme brute des 6 modificateurs */
+  const d = R.roll(rngFrom(7), env.window.FunnelIcons);
+  const expected = ['force', 'agilite', 'endurance', 'presence', 'chance', 'intelligence']
+    .reduce(function (sum, key) { return sum + R.statMod(d[key]); }, 0);
+  r.eq(R.powerOf(d), expected, 'powerOf(tirage) = somme des 6 modificateurs (' + expected + ')');
+}
+
+/* ------------------------------------------------------------------ *
+ * 7. Promotion niveau 0 → niveau 1
  * ------------------------------------------------------------------ */
 function testPromote(r, env, R) {
   const funnel = env.window.FunnelIcons;
@@ -324,7 +349,7 @@ function testPromote(r, env, R) {
 }
 
 /* ------------------------------------------------------------------ *
- * 7. Fiche classes/lvl0.js
+ * 8. Fiche classes/lvl0.js
  * ------------------------------------------------------------------ */
 function testSheet(r) {
   const env = createEnv();
@@ -376,7 +401,7 @@ function testSheet(r) {
 }
 
 /* ------------------------------------------------------------------ *
- * 8. Registre des portraits : la source funnel est bien branchée
+ * 9. Registre des portraits : la source funnel est bien branchée
  * ------------------------------------------------------------------ */
 function testPortraitRegistry(r) {
   const env = createEnv();
@@ -413,7 +438,7 @@ function testPortraitRegistry(r) {
 }
 
 /* ------------------------------------------------------------------ *
- * 9. Câblage : index.html, style.css, script.js, API
+ * 10. Câblage : index.html, style.css, script.js, API
  * ------------------------------------------------------------------ */
 function testWiring(r) {
   const html = read('index.html');
@@ -423,10 +448,11 @@ function testWiring(r) {
   r.ok(iVoleur !== -1 && iLvl0 !== -1 && iLvl0 > iVoleur,
     'onglet « Niveau 0 » placé après Voleur');
 
-  r.ok(html.indexOf('id="btn-lvl0-mobile"') !== -1, 'pastille mobile « Lvl 0 » dans le topbar');
-  r.ok(html.indexOf('class="logo">Dungeon Crawl Classics</a>') < html.indexOf('id="btn-lvl0-mobile"'),
-    'pastille à droite du titre');
-  r.ok(html.indexOf('title="Niveau 0">Lvl 0</button>') !== -1, 'libellé de la pastille');
+  /* L'onglet « Niveau 0 » est visible en mobile : la pastille a disparu */
+  r.eq(html.indexOf('id="btn-lvl0-mobile"'), -1, 'pastille mobile « Lvl 0 » retirée du topbar');
+  r.ok(html.indexOf('>Niveau 0</span>') !== -1, 'onglet : libellé long « Niveau 0 » (desktop)');
+  r.ok(html.indexOf('>Niv 0</span>') !== -1, 'onglet : libellé court « Niv 0 » (mobile)');
+  r.eq(html.indexOf('Lvl 0'), -1, 'plus de libellé « Lvl 0 » dans l\'application');
 
   ['lvl0-data.js', 'lvl0-roll.js', 'funnel-icons.js'].forEach(function (src) {
     r.ok(html.indexOf('<script src="' + src + '"></script>') !== -1, 'index.html charge ' + src);
@@ -437,11 +463,12 @@ function testWiring(r) {
     'lvl0-roll.js chargé avant script.js');
 
   const css = read('style.css');
-  ['.tab-lvl0', '.btn-lvl0-mobile', '.btn-reroll', '.btn-promote', '.promo-class-list',
+  ['.tab-lbl-short', '.btn-reroll', '.btn-promote', '.promo-class-list',
     '.promo-class-row', '.promo-delete-row'].forEach(function (sel) {
     r.ok(css.indexOf(sel + ' {') !== -1 || css.indexOf(sel + ',') !== -1,
       'style.css contient ' + sel);
   });
+  r.eq(css.indexOf('.btn-lvl0-mobile'), -1, 'styles de la pastille « Lvl 0 » supprimés');
   const titleBlock = css.match(/\.sheet-title \{[^}]+\}/);
   r.ok(!!titleBlock, '.sheet-title block found');
   if (titleBlock) {
@@ -455,8 +482,21 @@ function testWiring(r) {
     r.ok(headerBlock[0].indexOf('flex-wrap: wrap') !== -1,
       '.sheet-header autorise le passage à la ligne');
   }
-  const mobileRule = css.match(/\.tab-lvl0 \{\s*display: none;/);
-  r.ok(!!mobileRule, 'onglet masqué en mobile (pastille le remplace)');
+
+  /* Badge de puissance : bras en rouge à droite du nom (fiche lvl0) */
+  r.ok(css.indexOf('.lvl0-power') !== -1, 'style.css contient .lvl0-power');
+  r.ok(/\.lvl0-power \{[^}]*color: var\(--red\)/s.test(css), 'badge de puissance en rouge');
+  r.ok(/\.lvl0-power-value \{[^}]*font-weight: 800/s.test(css), 'valeur de puissance en gras');
+  /* En mobile, les 8 onglets doivent tenir : barre + onglets resserrés,
+     libellé court « Niv 0 » pour le Niveau 0 */
+  r.eq(/\.tab-lvl0 \{\s*display: none;/.test(css), false,
+    'onglet Niveau 0 visible en mobile');
+  r.ok(/\.tab \{\s*flex: 1 1 0;\s*min-width: 0;\s*padding: 9px 2px;\s*font-size: 11px;[^}]*text-overflow: ellipsis;/s.test(css),
+    'onglets à largeur maximale + troncature en mobile (flex:1, 11px, ellipsis)');
+  r.ok(/\.tab-bar \{\s*padding: 4px 4px;\s*gap: 1px;\s*overflow-x: hidden;/s.test(css),
+    'barre d\'onglets sans défilement horizontal en mobile');
+  r.ok(/\.tab-lbl-short \{\s*display: inline;/.test(css), 'libellé court actif en mobile');
+  r.ok(/\.tab-lbl-full \{\s*display: none;/.test(css), 'libellé long masqué en mobile');
   /* En PC l'onglet a le style commun des classes : pas d'accent « Equipe » */
   r.eq(css.indexOf('.tab-lvl0:hover'), -1, 'pas d\'accent hover sur l\'onglet Niveau 0');
   r.eq(css.indexOf('.tab-lvl0.active'), -1, 'pas d\'accent actif sur l\'onglet Niveau 0');
@@ -471,10 +511,21 @@ function testWiring(r) {
   r.ok(iToggle !== -1 && iTitle !== -1 && iToggle < iTitle,
     'nom ajouté après les boutons dans l\'en-tête');
   r.ok(js.indexOf('className: \'sheet-title\'') !== -1, 'nom du personnage en .sheet-title');
-  ['rerollLvl0', 'promoteLvl0', 'showPromoteModal', 'randomPortraitFor',
-    "switchTab('lvl0')"].forEach(function (needle) {
+
+  /* Badge « puissance » (bras rouge + somme des mods) : fiche lvl0 uniquement */
+  r.eq(js.split('function buildLvl0Power').length - 1, 1, 'buildLvl0Power défini une seule fois');
+  r.ok(js.indexOf('title.appendChild(buildLvl0Power(charData))') !== -1,
+    'badge ajouté à droite du nom de la fiche lvl0');
+  r.ok(/if \(cls === 'lvl0'\) title\.appendChild\(buildLvl0Power/.test(js),
+    'badge conditionné à la classe lvl0');
+  r.ok(!/createCharCard[\s\S]{0,2500}lvl0-power/.test(js),
+    'badge absent des cartes de la liste');
+  r.ok(js.indexOf('LVL0_POWER_ICON') !== -1 && js.indexOf('fill="currentColor"') !== -1,
+    'icône de bras en SVG (couleur héritée)');
+  ['rerollLvl0', 'promoteLvl0', 'showPromoteModal', 'randomPortraitFor'].forEach(function (needle) {
     r.ok(js.indexOf(needle) !== -1, 'script.js contient ' + needle);
   });
+  r.eq(js.indexOf('btn-lvl0-mobile'), -1, 'plus de branchement de pastille « Lvl 0 »');
   /* Le pied de modale doit réutiliser la classe standard : sinon les boutons
      perdent la mise en forme de `.modal-actions button` (padding, font, case) */
   r.ok(js.indexOf("className: 'modal-actions'") !== -1,
@@ -523,7 +574,7 @@ module.exports = async function suite() {
   if (!R) return r;
 
   ['statMod', 'formatMod', 'formatBonus', 'raceOf', 'movementOf', 'languesOf', 'notesOf',
-    'allowedClasses', 'weaponInfo', 'portraitIndexFor', 'roll', 'promote'].forEach(function (fn) {
+    'allowedClasses', 'weaponInfo', 'portraitIndexFor', 'powerOf', 'roll', 'promote'].forEach(function (fn) {
     r.ok(typeof R[fn] === 'function', 'DCCLvl0Roll.' + fn + ' est une fonction');
   });
 
@@ -532,6 +583,7 @@ module.exports = async function suite() {
   testRace(r, R);
   testWeapons(r, R);
   testRoll(r, env, R);
+  testPower(r, env, R);
   testPromote(r, env, R);
   testSheet(r);
   testPortraitRegistry(r);

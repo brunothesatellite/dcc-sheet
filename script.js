@@ -254,6 +254,43 @@
     return '';
   }
 
+  /* ---------------------------------------------------------------------
+     Garde des portraits (portrait-guard.js, module optionnel) :
+     si un dossier de la source n'est pas installe sur le serveur (droits),
+     on affiche un placeholder « Aucune image disponible » au lieu de
+     demander une image en 404. Inconnu (icons.php absent/en echec) ->
+     on affiche les images, comportement historique.
+     --------------------------------------------------------------------- */
+  var portraitGuardReady = null;
+
+  function initPortraitGuard() {
+    if (!window.DCCPortraitGuard) return Promise.resolve();
+    if (!portraitGuardReady) {
+      portraitGuardReady = getAvailableIconDirs().then(function (dirs) {
+        window.DCCPortraitGuard.setDirs(dirs);
+        sweepPortraits();
+        return dirs;
+      });
+    }
+    return portraitGuardReady;
+  }
+
+  /* Balayage du DOM deja rendu (course avec le premier affichage) : remplace
+     tout <img> pointant vers un dossier absent. Le portrait de la fiche
+     garde son libelle visible, les vignettes un libelle via aria/title. */
+  function sweepPortraits() {
+    if (!window.DCCPortraitGuard) return;
+    $$('img').forEach(function (img) {
+      var src = img.getAttribute('src') || '';
+      if (!src || src.indexOf('data:') === 0 || src.indexOf('http') === 0) return;
+      if (!window.DCCPortraitGuard.isMissingSrc(src)) return;
+      if (!img.parentNode) return;
+      var inSheet = !!(img.closest && img.closest('.portrait-area'));
+      var ph = window.DCCPortraitGuard.placeholder(img.className, { showLabel: inSheet });
+      img.parentNode.replaceChild(ph, img);
+    });
+  }
+
   /* =========================================================================
      6. Auth
      ======================================================================== */
@@ -1059,7 +1096,15 @@
     var nameRow = el('div', { className: 'char-card-name-row' });
     if (window.getPortraitSrc) {
       var portraitResult = window.getPortraitSrc(parsed.portrait_source || 'dcc', cls, parsed.portrait_index);
-      if (portraitResult.src) {
+      var guard = window.DCCPortraitGuard;
+      if (portraitResult.src && guard && guard.isMissing && guard.isMissing(portraitResult.source)) {
+        /* Dossier absent du serveur : placeholder, jamais d'image en 404 */
+        var cardMissing = guard.placeholder('char-card-portrait');
+        nameRow.appendChild(cardMissing);
+        if (window.DCCDeadOverlay) {
+          window.DCCDeadOverlay.apply(cardMissing, window.DCCDeadOverlay.isDead(parsed.points_de_vie));
+        }
+      } else if (portraitResult.src) {
         var cardPortrait = el('img', { className: 'char-card-portrait', src: portraitResult.src, alt: '' });
         nameRow.appendChild(cardPortrait);
         /* PV courants <= 0 : meme "tete de mort" que sur la fiche et dans
@@ -1454,18 +1499,53 @@
     var source = hiddenSource.value || 'dcc';
     var index = parseInt(hiddenIndex.value, 10) || 0;
 
+    /* Rendu pilote par le DOM (et non par une reference figee) : le garde des
+       portraits peut remplacer l'<img> par un placeholder en cours de session. */
     function applyPortrait() {
       var result = window.getPortraitSrc(source, cls, index);
-      img.src = result.src;
       source = result.source;
       index = result.index;
       hiddenSource.value = source;
       hiddenIndex.value = index;
+
+      var guard = window.DCCPortraitGuard;
+      var missing = guard && guard.isMissing && guard.isMissing(source);
+      var currentImg = area.querySelector('[data-portrait-img]');
+      var currentPh = area.querySelector('.portrait-missing');
+
+      if (missing) {
+        /* Dossier absent : aucun src pose -> aucun 404 */
+        if (currentImg) currentImg.style.display = 'none';
+        if (!currentPh) {
+          var ph = guard.placeholder('portrait-img clickable', { showLabel: true });
+          if (currentImg && currentImg.parentNode) {
+            currentImg.parentNode.insertBefore(ph, currentImg.nextSibling);
+          } else {
+            area.appendChild(ph);
+          }
+        }
+      } else {
+        if (currentPh && currentPh.parentNode) currentPh.parentNode.removeChild(currentPh);
+        if (currentImg) {
+          currentImg.style.display = '';
+          currentImg.src = result.src;
+        } else {
+          var fresh = document.createElement('img');
+          fresh.className = 'portrait-img clickable';
+          fresh.setAttribute('data-portrait-img', '');
+          fresh.alt = '';
+          fresh.src = result.src;
+          area.appendChild(fresh);
+        }
+      }
     }
 
     applyPortrait();
 
-    img.addEventListener('click', function () {
+    /* Clic sur la ZONE (et non sur l'<img>) : le listener survit au
+       remplacement de l'image par le placeholder — le clic ouvre alors le
+       sélecteur, qui affichera son propre message si la grille est vide. */
+    area.addEventListener('click', function () {
       showPortraitPicker(cls, source, index).then(function (result) {
         if (!result) return;
         source = result.source;
@@ -1487,7 +1567,8 @@
     if (!window.DCCDeadOverlay) return;
     var panel = $('[data-class="' + cls + '"].tab-panel');
     var viewSheet = panel ? $('.view-sheet', panel) : null;
-    var img = viewSheet ? viewSheet.querySelector('.portrait-area img[data-portrait-img]') : null;
+    var img = viewSheet ? viewSheet.querySelector(
+      '.portrait-area img[data-portrait-img], .portrait-area .portrait-missing') : null;
     if (img) window.DCCDeadOverlay.apply(img, window.DCCDeadOverlay.isDead(pv));
   }
 
@@ -1561,7 +1642,18 @@
         });
       });
 
-      body.appendChild(grid);
+      /* Aucune image affichable (dossier de la source absent du serveur) :
+         message explicite au lieu d'une grille vide */
+      if (grid.children.length === 0) {
+        var emptyEl = document.createElement('div');
+        emptyEl.className = 'portrait-picker-empty';
+        emptyEl.textContent = (window.DCCPortraitGuard && window.DCCPortraitGuard.emptyMessage)
+          ? window.DCCPortraitGuard.emptyMessage(cls)
+          : 'Aucune image disponible.';
+        body.appendChild(emptyEl);
+      } else {
+        body.appendChild(grid);
+      }
 
       picker.appendChild(body);
 
@@ -1651,6 +1743,40 @@
     applySheetDeadOverlay(cls, sheetData.points_de_vie);
   }
 
+  /* Niveau 0 : bras muscule en rouge + somme des 6 modificateurs, a droite du
+     nom — UNIQUEMENT dans l'en-tete de fiche (jamais sur les cartes ni en Equipe) */
+  var LVL0_POWER_ICON =
+    '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" fill="currentColor">' +
+      '<ellipse cx="6.6" cy="13.4" rx="4.9" ry="3.5"/>' +
+      '<rect x="1.4" y="14" width="12.2" height="5.4" rx="2.7"/>' +
+      '<circle cx="13.2" cy="16.7" r="3.1"/>' +
+      '<path d="M15.7 6.2 L20.3 8.8 L15.3 17.8 L10.7 15.2 Z"/>' +
+      '<rect x="15.2" y="1.4" width="7.4" height="7.4" rx="2.4"/>' +
+    '</svg>';
+
+  function buildLvl0Power(charData) {
+    var data0 = {};
+    try { data0 = JSON.parse(charData.data || '{}'); } catch (e) {}
+
+    var power = 0;
+    if (window.DCCLvl0Roll && typeof window.DCCLvl0Roll.powerOf === 'function') {
+      power = window.DCCLvl0Roll.powerOf(data0);
+    }
+
+    var badge = el('span', {
+      className: 'lvl0-power',
+      title: 'Puissance : somme des modificateurs des 6 caractéristiques',
+    });
+    badge.innerHTML = LVL0_POWER_ICON;
+    badge.appendChild(el('span', {
+      className: 'lvl0-power-value',
+      textContent: (window.DCCLvl0Roll && typeof window.DCCLvl0Roll.formatMod === 'function')
+        ? window.DCCLvl0Roll.formatMod(power)
+        : String(power),
+    }));
+    return badge;
+  }
+
   function createSheetHeader(cls, charData) {
     var isActive = charData.is_active === 1;
 
@@ -1668,6 +1794,9 @@
       className: 'sheet-title',
       textContent: charData.name || 'Sans nom',
     });
+
+    /* Niveau 0 uniquement : badge de puissance a droite du nom */
+    if (cls === 'lvl0') title.appendChild(buildLvl0Power(charData));
 
     var exportBtn = el('button', {
       className: 'btn-export',
@@ -2016,6 +2145,10 @@
   function init() {
     initTheme();
 
+    /* Detection des dossiers de portraits des le demarrage : le premier
+       affichage attend ce resultat (pas de 404 au premier rendu). */
+    initPortraitGuard();
+
     var themeBtn = $('.theme-toggle');
     if (themeBtn) {
       themeBtn.addEventListener('click', toggleTheme);
@@ -2032,14 +2165,6 @@
     if (btnEquipeMobile) {
       btnEquipeMobile.addEventListener('click', function () {
         switchTab('equipe');
-      });
-    }
-
-    /* Pastille "Lvl 0" (mobile) : a droite du titre de l'application */
-    var btnLvl0Mobile = $('#btn-lvl0-mobile');
-    if (btnLvl0Mobile) {
-      btnLvl0Mobile.addEventListener('click', function () {
-        switchTab('lvl0');
       });
     }
 
@@ -2089,6 +2214,14 @@
         var spinner = $('#loading-spinner');
         if (spinner) spinner.classList.remove('hidden');
       }, 500);
+
+      /* Garde des portraits : on attend (3 s max) la liste des dossiers pour
+         ne pas poser d'image en 404 au premier rendu ; au-delà on affiche et
+         le balayage de initPortraitGuard corrige des que la reponse arrive. */
+      await Promise.race([
+        initPortraitGuard(),
+        new Promise(function (resolve) { setTimeout(resolve, 3000); }),
+      ]);
 
       await switchTab(activeTab);
       hideSpinner();

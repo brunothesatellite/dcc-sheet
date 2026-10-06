@@ -16,6 +16,7 @@ const suites = [
   require('./10-dead-overlay.test'),
   require('./11-team-state.test'),
   require('./12-lvl0.test'),
+  require('./13-portrait-guard.test'),
 ];
 
 function pad(s, n) {

@@ -269,7 +269,7 @@
 
       armes: metierRow.arme || '',
       equipement: equipItems.join('\n'),
-      tresor: '5d12 pc = ' + tresor + ' pc',
+      tresor: tresor + ' pc',
       armure: '',
 
       portrait_source: 'funnel',
@@ -277,6 +277,22 @@
 
       notes: notesOf(metier),
     };
+  }
+
+  /* ---------------------------------------------------------- puissance */
+
+  /* Somme des modificateurs des 6 caractéristiques : indicateur de synthese
+     affiche en rouge a droite du nom sur la fiche de niveau 0 (et nulle part
+     ailleurs) pour juger d'un coup d'oeil la puissance d'un tirage. */
+  var POWER_STATS = ['force', 'agilite', 'endurance', 'presence', 'chance', 'intelligence'];
+
+  function powerOf(data0) {
+    var sum = 0;
+    data0 = data0 || {};
+    POWER_STATS.forEach(function (key) {
+      sum += statMod(data0[key]);
+    });
+    return sum;
   }
 
   /* ---------------------------------------------------------- promotion */
@@ -319,6 +335,7 @@
     firstDie: firstDie,
     weaponInfo: weaponInfo,
     damageWithMod: damageWithMod,
+    powerOf: powerOf,
     portraitIndexFor: portraitIndexFor,
     roll: roll,
     promote: promote,

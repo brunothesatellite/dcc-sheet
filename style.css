@@ -311,6 +311,12 @@ ul, ol {
   display: none;
 }
 
+/* Libellé responsive de l'onglet Niveau 0 : « Niv 0 » en mobile (cf. 600px)
+   pour que les 8 onglets tiennent sans défilement horizontal */
+.tab-lbl-short {
+  display: none;
+}
+
 .tab {
   flex-shrink: 0;
   padding: 8px 20px;
@@ -718,6 +724,29 @@ ul, ol {
   flex: 1 1 100%;
   min-width: 0;
   overflow-wrap: anywhere;
+}
+
+/* Niveau 0 : bras muscule (rouge) + somme des 6 modificateurs, a droite du
+   nom — present uniquement dans l'en-tete de la fiche de niveau 0 */
+.lvl0-power {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 14px;
+  color: var(--red);
+  vertical-align: middle;
+}
+
+.lvl0-power svg {
+  display: block;
+}
+
+.lvl0-power-value {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--red);
 }
 
 .sheet-header .toggle-inn {
@@ -1856,34 +1885,10 @@ button.section-bar.collapse-toggle[aria-expanded="true"] .chev {
 }
 
 /* --------------------------------------------------------------------------
-   Niveau 0 (funnel) : pastille mobile, boutons de fiche, promotion
+   Niveau 0 (funnel) : boutons de fiche, promotion
    (l'onglet utilise le style commun des onglets de classe, comme Voleur ;
    il n'a PAS l'accent de l'onglet Equipe)
    -------------------------------------------------------------------------- */
-
-/* Pastille "Lvl 0" : visible uniquement en mobile (cf. media query 600px) */
-.btn-lvl0-mobile {
-  display: none;
-  align-items: center;
-  justify-content: center;
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 18px;
-  background: var(--tab-active);
-  color: #fff;
-  border: none;
-  font-family: var(--font-heading);
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: filter 0.2s;
-}
-
-.btn-lvl0-mobile:hover {
-  filter: brightness(1.1);
-}
 
 /* Fiche de niveau 0 : « Autre tirage » (session de tirage) / Promouvoir */
 .btn-reroll,
@@ -2606,15 +2611,32 @@ tr.team-stats-detail.open .team-detail-wrap {
     max-width: calc(100vw - 1rem);
   }
 
+  /* Les 8 onglets prennent TOUTE la largeur disponible : chaque onglet a sa
+     part (flex) et la barre ne défile plus horizontalement */
   .tab-bar {
-    padding: 4px 10px;
-    gap: 2px;
+    padding: 4px 4px;
+    gap: 1px;
+    overflow-x: hidden;
   }
 
   .tab {
-    padding: 6px 12px;
-    font-size: 12px;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 9px 2px;
+    font-size: 11px;
     letter-spacing: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Libellé court pour l'onglet Niveau 0 (le texte complet reste dans le DOM) */
+  .tab-lbl-full {
+    display: none;
+  }
+
+  .tab-lbl-short {
+    display: inline;
   }
 
   .main {
@@ -2644,6 +2666,20 @@ tr.team-stats-detail.open .team-detail-wrap {
     font-size: 16px;
     flex: 1 1 100%;
     order: 1;
+  }
+
+  /* Niveau 0 : badge de puissance plus compact sur mobile */
+  .lvl0-power {
+    margin-left: 8px;
+  }
+
+  .lvl0-power svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .lvl0-power-value {
+    font-size: 16px;
   }
 
   .btn-back {
@@ -2957,14 +2993,6 @@ tr.team-stats-detail.open .team-detail-wrap {
   }
 
   .btn-equipe-mobile {
-    display: flex;
-  }
-
-  .tab-lvl0 {
-    display: none;
-  }
-
-  .btn-lvl0-mobile {
     display: flex;
   }
 
@@ -3650,3 +3678,47 @@ html:not(.has-spell-reader) .spell-lookup,
   }
 }
 
+
+/* --------------------------------------------------------------------------
+   Portraits indisponibles (dossier absent du serveur : droits)
+   Placeholder sans requete, qui reprend les dimensions de l'image remplacee
+   (classes combinees : 'portrait-img' / 'char-card-portrait' / ...).
+   -------------------------------------------------------------------------- */
+.portrait-missing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: var(--field-bg);
+  border: 1px dashed var(--input-border);
+  color: var(--muted);
+  text-align: center;
+  overflow: hidden;
+}
+
+.portrait-missing svg {
+  width: 46%;
+  height: 46%;
+  flex: none;
+  opacity: 0.55;
+}
+
+.portrait-missing-text {
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  line-height: 1.2;
+  padding: 0 8px;
+}
+
+/* Selecteur de portraits sans aucune image affichable */
+.portrait-picker-empty {
+  padding: 28px 16px;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted);
+}

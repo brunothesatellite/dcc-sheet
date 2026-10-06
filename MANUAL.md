@@ -128,7 +128,6 @@ Tous vos personnages sont supprimés avec le compte : vous êtes redirigé vers 
 ### La barre supérieure (topbar)
 
 - **Bouton ⚔** : ouvre l'onglet **Equipe** — affiché uniquement en basse résolution (≤ 600 px), où l'onglet lui-même est masqué.
-- **Pastille « Lvl 0 »** : ouvre l'onglet **Niveau 0** — elle aussi réservée à la basse résolution (≤ 600 px), placée **à droite du titre**.
 - **Texte « Dungeon Crawl Classics »**
 - **Bouton ☾ / ☀** : bascule le thème sombre/clair (§ 9).
 - **Avatar** : menu utilisateur (une fois connecté) — ou boutons **Connexion / Inscription** sinon.
@@ -138,7 +137,7 @@ Tous vos personnages sont supprimés avec le compte : vous êtes redirigé vers 
 
 9 onglets : **Equipe** (rouge, en premier et en haut) puis en dessous les 7 classes : **Clerc, Elfe, Guerrier, Halfelin, Mage, Nain, Voleur**, et enfin **Niveau 0** — qui reprend le **style commun des onglets de classe** (pas l'accent de l'onglet Équipe).
 
-> En basse résolution (≤ 600 px), les onglets **Equipe** et **Niveau 0** sont masqués : on y accède par l'**icône ⚔** (haut gauche) et la **pastille « Lvl 0 »** (à droite du titre) de la barre supérieure.
+> En basse résolution (≤ 600 px), seul l'onglet **Equipe** est masqué : on y accède par l'**icône ⚔** (haut gauche de la barre supérieure). Les **8 autres onglets occupent toute la largeur de l'écran**, chacun avec sa part égale (`flex: 1`) : **aucun défilement horizontal**. **Niveau 0** s'affiche sous sa forme courte **« Niv 0 »**, la police passe à 11 px et un libellé trop long est tronqué par des points de suspension.
 
 - L'onglet actif est **mémorisé** dans le navigateur : à votre prochaine visite, c'est lui qui s'ouvre.
 - Cliquer sur un onglet charge aussitôt la liste des personnages de cette classe.
@@ -255,7 +254,7 @@ Le champ **Nom** de la fiche met à jour le titre de la carte dans la liste. Les
 L'onglet **Niveau 0** gère les personnages du *funnel* DCC, ceux qui existent avant de choisir une classe.
 
 **Tirer un personnage**
-1. Ouvrez l'onglet **Niveau 0** (en basse résolution : pastille **« Lvl 0 »** à droite du titre).
+1. Ouvrez l'onglet **Niveau 0** — en mobile, il s'affiche sous sa forme courte **« Niv 0 »**, juste après *Voleur* (les 8 onglets partagent toute la largeur : aucun défilement).
 2. Cliquez sur **+ Nouveau** : un personnage complet est tiré au sort — nom, métier (avec son arme et son équipement), 6 caractéristiques en 3d6 et leurs modificateurs, CA, PV, initiative, jet chanceux, langues, notes, équipement, trésor de 5d12 pc et un portrait tiré selon le métier.
 3. La fiche s'ouvre aussitôt : elle contient **uniquement le bloc commun et les Notes**, **sans dé de vie** dans le bouclier PV (les niveaux 0 n'en ont pas).
 
@@ -276,6 +275,7 @@ L'onglet **Niveau 0** gère les personnages du *funnel* DCC, ceux qui existent a
 4. À la validation, un **nouveau personnage de niveau 1** est créé dans la classe choisie : **la fiche est recopiée intégralement** — identité (nom, titre, métier, alignement, mouvement), caractéristiques et modificateurs, **jets de sauvegarde (JS Ref / Vig / Vol)**, bonus d'attaque, dés et table de critique, initiative, jet chanceux, langues, notes, armes, équipement, trésor, armure, PV et CA. **Seul le portrait est retiré** : un nouveau est tiré dans ceux de la classe. Vérifiez simplement les valeurs héritées du funnel qui dépendent de la classe (bonus d'attaque, dé de critique) : elles sont conservées telles quelles. La fiche du personnage promu s'ouvre directement.
 
 **Bon à savoir**
+- **Puissance** : à droite du nom dans l'en-tête de la fiche, un **bras musclé rouge** suivi de la **somme des modificateurs des 6 caractéristiques** (ex. `+3`) — repère rapide pour juger la qualité d'un tirage. Ce badge n'existe que sur la fiche de niveau 0.
 - La carte de la liste affiche le **métier** en sous-titre (à la place du dieu des Clercs) et le nom suivi de `— Niv.0`.
 - Un niveau 0 **en expédition** entre dans l'**onglet Équipe** comme les autres personnages : PV, initiative, tour, ordre de marche, statistiques.
 - L'export/import **individuel** et **global** (§ 4.4 à 4.6) prennent en charge les niveaux 0 sans rien changer à la procédure.
@@ -325,7 +325,7 @@ Toutes les fiches partagent un **bloc commun** (page 1 + équipement) et ajouten
 
 **En-tête de fiche** — sur **deux lignes** :
 - **Ligne 1** : **◀** (retour à la liste), **Export** (§ 4.4), **Autre tirage** et **Promouvoir** (niveau 0 uniquement, § 4.9), puis l'**interrupteur** expédition/auberge (§ 5).
-- **Ligne 2** : **Nom du personnage**, sur **toute la largeur** — un nom très long ne décale donc plus les boutons de la ligne du dessus.
+- **Ligne 2** : **Nom du personnage**, sur **toute la largeur** — un nom très long ne décale donc plus les boutons de la ligne du dessus. Sur une fiche de **niveau 0** uniquement, à droite du nom s'affiche un **bras musclé rouge** suivi de la **puissance** du personnage : la **somme des modificateurs des 6 caractéristiques** (ex. `+3`, `-1`) — un repère rapide sur la qualité du tirage ; il n'apparaît ni sur les cartes de la liste, ni dans l'onglet Équipe.
 
 **Identité** : Nom, Titre, Métier, Alignement, Mouvement, Niveau, PX.
 > Le champ **Nom** renomme la carte dans la liste.
@@ -444,7 +444,9 @@ Huit sources sont disponibles :
 2. La popup **« Choisir un portrait »** s'ouvre : grille continue de portraits ronds (3 colonnes, 2 sur mobile), le **nom de chaque source** s'affiche **au-dessus du premier portrait** de cette source.
 3. Le portrait courant est **surligné** (bordure accent) et la liste s'y **défile automatiquement**.
 
-> **Dossier absent sur le serveur** : si les images d'une source ne sont pas installées (licence / copyright), cette **source entière n'apparaît pas** dans la popup. Les personnages déjà dotés d'un portrait de cette source le conservent (leur index aussi) : seule une **image brisée** s'affiche tant que les images ne sont pas installées.
+> **Dossier absent sur le serveur** : si les images d'une source ne sont pas installées (licence / copyright), cette **source entière n'apparaît pas** dans la popup — et si la grille ressort vide, la fenêtre affiche **« Aucune image disponible »** (niveau 0 : *« Les portraits de niveau 0 ne sont pas installés sur ce serveur (droits d'image) »*).
+>
+> Partout où un portrait s'affiche (**fiche, cartes de la liste, onglet Équipe, ordre de marche**), un **placeholder** prend la place de l'image : mêmes dimensions, **silhouette en SVG** et mention **« Aucune image disponible »** (visible sous le portrait de la fiche, libellé accessible partout) — **aucune image n'est demandée, donc aucune erreur 404**. Le choix de portrait reste **conservé en base** : il redevient visible si les images sont installées plus tard.
 4. Cliquez sur une image : la popup se ferme, l'image et le choix sont **sauvegardés automatiquement** (toast disquette).
 5. Pour annuler : bouton **✕** (en-tête), bouton **FERMER** (pied), clic en dehors de la fenêtre, ou touche **Échap**.
 
@@ -603,7 +605,7 @@ Si le thème ne « tient » pas après un rechargement : videz le cache du navig
 
 - Fiches : mise en page compacte sur 2 colonnes maintenues, cercles de jets réduits, textes redimensionnables.
 - Tableaux de l'onglet Équipe : lignes et portraits réduits pour tenir en largeur d'écran.
-- **Onglets Équipe et Niveau 0 masqués** : remplaçés par l'**icône ⚔** (haut gauche) et la **pastille « Lvl 0 »** (à droite du titre).
+- **Onglet Équipe masqué** : remplacé par l'**icône ⚔** (haut gauche) ; les **8 autres onglets prennent toute la largeur** (part égale chacun, `flex: 1`, police 11 px, libellé **« Niv 0 »**) — **sans défilement horizontal**.
 - **Règle générale** : l'application se pilote aussi au doigt (clics → taps, clic droit → appui long).
 
 ---
@@ -619,6 +621,7 @@ Si le thème ne « tient » pas après un rechargement : videz le cache du navig
 | Toast **« Erreur sauvegarde »** | Envoi échoué (réseau/serveur) | Rechargez la page, vérifiez la connexion ; rechargez ensuite la fiche pour vérifier les dernières valeurs |
 | Toast **« Import reussi (N persos) »** | Import terminé | Vérifiez les onglets |
 | Spinner prolongé | Serveur lent | Patientez ; en cas de blocage, rechargez |
+| Placeholder **« Aucune image disponible »** (silhouette grise en pointillé) | Dossier de portraits absent du serveur (droits d'image) — fiche, cartes, Équipe, ordre de marche | Installer le dossier d'images concerné ; le choix de portrait est conservé et réapparaîtra |
 | **Crâne rouge** par-dessus un portrait | PV du personnage à **0 ou moins** (liste des cartes, fiche, Équipe, ordre de marche) | Soignez le PJ : l'overlay disparaît dès que ses PV repassent au-dessus de 0 |
 | Message **« Erreur de chargement. »** dans un onglet | Session expirée ou serveur injoignable | Reconnectez-vous (§ 2.2) puis rechargez |
 
@@ -643,7 +646,7 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 - **Les notes d'équipe sont vides sur un autre appareil** : vérifiez d'abord la connexion au bon compte ; en cas de doute, restaurez-les depuis un **Exporter/Importer tout (JSON)** (§ 4.6). Les notes d'un ancien navigateur sont migrées automatiquement en base à la première ouverture de l'onglet Équipe.
 - **Un personnage n'apparaît pas dans l'Équipe** : vérifiez son interrupteur **EN EXPÉDITION** (§ 5), puis rouvrez l'onglet.
 - **Je ne trouve plus l'onglet Équipe** : en basse résolution (≤ 600 px) il est masqué — utilisez l'**icône ⚔** en haut à gauche (§ 8).
-- **Je ne trouve plus l'onglet Niveau 0** : en basse résolution (≤ 600 px) il est masqué — utilisez la **pastille « Lvl 0 »** à droite du titre (§ 4.9).
+- **Je ne trouve plus l'onglet Niveau 0** : en mobile il s'affiche sous la forme courte **« Niv 0 »**, juste après *Voleur* — les 8 onglets partagent toute la largeur, sans défilement (§ 3, § 4.9).
 - **Import global refusé** : le fichier doit contenir au moins un personnage et une `class` valide pour chacun (annexe A).
 - **Pseudo/mot de passe refusé** : pseudo 3-20 caractères (`a-z A-Z 0-9 - _`), mot de passe 6+ ; une ancienne session peut rester active → rechargez la page.
 

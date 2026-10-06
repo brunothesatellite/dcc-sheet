@@ -1554,7 +1554,14 @@ button.section-bar.collapse-toggle[aria-expanded="true"] .chev {
   line-height: 1.4;
 }
 
-
+/* Nom du sort (Mage / Elfe) : doit se lire comme un TITRE, au-dessus de la
+   note de la ligne du dessous. Regle volontairement placee APRES le bloc
+   partage ci-dessus pour le surcharger sans le modifier :
+   tests/02-css.test.js regex ce bloc combine et exige qu'il garde sa bordure. */
+.dtable td.sort-name input {
+  font-size: 14px;
+  font-weight: 700;
+}
 
 .dtable td.sort-fixed {
   text-align: left;
@@ -1570,10 +1577,13 @@ button.section-bar.collapse-toggle[aria-expanded="true"] .chev {
   text-align: center;
 }
 
+/* Note du sort : secondaire par definition (corps plus petit, en retrait),
+   le nom portant la hierarchie. */
 .dtable td.sort-notes textarea {
   resize: vertical;
   min-height: 22px;
   font-size: 11px;
+  color: var(--muted);
 }
 
 .dtable td.row-del {

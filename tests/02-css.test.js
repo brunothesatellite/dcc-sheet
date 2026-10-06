@@ -78,6 +78,23 @@ module.exports = function suite() {
       'shared rule gives the field its border');
   }
 
+  // Section SORTS (Mage / Elfe) : le nom du sort doit se lire comme un titre,
+  // clairement au-dessus de la note de la ligne du dessous.
+  // Les regex ciblent la regle dediee ("input {"), pas le bloc partage
+  // ci-dessus dont la liste de selecteurs se termine par une virgule.
+  const spellName = css.match(/\.dtable td\.sort-name input \{[^}]+\}/);
+  r.ok(!!spellName, 'spell name dedicated block found');
+  if (spellName) {
+    r.ok(spellName[0].indexOf('font-weight: 700') !== -1, 'spell name is bold');
+    r.ok(spellName[0].indexOf('font-size: 14px') !== -1, 'spell name is 14px');
+  }
+  const spellNote = css.match(/\.dtable td\.sort-notes textarea \{[^}]+\}/);
+  r.ok(!!spellNote, 'spell note block found');
+  if (spellNote) {
+    r.ok(spellNote[0].indexOf('font-size: 11px') !== -1, 'spell note stays at 11px');
+    r.ok(spellNote[0].indexOf('color: var(--muted)') !== -1, 'spell note is secondary (muted)');
+  }
+
   const blockMatch = css.match(/\.team-table \.char-class-content \{[^}]+\}/);
   r.ok(!!blockMatch, '.char-class-content block found');
   if (blockMatch) {

@@ -139,6 +139,10 @@ Tous vos personnages sont supprimés avec le compte : vous êtes redirigé vers 
 
 > En basse résolution (≤ 600 px), seul l'onglet **Equipe** est masqué : on y accède par l'**icône ⚔** (haut gauche de la barre supérieure). Les **8 autres onglets occupent toute la largeur de l'écran**, chacun avec sa part égale (`flex: 1`) : **aucun défilement horizontal**. **Niveau 0** s'affiche sous sa forme courte **« Niv 0 »**, la police passe à 11 px et un libellé trop long est tronqué par des points de suspension.
 
+<img src="captures/barremobile.png" alt="Barre d'onglets en mode mobile portrait : les 8 onglets Clerc, Elfe, Guerrier, Halfelin, Mage, Nain, Voleur et Niv 0 occupent toute la largeur de l'écran, l'onglet Équipe étant masqué au profit de l'icône ⚔" width="420">
+
+*La barre en mobile portrait : les 8 onglets partagent toute la largeur, « Niveau 0 » s'affiche sous sa forme courte « Niv 0 », sans défilement.*
+
 - L'onglet actif est **mémorisé** dans le navigateur : à votre prochaine visite, c'est lui qui s'ouvre.
 - Cliquer sur un onglet charge aussitôt la liste des personnages de cette classe.
 
@@ -253,10 +257,18 @@ Le champ **Nom** de la fiche met à jour le titre de la carte dans la liste. Les
 
 L'onglet **Niveau 0** gère les personnages du *funnel* DCC, ceux qui existent avant de choisir une classe.
 
+<img src="captures/onglet0.png" alt="Onglet Niveau 0 : liste des personnages de niveau 0 avec leur portrait, leur nom suivi de Niv.0, leur métier en sous-titre, l'interrupteur expédition / auberge et les boutons + Nouveau et Import" width="420">
+
+*L'onglet **Niveau 0** : cartes avec le métier en sous-titre, boutons **+ Nouveau** (tirage) et **Import**.*
+
 **Tirer un personnage**
 1. Ouvrez l'onglet **Niveau 0** — en mobile, il s'affiche sous sa forme courte **« Niv 0 »**, juste après *Voleur* (les 8 onglets partagent toute la largeur : aucun défilement).
 2. Cliquez sur **+ Nouveau** : un personnage complet est tiré au sort — nom, métier (avec son arme et son équipement), 6 caractéristiques en 3d6 et leurs modificateurs, CA, PV, initiative, jet chanceux, langues, notes, équipement, trésor de 5d12 pc et un portrait tiré selon le métier.
 3. La fiche s'ouvre aussitôt : elle contient **uniquement le bloc commun et les Notes**, **sans dé de vie** dans le bouclier PV (les niveaux 0 n'en ont pas).
+
+<img src="captures/fiche0.png" alt="Fiche de personnage de niveau 0 : en-tête sur deux lignes (retour, Export, Autre tirage, Promouvoir, interrupteur en expédition, puis le nom avec un bras musclé rouge suivi de la somme des modificateurs), bouclier de classe d'armure, casque de points de vie sans dé de vie, caractéristiques et notes" width="420">
+
+*La fiche de niveau 0 : en-tête sur deux lignes, badge **puissance** (bras rouge + somme des modificateurs) à droite du nom, casque **sans dé de vie**.*
 
 **Rejeter un tirage — bouton « Autre tirage »**
 - En haut de la fiche, **Autre tirage** relance un tirage complet et **remplace** le personnage ouvert (nom, métier, caractéristiques, portrait… tout change). Utilisez-le tant que vous n'êtes pas satisfait du résultat.
@@ -273,6 +285,10 @@ L'onglet **Niveau 0** gère les personnages du *funnel* DCC, ceux qui existent a
    Le bouton **Promouvoir** reste inactif tant qu'aucune classe n'est cochée.
 3. La case **« Supprimer le personnage de niveau 0 après la conversion »** est décochée par défaut : elle permet de convertir *sans* garder l'originel.
 4. À la validation, un **nouveau personnage de niveau 1** est créé dans la classe choisie : **la fiche est recopiée intégralement** — identité (nom, titre, métier, alignement, mouvement), caractéristiques et modificateurs, **jets de sauvegarde (JS Ref / Vig / Vol)**, bonus d'attaque, dés et table de critique, initiative, jet chanceux, langues, notes, armes, équipement, trésor, armure, PV et CA. **Seul le portrait est retiré** : un nouveau est tiré dans ceux de la classe. Vérifiez simplement les valeurs héritées du funnel qui dépendent de la classe (bonus d'attaque, dé de critique) : elles sont conservées telles quelles. La fiche du personnage promu s'ouvre directement.
+
+<img src="captures/promo0.png" alt="Fenêtre Promouvoir en niveau 1 : liste des classes à cocher (Clerc, Guerrier, Mage, Voleur), les classes raciales grisées avec le motif, la case Supprimer le personnage de niveau 0 après la conversion, et les boutons Annuler et Promouvoir" width="420">
+
+*La fenêtre **Promouvoir** : le métier impose la classe quand il s'agit d'une race, et le bouton reste inactif tant qu'aucune classe n'est cochée.*
 
 **Bon à savoir**
 - **Puissance** : à droite du nom dans l'en-tête de la fiche, un **bras musclé rouge** suivi de la **somme des modificateurs des 6 caractéristiques** (ex. `+3`) — repère rapide pour juger la qualité d'un tirage. Ce badge n'existe que sur la fiche de niveau 0.
@@ -453,6 +469,10 @@ Huit sources sont disponibles :
 <img src="captures/choix-portrait.png" alt="Popup « Choisir un portrait » : grille continue de portraits ronds, le nom de chaque source affiché au-dessus de son premier portrait" width="420">
 
 *La popup de choix : grille continue (3 colonnes) ; le libellé de chaque source (DCC, Red Box, Leremy Gan, Shadowdark, Jeff Stevens, Gonzo, Old School, Funnel) apparaît au-dessus du premier portrait de la section. Le portrait courant est cerclé de la couleur d'accent.*
+
+<img src="captures/selvide.png" alt="Sélecteur de portraits sans aucune image disponible : la grille est remplacée par le message « Les portraits de niveau 0 ne sont pas installés sur ce serveur (droits d'image) »" width="420">
+
+*Aucune image disponible : si le dossier d'une source n'est pas installé sur le serveur, la grille est remplacée par un message explicite — et aucun portrait n'est demandé au serveur (aucune erreur 404).*
 
 ### 7.2 Où le portrait apparaît
 

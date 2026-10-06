@@ -7,6 +7,10 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 |:-----------:|:-------------:|
 | <img src="captures/clerc.png" alt="Fiche complète d'un personnage Clerc : identité, défense, combat, caractéristiques, portrait, équipement, sorts et notes" width="420"> | <img src="captures/equipe.png" alt="Onglet Équipe : tableau des personnages en expédition avec portraits, détail combat déplié, ennemis et notes" width="420"> |
 
+| Fiche Niveau 0 | Onglet Niveau 0 |
+|:--------------:|:---------------:|
+| <img src="captures/fiche0.png" alt="Fiche de personnage de niveau 0 : en-tête sur deux lignes avec les boutons Export, Autre tirage et Promouvoir, le nom suivi du badge de puissance (bras musclé rouge), le casque de points de vie sans dé de vie, les caractéristiques, l'équipement et les notes" width="420"> | <img src="captures/onglet0.png" alt="Onglet Niveau 0 : liste des personnages de niveau 0 avec portrait, nom suivi de Niv.0, métier en sous-titre, interrupteur expédition / auberge et boutons + Nouveau / Import" width="420"> |
+
 ## Fonctionnalites
 
 ### Authentification
@@ -155,7 +159,7 @@ dcc-sheet/
 │   ├── jeff-stevens/           # 8 planches Jeff Stevens
 │   ├── gonzo/                  # 30 PNG portraits Gonzo (couleur + N&B)
 │   ├── osr/                    # 17 PNG portraits Old School
-│   └── funnel-tokens/          # 75 PNG tokens de niveau 0 + funnel-tokens.json (metier -> images)
+│   └── funnel-tokens/          # 75 PNG tokens de niveau 0 (mapping metier -> images embarque dans funnel-icons.js)
 ├── exemples/                   # Exports JSON d'exemple (equipe complete)
 ├── login.php                   # Page de connexion
 ├── register.php                # Page d'inscription

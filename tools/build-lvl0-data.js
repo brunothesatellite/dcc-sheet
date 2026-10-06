@@ -59,7 +59,14 @@ const fichiers = fs.readdirSync(ICON_DIR)
   .filter(function (f) { return /\.png$/i.test(f); })
   .sort(function (a, b) { return a.localeCompare(b, 'en'); });
 
-const mapping = JSON.parse(fs.readFileSync(path.join(ICON_DIR, 'funnel-tokens.json'), 'utf8'));
+const mappingPath = path.join(ICON_DIR, 'funnel-tokens.json');
+let mapping = { entries: [] };
+if (fs.existsSync(mappingPath)) {
+  mapping = JSON.parse(fs.readFileSync(mappingPath, 'utf8'));
+} else {
+  console.warn('ATTENTION : funnel-tokens.json absent -> byMetier vide, ' +
+    'les portraits seront tires au hasard parmi les 75 tokens.');
+}
 const indexOfFile = {};
 fichiers.forEach(function (f, i) { indexOfFile[f] = i; });
 

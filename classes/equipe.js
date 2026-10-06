@@ -5,7 +5,8 @@ window.DCCModules.equipe = {
     initialState, onSaveTeamState) {
     const CLASS_LABELS = {
       clerc: 'Clerc', elfe: 'Elfe', guerrier: 'Guerrier',
-      halfelin: 'Halfelin', mage: 'Mage', nain: 'Nain', voleur: 'Voleur'
+      halfelin: 'Halfelin', mage: 'Mage', nain: 'Nain', voleur: 'Voleur',
+      lvl0: 'Niv.0'
     };
     let expandedCharacterId = null;
     let expandedStatsId = null;

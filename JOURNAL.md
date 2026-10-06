@@ -1422,3 +1422,60 @@ Dans l'onglet Equipe, la section expedition (INIT. COMBAT + TOUR de chaque perso
 
 - `node tests\run.js` : **846/846 OK, 7 skip** (11 suites : `11-team-state` 73 assertions nouvelle, `07-restore` +14).
 - Vérification visuelle a faire sur `http://localhost:8000` (aucun navigateur connecte a la session de travail).
+
+---
+
+## Date : 6 octobre 2026 — Évolution « Niveau 0 » (branche `evol-level0`)
+
+### Spec, plan et maquettes
+
+- Spec source : `plan0/lvl0-spec.txt` (tirage niveau 0, onglet, fiche simplifiée, promotion).
+- Reformulation, plan d'implémentation et réponses à la question « champs oubliés dans BLOC_COMMUN » : `plan0/PLAN-LVL0.md`.
+- Maquettes HTML statiques validées par l'utilisateur : `plan0/maquettes/` (sommaire `index.html`, onglet, fiche, promotion) — ignorées par git (`.gitignore : maquettes/`), branchées sur le `style.css` réel.
+- Décisions tranchées avec l'utilisateur : pseudo-classe **`lvl0`** en base, pastille « Lvl 0 » en mobile à droite du titre, champ **Attaque = +0**, **JS Ref/Vig/Vol = mods AGI/END/PRE**, détection d'arme de distance par **plage chiffrée `3/6/9`**, bouton **Promouvoir inactif** tant que aucune classe n'est choisie, promotion = **fiche intégrale sauf portrait** (*évolution : après analyse, plus aucun champ n'est vidé*), détection raciale par **« commence par »** elfe/nain/halfelin, niveaux 0 présents dans l'**onglet Équipe**.
+
+### Données (générées)
+
+- `tools/build-lvl0-data.js` : convertit `plan0/noms.txt`, `plan0/metiers.csv`, `plan0/chance.txt`, `plan0/equipement.txt` et `icons/funnel-tokens/funnel-tokens.json` en deux fichiers chargés par `index.html`.
+  - `lvl0-data.js` → `window.DCCLvl0Data` : **862 noms, 100 métiers** (table d100 conservée avec ses doublons pondérés), **30 jets chanceux**, **24 équipements**.
+  - `funnel-icons.js` → `window.FunnelIcons` : catalogue `funnel` (**75 tokens**) + `byMetier` (80 métiers cartographiés → index).
+  - Encodage UTF-8 vérifié (fichiers sources déjà UTF-8, BOM retiré).
+
+### Moteur de tirage (`lvl0-roll.js`, pur, RNG injectable)
+
+- Barème de mods complet, `formatMod` (`+1` / `0` / `-2`).
+- Race par **« commence par »** : mouvement 20 (nain/halfelin), langues (`commun`, `+ elfique/nain/halfelin`), notes (`Infravision`, `Sens très développés et sensibles au fer`), classes autorisées à la promotion.
+- Arme : `ranged` = plage `x/y/z` (3 nombres), premier dé de dégâts, dégâts + mod côté CàC **ou** distance (un seul côté renseigné).
+- `roll()` : CA = 10 + mod AGI, PV = 1d4 + mod END (**plancher 1**, écart documenté dans le plan), initiative `1d20` + mod AGI, attaque `+0`, JS = mods, trésor `5d12 pc = N pc`, portrait indexé par métier (ou tirage libre si métier absent du catalogue), équipement = 3 objets tirés + équipement du métier.
+- `promote()` : recopie identité/caracs/mods/jet chanceux/langues/notes/armes/équipement/trésor/PV/CA/initiative ; **vides** : attaque, dés/table de critique, JS, titre, alignement, armure ; portrait réinitialisé (tiré pour la classe par l'appelant).
+
+### Fiche, onglet et promotion
+
+- `classes/lvl0.js` : `blocCommun.render(..., 'lvl0', ...)` + section **Notes**, **retrait du `.hit-die`** (pas de dé de vie au niveau 0).
+- `index.html` : onglet **Niveau 0** après *Voleur*, pastille **`Lvl 0`** à droite du titre, scripts `funnel-icons.js` (avant `portrait-icons.js`), `lvl0-data.js`, `lvl0-roll.js`.
+- `style.css` : `.tab-lvl0` (masqué hors ≤ 600 px dans la media query — l'onglet garde le style commun des classes), `.btn-lvl0-mobile`, `.btn-reroll`, `.btn-promote`, `.promo-class-list/-row/-why`, `.promo-delete-row`.
+- `script.js` : `CLASSES`/`CLASS_LABELS` += `lvl0` ; création = **tirage** ; carte = **métier** en sous-titre ; en-tête **Export / Autre tirage / Promouvoir** ; `rerollLvl0` (vide le debounce avant relance), `showPromoteModal` (radios, classes raciales interdites grises avec motif, classe raciale présélectionnée, bouton inactif tant qu'aucun choix), `promoteLvl0` (flush + relecture en base, création, suppression optionnelle, ouverture directe), `randomPortraitFor` (portrait tiré dans **toutes** les sources de la classe), pastille mobile branchée, **auto-ouverture désactivée** pour l'onglet Niveau 0 (garder « + Nouveau » accessible).
+- `classes/equipe.js` : libellé `lvl0: 'Niv.0'` ; `api/characters.php` : `'lvl0'` ajouté aux classes valides ; `deploy/_build.ps1` : dossier `plan0` exclu du build.
+- `portrait-icons.js` : **`window.FunnelIcons` ajouté à `PortraitSources`** — sans cela `getPortraitSrc('funnel', 'lvl0', …)` retombait sur le fallback DCC (image absente sur les cartes/fiches/Équipe) et le sélecteur de portraits ne proposait **aucune** image en niveau 0 (bug corrigé en cours de route, couvert par la suite `12-lvl0`).
+- Correctifs de finition : pied de modale **Promouvoir** en `.modal-actions` (classe standard → mêmes styles que les autres boutons de modale, sinon la mise en forme de `.modal-actions button` ne s'appliquait pas) + état `:disabled` stylé pour le bouton, `.promo-class-row` autorise le retour à la ligne.
+- Renommage et périmètre du bouton de re-tirage : **« Retire » → « Autre tirage »** (classe CSS `.btn-retire` → `.btn-reroll`), **actif uniquement pendant la session de tirage** : posé à la création (`+ Nouveau`), conservé après chaque re-tirage, puis **retiré dès qu'on quitte la fiche** (retour à la liste ◀, changement d'onglet, ouverture d'un autre personnage) ou au rechargement de la page — état en mémoire `rollSessionId` (`createCharacter` / `openSheet` / `showList` / `switchTab`). Couvert par 6 assertions dans `12-lvl0`.
+- **En-tête de fiche sur deux lignes** (`createSheetHeader` + `style.css`) : ligne 1 = **◀ / Export / Autre tirage / Promouvoir / interrupteur**, ligne 2 = **le nom en pleine largeur** (`.sheet-title` en `flex: 1 1 100%`, `.sheet-header` en `flex-wrap: wrap`) — un nom long ne décale plus les boutons. Concerne toutes les fiches, pas seulement le niveau 0 ; assertions de non-régression dans `12-lvl0`.
+- **Onglet « Niveau 0 » : style commun des onglets de classe** — suppression des règles `.tab-lvl0` à l'accent « Équipe » (l'onglet se contente d'hériter de `.tab`, comme *Voleur* / *Nain*) ; seule la règle de la media query subsiste (onglet masqué ≤ 600 px, remplacé par la pastille « Lvl 0 »). 3 assertions interdisent le retour de l'accent.
+- **Promotion : plus aucun champ vidé** (après demande et analyse des pertes) — `promote()` recopie désormais la fiche **intégralement** (copie superficielle de toutes les clés : titre, alignement, armure, **JS Ref/Vig/Vol**, attaque, dés/table de critique, plus toute clé hors liste) ; seuls `niveau → 1` et le **portrait** (tiré pour la classe) sont réécrits. La liste blanche `PROMOTE_COPY` est supprimée : rien ne peut plus être perdu en silence. Tests `12-lvl0` réécrits (copie de toutes les clés + clé expérimentale conservée).
+
+### Tests
+
+- Nouvelle suite `tests/12-lvl0.test.js` (**973 assertions**) : données générées, barème, race (« commence par »), armes CàC/distance, 20 tirages complets (cohérence CA/PV/init/JS/trésor/portrait/dégâts), promotion (**copie intégrale — aucune clé perdue, seul le portrait réécrit**), fiche (sans `.hit-die`, Notes, roundtrip), **registre des portraits** (8 sources, funnel résolu pour `lvl0`, absent des fiches de classe et inversement), **câblage** `index.html`/`style.css`/`script.js`/API (bouton « Autre tirage » conditionné à la session, en-tête sur deux lignes, onglet sans accent).
+- `tests/helpers/env.js` : `CLASSES` += `lvl0` → `01-syntax`, `03-modules` et `05-export` couvrent automatiquement le nouveau module.
+- `node tests\run.js` : **1840/1840 OK, 7 skip** (12 suites).
+
+### Documentation
+
+- `README.md` : 8 onglets, section « Niveau 0 (funnel) », 8 sources de portraits, pastille mobile, arborescence (`lvl0-data.js`, `lvl0-roll.js`, `funnel-icons.js`, `classes/lvl0.js`, `icons/funnel-tokens/`).
+- `MANUAL.md` : § 1 (8 sources + niveau 0), topbar (pastille « Lvl 0 »), barre d'onglets (9 onglets), § 4.2 (pas d'auto-ouverture Niveau 0), **nouveau § 4.9** (tirage, Autre tirage, Promouvoir), § 6.2 (fiche Niveau 0), § 7 (8 sources, source Funnel exclusive), § 8 (niveaux 0 dans l'Équipe), mobile, dépannage, annexe A (`class: lvl0`), annexe B, glossaire.
+- `TODO.md` : évolution « onglet Level 0 » passée à ✅ livrée.
+
+### Validation
+
+- `node tests\run.js` : **1840/1840 OK, 7 skip**.
+- Vérification visuelle à faire sur `http://localhost:8000` (aucun navigateur connecté à la session) : tirage, Autre tirage (disparaît en quittant la fiche), Promouvoir (4 classes / classe raciale imposée), portrait funnel, niveau 0 en Équipe, pastille mobile.

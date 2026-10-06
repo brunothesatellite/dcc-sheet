@@ -5,7 +5,7 @@ const path = require('path');
 const { JSDOM } = require('jsdom');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const CLASSES = ['clerc', 'elfe', 'guerrier', 'halfelin', 'mage', 'nain', 'voleur'];
+const CLASSES = ['clerc', 'elfe', 'guerrier', 'halfelin', 'mage', 'nain', 'voleur', 'lvl0'];
 
 function read(rel) {
   return fs.readFileSync(path.join(ROOT, rel), 'utf8');

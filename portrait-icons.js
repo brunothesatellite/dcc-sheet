@@ -6,6 +6,8 @@ window.PortraitSources = [
   window.ComicsIcons,
   window.GonzoIcons,
   window.OSRIcons,
+  /* Funnel : 75 tokens de niveau 0, present uniquement sur les fiches lvl0 */
+  window.FunnelIcons,
 ].filter(Boolean);
 
 window.getPortraitSrc = function (source, cls, index) {

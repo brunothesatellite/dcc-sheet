@@ -40,7 +40,7 @@ if ($action === 'create') {
     $name = trim($input['name'] ?? 'Sans nom');
     $isActive = (int)($input['is_active'] ?? 1);
     if ($isActive !== 0 && $isActive !== 1) { jsonError('is_active invalide'); }
-    $validClasses = ['clerc','elfe','guerrier','halfelin','mage','nain','voleur'];
+    $validClasses = ['clerc','elfe','guerrier','halfelin','mage','nain','voleur','lvl0'];
     if (!in_array($class, $validClasses)) { jsonError('Classe invalide'); }
     $stmt = $db->prepare('INSERT INTO characters (user_id, name, class, is_active, data) VALUES (:uid, :name, :class, :active, \'{}\')');
     $stmt->bindValue(':uid', $user['id'], SQLITE3_INTEGER);

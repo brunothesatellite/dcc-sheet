@@ -15,6 +15,7 @@ const suites = [
   require('./09-spell-reader.test'),
   require('./10-dead-overlay.test'),
   require('./11-team-state.test'),
+  require('./12-lvl0.test'),
 ];
 
 function pad(s, n) {

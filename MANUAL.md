@@ -12,7 +12,7 @@ Manuel d'utilisation de l'application web **DCC Fiches de Personnage** : créez 
 4. [Gérer ses personnages](#4-gérer-ses-personnages)
 5. [Statut : en expédition vs à l'auberge](#5-statut--en-expédition-vs-à-lauberge)
 6. [La fiche de personnage](#6-la-fiche-de-personnage)
-7. [Le portrait (7 sources)](#7-le-portrait-7-sources)
+7. [Le portrait (8 sources)](#7-le-portrait-8-sources)
 8. [Onglet Équipe (suivi de partie)](#8-onglet-équipe-suivi-de-partie)
 9. [Personnalisation & responsive](#9-personnalisation--responsive)
 10. [Astuces & dépannage](#10-astuces--dépannage)
@@ -30,7 +30,8 @@ Manuel d'utilisation de l'application web **DCC Fiches de Personnage** : créez 
 - créer **zéro à plusieurs personnages** par classe ;
 - remplir des **fiches fidèles aux feuilles officielles DCC** (PDF éditables fournis dans le dépôt) ;
 - suivre l'**équipe en expédition** (avec possibilité de laisser des personnages à l'**auberge**) dans un tableau de combat avec ennemis et compteurs de tour, et d'organiser leur **ordre de marche** dans une grille 3×3 ;
-- choisir un **portrait** parmi 7 sources : tokens officiels DCC, illustrations D&D Red Box 1983, silhouettes Leremy Gan, portraits Shadowdark, planches Jeff Stevens, portraits Gonzo ou portraits Old School.
+- choisir un **portrait** parmi 8 sources : tokens officiels DCC, illustrations D&D Red Box 1983, silhouettes Leremy Gan, portraits Shadowdark, planches Jeff Stevens, portraits Gonzo, portraits Old School ou tokens de **niveau 0** (funnel) ;
+- tirer au sort des **personnages de niveau 0** (le funnel DCC) puis les **promouvoir** en niveau 1 dans la classe de leur choix (§ 4.9).
 
 **Aucune installation** : l'application s'ouvre dans un navigateur moderne (Chrome, Firefox, Edge, Safari). Elle est optimisée pour smartphone mais fonctionne sur grand écran. Pour fonctionner elle nécessite seulement un serveur web avec **php** activé (et le module **sqlite3**). Voir **[README.md](./README.md)** pour plus d'informations sur le déploiement de l'application sur un serveur.
 
@@ -127,6 +128,7 @@ Tous vos personnages sont supprimés avec le compte : vous êtes redirigé vers 
 ### La barre supérieure (topbar)
 
 - **Bouton ⚔** : ouvre l'onglet **Equipe** — affiché uniquement en basse résolution (≤ 600 px), où l'onglet lui-même est masqué.
+- **Pastille « Lvl 0 »** : ouvre l'onglet **Niveau 0** — elle aussi réservée à la basse résolution (≤ 600 px), placée **à droite du titre**.
 - **Texte « Dungeon Crawl Classics »**
 - **Bouton ☾ / ☀** : bascule le thème sombre/clair (§ 9).
 - **Avatar** : menu utilisateur (une fois connecté) — ou boutons **Connexion / Inscription** sinon.
@@ -134,9 +136,9 @@ Tous vos personnages sont supprimés avec le compte : vous êtes redirigé vers 
 
 ### La barre d'onglets
 
-8 onglets : **Equipe** (rouge, en premier et en haut) puis en dessous les 7 classes : **Clerc, Elfe, Guerrier, Halfelin, Mage, Nain, Voleur**.
+9 onglets : **Equipe** (rouge, en premier et en haut) puis en dessous les 7 classes : **Clerc, Elfe, Guerrier, Halfelin, Mage, Nain, Voleur**, et enfin **Niveau 0** — qui reprend le **style commun des onglets de classe** (pas l'accent de l'onglet Équipe).
 
-> En basse résolution (≤ 600 px), l'onglet **Equipe** est masqué : on y accède par l'**icône ⚔** (haut gauche de la barre supérieure).
+> En basse résolution (≤ 600 px), les onglets **Equipe** et **Niveau 0** sont masqués : on y accède par l'**icône ⚔** (haut gauche) et la **pastille « Lvl 0 »** (à droite du titre) de la barre supérieure.
 
 - L'onglet actif est **mémorisé** dans le navigateur : à votre prochaine visite, c'est lui qui s'ouvre.
 - Cliquer sur un onglet charge aussitôt la liste des personnages de cette classe.
@@ -181,7 +183,7 @@ Tous vos personnages sont supprimés avec le compte : vous êtes redirigé vers 
 - cliquez n'importe où sur la carte, ou
 - cliquez sur le bouton **✎** (stylo) de la carte.
 
-**Ouvrir automatiquement** : si l'onglet ne contient **qu'un seul personnage actif**, sa fiche s'ouvre toute seule quand vous changez d'onglet.
+**Ouvrir automatiquement** : si l'onglet ne contient **qu'un seul personnage actif**, sa fiche s'ouvre toute seule quand vous changez d'onglet — sauf dans l'onglet **Niveau 0**, qui affiche toujours sa liste pour garder **+ Nouveau** à portée (§ 4.9).
 
 **Revenir à la liste** : cliquez sur la flèche **◀** en haut à gauche de la fiche. L'interrupteur de statut reste utilisable sans quitter la fiche.
 
@@ -195,7 +197,7 @@ La suppression est définitive. Pour conserver une copie, exportez d'abord le pe
 ### 4.4 Exporter un personnage (JSON individuel)
 
 1. Ouvrez la fiche du personnage.
-2. Cliquez sur **Export** (en haut, à côté du nom).
+2. Cliquez sur **Export** (première ligne de l'en-tête — le nom du personnage est affiché juste en dessous, sur toute la largeur).
 3. Un fichier `.json` est téléchargé, nommé d'après le personnage (ex. `Alovnek.json`).
 
 Le fichier contient la classe, le nom, le statut et **toutes les données de la fiche**, y compris le portrait choisi.
@@ -248,6 +250,36 @@ La carte affiche `NOM — Niv.X` si un niveau est renseigné, le **portrait** du
 
 Le champ **Nom** de la fiche met à jour le titre de la carte dans la liste. Les boutons de statut, eux, sont enregistrés immédiatement.
 
+### 4.9 Personnages de niveau 0 (funnel)
+
+L'onglet **Niveau 0** gère les personnages du *funnel* DCC, ceux qui existent avant de choisir une classe.
+
+**Tirer un personnage**
+1. Ouvrez l'onglet **Niveau 0** (en basse résolution : pastille **« Lvl 0 »** à droite du titre).
+2. Cliquez sur **+ Nouveau** : un personnage complet est tiré au sort — nom, métier (avec son arme et son équipement), 6 caractéristiques en 3d6 et leurs modificateurs, CA, PV, initiative, jet chanceux, langues, notes, équipement, trésor de 5d12 pc et un portrait tiré selon le métier.
+3. La fiche s'ouvre aussitôt : elle contient **uniquement le bloc commun et les Notes**, **sans dé de vie** dans le bouclier PV (les niveaux 0 n'en ont pas).
+
+**Rejeter un tirage — bouton « Autre tirage »**
+- En haut de la fiche, **Autre tirage** relance un tirage complet et **remplace** le personnage ouvert (nom, métier, caractéristiques, portrait… tout change). Utilisez-le tant que vous n'êtes pas satisfait du résultat.
+- Ce bouton **n'existe que pendant la session de tirage** : il est proposé à la création (**+ Nouveau**) et le reste tant que vous restez sur cette fiche (chaque **Autre tirage** prolonge la session). **Dès que vous quittez la fiche** — retour à la liste ◀, changement d'onglet, ouverture d'un autre personnage — il **disparaît** : en le rouvrant plus tard, vous ne pourrez plus écraser ce tirage par hasard.
+- **Export** fonctionne comme ailleurs (§ 4.4) : le tirage peut être sauvegardé en fichier JSON puis ré-importé (bouton **Import** de la liste).
+
+**Transformer en niveau 1 — bouton « Promouvoir »**
+1. Cliquez sur **Promouvoir** (à côté d'**Autre tirage**) : une fenêtre demande la classe à attribuer.
+2. Le métier fait foi :
+   - métier commençant par **Elfe** → seule la classe **Elfe** est proposée ;
+   - métier commençant par **Nain** → seulement **Nain** ;
+   - métier commençant par **Halfelin** → seulement **Halfelin** ;
+   - sinon → choix entre **Clerc, Guerrier, Mage, Voleur** (les autres sont grisées).
+   Le bouton **Promouvoir** reste inactif tant qu'aucune classe n'est cochée.
+3. La case **« Supprimer le personnage de niveau 0 après la conversion »** est décochée par défaut : elle permet de convertir *sans* garder l'originel.
+4. À la validation, un **nouveau personnage de niveau 1** est créé dans la classe choisie : **la fiche est recopiée intégralement** — identité (nom, titre, métier, alignement, mouvement), caractéristiques et modificateurs, **jets de sauvegarde (JS Ref / Vig / Vol)**, bonus d'attaque, dés et table de critique, initiative, jet chanceux, langues, notes, armes, équipement, trésor, armure, PV et CA. **Seul le portrait est retiré** : un nouveau est tiré dans ceux de la classe. Vérifiez simplement les valeurs héritées du funnel qui dépendent de la classe (bonus d'attaque, dé de critique) : elles sont conservées telles quelles. La fiche du personnage promu s'ouvre directement.
+
+**Bon à savoir**
+- La carte de la liste affiche le **métier** en sous-titre (à la place du dieu des Clercs) et le nom suivi de `— Niv.0`.
+- Un niveau 0 **en expédition** entre dans l'**onglet Équipe** comme les autres personnages : PV, initiative, tour, ordre de marche, statistiques.
+- L'export/import **individuel** et **global** (§ 4.4 à 4.6) prennent en charge les niveaux 0 sans rien changer à la procédure.
+
 ---
 
 ## 5. Statut : en expédition vs à l'auberge
@@ -272,7 +304,7 @@ Deux endroits, même effet immédiat :
 
 **Depuis la fiche** :
 1. Ouvrez la fiche.
-2. Utilisez l'interrupteur situé en haut, à droite du bouton **Export**.
+2. Utilisez l'interrupteur situé sur la première ligne de l'en-tête, à droite des boutons (**Export**, et **Autre tirage** / **Promouvoir** pour un niveau 0).
 3. Le libellé change sans quitter la fiche.
 
 <img src="captures/guerrier-auberge.png" alt="Liste des guerriers avec Alovnek en expédition (interrupteur vert) et Zaruma à l'auberge (interrupteur rouge)" width="380">
@@ -291,11 +323,9 @@ Toutes les fiches partagent un **bloc commun** (page 1 + équipement) et ajouten
 
 *La fiche de Travok, Clerc niveau 3 — vue d'ensemble sur mobile (défilement vertical).*
 
-**En-tête de fiche**
-- **◀** : retour à la liste.
-- **Nom du personnage** : titre courant.
-- **Export** : export JSON individuel (§ 4.4).
-- **Interrupteur** : statut expédition/auberge (§ 5).
+**En-tête de fiche** — sur **deux lignes** :
+- **Ligne 1** : **◀** (retour à la liste), **Export** (§ 4.4), **Autre tirage** et **Promouvoir** (niveau 0 uniquement, § 4.9), puis l'**interrupteur** expédition/auberge (§ 5).
+- **Ligne 2** : **Nom du personnage**, sur **toute la largeur** — un nom très long ne décale donc plus les boutons de la ligne du dessus.
 
 **Identité** : Nom, Titre, Métier, Alignement, Mouvement, Niveau, PX.
 > Le champ **Nom** renomme la carte dans la liste.
@@ -329,6 +359,7 @@ Chaque classe ajoute une page de capacités puis une section **Notes** :
 | **Mage** | Test d'incantation, Familier, Patron(s), Corruption, mod. de chance, **liste de sorts dynamique** (§ 6.3) |
 | **Nain** | Infravision, Compétences souterraines, Arme Chance, Hauts faits d'arme, Coup de bouclier |
 | **Voleur** | Grille de **14 compétences** (Dé de chance, Falsifier documents, Attaque sournoise, Se déguiser, Déplacement silencieux, Lire langues inconnues, Se cacher dans l'ombre, Utiliser des poisons, Vol à la tire, Incant. parchemin, Escalade parois abruptes, Crocheter les serrures, Détecter les pièges, Désamorcer les pièges) + Argot des voleurs |
+| **Niveau 0** | **Aucune section propre** : la fiche s'arrête au bloc commun (sans dé de vie) puis aux **Notes** — boutons **Autre tirage** (session de tirage uniquement) et **Promouvoir** dans l'en-tête (§ 4.9) |
 
 ### 6.3 Gérer les sorts du Mage, de l'Elfe et du Clerc (liste dynamique)
 
@@ -390,11 +421,11 @@ Les listes de sorts du Mage (2 lignes par sort), de l'Elfe (2 lignes par sort + 
 
 ---
 
-## 7. Le portrait (7 sources)
+## 7. Le portrait (8 sources)
 
 Chaque fiche possède un portrait, sous le bloc « combat étendu ». **Cliquez dessus** pour ouvrir la fenêtre de sélection.
 
-Sept sources sont disponibles :
+Huit sources sont disponibles :
 
 | Source | Contenu |
 |---|---|
@@ -405,6 +436,7 @@ Sept sources sont disponibles :
 | **Jeff Stevens** | Planches de comics (8 au total, répartis par classe) |
 | **Gonzo** | Portraits colorés + variantes noir et blanc (30 au total, répartis par classe) |
 | **Old School** | Portraits Old School Révival (17 au total, répartis par classe) |
+| **Funnel — niveau 0** | 75 tokens de personnages de niveau 0, **réservés aux fiches de niveau 0** (les autres classes ne les proposent pas, et inversement) |
 
 ### 7.1 Choisir un portrait (mode opératoire)
 
@@ -418,7 +450,7 @@ Sept sources sont disponibles :
 
 <img src="captures/choix-portrait.png" alt="Popup « Choisir un portrait » : grille continue de portraits ronds, le nom de chaque source affiché au-dessus de son premier portrait" width="420">
 
-*La popup de choix : grille continue (3 colonnes) ; le libellé de chaque source (DCC, Red Box, Leremy Gan, Shadowdark, Jeff Stevens, Gonzo, Old School) apparaît au-dessus du premier portrait de la section. Le portrait courant est cerclé de la couleur d'accent.*
+*La popup de choix : grille continue (3 colonnes) ; le libellé de chaque source (DCC, Red Box, Leremy Gan, Shadowdark, Jeff Stevens, Gonzo, Old School, Funnel) apparaît au-dessus du premier portrait de la section. Le portrait courant est cerclé de la couleur d'accent.*
 
 ### 7.2 Où le portrait apparaît
 
@@ -432,7 +464,7 @@ Sept sources sont disponibles :
 
 ## 8. Onglet Équipe (suivi de partie)
 
-L'onglet **Equipe** (premier onglet, fond rouge) est le tableau de bord de vos parties : il liste tous les personnages **en expédition** de vos 7 classes et sert de initiative tracker pendant le combat.
+L'onglet **Equipe** (premier onglet, fond rouge) est le tableau de bord de vos parties : il liste tous les personnages **en expédition** de vos 7 classes **et de vos niveaux 0** et sert de initiative tracker pendant le combat.
 
 **Accès** :
 - **écran large** : onglet **Equipe** dédié (premier onglet, fond rouge) ;
@@ -571,6 +603,7 @@ Si le thème ne « tient » pas après un rechargement : videz le cache du navig
 
 - Fiches : mise en page compacte sur 2 colonnes maintenues, cercles de jets réduits, textes redimensionnables.
 - Tableaux de l'onglet Équipe : lignes et portraits réduits pour tenir en largeur d'écran.
+- **Onglets Équipe et Niveau 0 masqués** : remplaçés par l'**icône ⚔** (haut gauche) et la **pastille « Lvl 0 »** (à droite du titre).
 - **Règle générale** : l'application se pilote aussi au doigt (clics → taps, clic droit → appui long).
 
 ---
@@ -610,6 +643,7 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 - **Les notes d'équipe sont vides sur un autre appareil** : vérifiez d'abord la connexion au bon compte ; en cas de doute, restaurez-les depuis un **Exporter/Importer tout (JSON)** (§ 4.6). Les notes d'un ancien navigateur sont migrées automatiquement en base à la première ouverture de l'onglet Équipe.
 - **Un personnage n'apparaît pas dans l'Équipe** : vérifiez son interrupteur **EN EXPÉDITION** (§ 5), puis rouvrez l'onglet.
 - **Je ne trouve plus l'onglet Équipe** : en basse résolution (≤ 600 px) il est masqué — utilisez l'**icône ⚔** en haut à gauche (§ 8).
+- **Je ne trouve plus l'onglet Niveau 0** : en basse résolution (≤ 600 px) il est masqué — utilisez la **pastille « Lvl 0 »** à droite du titre (§ 4.9).
 - **Import global refusé** : le fichier doit contenir au moins un personnage et une `class` valide pour chacun (annexe A).
 - **Pseudo/mot de passe refusé** : pseudo 3-20 caractères (`a-z A-Z 0-9 - _`), mot de passe 6+ ; une ancienne session peut rester active → rechargez la page.
 
@@ -638,7 +672,7 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 }
 ```
 
-- `class` est **obligatoire** à l'import (sinon refus) : `clerc`, `elfe`, `guerrier`, `halfelin`, `mage`, `nain`, `voleur`.
+- `class` est **obligatoire** à l'import (sinon refus) : `clerc`, `elfe`, `guerrier`, `halfelin`, `mage`, `nain`, `voleur`, `lvl0` (personnage de niveau 0).
 - `data` contient tous les champs de la fiche (textes bruts).
 - `portrait_source` vaut `dcc`, `redbox`, `shadow` (Leremy Gan), `shadowdark`, `comics` (Jeff Stevens), `gonzo` ou `osr` (Old School) ; `portrait_index` est la position de l'image dans la source (§ 7).
 
@@ -686,7 +720,8 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 | Voleur | d6 | 3 | 1 | 1 | **3** | 1 | 4 | 2 |
 | **Total** | — | **20 tokens** | **7 illustrations** | **7 silhouettes** | **12 images** | **8 planches** | **30 images** | **17 images** |
 
-- La sélection se fait via la popup **« Choisir un portrait »** (§ 7) : les sept sources y sont proposées, libellé au-dessus du premier portrait de chaque section.
+- La sélection se fait via la popup **« Choisir un portrait »** (§ 7) : les huit sources y sont proposées, libellé au-dessus du premier portrait de chaque section.
+- **Niveau 0** : la fiche n'affiche **aucun dé de vie** dans le casque, et la source **Funnel — niveau 0** (75 tokens, `icons/funnel-tokens/`) lui est **exclusivement** réservée — elle n'apparaît ni dans les autres fiches, ni dans leurs exports de portraits.
 
 ---
 
@@ -696,7 +731,10 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 |---|---|
 | **CA / Classe d'armure** | Classe d'armure, valeur de défense (bouclier de la fiche) |
 | **PV / Points de vie** | Points de vie (casque de la fiche), avec PV Max |
-| **Dé de vie** | Dé de caractéristique de la classe (d4 à d12) |
+| **Dé de vie** | Dé de caractéristique de la classe (d4 à d12) — **absent de la fiche de niveau 0** |
+| **Niveau 0 / funnel** | Personnage du funnel DCC (avant le choix d'une classe) — onglet **Niveau 0** |
+| **Autre tirage** | Bouton d'une fiche de niveau 0 : relance le tirage complet et **remplace** le personnage ouvert — présent **uniquement pendant la session de tirage** (création, puis tant qu'on ne quitte pas la fiche) |
+| **Promouvoir** | Bouton d'une fiche de niveau 0 : convertit le personnage en **niveau 1** dans la classe choisie (§ 4.9) |
 | **PX** | Points d'expérience |
 | **JS Ref / Vig / Vol** | Jets de sauvegarde : Réflexes, Vigueur, Volonté |
 | **Init.** | Initiative (jet d'entrée en combat) |
@@ -716,6 +754,7 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 | **Jeff Stevens** | Planches de comics, 8 images réparties par classe |
 | **Gonzo** | Portraits colorés + variantes N&B, 30 images réparties par classe |
 | **Old School** | Portraits OSR, 17 images réparties par classe |
+| **Funnel** | 75 tokens de niveau 0 (`icons/funnel-tokens/`), réservés aux fiches de niveau 0 |
 | **Toast** | Petit message transitoire en bas à droite |
 | **RAZ** | Remise à zéro (table des ennemis) |
 

@@ -12,7 +12,7 @@
      1. Configuration
      ======================================================================== */
 
-  const CLASSES = ['clerc', 'elfe', 'guerrier', 'halfelin', 'mage', 'nain', 'voleur'];
+  const CLASSES = ['clerc', 'elfe', 'guerrier', 'halfelin', 'mage', 'nain', 'voleur', 'lvl0'];
 
   const CLASS_LABELS = {
     clerc: 'Clerc',
@@ -22,6 +22,7 @@
     mage: 'Mage',
     nain: 'Nain',
     voleur: 'Voleur',
+    lvl0: 'Niveau 0',
   };
 
   const AUTO_SAVE_DELAY = 400;
@@ -40,6 +41,10 @@
   let toastContainer = null;
   let toastSaveTimer = null;
   let spinnerTimer = null;
+  /* Niveau 0 : id du personnage "en cours de tirage" — le bouton
+     « Autre tirage » n'existe que pendant cette session (creation, puis
+     chaque re-tirage) ; on quitte la session des qu'on sort de la fiche. */
+  let rollSessionId = null;
 
   /* =========================================================================
      3. Toast Notifications
@@ -687,6 +692,8 @@
 
   async function switchTab(cls) {
     closePortraitPicker();
+    /* Changer d'onglet = quitter la fiche = fin de la session de tirage */
+    rollSessionId = null;
     activeTab = cls;
     localStorage.setItem('dcc-active-tab', cls);
 
@@ -756,7 +763,8 @@
 
       if (active.length === 0 && inactive.length === 0) {
         renderEmptyState(panel, cls);
-      } else if (autoOpen && active.length === 1 && active.length + inactive.length > 0) {
+      } else if (autoOpen && cls !== 'lvl0' && active.length === 1 && active.length + inactive.length > 0) {
+        /* Niveau 0 : on garde la liste (« + Nouveau » doit rester accessible) */
         openSheet(cls, active[0]);
       } else {
         renderCharList(panel, cls, active, inactive);
@@ -1037,6 +1045,8 @@
     try { parsed = JSON.parse(charData.data || '{}'); } catch (e) {}
 
     if (parsed.dieu) metaParts.push(parsed.dieu);
+    /* Carte de niveau 0 : 1re ligne de metier (pas de dieu) */
+    if (cls === 'lvl0' && parsed.metier) metaParts.push(parsed.metier);
 
     var card = el('div', { className: 'char-card' + (isActive ? '' : ' inactive') });
 
@@ -1138,12 +1148,21 @@
     if (!currentUser) return;
 
     try {
+      /* Niveau 0 : la creation EST un tirage aleatoire complet (spec lvl0) */
+      var rolled = (cls === 'lvl0' && window.DCCLvl0Roll) ? window.DCCLvl0Roll.roll() : null;
+
       var res = await api('characters.php', {
         method: 'POST',
-        body: { action: 'create', class: cls, name: 'Sans nom' },
+        body: { action: 'create', class: cls, name: (rolled && rolled.nom) ? rolled.nom : 'Sans nom' },
       });
 
       if (res.character) {
+        if (rolled) {
+          await saveCharacter(res.character.id, rolled, rolled.nom);
+          /* Session de tirage : le bouton « Autre tirage » reste propose
+             tant que l'utilisateur ne quitte pas cette fiche */
+          rollSessionId = res.character.id;
+        }
         invalidateEquipePanel();
         openSheet(cls, res.character);
         showToastSave();
@@ -1210,6 +1229,207 @@
       }
     } catch (err) {
       console.error('Erreur activation:', err);
+    }
+  }
+
+  /* =========================================================================
+     9b. Niveau 0 : « Autre tirage » (session de creation) et « Promouvoir » (niveau 1)
+     ======================================================================== */
+
+  /* Une sauvegarde programmée (debounce) écraserait ce qu'on vient d'écrire :
+     on la vide sans l'exécuter. */
+  function discardPendingSave(cls) {
+    cancelPendingSaves(cls);
+  }
+
+  /* Sauvegarde immédiate de la fiche si une est en attente (avant relecture) */
+  async function flushPendingSave(cls, charId) {
+    if (!saveTimers[cls]) return;
+    clearTimeout(saveTimers[cls]);
+    delete saveTimers[cls];
+    await flushSave(cls, charId);
+  }
+
+  /* Relance le tirage complet et remplace le personnage ouvert (spec lvl0 4). */
+  async function rerollLvl0(cls, charData) {
+    if (!currentUser || !window.DCCLvl0Roll) return;
+
+    discardPendingSave(cls);
+
+    try {
+      var rolled = window.DCCLvl0Roll.roll();
+      var result = await saveCharacter(charData.id, rolled, rolled.nom);
+      if (!result || !result.ok) {
+        showToast('Erreur lors du tirage', 'error');
+        return;
+      }
+      invalidateEquipePanel();
+      showToastSave();
+      openSheet(cls, charData); /* openSheet relit la fiche en base */
+    } catch (err) {
+      console.error('Erreur tirage niveau 0:', err);
+    }
+  }
+
+  /* Portrait aléatoire pris dans TOUTES les sources disponibles pour la classe */
+  function randomPortraitFor(cls) {
+    var options = [];
+    (window.PortraitSources || []).forEach(function (ps) {
+      if (!ps || !ps.meta) return;
+      var entry = ps[cls];
+      var images = Array.isArray(entry) ? entry : (typeof entry === 'string' ? [entry] : []);
+      for (var i = 0; i < images.length; i++) {
+        options.push({ source: ps.meta.key, index: i });
+      }
+    });
+    if (options.length === 0) return { source: '', index: 0 };
+    return options[Math.floor(Math.random() * options.length)];
+  }
+
+  /* Modale de promotion : choix de la classe + suppression optionnelle */
+  function showPromoteModal(charName, metier, allowed) {
+    return new Promise(function (resolve) {
+      var selected = allowed.length === 1 ? allowed[0] : null;
+
+      var overlay = el('div', { className: 'modal-overlay' });
+      var box = el('div', { className: 'modal-box' });
+
+      box.appendChild(el('div', { className: 'modal-title', textContent: 'Promouvoir en niveau 1' }));
+
+      var message = el('div', { className: 'modal-message' });
+      message.appendChild(document.createTextNode('Classe à assigner à '));
+      message.appendChild(el('strong', { textContent: charName || 'Sans nom' }));
+      message.appendChild(document.createTextNode(
+        ' (métier : ' + (metier || '—') + ') :'));
+      box.appendChild(message);
+
+      var list = el('div', { className: 'promo-class-list' });
+      var inputs = [];
+
+      CLASSES.filter(function (c) { return c !== 'lvl0'; }).forEach(function (clsName) {
+        var isAllowed = allowed.indexOf(clsName) !== -1;
+        var row = el('div', { className: 'promo-class-row' + (isAllowed ? '' : ' is-disabled') });
+        var input = el('input', { type: 'radio', name: 'promo-class', value: clsName });
+        input.disabled = !isAllowed;
+        input.checked = selected === clsName;
+        input.addEventListener('change', function () {
+          if (input.checked) {
+            selected = clsName;
+            okBtn.disabled = false;
+          }
+        });
+        row.appendChild(input);
+        row.appendChild(el('span', { textContent: CLASS_LABELS[clsName] }));
+        if (!isAllowed) {
+          row.appendChild(el('span', {
+            className: 'promo-class-why',
+            textContent: allowed.length === 1
+              ? 'métier « ' + allowed[0] + ' »'
+              : 'métier sans « ' + clsName + ' »',
+          }));
+        }
+        inputs.push(input);
+        list.appendChild(row);
+      });
+      box.appendChild(list);
+
+      var deleteRow = el('label', { className: 'promo-delete-row' });
+      var deleteInput = el('input', { type: 'checkbox' });
+      deleteRow.appendChild(deleteInput);
+      deleteRow.appendChild(el('span', {
+        textContent: 'Supprimer le personnage de niveau 0 après la conversion',
+      }));
+      box.appendChild(deleteRow);
+
+      var actions = el('div', { className: 'modal-actions' });
+      var cancelBtn = el('button', {
+        className: 'modal-btn-cancel',
+        textContent: 'Annuler',
+        onClick: function () { close(null); },
+      });
+      var okBtn = el('button', {
+        className: 'modal-btn-ok',
+        textContent: 'Promouvoir',
+        onClick: function () {
+          close({ class: selected, delete: deleteInput.checked });
+        },
+      });
+      okBtn.disabled = !selected; /* Q6 : inactif tant qu'aucune classe n'est choisie */
+      actions.appendChild(cancelBtn);
+      actions.appendChild(okBtn);
+      box.appendChild(actions);
+
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+
+      function onKeyDown(e) { if (e.key === 'Escape') close(null); }
+      document.addEventListener('keydown', onKeyDown);
+
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) close(null);
+      });
+
+      function close(result) {
+        document.removeEventListener('keydown', onKeyDown);
+        overlay.remove();
+        resolve(result);
+      }
+    });
+  }
+
+  /* Conversion d'un niveau 0 en niveau 1 (spec lvl0 6) */
+  async function promoteLvl0(cls, charData) {
+    if (!currentUser || !window.DCCLvl0Roll) return;
+
+    /* Les valeurs affichées sont celles à sauvegarder : on vide le debounce
+       puis on relit la fiche en base (l'entête conserve les données d'origine) */
+    try { await flushPendingSave(cls, charData.id); } catch (e) { /* base en erreur : on continue */ }
+
+    var fresh = charData;
+    try {
+      var got = await api('characters.php', { method: 'GET', data: { action: 'get', id: charData.id } });
+      if (got.character) fresh = got.character;
+    } catch (e) { /* relecture impossible : données de l'entête */ }
+
+    var data0 = {};
+    try { data0 = JSON.parse(fresh.data || '{}'); } catch (e) {}
+
+    var allowed = window.DCCLvl0Roll.allowedClasses(data0.metier);
+    var choice = await showPromoteModal(fresh.name, data0.metier, allowed);
+    if (!choice || !choice.class) return;
+
+    var newData = window.DCCLvl0Roll.promote(data0);
+    var portrait = randomPortraitFor(choice.class);
+    newData.portrait_source = portrait.source;
+    newData.portrait_index = String(portrait.index);
+
+    try {
+      var res = await api('characters.php', {
+        method: 'POST',
+        body: {
+          action: 'create',
+          class: choice.class,
+          name: fresh.name || 'Sans nom',
+          is_active: fresh.is_active === 0 ? 0 : 1,
+        },
+      });
+      if (!res.character) throw new Error('création refusée');
+
+      await saveCharacter(res.character.id, newData, fresh.name);
+
+      if (choice.delete) {
+        discardPendingSave(cls);
+        await api('characters.php', { method: 'POST', body: { action: 'delete', id: fresh.id } });
+      }
+
+      invalidateEquipePanel();
+      showToastSave();
+
+      await switchTab(choice.class);
+      openSheet(choice.class, res.character);
+    } catch (err) {
+      console.error('Erreur promotion:', err);
+      showToast('Erreur lors de la promotion', 'error');
     }
   }
 
@@ -1391,6 +1611,10 @@
   async function openSheet(cls, charData) {
     if (!charData) return;
 
+    /* Ouverture d'un autre personnage = sortie de la session de tirage :
+       le bouton « Autre tirage » ne survit pas a ce changement */
+    if (rollSessionId !== null && charData.id !== rollSessionId) rollSessionId = null;
+
     /* Toujours relire la fiche en base : l'onglet doit afficher les valeurs
        sauvegardées (PV, initiative, AC...), même si l'appelant fournit des
        données mises en cache (liste, onglet équipe) */
@@ -1438,11 +1662,12 @@
         innerHTML: '&#9664;',
         onClick: function () { showList(cls); },
       }),
-      el('span', {
-        className: 'sheet-title',
-        textContent: charData.name || 'Sans nom',
-      }),
     ]);
+
+    var title = el('span', {
+      className: 'sheet-title',
+      textContent: charData.name || 'Sans nom',
+    });
 
     var exportBtn = el('button', {
       className: 'btn-export',
@@ -1477,7 +1702,30 @@
 
     header.appendChild(left);
     header.appendChild(exportBtn);
+
+    /* Niveau 0 : « Autre tirage » (session de tirage uniquement) / Promouvoir */
+    if (cls === 'lvl0') {
+      if (rollSessionId !== null && charData.id === rollSessionId) {
+        header.appendChild(el('button', {
+          className: 'btn-reroll',
+          textContent: 'Autre tirage',
+          title: 'Tirer un autre personnage et remplacer celui-ci',
+          onClick: function () { rerollLvl0(cls, charData); },
+        }));
+      }
+      header.appendChild(el('button', {
+        className: 'btn-promote',
+        textContent: 'Promouvoir',
+        title: 'Transformer en personnage de niveau 1',
+        onClick: function () { promoteLvl0(cls, charData); },
+      }));
+    }
+
     header.appendChild(toggleWrapper);
+
+    /* Le nom vient en DERNIERE ligne, pleine largeur : un nom long ne
+       decale plus les boutons (Export / Autre tirage / Promouvoir / statut) */
+    header.appendChild(title);
 
     return header;
   }
@@ -1485,6 +1733,9 @@
   function showList(cls) {
     var panel = $('[data-class="' + cls + '"].tab-panel');
     if (!panel) return;
+
+    /* Retour a la liste = fin de la session de tirage */
+    rollSessionId = null;
 
     var viewList = $('.view-list', panel);
     var viewSheet = $('.view-sheet', panel);
@@ -1781,6 +2032,14 @@
     if (btnEquipeMobile) {
       btnEquipeMobile.addEventListener('click', function () {
         switchTab('equipe');
+      });
+    }
+
+    /* Pastille "Lvl 0" (mobile) : a droite du titre de l'application */
+    var btnLvl0Mobile = $('#btn-lvl0-mobile');
+    if (btnLvl0Mobile) {
+      btnLvl0Mobile.addEventListener('click', function () {
+        switchTab('lvl0');
       });
     }
 

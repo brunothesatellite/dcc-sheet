@@ -19,7 +19,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - Menu utilisateur (avatar + dropdown)
 
 ### Gestion des personnages
-- 7 classes : Clerc, Elfe, Guerrier, Halfelin, Mage, Nain, Voleur
+- 8 onglets de personnages : les 7 classes **Clerc, Elfe, Guerrier, Halfelin, Mage, Nain, Voleur** + l'onglet **Niveau 0** (funnel)
 - 0 a plusieurs personnages par classe
 - Creation rapide (bouton "+ Nouveau")
 - Import / Export individuel au format JSON
@@ -39,6 +39,15 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - **Nain** : Infravision, Competences souterraines, Coup de bouclier, Arme Chance
 - **Voleur** : 14 competences voleur en grille (De de chance, Escalade, Crocheter, Pieges, etc.)
 
+### Niveau 0 (funnel)
+- Onglet **« Niveau 0 »** apres *Voleur* ; en mobile (<= 600 px), pastille **« Lvl 0 »** a droite du titre de l'application (l'onglet est alors masque, comme l'onglet Equipe)
+- **Fiche simplifiee** : BLOC_COMMUN + Notes, **sans le de de vie** dans le bouclier PV (les niveaux 0 n'ont pas de de de vie)
+- **« + Nouveau » = tirage aleatoire complet** (table `plan0/` generee dans `lvl0-data.js`) : nom, metier (arme + equipement), 6 caracs en 3d6, modifs, CA 10 + mod AGI, PV 1d4 + mod END (plancher 1), initiative `1d20` + mod AGI, jet chanceux, langues, notes raciales, equipement (3 objets + metier), trésor 5d12 pc, portrait tire selon le metier (`funnel-icons.js`) ; la fiche s'ouvre ensuite directement
+- **`Autre tirage`** : relance un tirage complet et remplace le personnage ouvert (pour refuser un tirage) — présent **uniquement pendant la session de tirage**, c'est-à-dire à la création (**+ Nouveau**) puis tant qu'on ne quitte pas la fiche ; dès le retour à la liste, un changement d'onglet ou l'ouverture d'un autre personnage, le bouton disparaît
+- **`Promouvoir`** : modale de choix de classe - classe raciale imposée si le metier **commence par** `elfe` / `nain` / `halfelin`, sinon choix parmi Clerc, Guerrier, Mage, Voleur ; case « supprimer le personnage de niveau 0 apres la conversion » (fausse par defaut) ; creation du niveau 1 en recopiant la fiche **entierement** (JS, attaque, des/table de critique, alignement, armure compris) - **seul le portrait est retire** (tire pour la classe) - puis ouverture directe de la nouvelle fiche
+- **Edition identique** aux autres onglets (auto-save, export/import individuel et global, supression, toggle expedition/auberge) ; un niveau 0 en expedition apparait dans l'**onglet Equipe** (PV, initiative, tour, ordre de marche)
+- Carte : 1re ligne de metier (a la place du dieu), nom suivi de `— Niv.0`
+
 ### Definition des sorts (dossier frere dcc-spells-reader)
 - **Detection automatique** : au demarrage, chargement de `../dcc-spells-reader/content/anchors.js` (1 requete = presence du dossier frere + index des ancres) ; si le dossier est absent ou non accessible HTTP, **aucune icone n'apparait** et la fiche reste identique (aucun PHP, aucune configuration)
 - **Loupe a gauche de chaque nom de sort renseigne** (Mage, Elfe, Clerc ; ligne vide = pas d'icone) ; sur les lignes fixes de l'Elfe : loupe sur *Lier un patron*, **loupe + loupe patron** sur *Invoquer un Patron* (lit le champ « Patron(s) » au moment du clic)
@@ -49,7 +58,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - Fermeture : bouton X ou touche Echap ; suite `09-spell-reader` (143 assertions) + smoke sur les donnees reelles (144/144 noms resolus, 130/130 traductions FR et EN sans divergence de page)
 
 ### Portrait
-- 7 sources d'images : **DCC** (tokens officiels, 20 images), **D&D Red Box 1983** (7 illustrations), **Leremy Gan** (7 silhouettes), **Shadowdark** (12 images), **Jeff Stevens** (8 planches), **Gonzo** (30 images) et **Old School** (17 images)
+- 8 sources d'images : **DCC** (tokens officiels, 20 images), **D&D Red Box 1983** (7 illustrations), **Leremy Gan** (7 silhouettes), **Shadowdark** (12 images), **Jeff Stevens** (8 planches), **Gonzo** (30 images), **Old School** (17 images) et **Funnel - niveau 0** (75 tokens `icons/funnel-tokens/`, catalogue `funnel-icons.js`)
 - **Popup « Choisir un portrait »** : clic sur le portrait dans la fiche → grille continue (3 colonnes, 2 sur mobile), libellé de source au-dessus du premier portrait de chaque section
 - **Filtrage des dossiers absents** : si le dossier d'une source n'est pas present sur le serveur (licence / copyright), la source entiere n'apparait pas dans la popup (1 requete lazy `api/icons.php` mise en cache par session ; echec de l'endpoint → popup complete) ; les persos deja dotes d'un tel portrait gardent leur source + index (image brisee, comportement voulu)
 - Portrait courant surligne (bordure accent) et scroll automatique vers lui
@@ -85,7 +94,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - Onglets avec persistence de l'onglet actif (localStorage)
 - Auto-ouverture de la fiche si 1 seul personnage actif
 - Bouton retour (fleche) pour revenir a la liste
-- Onglet Equipe dedie sur grand ecran ; sur ecran reduit (<= 600px), icone Equipe dans le topbar
+- Onglet Equipe dedie sur grand ecran ; sur ecran reduit (<= 600px), icone Equipe dans le topbar + pastille **Lvl 0** a droite du titre (onglets Equipe et Niveau 0 alors masques)
 
 ### UI / UX
 - Theme sombre / clair (localStorage)
@@ -114,6 +123,9 @@ dcc-sheet/
 ├── gonzo-icons.js              # Catalogue d'icones Gonzo (30 images, 7 classes)
 ├── osr-icons.js                # Catalogue d'icones Old School (17 images, 7 classes)
 ├── portrait-icons.js           # Registre des sources de portraits (getPortraitSrc)
+├── funnel-icons.js             # Catalogue de portraits niveau 0 (75 tokens + metier -> images)
+├── lvl0-data.js                # Donnees niveau 0 generees (noms, metiers, jets chanceux, equipements)
+├── lvl0-roll.js                # Moteur de tirage niveau 0 (pur : mods, race, arme, promotion)
 ├── marching-order.js           # Logique pure ordre de marche (normalize, export, import)
 ├── team-state.js               # Logique pure etat combat equipe (init, tours, ennemis, export, import)
 ├── dead-overlay.js             # Overlay "tete de mort" sur les portraits (PV courants <= 0)
@@ -128,6 +140,7 @@ dcc-sheet/
 │   ├── elfe.js                 # Fiche Elfe (sorts dynamiques + 2 sorts de patron figés)
 │   ├── guerrier.js             # Fiche Guerrier
 │   ├── halfelin.js             # Fiche Halfelin
+│   ├── lvl0.js                 # Fiche Niveau 0 (funnel : bloc commun sans de de vie + notes)
 │   ├── mage.js                 # Fiche Mage (sorts dynamiques)
 │   ├── nain.js                 # Fiche Nain
 │   ├── voleur.js               # Fiche Voleur
@@ -139,7 +152,8 @@ dcc-sheet/
 │   ├── shadowdark/             # 12 PNG portraits Shadowdark (compreses)
 │   ├── jeff-stevens/           # 8 planches Jeff Stevens
 │   ├── gonzo/                  # 30 PNG portraits Gonzo (couleur + N&B)
-│   └── osr/                    # 17 PNG portraits Old School
+│   ├── osr/                    # 17 PNG portraits Old School
+│   └── funnel-tokens/          # 75 PNG tokens de niveau 0 + funnel-tokens.json (metier -> images)
 ├── exemples/                   # Exports JSON d'exemple (equipe complete)
 ├── login.php                   # Page de connexion
 ├── register.php                # Page d'inscription

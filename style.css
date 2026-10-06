@@ -679,8 +679,16 @@ ul, ol {
 .sheet-header {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 24px;
+}
+
+/* Ligne superieure : retour + boutons + statut (le nom n'y est pas) */
+.sheet-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .btn-back {
@@ -706,7 +714,10 @@ ul, ol {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--ink);
-  flex: 1;
+  /* Pleine largeur : le nom occupe sa propre ligne, sous les boutons */
+  flex: 1 1 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .sheet-header .toggle-inn {
@@ -1844,6 +1855,136 @@ button.section-bar.collapse-toggle[aria-expanded="true"] .chev {
   filter: brightness(1.1);
 }
 
+/* --------------------------------------------------------------------------
+   Niveau 0 (funnel) : pastille mobile, boutons de fiche, promotion
+   (l'onglet utilise le style commun des onglets de classe, comme Voleur ;
+   il n'a PAS l'accent de l'onglet Equipe)
+   -------------------------------------------------------------------------- */
+
+/* Pastille "Lvl 0" : visible uniquement en mobile (cf. media query 600px) */
+.btn-lvl0-mobile {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 18px;
+  background: var(--tab-active);
+  color: #fff;
+  border: none;
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.btn-lvl0-mobile:hover {
+  filter: brightness(1.1);
+}
+
+/* Fiche de niveau 0 : « Autre tirage » (session de tirage) / Promouvoir */
+.btn-reroll,
+.btn-promote {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: filter 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.btn-reroll {
+  color: #fff;
+  background: #b3441f;
+  border: 1px solid #b3441f;
+}
+
+.btn-reroll:hover {
+  filter: brightness(1.1);
+}
+
+.btn-promote {
+  color: var(--ink);
+  background: var(--field-bg);
+  border: 1px solid var(--green, #3f7d4f);
+}
+
+.btn-promote:hover {
+  background: var(--paper);
+}
+
+.btn-promote:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+}
+
+/* Modale de promotion : liste de classes + suppression optionnelle */
+.promo-class-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 14px 0 10px;
+  padding: 12px;
+  background: var(--field-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+}
+
+.promo-class-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.promo-class-row input {
+  cursor: pointer;
+}
+
+.promo-class-row.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.promo-class-row.is-disabled span {
+  text-decoration: line-through;
+}
+
+.promo-class-why {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.promo-delete-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  cursor: pointer;
+}
+
+/* Etat inactif d'un bouton de modale (ex. « Promouvoir » sans classe choisie) */
+.modal-btn-ok:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+}
+
 .team-table {
   width: 100%;
   border-collapse: collapse;
@@ -2816,6 +2957,14 @@ tr.team-stats-detail.open .team-detail-wrap {
   }
 
   .btn-equipe-mobile {
+    display: flex;
+  }
+
+  .tab-lvl0 {
+    display: none;
+  }
+
+  .btn-lvl0-mobile {
     display: flex;
   }
 

@@ -35,13 +35,14 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 
 ### Fiches de personnage
 - **Commun** : Identite (Nom, Titre, Metier, Alignement, Mouvement, Niveau, PX), Defense (CA, PV/Max avec **Des de vie**), Combat (Initiative, Des d'action, Attaque, Critique), 6 carac. avec modif. et jets de sauvegarde, Combat etendu (CAC/Distance), **Portrait** (7 sources, choix via popup), Equipement (Armes, Equipement, Tresor, Armure)
-- **Clerc** : Dieu, Incantation, Defaveur, Imposition des mains (tableau de référence non modifiable), **Liste de sorts dynamique** (grille 2 colonnes, champ unique par sort, ajout/suppression avec confirmation, migration de l'ancienne grille 3 × 7)
+- **Clerc** : Dieu, Incantation, Defaveur, Imposition des mains (tableau de référence non modifiable), **Liste de sorts dynamique** (table comme le Mage : 1 ligne par sort = n°, nom, niveau, test, suppression, ajout/suppression avec confirmation, niveau et test sauvegardés, migration de l'ancienne grille 3 × 7)
 - **Elfe** : Incantation, Familier, Patron, Corruption, Traits elfiques, **Liste de sorts dynamique** comme le Mage (2 sorts de patron figés en lignes 1-2 : Lier un patron / Invoquer un Patron (___/jour) saisissable, lignes libres à partir de la 3e, ajout/suppression avec confirmation)
 - **Guerrier** : Coup critique, Arme Chance, Hauts faits d'armes
 - **Halfelin** : Infravision, Discretion, Porte-bonheur, Combat a deux armes
 - **Mage** : Incantation, Familier, Patron, Corruption, **Liste de sorts dynamique** (ajout/suppression de lignes avec confirmation, nom en gras, style editable)
 - **Nain** : Infravision, Competences souterraines, Coup de bouclier, Arme Chance
 - **Voleur** : 14 competences voleur en grille (De de chance, Escalade, Crocheter, Pieges, etc.)
+- **Sorts (Mage, Elfe, Clerc)** : **meme table** pour les 3 classes (colonnes N°, Nom, Niveau, Test, Suppression) ; le **nom du sort se lit en gras 14 px**, la note (Mage/Elfe, 1 ligne sous le sort) en 11 px gris secondaire ; le Clerc n'a **pas de ligne de note** et sauvegarde desormais Niveau + Test par sort (cles `sort_niveau_N` / `sort_test_N`, vides si absentes a la lecture)
 
 ### Niveau 0 (funnel)
 - Onglet **« Niveau 0 »** apres *Voleur* ; en mobile (<= 600 px) il reste visible sous la forme courte **« Niv 0 »** : les 8 onglets occupent toute la largeur (`flex: 1`, ellipsis si besoin) **sans defilement horizontal** ; seul l'onglet Equipe est masque au profit de l'icone ⚔
@@ -142,7 +143,7 @@ dcc-sheet/
 │   └── icons.php               # Dossiers de portraits presents sur le serveur (action=list)
 ├── classes/
 │   ├── bloc_commun.js          # Bloc commun + portrait (identite, combat, stats, portrait, equipement)
-│   ├── clerc.js                # Fiche Clerc (sorts dynamiques, grille 2 colonnes)
+│   ├── clerc.js                # Fiche Clerc (sorts dynamiques, table 1 ligne par sort)
 │   ├── elfe.js                 # Fiche Elfe (sorts dynamiques + 2 sorts de patron figés)
 │   ├── guerrier.js             # Fiche Guerrier
 │   ├── halfelin.js             # Fiche Halfelin
@@ -169,7 +170,7 @@ dcc-sheet/
 ├── tests/                      # Suite de non-regression (node tests/run.js)
 │   ├── run.js                  # Orchestrateur + rapport tests/report.md
 │   ├── helpers/                # assert + environnement jsdom
-│   └── *.test.js               # syntaxe, CSS, modules, equipe, export, ordre de marche, restauration
+│   └── *.test.js               # syntaxe, CSS, modules, equipe, export, ordre de marche, restauration, sorts du clerc
 ├── pregens/                    # 10 fiches pre-generees (JSON au format import individuel)
 ├── tools/                      # Conversion PDF -> JSON des pre-gens (pregens_to_json.py + overrides)
 └── deploy/

@@ -17,6 +17,7 @@ const suites = [
   require('./11-team-state.test'),
   require('./12-lvl0.test'),
   require('./13-portrait-guard.test'),
+  require('./14-clerc-sorts.test'),
 ];
 
 function pad(s, n) {

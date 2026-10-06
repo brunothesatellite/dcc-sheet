@@ -1490,3 +1490,49 @@ Dans l'onglet Equipe, la section expedition (INIT. COMBAT + TOUR de chaque perso
 
 - `node tests\run.js` : **1953/1953 OK, 7 skip**.
 - Vérification visuelle à faire sur `http://localhost:8000` (aucun navigateur connecté à la session) : tirage, Autre tirage (disparaît en quittant la fiche), Promouvoir (4 classes / classe raciale imposée), portrait funnel, niveau 0 en Équipe, pastille mobile.
+
+---
+
+## Date : 6 octobre 2026 — Sorts : nom de sort en gras + fiche Clerc alignée sur Mage/Elfe
+
+### Hiérarchie visuelle du nom de sort (Mage, Elfe) — commit `441f69a`
+
+- **Problème** : nom et note partageaient le même cadre, la même couleur et la même graisse ; seul **1 px de corps** les séparait (12 px / 11 px).
+- `style.css` : nouvelle règle `.dtable td.sort-name input { font-size: 14px; font-weight: 700 }`, posée **après** le bloc partagé `.dtable td.sort-notes textarea, .dtable td.sort-name input, .sort-cell input` — ce bloc est laissé intact **à dessein** : `tests/02-css.test.js` le repère par sa liste de sélecteurs et exige qu'il conserve `border: 1px solid var(--input-border)`.
+- `style.css` : `.dtable td.sort-notes textarea` passe en `color: var(--muted)` (secondaire) — en thème clair le rapport tombe à ≈ 3,9:1 pour du 11 px (sous le seuil AA 4,5:1), comme ailleurs dans la fiche ; arbitrage assumé, revu si le strict AA est exigé.
+- Effet de bord voulu : l'Elfe hérite du style (mêmes classes) ; le Clerc, encore en `.sort-cell`, hérite à son tour avec la refonte ci-dessous.
+- `tests/02-css.test.js` : **+6 assertions** (gras, 14 px, note 11 px, note `--muted`) → 1953 → **1959**.
+
+### Fiche Clerc : table identique à Mage/Elfe + Niveau et Test par sort
+
+- **Demande** : même mise en page que Mage/Elfe mais **sans ligne de note** sous chaque sort → le Clerc gagne **2 champs sauvegardables par sort** (`sort_niveau_N`, `sort_test_N`) ; absents d'une base ancienne ou d'un import JSON → **champs vides**, aucune valeur par défaut imposée.
+- `classes/clerc.js` (refonte de la section SORTS) :
+  - table `#clerc-spells-{id}` en `.dtable`, en-têtes `# / Nom du sort / Niveau / Test / ✕`, **1 `<tr>` par sort** : aucun `textarea`, aucune `.sort-notes` — le champ nom hérite donc du gras 14 px via `td.sort-name`.
+  - clé de nom **historique `sort_N` conservée** (zéro migration des données existantes) ; `sort_niveau_N` / `sort_test_N` portés par des `data-key` → auto-save (`collectSheetData`), `collectData` du module et export/import JSON **sans rien changer ailleurs** (`api/characters.php` stocke le JSON brut, sans liste blanche).
+  - **indices stables** : les 3 clés partagent le même index ; supprimer un sort au milieu ne décale plus les suivants — l'ancien comportement **compactait** les noms, ce qui aurait fait décrocher Niveau/Test de leur sort. `renumber()` est appelé **au rendu** : la numérotation affichée reste continue (1, 2, 3) malgré le trou d'index, comme après une suppression en session.
+  - migration de l'ancienne grille 3 × 7 (`sort_{colonne}_{ligne}`) conservée : noms compactés en `sort_1..n`, Niveau/Test vides.
+  - `_spellRowHTML(charId, n, k)` appelé **sans `v`** : une ligne créée à la demande est toujours vide (`value=""` + loupe masquée) — voir le bug documenté plus bas.
+- `tests/14-clerc-sorts.test.js` : **nouvelle suite, 51 assertions** — structure identique au Mage, compatibilité base ancienne / import JSON sans Niveau+Test, migration de la grille 3 × 7, non-décrochage des index, roundtrip auto-save + `collectData` + aller-retour JSON, ajout/suppression (avec confirmation, sans confirmation, annulation). Enregistrée dans `tests/run.js` (13 → **14 suites**).
+- `tests/09-spell-reader.test.js` : bloc clerc `.sort-cell` → `td.sort-name` (la loupe passe au nouveau markup ; la regex `sort_(?:nom_)?\d+` de `spell-reader.js` couvrait déjà `sort_N`).
+
+### Documentation
+
+- `MANUAL.md` : § 6.2 (section Clerc), § 6.3 (intro : le Clerc passe sur « même table que le Mage, 1 ligne par sort », consigne d'ajout precisant « Effet/Notes : Mage et Elfe uniquement »), **« Côté Clerc » réécrit** (table identique, Niveau/Test sauvegardés et vides si absents, migration 3 × 7).
+- `README.md` : bullet **Clerc** (table comme le Mage + niveau/test sauvegardés), **nouveau bullet transverse « Sorts (Mage, Elfe, Clerc) »**, `clerc.js` et `*.test.js` dans l'arborescence.
+- `TODO.md` : **bug Mage/Elfe documenté en *Majeur*** (non corrigé) — voir ci-dessous.
+- `captures/clerc.png` régénérée (nouveau rendu de la fiche).
+
+### Bug documenté, non corrigé (`TODO.md` → *Majeur*)
+
+- **Supprimer un sort peut le faire réapparaître, auto-save comprise** : `_spellRowHTML(charId, n, k, v)` préremplit la ligne créée avec `v`, or `v` lit `data` = snapshot **au chargement** (les saisies vont dans le DOM). `getNextIndex()` = `max(lignes) + 1` **réutilise l'index de la ligne supprimée** → supprimer le dernier sort (`mage.js` L215, `elfe.js` L228) ou supprimer puis ré-ajouter (`mage.js` L225, `elfe.js` L238) ressuscite l'ancien contenu ; comme la sauvegarde lit le DOM, **les clés repartent en base**.
+- Correctif proposé (non appliqué) : ne plus passer `v` — déjà fait côté Clerc ; tests à ajouter listés dans le TODO.
+
+### Points laissés ouverts
+
+- `.sorts-grid` / `.sort-cell` ne sont plus utilisés par **aucun** JS : CSS mort + assertions `02-css` qui le décrivent — nettoyage non fait.
+- Bug Mage/Elfe ci-dessus : documenté, non corrigé.
+
+### Validation
+
+- `node tests\run.js` : **2010/2010 OK, 7 skip** (14 suites : `14-clerc-sorts` 51 assertions nouvelle, `02-css` 77 au lieu de 71).
+- Vérification visuelle à faire sur `http://localhost:8000` (aucun navigateur connecté à la session) : table du Clerc (nom en gras, colonnes Niveau/Test), migration d'une base avec ancienne grille, export/import d'un JSON sans `sort_niveau_*`.

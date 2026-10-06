@@ -3,45 +3,56 @@ if (!window.DCCModules) window.DCCModules = {};
 window.DCCModules.clerc = {
   render(container, charId, data) {
     data = data || {};
-    const v = (field, def = '') => data[field] ?? def;
     const k = (field) => `clerc-${charId}-${field}`;
     const bc = window.DCCModules.blocCommun;
 
-    // --- Spell values : migration grille legacy 3x7 -> liste plate ---
-    var maxNew = 0;
-    Object.keys(data).forEach(function (key) {
-      var m = key.match(/^sort_(\d+)$/);
-      if (m) maxNew = Math.max(maxNew, parseInt(m[1], 10));
+    /* Une ligne de sort porte 3 cles partageant le meme index :
+         sort_N        : nom du sort (cle historique, conservee)
+         sort_niveau_N : niveau du sort
+         sort_test_N   : test du sort
+       Base ancienne ou import JSON sans sort_niveau_N / sort_test_N :
+       le champ se charge vide (aucune valeur par defaut imposee).
+       Ancienne grille 3x7 (sort_{colonne}_{ligne}) sans niveau ni test :
+       les noms sont compacts en sort_1..sort_n, les champs annexes vides. */
+    var spellData = Object.assign({}, data);
+    var seen = {};
+    Object.keys(spellData).forEach(function (key) {
+      var m = key.match(/^sort_(?:niveau_|test_)?(\d+)$/);
+      if (m) seen[m[1]] = true;
     });
+    var spellIndices = Object.keys(seen).map(Number).sort(function (a, b) { return a - b; });
 
-    var spellValues = [];
-    if (maxNew > 0) {
-      for (var n = 1; n <= maxNew; n++) {
-        var nv = data['sort_' + n];
-        if (typeof nv === 'string' && nv.trim() !== '') spellValues.push(nv);
-      }
-    } else {
-      for (var c = 1; c <= 3; c++) {
-        for (var r = 1; r <= 7; r++) {
-          var lv = data['sort_' + c + '_' + r];
-          if (typeof lv === 'string' && lv.trim() !== '') spellValues.push(lv);
+    if (spellIndices.length === 0) {
+      var gridValues = [];
+      for (var col = 1; col <= 3; col++) {
+        for (var row = 1; row <= 7; row++) {
+          var gv = spellData['sort_' + col + '_' + row];
+          if (typeof gv === 'string' && gv.trim() !== '') gridValues.push(gv);
         }
       }
+      gridValues.forEach(function (val, i) { spellData['sort_' + (i + 1)] = val; });
+      spellIndices = gridValues.map(function (val, i) { return i + 1; });
     }
-    if (spellValues.length === 0) spellValues.push('');
-    spellValues.push('');
 
-    function spellCell(n, val) {
+    // Toujours une ligne vierge en fin de tableau
+    if (spellIndices.length === 0) spellIndices.push(1);
+    spellIndices.push(Math.max.apply(null, spellIndices) + 1);
+
+    const v = (field, def = '') => spellData[field] ?? def;
+
+    function spellRow(n) {
       return `
-        <div class="sort-cell" data-spell="${n}">
-          ${bc.spellLookup('spell', !String(val ?? '').trim())}
-          <input type="text" data-key="${k('sort_' + n)}" value="${val}" placeholder="Nom du sort (n° page)">
-          <button type="button" class="btn-spell-del" data-del="${n}">&#10005;</button>
-        </div>`;
+        <tr data-spell="${n}">
+          <td class="row-num">${n}</td>
+          <td class="sort-name">${bc.spellLookup('spell', !String(v('sort_' + n) ?? '').trim())}<input type="text" data-key="${k('sort_' + n)}" value="${v('sort_' + n)}"></td>
+          <td><input type="text" data-key="${k('sort_niveau_' + n)}" value="${v('sort_niveau_' + n)}" placeholder="1-5"></td>
+          <td><input type="text" data-key="${k('sort_test_' + n)}" value="${v('sort_test_' + n)}"></td>
+          <td class="row-del"><button type="button" class="btn-spell-del" data-del="${n}">&#10005;</button></td>
+        </tr>`;
     }
 
-    function cellsHTML() {
-      return spellValues.map(function (val, i) { return spellCell(i + 1, val); }).join('');
+    function spellsHTML() {
+      return spellIndices.map(spellRow).join('');
     }
 
     container.innerHTML = bc.render(container, charId, 'clerc', data) + `
@@ -104,9 +115,20 @@ window.DCCModules.clerc = {
         </table>
 
         <div class="section-bar">Sorts</div>
-        <div class="sorts-grid" id="clerc-spells-${charId}">
-          ${cellsHTML()}
-        </div>
+        <table class="dtable" id="clerc-spells-${charId}">
+          <thead>
+            <tr>
+              <th style="width:30px">#</th>
+              <th>Nom du sort</th>
+              <th style="width:60px">Niveau</th>
+              <th style="width:70px">Test</th>
+              <th style="width:30px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${spellsHTML()}
+          </tbody>
+        </table>
         <button type="button" class="btn-spell-add" id="btn-spell-add-${charId}">+ Ajouter un sort</button>
 
         <div class="section-bar">Notes</div>
@@ -118,44 +140,73 @@ window.DCCModules.clerc = {
       </div>
     `;
 
-    // --- Dynamic spells logic (meme mecanique que le Mage) ---
-    var grid = container.querySelector('#clerc-spells-' + charId);
+    // --- Dynamic spells logic (meme mecanique que le Mage, sans ligne de note) ---
+    var self = this;
+    var table = container.querySelector('#clerc-spells-' + charId);
+    var tbody = table.querySelector('tbody');
     var addBtn = container.querySelector('#btn-spell-add-' + charId);
+
+    // Numerotation continue : une suppression au milieu laisse un trou dans
+    // les indexes (les cles doivent rester alignees), pas dans l'affichage.
+    renumber();
+
+    function rowsOf(spellIdx) {
+      return Array.prototype.slice.call(
+        tbody.querySelectorAll('tr[data-spell="' + spellIdx + '"]'));
+    }
+
+    function allRows() {
+      return Array.prototype.slice.call(tbody.querySelectorAll('tr[data-spell]'));
+    }
+
+    function renumber() {
+      var seenIdx = {};
+      var num = 1;
+      allRows().forEach(function (tr) {
+        var idx = tr.getAttribute('data-spell');
+        if (seenIdx[idx]) return;
+        seenIdx[idx] = true;
+        var rowNum = tr.querySelector('.row-num');
+        if (rowNum) rowNum.textContent = num;
+        num++;
+      });
+    }
 
     function getNextIndex() {
       var max = 0;
-      grid.querySelectorAll('.sort-cell').forEach(function (cell) {
-        var idx = parseInt(cell.getAttribute('data-spell'), 10);
+      allRows().forEach(function (tr) {
+        var idx = parseInt(tr.getAttribute('data-spell'), 10);
         if (idx > max) max = idx;
       });
       return max + 1;
     }
 
-    function cellEmpty(cell) {
-      var input = cell.querySelector('input');
-      return !input || input.value.trim() === '';
+    function rowFilled(tr) {
+      var inputs = tr.querySelectorAll('input[data-key]');
+      for (var i = 0; i < inputs.length; i++) {
+        if (inputs[i].value.trim() !== '') return true;
+      }
+      return false;
     }
 
     function removeEmptyTrailing() {
-      while (grid.querySelectorAll('.sort-cell').length > 1) {
-        var cells = grid.querySelectorAll('.sort-cell');
-        var last = cells[cells.length - 1];
-        if (!cellEmpty(last)) break;
-        last.remove();
+      var rows = allRows();
+      for (var i = rows.length - 1; i > 0; i--) {
+        if (rowFilled(rows[i])) break;
+        rows[i].remove();
       }
     }
 
-    function ensureTrailingEmpty() {
-      var cells = grid.querySelectorAll('.sort-cell');
-      var last = cells[cells.length - 1];
-      if (last && cellEmpty(last)) return;
-      grid.insertAdjacentHTML('beforeend', spellCell(getNextIndex(), ''));
-    }
+    async function deleteSpell(spellIdx) {
+      var rows = rowsOf(spellIdx);
+      if (rows.length === 0) return;
 
-    async function deleteSpell(cell) {
-      if (!cell) return;
+      var hasData = false;
+      rows.forEach(function (tr) {
+        if (rowFilled(tr)) hasData = true;
+      });
 
-      if (!cellEmpty(cell)) {
+      if (hasData) {
         var confirmed = await window.showModal({
           title: 'Suppression',
           message: 'Supprimer ce sort ?',
@@ -166,29 +217,52 @@ window.DCCModules.clerc = {
         if (!confirmed) return;
       }
 
-      cell.remove();
+      rows.forEach(function (tr) { tr.remove(); });
       removeEmptyTrailing();
-      ensureTrailingEmpty();
+
+      // Au moins une ligne vierge
+      if (allRows().length === 0) {
+        tbody.insertAdjacentHTML('beforeend', self._spellRowHTML(charId, getNextIndex(), k));
+      }
+
+      renumber();
       window.bindAutoSave('clerc', charId);
       window.scheduleSave('clerc', charId);
     }
 
     function addSpell() {
-      grid.insertAdjacentHTML('beforeend', spellCell(getNextIndex(), ''));
+      tbody.insertAdjacentHTML('beforeend', self._spellRowHTML(charId, getNextIndex(), k));
+      renumber();
       window.bindAutoSave('clerc', charId);
       window.scheduleSave('clerc', charId);
     }
 
-    grid.addEventListener('click', function (e) {
+    tbody.addEventListener('click', function (e) {
       var btn = e.target.closest('.btn-spell-del');
       if (!btn) return;
       e.preventDefault();
-      deleteSpell(btn.closest('.sort-cell'));
+      var idx = parseInt(btn.getAttribute('data-del'), 10);
+      deleteSpell(idx);
     });
 
     addBtn.addEventListener('click', function () {
       addSpell();
     });
+  },
+
+  /* Ligne vierge ajoutee a la demande : nom / niveau / test vides, quel que
+     soit l'index (un sort supprime ne doit pas reapparaitre dans la ligne
+     recreee). */
+  _spellRowHTML(charId, n, k) {
+    const bc = window.DCCModules.blocCommun;
+    return `
+      <tr data-spell="${n}">
+        <td class="row-num">${n}</td>
+        <td class="sort-name">${bc.spellLookup('spell', true)}<input type="text" data-key="${k('sort_' + n)}" value=""></td>
+        <td><input type="text" data-key="${k('sort_niveau_' + n)}" value="" placeholder="1-5"></td>
+        <td><input type="text" data-key="${k('sort_test_' + n)}" value=""></td>
+        <td class="row-del"><button type="button" class="btn-spell-del" data-del="${n}">&#10005;</button></td>
+      </tr>`;
   },
 
   collectData(container) {

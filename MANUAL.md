@@ -368,7 +368,7 @@ Chaque classe ajoute une page de capacités puis une section **Notes** :
 
 | Classe | Sections propres |
 |---|---|
-| **Clerc** | Dieu, Test d'incant., Risque de défaveur, rappel des pouvoirs, table **Imposition des mains** (référence non modifiable — décalage d'alignement, colonnes 12/14/20/22+), **liste de sorts dynamique** sur 2 colonnes (§ 6.3) |
+| **Clerc** | Dieu, Test d'incant., Risque de défaveur, rappel des pouvoirs, table **Imposition des mains** (référence non modifiable — décalage d'alignement, colonnes 12/14/20/22+), **liste de sorts dynamique** (même table que le Mage, 1 ligne par sort — § 6.3) |
 | **Elfe** | Test d'incantation, Familier, Patron(s), Corruption, **Traits elfiques** (rappel), Autres notes, **liste de sorts dynamique** (2 sorts de patron figés en lignes 1-2, lignes libres à partir de la 3e, même présentation que le Mage : § 6.3) |
 | **Guerrier** | Coup critique sur, Arme soumise au mod. de Chance, Hauts faits d'armes (dé) |
 | **Halfelin** | Infravision, Discrétion, Porte-bonheur, Petite taille/lenteur + encadré **Combat à deux armes** (d16+d16, crit sur 16, etc.) |
@@ -379,7 +379,7 @@ Chaque classe ajoute une page de capacités puis une section **Notes** :
 
 ### 6.3 Gérer les sorts du Mage, de l'Elfe et du Clerc (liste dynamique)
 
-Les listes de sorts du Mage (2 lignes par sort), de l'Elfe (2 lignes par sort + 2 sorts de patron figés) et du Clerc (grille **2 colonnes**, un champ par sort) s'adaptent au nombre de sorts appris.
+Les listes de sorts du Mage (2 lignes par sort), de l'Elfe (2 lignes par sort + 2 sorts de patron figés) et du Clerc (**même table que le Mage, 1 ligne par sort** : nom / niveau / test, sans ligne de note) s'adaptent au nombre de sorts appris.
 
 <img src="captures/mage-sorts.png" alt="Table des sorts du mage avec sorts numérotés, niveau, test, effet et bouton de suppression rouge" width="420">
 
@@ -388,7 +388,7 @@ Les listes de sorts du Mage (2 lignes par sort), de l'Elfe (2 lignes par sort + 
 **Ajouter un sort**
 1. Cliquez sur **+ Ajouter un sort** sous la table.
 2. Une ligne vide numérotée s'ajoute à la fin (toujours une ligne disponible).
-3. Remplissez Nom, Niveau (1-5), Test, puis Effet/Notes : la sauvegarde est automatique.
+3. Remplissez Nom, Niveau (1-5), Test, puis Effet/Notes (Mage et Elfe uniquement) : la sauvegarde est automatique.
 
 **Supprimer un sort**
 1. Cliquez sur le **✕** rouge à droite du sort.
@@ -400,9 +400,9 @@ Les listes de sorts du Mage (2 lignes par sort), de l'Elfe (2 lignes par sort + 
 - Les lignes libres commencent à la **3e position** : les sorts ajoutés/supprimés sont numérotés à partir de 3.
 
 **Côté Clerc**
-- Grille de **2 colonnes** : chaque cellule = 1 sort (`n°` + champ unique « Nom n° de page » + ✕).
-- Chaque **ligne** (2 cellules) est délimitée par des bordures et un **fond alterné** (zébrage).
-- Les sorts saisis dans l'ancienne grille 3 × 7 sont **migrés automatiquement** à l'ouverture (ordre de lecture actuel conservé).
+- Même table que le Mage et l'Elfe : **une ligne par sort** (`n°` + Nom + **Niveau (1-5)** + **Test** + ✕), sans ligne de note en dessous.
+- **Niveau** et **Test** sont de nouveaux champs **sauvegardés** comme les autres (base + export/import JSON) ; un fichier exporté avant cette évolution, ou une base plus ancienne, les ouvre **vides** — rien n'est écrasé.
+- Les sorts saisis dans l'ancienne grille 3 × 7 sont **migrés automatiquement** à l'ouverture (ordre de lecture actuel conservé), avec Niveau et Test vides.
 
 > Les classes sans liste de sorts (Guerrier, Halfelin, Nain, Voleur) n'affichent pas cette section.
 

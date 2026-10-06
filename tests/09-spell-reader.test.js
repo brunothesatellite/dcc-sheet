@@ -220,7 +220,7 @@ async function testIcons(r) {
     r.ok(btns[1].hidden, 'mage : icône disparait quand on vide le champ');
   }
 
-  // --- Clerc : icône dans la cellule de la grille
+  // --- Clerc : meme structure que mage/elfe (une ligne par sort, pas de note)
   const h2 = createHarness();
   h2.env.load('spell-reader.js');
   await h2.env.window.DCCSpellReader.ensureReady();
@@ -228,11 +228,11 @@ async function testIcons(r) {
   const c2 = h2.env.document.getElementById('root');
   h2.env.window.DCCModules.clerc.render(c2, '3', { sort_1: 'Bénédiction' });
 
-  const cells = c2.querySelectorAll('.sort-cell');
-  r.eq(cells.length, 2, 'clerc : 2 cellules (1 remplie + 1 vide, got ' + cells.length + ')');
+  const cells = c2.querySelectorAll('#clerc-spells-3 td.sort-name');
+  r.eq(cells.length, 2, 'clerc : 2 lignes (1 remplie + 1 vide, got ' + cells.length + ')');
   if (cells.length === 2) {
-    r.ok(!cells[0].querySelector('.spell-lookup').hidden, 'clerc : icône visible sur cellule renseignée');
-    r.ok(cells[1].querySelector('.spell-lookup').hidden, 'clerc : icône masquée sur cellule vide');
+    r.ok(!cells[0].querySelector('.spell-lookup').hidden, 'clerc : icône visible sur ligne renseignée');
+    r.ok(cells[1].querySelector('.spell-lookup').hidden, 'clerc : icône masquée sur ligne vide');
   }
 
   // --- Elfe : lignes fixes + double recherche sur "Invoquer un Patron"

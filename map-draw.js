@@ -160,7 +160,63 @@
   /* =========================================================
      5. Dimensionnement / zoom
      ========================================================= */
+
+  /* Scène « infinie » (D17) : sans image de fond, la scène grandit pour
+     toujours couvrir la zone visible + une réserve (sinon impossible de
+     défiler) + le dessin. L'origine reste fixe en haut-gauche et le
+     défilement ne peut pas être négatif : on ne grandit qu'à droite / en bas,
+     donc jamais de coordonnées négatives. */
+  function ensureScene() {
+    if (state.bg.uid) return false;          /* avec une image : la scène = l'image */
+    var r = els.viewport.getBoundingClientRect();
+    var vw = r.width / view.zoom;
+    var vh = r.height / view.zoom;
+    var sx = els.viewport.scrollLeft / view.zoom;
+    var sy = els.viewport.scrollTop / view.zoom;
+    var needW = sx + vw * 2;                 /* visible + 1 écran de réserve */
+    var needH = sy + vh * 2;
+    var bb = contentBBox();
+    if (bb) {
+      needW = Math.max(needW, bb.x + bb.w + vw * 0.5);
+      needH = Math.max(needH, bb.y + bb.h + vh * 0.5);
+    }
+    var changed = false;
+    if (needW > state.scene.w) { state.scene.w = Math.ceil(needW); changed = true; }
+    if (needH > state.scene.h) { state.scene.h = Math.ceil(needH); changed = true; }
+    return changed;
+  }
+
+  /* Boite englobante du dessin (unités de scène) — sert au cadrage et à la
+     croissance de la scène. null si aucun dessin. */
+  function contentBBox() {
+    if (!state.ops.length) return null;
+    var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    state.ops.forEach(function (op) {
+      var pad = 0;
+      if (op.k === 's' || op.k === 'e') {
+        pad = (op.w || 0) / 2;
+        op.p.forEach(function (q) {
+          if (q[0] - pad < minX) minX = q[0] - pad;
+          if (q[1] - pad < minY) minY = q[1] - pad;
+          if (q[0] + pad > maxX) maxX = q[0] + pad;
+          if (q[1] + pad > maxY) maxY = q[1] + pad;
+        });
+      } else if (op.k === 't') {
+        var lines = String(op.t).split('\n');
+        var wT = Math.max.apply(null, lines.map(function (l) { return l.length; })) * op.s * 0.62;
+        var hT = lines.length * op.s * 1.25;
+        if (op.x < minX) minX = op.x;
+        if (op.y < minY) minY = op.y;
+        if (op.x + wT > maxX) maxX = op.x + wT;
+        if (op.y + hT > maxY) maxY = op.y + hT;
+      }
+    });
+    if (!(maxX >= minX && maxY >= minY)) return null;
+    return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+  }
+
   function layout() {
+    ensureScene();                 /* la grille couvre toujours la zone visible */
     var r = els.viewport.getBoundingClientRect();
     view.dpr = Math.min(window.devicePixelRatio || 1, 3);
     var wPx = Math.max(1, Math.round(r.width * view.dpr));
@@ -175,6 +231,8 @@
     $('zoomPct').textContent = Math.round(view.zoom * 100) + ' %';
     var v = Math.round(100 * Math.log(view.zoom / ZMIN) / Math.log(ZMAX / ZMIN));
     if (+$('zoomRange').value !== v) $('zoomRange').value = v;
+    var ruler = $('zoomRuler');
+    if (ruler && +ruler.value !== v) ruler.value = v;   /* reglette PC (D18) */
   }
   /* Zoom ancre sur un point ecran (base du pincement) */
   function zoomAt(next, ax, ay) {
@@ -193,9 +251,38 @@
     saveCur();
     scheduleUiSave();
   }
+  /* « Ajuster à l'écran » : avec une image = cadre l'image ; sans image =
+     cadre le dessin (jamais la scène « infinie », sinon zoom et croissance de
+     la scène se nourriraient l'un l'autre) ; carte vide = 100 % au coin. */
   function fitToView() {
     var r = els.viewport.getBoundingClientRect();
     if (!state.scene.w) return;
+
+    if (!state.bg.uid) {
+      var bb = contentBBox();
+      if (!bb) {
+        view.zoom = 1;
+        layout();
+        els.viewport.scrollLeft = 0;
+        els.viewport.scrollTop = 0;
+        render();
+        syncZoomUI();
+        saveCur();
+        scheduleUiSave();
+        return;
+      }
+      var zw = r.width / (bb.w * 1.15), zh = r.height / (bb.h * 1.15);
+      view.zoom = Math.min(ZMAX, Math.max(ZMIN, Math.min(zw, zh)));
+      layout();
+      els.viewport.scrollLeft = Math.max(0, (bb.x + bb.w / 2) * view.zoom - r.width / 2);
+      els.viewport.scrollTop = Math.max(0, (bb.y + bb.h / 2) * view.zoom - r.height / 2);
+      render();
+      syncZoomUI();
+      saveCur();
+      scheduleUiSave();
+      return;
+    }
+
     var z = Math.min(r.width / state.scene.w, r.height / state.scene.h);
     view.zoom = Math.min(ZMAX, Math.max(ZMIN, z));
     layout();
@@ -883,6 +970,7 @@
 
   /* sync(true) = pas de sauvegarde (chargement) */
   function sync(skipSave) {
+    if (ensureScene()) layout();   /* la scene englobe le dessin (D17) */
     saveCur();
     $('undoBtn').disabled = state.ops.length === 0;
     updateMapBadge();
@@ -1169,8 +1257,14 @@
     '<div class="topright">' +
     '<button class="chip chip--maps" id="md-mapsBtn" type="button" aria-haspopup="dialog" aria-label="Cartes ouvertes : 1">' +
     use('layers') + '<span class="mcount" id="md-mapCount">1</span></button>' +
+    '<div class="zoomcol">' +
     '<button class="chip chip--zoom" id="md-zoomChip" type="button" aria-label="Zoom : toucher pour 100 %, appuyer longuement pour ajuster">' +
     '<span id="md-zoomLabel">100%</span></button>' +
+    '<div class="zoomruler-wrap">' +
+    '<input type="range" class="zoomruler" id="md-zoomRuler" min="0" max="100" value="59" ' +
+    'aria-label="R\u00e9glette de zoom">' +
+    '</div>' +
+    '</div>' +
     '<button id="md-close" type="button" aria-label="Fermer le module carte" title="Fermer">' + use('close') + '</button>' +
     '</div></header>' +
 
@@ -1408,6 +1502,9 @@
     $('zoomRange').addEventListener('input', function (e) {
       zoomAt(ZMIN * Math.pow(ZMAX / ZMIN, +e.target.value / 100));
     });
+    $('zoomRuler').addEventListener('input', function (e) {
+      zoomAt(ZMIN * Math.pow(ZMAX / ZMIN, +e.target.value / 100));
+    });
     var holdTimer = 0, held = false;
     $('zoomChip').addEventListener('click', function () {
       if (held) return;
@@ -1618,6 +1715,7 @@
       if (raf) return;
       raf = window.requestAnimationFrame(function () {
         raf = 0;
+        if (ensureScene()) layout();   /* scene infinie : la grille suit l'exploration */
         render();
         saveCur();
         scheduleUiSave();

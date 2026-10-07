@@ -623,6 +623,12 @@ Le dessin est **vectoriel** (traits, gomme, texte) : il est léger, net à tous 
   dessinez au doigt sur mobile, à la souris sur ordinateur.
 - **En bas** : la barre d'outils (à portée du pouce sur mobile).
 
+**Sans image de fond**, la zone de dessin est quadrillée comme un **papier millimétré** :
+la grille **remplit toujours l'écran**, quel que soit le zoom, et s'étend à mesure que
+vous dézoomez ou défilez — la carte « grandit » avec votre exploration. **« Ajuster à
+l'écran »** cadre alors **votre dessin** (et non la grille) ; sur une carte vide, il revient
+à 100 % ; avec une image de fond, il cadre l'image.
+
 Le chrome (barres du haut et du bas) se masque dès que vous touchez la carte et réapparaît
 au relâchement ; en mode *focus* (bouton « Masquer l'interface »), la flèche du bas le
 ramène.
@@ -643,9 +649,10 @@ ramène.
 | **Plus** | zoom, export/import, image de fond, mode focus, effacer le dessin |
 
 **Zoom** : boutons `−` / `+`, curseur dans la feuille « Plus », toucher du chip de zoom
-(= 100 %, appui long = ajuster à l'écran), et **pincement à deux doigts** sur mobile.
-L'épaisseur du trait dépend du zoom **au moment du geste** : un trait tracé zoomé reste
-visible quand on dézoome.
+(= 100 %, appui long = ajuster à l'écran), et **pincement à deux doigts** sur mobile. Sur
+**PC**, une **réglette verticale** permanente, sous l'indicateur de zoom, règle le zoom à
+la souris (masquée sur tactile : le pincement suffit). L'épaisseur du trait dépend du zoom
+**au moment du geste** : un trait tracé zoomé reste visible quand on dézoome.
 
 <img src="captures/carte-feuille-plus.png" alt="Feuille « Plus » du module carte : section Vue avec zoom et ajuster à l'écran, section Fichier avec exporter, importer et charger une image de fond, section Affichage et section Dessin" width="380">
 

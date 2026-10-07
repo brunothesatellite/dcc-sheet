@@ -1625,6 +1625,25 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
    **immédiatement** (sans debounce). *Non-régression* : `15-map-draw` — entrées présentes
    dans la feuille du calque, absentes des options, état du bouton « Retirer », suppression
    effective du fichier + de la référence.
+7. **Grille « infinie » sur carte sans image** (D17) : la scène **grandit** pour couvrir la
+   zone visible + 1 écran de réserve + le dessin (origine fixe, croissance à droite/bas
+   seulement — le défilement ne peut pas être négatif). La grille remplit l'écran à tout
+   zoom, comme un **papier quadrillé**. **« Ajuster à l'écran »** cadré sur le **dessin**
+   (bbox + marge), 100 % sur carte vide, l'image si fond présent ; les `w/h` d'un import
+   deviennent un minimum. *Non-régression* : `15-map-draw` — croissance au zoom arrière,
+   **stabilité d'« Ajuster »** (pas de boucle zoom/scène), scène = dimensions de l'image
+   quand un fond existe, coordonnées d'import préservées.
+8. **Réglette de zoom verticale permanente sur PC** (D18) : sous le chip de zoom, réglage à
+   la souris (mapping log 5–800 %) sans passer par la feuille « … » ; **masquée sur
+   tactile** (`@media (pointer: coarse)`) où pincement + chip suffisent ; réglette et
+   curseur de la feuille « Plus » restent **synchronisés**. Deux retours console/rendu
+   traités en route : la valeur d'`appearance` verticale **dépréciée** (warning Chrome)
+   puis, le **curseur vertical natif ne se centrait pas** sur son rail (retour utilisateur,
+   dépendant du navigateur) — remplacé par la méthode déterministe : un curseur
+   **horizontal pivote à -90°** (max vers le haut), dont le centrage est déjà garanti par
+   les règles `input[type=range]` du module. Ni `writing-mode`, ni `appearance` expérimental.
+   *Non-régression* : `15-map-draw` — présence, synchronisation, pilotage du zoom, contrat
+   CSS (pivot -90°, masquage tactile, ni valeur dépréciée ni slider vertical natif).
 
 ### Extensions PHP activées (`D:\VS_Code_Workspaces\php\php.ini`)
 
@@ -1639,7 +1658,7 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
 
 ### Validation
 
-- `node tests\run.js` : **2183/2183 OK, 9 skip** (17 suites : `15-map-draw` 105, `16-map-persist` 34, `17-map-export` 32 en plus des 2012 existantes).
+- `node tests\run.js` : **2200/2200 OK, 9 skip** (17 suites : `15-map-draw` 122, `16-map-persist` 34, `17-map-export` 32 en plus des 2012 existantes).
 - `php -l` : `api/db.php`, `api/maps.php`, `api/map-image.php` sans erreur de syntaxe.
 - **Smoke test réel** (PHP 8.2 + SQLite, 22 vérifications × 2 passes) : session, CRUD calques, prefs, upload webp → UID, service d'image, **conversion PNG → webp (GD, RIFF/WEBP vérifié)**, `check_images`, limite 10 (409), **export ZIP réel (1,6 Mo)**, `import_map` JSON + rapport d'UID manquant, refus sans fichier (400), **rafale de 40 requêtes concurrentes sans 5xx**, suppression carte + image (404) — aucun `database is locked` dans le log serveur.
 - Vérification visuelle à faire sur `http://localhost:8000` : ouverture/fermeture par la croix, dessin + toast 💾, fond webp (png/jpg converti), remplacement/suppression d'image, suppression de carte, export ZIP aller-retour, mobile (pincement, clavier virtuel, safe-areas).

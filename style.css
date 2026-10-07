@@ -3858,6 +3858,54 @@ html:not(.has-spell-reader) .spell-lookup,
   outline-offset: 2px;
 }
 
+/* Réglette de zoom verticale, permanente, sous le chip de zoom : réglage à la
+   souris sans passer par la feuille « Plus » (D18). Masquée sur tactile :
+   le pincement et le chip suffisent.
+   Rendu : un curseur HORIZONTAL (déjà stylé et centré par les règles
+   input[type=range] du module) pivote de -90° — le centrage du curseur sur son
+   rail est ainsi garanti, sans valeur d'appearance ni propriété expérimentale
+   (le slider vertical natif ne se centre pas de façon fiable). */
+#map-module .zoomcol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+#map-module .zoomcol > * {
+  pointer-events: auto;
+}
+
+#map-module .zoomruler-wrap {
+  width: 30px;
+  height: 152px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+#map-module #md-zoomRuler {
+  flex: 0 0 auto;
+  width: 148px;
+  height: 30px;
+  margin: 0;
+  transform: rotate(-90deg);   /* max vers le haut : monter = zoomer */
+  cursor: ns-resize;
+}
+
+#map-module #md-zoomRuler:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (pointer: coarse) {
+  #map-module .zoomruler-wrap {
+    display: none;
+  }
+}
+
 /* Bouton d'action des toasts globaux (« Annuler » de draw-on-map) */
 .toast-action {
   margin-left: 10px;

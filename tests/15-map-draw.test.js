@@ -146,7 +146,10 @@ module.exports = async function suite() {
     await delay(30);
     const model = exportJSON(h);
     r.eq(model.ops.length, 1, 'import v:2 : operation recuperee');
-    r.eq(model.w, 100, 'import v:2 : scene reprise du fichier');
+    r.ok(model.w >= 824 && model.h >= 1400,
+      'import v:2 : la scene couvre l ecran meme si le fichier dit 100x80 (' + model.w + 'x' + model.h + ')');
+    r.eq(model.ops[0].p[0][0], 1, 'coordonnees d import preservees (x)');
+    r.eq(model.ops[0].p[0][1], 2, 'coordonnees d import preservees (y)');
     r.ok(h.toasts.some(function (t) { return /Importe : 1/.test(t.message); }), 'toast d import affiche');
 
     /* Operations corrompues : ignorees silencieusement */
@@ -480,6 +483,84 @@ module.exports = async function suite() {
     r.eq(deletes.length, 1, 'l image est supprimee de data/maps/');
     r.ok(!h.server.maps[0].bg_uid, 'la reference est retiree de la carte');
     r.ok(h.doc.getElementById('md-scene').classList.contains('is-empty'), 'grille de repli revenue');
+  }
+
+  /* ------- 17. scene « infinie » : la grille couvre l'ecran (D17) */
+  {
+    const h = createMapEnv();
+    /* Carte sans image, scene vide (w/h = 0) -> repli sur la zone de dessin */
+    seedMap(h.server, { data: { v: 3, w: 0, h: 0, ops: [] } });
+    await openModule(h);
+
+    let model = exportJSON(h);
+    /* zone de dessin factice 412x700 -> visible + 1 ecran de reserve */
+    r.ok(model.w >= 824, 'scene initiale = visible + reserve (' + model.w + ')');
+    r.ok(model.h >= 1400, 'hauteur initiale = visible + reserve (' + model.h + ')');
+
+    /* Dezoomer doit etendre la grille : elle couvre l'ecran a tout zoom */
+    h.doc.getElementById('md-zoomOut').click();
+    h.doc.getElementById('md-zoomOut').click();
+    model = exportJSON(h);
+    r.ok(model.w >= 1287, 'la scene grandit quand on dezoome (' + model.w + ')');
+
+    /* « Ajuster a l'ecran » cadre le dessin, pas la scene : pas de boucle */
+    h.stroke(h.doc.getElementById('md-cv'), [[10, 10], [60, 60]]);
+    h.doc.getElementById('md-fitBtn').click();
+    const z1 = h.doc.getElementById('md-zoomLabel').textContent;
+    h.doc.getElementById('md-fitBtn').click();
+    r.eq(h.doc.getElementById('md-zoomLabel').textContent, z1,
+      '« Ajuster » est stable (pas de boucle zoom / scene)');
+
+    /* Avec une image : la scene reste celle de l'image (jamais de croissance) */
+    const h2 = createMapEnv();
+    const m2 = seedMap(h2.server, {
+      bg_uid: '3f2b7c1e9a044d5b8c6f2a1d7e5b4c3a', bg_name: 'plan.webp',
+    });
+    h2.server.images[m2.bg_uid] = { name: 'plan.webp' };
+    await openModule(h2);
+    h2.doc.getElementById('md-zoomOut').click();
+    h2.doc.getElementById('md-zoomOut').click();
+    const model2 = exportJSON(h2);
+    r.eq(model2.w, 1600, 'avec une image : scene = largeur de l image');
+    r.eq(model2.h, 900, 'avec une image : hauteur de l image');
+  }
+
+  /* ------- 18. reglette de zoom verticale permanente (PC, D18) */
+  {
+    const h = createMapEnv();
+    seedMap(h.server);
+    await openModule(h);
+
+    const ruler = h.doc.getElementById('md-zoomRuler');
+    r.ok(!!ruler, 'reglette de zoom presente');
+    r.eq(ruler.type, 'range', 'c est bien un curseur');
+
+    /* Les deux reglettes (chip/menu) restent synchronisees */
+    h.doc.getElementById('md-zoomOut').click();
+    r.eq(ruler.value, h.doc.getElementById('md-zoomRange').value,
+      'reglette et curseur du menu « Plus » synchronises');
+
+    /* La reglette pilote le zoom */
+    ruler.value = '80';
+    ruler.dispatchEvent(new h.win.Event('input', { bubbles: true }));
+    r.ok(parseFloat(h.doc.getElementById('md-zoomLabel').textContent) > 125,
+      'la reglette change le zoom (' + h.doc.getElementById('md-zoomLabel').textContent + ')');
+
+    /* Et elle suit les autres commandes de zoom */
+    const before = +ruler.value;
+    h.doc.getElementById('md-zoomIn').click();
+    r.ok(+ruler.value > before, 'la reglette suit le bouton +');
+
+    /* Contrat CSS : curseur horizontal pivote (centrage du curseur garanti),
+       ni slider vertical natif ni valeur depreciee, et masquage tactile */
+    const css = read('style.css');
+    r.ok(/#map-module #md-zoomRuler\s*\{[^}]*transform:\s*rotate\(-90deg\)/.test(css),
+      'reglette verticale = curseur horizontal pivote a -90°');
+    r.ok(css.indexOf('slider-vertical') === -1, 'aucune valeur depreciee « slider-vertical »');
+    r.ok(css.indexOf('writing-mode: vertical') === -1,
+      'aucun slider vertical natif (centrage non fiable d un navigateur a l autre)');
+    r.ok(/@media \(pointer: coarse\)[\s\S]{0,200}?zoomruler-wrap/.test(css),
+      'reglette masquee sur les ecrans tactiles');
   }
 
   return r;

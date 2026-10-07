@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette 03 — feuilles et dialogues du module carte</title>
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="maquettes.css">
+</head>
+<body>
+
+<div class="mq-wrap">
+
+  <div class="section-title" style="font-size:26px;">3. Feuilles et dialogues du module</div>
+  <p class="mq-lead">
+    Meme logique de feuilles que <code>draw-on-map</code> (feuille basse en mobile, fenetre
+    centree en desktop), enrichies pour la persistance : UID des images, suppression effective
+    des fichiers, export/import JSON <b>et ZIP</b>. Les libelles « carte » designent les
+    <b>calques</b> persistes en base (une ligne <code>maps</code> = un calque).
+  </p>
+  <p class="mq-lead">
+    <button class="md-btn" type="button" id="mq-theme">Basculer clair / sombre</button>
+  </p>
+
+  <div class="section-bar">Feuille « Plus »</div>
+  <div class="mq-row">
+    <div class="md-sheet">
+      <div class="md-dhead">
+        <h2>Donjon de la Reine</h2>
+        <button class="md-close" type="button" aria-label="Fermer" style="box-shadow:none;width:32px;height:32px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="md-dbody">
+        <div class="md-group">
+          <h3>Vue</h3>
+          <button class="md-item" type="button">Zoom −  /  ────○────  /  + <span class="md-val">125 %</span></button>
+          <button class="md-item" type="button">Ajuster a l'ecran <span class="md-val">100 %</span></button>
+        </div>
+        <div class="md-group">
+          <h3>Fichier</h3>
+          <button class="md-item" type="button">Exporter le JSON / ZIP</button>
+          <button class="md-item" type="button">Importer un JSON / ZIP</button>
+          <button class="md-item" type="button">Choisir une image de fond</button>
+          <button class="md-item md-item--danger" type="button">Retirer l'image de fond</button>
+        </div>
+        <div class="md-group">
+          <h3>Affichage</h3>
+          <button class="md-item" type="button">Masquer l'interface <span class="md-val">mode focus</span></button>
+        </div>
+        <div class="md-group">
+          <h3>Dessin</h3>
+          <button class="md-item md-item--danger" type="button">Effacer tout le dessin</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mq-col" style="max-width:430px;">
+      <div class="mq-note">
+        <span class="mq-num">1</span><b>« Choisir une image de fond »</b> (entree unique, D16)
+        ouvre le selecteur de fichiers (<code>accept="image/webp,image/*"</code>) et charge OU
+        remplace le fond ; <b>« Retirer l'image de fond »</b> (inactive sans image) supprime
+        le fichier de <code>data/maps/</code>. L'image est convertie en webp, rangee sous
+        <code>data/maps/[UID].webp</code> (R5) — <b>aucun blob local</b> n'est conserve.
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">2</span><b>« Exporter le JSON / ZIP »</b> et
+        <b>« Importer un JSON / ZIP »</b> ne portent que sur le <b>calque actif</b>
+        (l'import ecrase son dessin, rien n'est cree ailleurs) — d'ou les titres des
+        fenetres : « Export — Donjon de la Reine », « Import — Donjon de la Reine ».
+        L'export est en v:3 (avec <code>bg.uid</code> + <code>bg.name</code>) ; l'import
+        accepte un .json <b>ou</b> un .zip produit par l'export.
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">3</span><b>« Effacer tout le dessin »</b> ne touche ni a l'image,
+        ni au fond : confirmation en 2 temps dans la feuille, puis toast « Annuler » (5 s).
+      </div>
+    </div>
+  </div>
+
+  <div class="section-bar">Tiroir « Cartes » (calques) et options de la carte</div>
+  <div class="mq-row">
+
+    <div class="md-sheet">
+      <div class="md-dhead">
+        <h2>Cartes</h2>
+        <button class="md-close" type="button" aria-label="Fermer" style="box-shadow:none;width:32px;height:32px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="md-dbody">
+        <p class="md-meta">Touchez une carte pour l'ouvrir. Chaque carte est sauvegardee en
+          base pendant le dessin. <b>3 / 10 cartes</b> utilisees.</p>
+        <div class="md-maplist">
+          <button class="md-maprow" type="button" aria-current="true">
+            <span>
+              <span class="md-mname">plan-du-donjon</span>
+              <span class="md-mmeta">42 operations</span>
+            </span>
+            <span class="md-uid">3f2b7c1e…</span>
+          </button>
+          <button class="md-maprow" type="button" aria-current="false">
+            <span>
+              <span class="md-mname">riveclaire</span>
+              <span class="md-mmeta">7 operations</span>
+            </span>
+            <span class="md-uid">9c1a44e2…</span>
+          </button>
+          <button class="md-maprow" type="button" aria-current="false">
+            <span>
+              <span class="md-mname">Brouillon</span>
+              <span class="md-mmeta">2 operations</span>
+            </span>
+            <span class="md-uid">aucun</span>
+          </button>
+        </div>
+        <div class="md-group">
+          <button class="md-item" type="button" aria-disabled="true">Nouvelle carte</button>
+          <button class="md-item" type="button">Options de la carte…</button>
+        </div>
+        <div class="md-confirm">
+          <p>Limite de <b>10 cartes</b> atteinte.
+            <span class="md-sub">Supprimez-en une pour en creer une nouvelle.</span></p>
+          <div class="md-row">
+            <button class="md-btn" type="button">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="md-sheet">
+      <div class="md-dhead">
+        <h2>Options de la carte</h2>
+        <button class="md-close" type="button" aria-label="Fermer" style="box-shadow:none;width:32px;height:32px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="md-dbody">
+        <div class="md-group">
+          <h3>Nom</h3>
+          <div class="md-item" style="cursor:default;">
+            <input class="md-mono" style="min-height:0;height:40px;font-family:var(--font-body);"
+                   value="Donjon de la Reine" aria-label="Nom de la carte">
+            <button class="md-btn" type="button">Renommer</button>
+          </div>
+        </div>
+        <div class="md-group">
+          <h3>Suppression</h3>
+          <button class="md-item md-item--danger" type="button">Supprimer cette carte</button>
+          <div class="md-confirm">
+            <p>Supprimer « Donjon de la Reine » et ses dessins ?
+              <span class="md-sub">L'image de fond <b>data/maps/3f2b7c1e….webp</b> sera aussi
+              supprimee si plus aucune carte ne l'utilise (R12).</span></p>
+            <div class="md-row">
+              <button class="md-btn md-btn--danger" type="button">Oui, supprimer</button>
+              <button class="md-btn" type="button">Annuler</button>
+            </div>
+          </div>
+        </div>
+        <p class="md-meta">42 operations &middot; repere 1600&times;900 &middot; image de fond
+          &middot; 3 carte(s)</p>
+      </div>
+    </div>
+
+    <div class="mq-col" style="max-width:430px;">
+      <div class="mq-note">
+        <span class="mq-num">4</span><b>Liste des calques</b> : nom, nombre d'operations et
+        UID tronque de l'image de fond (preuve visible que l'identifiant est bien persiste,
+        R10) — le nom de l'image n'est affiche nulle part (D3). Une carte encore nommee
+        « Carte N » prend le nom du fichier importe, sans extension (D15) — les deux
+        premieres lignes ci-dessus en sont l'exemple. La carte courante est marquee
+        (ombre jaune).
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">5</span><b>Options</b> : uniquement le nom de la carte et sa
+        suppression — l'image n'a pas d'entree ici (entree unique dans la feuille du calque,
+        D16). Le nom de l'image n'est <b>ni affiche ni modifiable</b> (D3) : il reste
+        conserve en base et dans les exports. <b>Choisir une image</b> = nouvel UID (jamais
+        d'ecrasement, D11) → <code>data/maps/[nouvel-UID].webp</code>, l'ancien fichier est
+        supprime et le dessin est recale proportionnellement.
+      </div>
+      <div class="mq-note mq-note--q">
+        <span class="mq-num">6</span><b>Suppression croisee</b> : la confirmation annonce
+        desormais la suppression du fichier <code>data/maps/[UID].webp</code> — comportement
+        inverse de <code>draw-on-map</code> ou le fichier etait toujours conserve (R12).
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-bar">Export / import d'un calque</div>
+  <div class="mq-row">
+
+    <div class="md-sheet">
+      <div class="md-dhead">
+        <h2>Export — Donjon de la Reine</h2>
+        <button class="md-close" type="button" aria-label="Fermer" style="box-shadow:none;width:32px;height:32px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="md-dbody">
+        <p class="md-meta">42 operations &middot; repere 1600&times;900 &middot; fond
+          plan-du-donjon.webp &middot; 15 Ko</p>
+        <textarea class="md-mono" readonly aria-label="Contenu JSON">{
+  "v": 3, "kind": "dcc-map",
+  "w": 1600, "h": 900,
+  "bg": { "uid": "3f2b7c1e9a044d5b8c6f2a1d7e5b4c3a",
+          "name": "plan-du-donjon.webp" },
+  "ops": [
+    { "k": "s", "c": "#2563eb", "w": 7.5, "p": [[110,300],[250,240]] },
+    { "k": "t", "c": "#111827", "x": 300, "y": 380, "s": 32, "b": 1, "t": "Entree" }
+  ],
+  "ui": { "zoom": 1.25, "left": 120, "top": 40 }
+}</textarea>
+        <div class="md-row">
+          <button class="md-btn md-btn--primary" type="button">Partager</button>
+          <button class="md-btn" type="button">Copier</button>
+          <button class="md-btn" type="button">.json</button>
+          <button class="md-btn" type="button">.zip (avec image)</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="md-sheet">
+      <div class="md-dhead">
+        <h2>Import — Donjon de la Reine</h2>
+        <button class="md-close" type="button" aria-label="Fermer" style="box-shadow:none;width:32px;height:32px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="md-dbody">
+        <p class="md-meta">Choisissez un fichier ou collez son contenu.</p>
+        <div class="md-item" style="cursor:default;">
+          <span>Fichier :</span>
+          <span class="md-val">.json, .zip</span>
+          <button class="md-btn" type="button">Parcourir…</button>
+        </div>
+        <textarea class="md-mono" placeholder='{"v":3,"w":1600,"h":900,"bg":{"uid":"…","name":"…"},"ops":[…]}' aria-label="Contenu JSON a importer"></textarea>
+        <div class="md-confirm" style="background:rgba(39,174,96,0.10);">
+          <p>Image de fond introuvable pour l'UID <b>3f2b7c1e…</b>
+            <span class="md-sub">Le dessin est importe, la grille par defaut est conservee (R11).</span></p>
+        </div>
+        <div class="md-row">
+          <button class="md-btn md-btn--primary" type="button">Importer</button>
+          <button class="md-btn" type="button">Fermer</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mq-col" style="max-width:430px;">
+      <div class="mq-note">
+        <span class="mq-num">7</span><b>Export</b> : le JSON ne contient <b>jamais</b> de
+        binaire — seulement <code>bg.uid</code> + <code>bg.name</code>. Le bouton
+        <b>.zip (avec image)</b> n'apparait que si un fond existe : il appelle
+        <code>maps.php?action=export_zip</code> qui emballe le JSON + <code>images/[UID].webp</code>.
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">8</span><b>Import</b> : .json ou .zip (le zip contient alors
+        l'image). Un <code>v:2</code> ancien format est accepte (sans UID = fond introuvable).
+      </div>
+      <div class="mq-note mq-note--q">
+        <span class="mq-num">9</span><b>UID introuvable</b> : le dessin est quand meme
+        importe, <b>aucune image</b> n'est affichee et un toast d'erreur signale l'UID
+        manquant (R11).
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-bar">Menu utilisateur — export / import global</div>
+  <div class="mq-row">
+    <div class="md-sheet" style="max-width:320px;">
+      <div class="md-dbody" style="padding:8px 0;">
+        <div class="menu-welcome">Bonjour, Bruno</div>
+        <button class="md-item" type="button">Exporter tout (JSON ou ZIP)</button>
+        <button class="md-item" type="button">Importer tout (JSON ou ZIP)</button>
+        <hr>
+        <button class="md-item" type="button">Changer le mot de passe</button>
+        <button class="md-item md-item--danger" type="button">Supprimer le compte</button>
+        <hr>
+        <button class="md-item" type="button">Deconnexion</button>
+      </div>
+    </div>
+
+    <div class="mq-col" style="max-width:520px;">
+      <div class="mq-note">
+        <span class="mq-num">10</span><b>Exporter tout</b> : si <b>aucune</b> image de fond
+        n'existe → fichier <code>.json</code> (comportement actuel, enrichi des calques). Si
+        <b>au moins une</b> image existe → fichier <code>.zip</code> =
+        <code>dcc-export-AAAA-MM-JJ.json</code> + <code>images/*.webp</code> (R9).
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">11</span><b>Importer tout</b> : accepte <code>.json</code> et
+        <code>.zip</code> ; le serveur extrait les images dans <code>data/maps/</code> et
+        repond avec un rapport (calques crees, images posees, UIDs manquants → toasts
+        d'erreur). Confirmation modale : « remplace tous vos personnages <b>et vos cartes</b> ».
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">12</span>Les libelles du menu sont mis a jour (« JSON ou ZIP »)
+        pour ne pas promettre un format unique.
+      </div>
+      <div class="mq-note mq-note--q">
+        <span class="mq-num">13</span><b>Limite de 10 cartes</b> (D12) : le bouton « Nouvelle
+        carte » est inactive des la 10ᵉ et un message invite a supprimer un calque. Un import
+        « tout » qui contient plus de 10 calques en importe les 10 premiers et liste les
+        autres dans un toast d'erreur (D13).
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+document.getElementById('mq-theme').addEventListener('click', function () {
+  var root = document.documentElement;
+  root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+</script>
+</body>
+</html>

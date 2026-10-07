@@ -1,0 +1,24 @@
+Bougie
+Chaîne, 3 m
+Coffre, vide
+Corde, 15 m
+Craie, 1 morceau
+Eau bénite 1d4 MV/DN/D
+Flasque, vide
+Gourde
+Grappin
+Huile 1d6 + DD10 Ref/tour
+Lanterne
+Marteau, petit
+Miroir de poche
+Outils de voleur
+Perche, 3 m
+Pied-de-biche
+Pointe en fer, unité
+Rations, par jour
+Sac, grand
+Sac, petit
+Sac à dos
+Silex & amadou
+Symbole sacré
+Torche, unité

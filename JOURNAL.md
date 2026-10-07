@@ -1536,3 +1536,110 @@ Dans l'onglet Equipe, la section expedition (INIT. COMBAT + TOUR de chaque perso
 
 - `node tests\run.js` : **2010/2010 OK, 7 skip** (14 suites : `14-clerc-sorts` 51 assertions nouvelle, `02-css` 77 au lieu de 71).
 - Vérification visuelle à faire sur `http://localhost:8000` (aucun navigateur connecté à la session) : table du Clerc (nom en gras, colonnes Niveau/Test), migration d'une base avec ancienne grille, export/import d'un JSON sans `sort_niveau_*`.
+
+---
+
+## Date : 7 octobre 2026 - Evolution « Carte » : module de dessin de carte (branche `evol-draw-map`)
+
+### Objectif
+
+Module de **dessin de carte plein écran** ouvert par une icône « carte » de la topbar (à gauche de l'icône de thème), reprenant l'application `D:\VS Code\draw-on-map` (crayon, gomme, texte, déplacer, annuler, zoom/pincement, multi-cartes), avec **persistance en base**, **images de fond webp** et **export/import JSON/ZIP**. Spec : `TODO.md` § EVOLUTIONS — plan détaillé et maquettes validés : `plan1/PLAN-CARTE.md`, `plan1/maquettes/`.
+
+### Backend (PHP/SQLite)
+
+- `api/db.php` : table `maps` (`data` = `{v,w,h,ops}`, `ui` = `{zoom,left,top}`, `bg_uid`, `bg_name`), colonne `users.map_prefs` (outil/couleur/taille/gras/calque actif), `busyTimeout(5000)` (écritures concurrentes multi-onglets, WAL = jamais de corruption, au pire « dernier écrit gagne »).
+- `api/maps.php` (**nouveau**) : `list/get/create/save/rename/delete`, `prefs_get/prefs_save`, `check_images`, `export_zip` (`ZipArchive` : json + `images/<uid>.webp` + `rapport.txt`), `import_all`/`import_map` (json ou zip). Limite **10 calques** (`create` → 409 + message). Suppression d'un calque = `unlink` de l'image orpheline (comptage de références).
+- `api/map-image.php` (**nouveau**) : `upload` (conversion **webp** GD qualité 85, EXIF effacé, champ `name` = nom utilisateur conservé), `get` (session obligatoire, ETag, `Cache-Control: private`), `delete`. Stockage `data/maps/[UID].webp`, UID = `bin2hex(random_bytes(16))`, **jamais d'écrasement** (remplacement = nouvel UID + purge de l'ancien).
+
+### Module carte (front)
+
+- `map-draw.js` (**nouveau**) : port du moteur `draw-on-map`, ids DOM préfixés `md-` (zéro collision avec `script.js`), invariants `ARCHI.md` § 10 préservés (unités de scène, `w_scene = épaisseur/zoom`, `destination-out` remis en `source-over`, bitmap = vue × dpr, simplification RDP).
+- Persistance : sauvegarde auto **debounce 400 ms** + `showToastSave()` 💾 ; zoom/position **par carte** (debounce 1,5 s) ; outil/couleur/taille/gras **par compte** — tout restauré à la réouverture (R13).
+- Fond d'image : upload → `data/maps/[UID].webp`, conversion webp **côté navigateur** (`canvas.toBlob`) avec repli GD serveur ; image introuvable → **toast d'erreur + grille de repli**, référence UID conservée (R11).
+- Feuilles Plus / Export / Import / Cartes / Options reprises du port + bouton « .zip (avec image) », « Remplacer/Supprimer l'image de fond », **croix de fermeture** + `Échap` (R3).
+- `style.css` : section « Module Carte » (port de `draw-on-map/index.css` scopé sous `#map-module`, jetons liés à `data-theme` : le module hérite du thème clair/sombre) + `.map-toggle` (clone de `.theme-toggle`, cible tactile 44 px).
+- `index.html` : icône `#btn-carte` **à gauche** de l'icône de thème (utilisateurs connectés), `viewport-fit=cover` (safe-areas iOS), `<script src="map-draw.js">`.
+- `script.js` : `showToast(message, type, actionLabel?, action?)` **rétrocompatible** ; export/import « tout » enrichis (`maps`, `map_prefs`) avec **ZIP** (et repli `.json` + avertissement si `ZipArchive` absent) ; import `.json` **ou** `.zip` avec rapport des UID manquants et des calques écartés.
+
+### Tests
+
+- `tests/helpers/mapenv.js` (**nouveau**) : harnais du module (stubs canvas 2D / dialogues / Image / toBlob + serveur factice `maps.php` + `map-image.php` avec état en mémoire).
+- `tests/15-map-draw.test.js` : **52 assertions** — règle d'épaisseur au zoom (6 px → 7,5 px à 80 %), gomme `destination-out` puis retour `source-over`, sérialisation `v:3` (UID + nom + `ui`), compat `v:2`, ops corrompues ignorées, image introuvable (toast + grille), limite de 10 cartes, suppression carte + image, fermeture (croix) avec sauvegarde.
+- `tests/16-map-persist.test.js` : **34 assertions** — sauvegarde auto + toast 💾, prefs outil/couleur, reprise zoom/position/outils/gras, upload puis **remplacement** d'image (nouvel UID + purge de l'ancien), erreur de sauvegarde, UID conservé malgré image manquante.
+- `tests/17-map-export.test.js` : **32 assertions** — export global (JSON `version: 2` + cartes + prefs ; **ZIP** dès qu'une image existe), import `.json`/`.zip` (remplacement des calques, toasts UID manquants, **limite de 10** = 10 importés + toast).
+
+### Documentation
+
+- `MANUAL.md` : **nouvelle § 9 « Dessiner une carte »** (§ 9/10 → 10/11, table des matières et renvois § mis à jour), § 10 = tableau des données stockées (cartes + images), § 11 = nouveaux toasts, **annexe A** : format `v:3` d'un calque + collection globale `version: 2` (`maps`, `map_prefs`, ZIP).
+- `README.md` : section **Module Carte**, galerie (2 captures), arborescence (`map-draw.js`, `api/maps.php`, `api/map-image.php`), tableaux API.
+- `plan1/PLAN-CARTE.md` : décision **D12** ajustée (bouton « Nouvelle carte » cliquable pour afficher le message de limite), § 18 = liste des captures attendues.
+
+### Correctif : la croix de fermeture dessinait au lieu de fermer (bug réel)
+
+- **Symptôme** : cliquer sur la ✕ du module traçait un point sur le canvas au lieu de fermer.
+- **Cause** : `#md-top` est en `pointer-events:none` (comportement `draw-on-map` : le geste doit passer **sous** le chrome) et seuls les `.chip` réactivent `pointer-events:auto` — la croix, bouton nu, **laissait donc le clic filer vers le canvas** qui capture le pointeur (`setPointerCapture`) et trace.
+- **Correctif** : `pointer-events: auto` explicite sur `#map-module #md-close` (`style.css`) ; le même contrat s'applique désormais à **toute commande ajoutée au chrome haut**.
+- **Non-régression** : `tests/15-map-draw.test.js` **+5 assertions CSS** (contrat : `#md-close` en `pointer-events:auto`, `#md-top` en `pointer-events:none` + `z-index:30`, canvas en `z-index:5`). Le clic synthétique jsdom ne détecte pas ce genre de bug (pas de hit-test) : ce sont les assertions CSS qui le verrouillent.
+
+### Correctif : `database is locked` en Fatal error au démarrage d'une requête (D14)
+
+- **Symptôme** (log serveur) : `PHP Fatal error: Uncaught Exception: database is locked` levée sur `PRAGMA journal_mode=WAL` dans `getDB()` → la requête partait en 500.
+- **Cause** : `busyTimeout(5000)` était posé **après** les `PRAGMA` — le timeout ne s'appliquait donc jamais au moment exact où il fallait attendre le verre (et `journal_mode=WAL` exige un accès bref exclusif, même pour constater que la base est déjà en WAL).
+- **Correctif** (`api/db.php`) : `busyTimeout(5000)` posé **dès la création de la connexion**, avant tout pragma ; `PRAGMA journal_mode=WAL` passé en `try/catch` non bloquant (le mode est persistant dans le fichier : un échec = déjà en WAL ou autre connexion active).
+- **Non-régression** : smoke test + **rafale de 40 requêtes concurrentes** (list/save/get/prefs) sans aucun 5xx ; deux passes complètes à la suite sans `database is locked` dans le log.
+
+### Correctifs d'interface (retours de test en navigateur, 07/10)
+
+1. **Les croix des feuilles ne fermaient rien** (Plus, Importer, Cartes, Options) : les
+   attributs `data-close` portaient l'id **déjà préfixé** (`md-moreDlg`) alors que
+   `closeDlg()` re-préfixe → `getElementById('md-md-moreDlg')` = `null`, clic sans effet.
+   *Correctif* : `data-close` = id **logique** (sans préfixe), convention commentée dans
+   `bindUI()`. *Non-régression* : `15-map-draw` — les 4 feuilles testées une par une
+   (ouverture puis fermeture par leur croix) + contrat « aucun `data-close` préfixé ».
+2. **Crayon / gomme / texte inertes, on restait en mode déplacement** : `setTool()` ne
+   **ré-armait pas** `drawMode` (oubli de port — `draw-on-map` fait
+   `setDrawMode(tool !== 'move')` : *choisir un outil = vouloir dessiner*). Le geste
+   tombait donc toujours dans le pan après un chargement de fond (`setDrawMode(false)`).
+   *Correctif* : port fidèle (avec fermeture du tiroir de couleurs hors outil texte,
+   focus du champ texte, vibration légère). *Non-régression* : `15-map-draw` — séquence
+   complète déplacement → crayon → gomme → texte avec vérification des opérations créées.
+3. **Options de la carte simplifiées** : le nom de l'image de fond n'est **ni affiché ni
+   renommable** (retour utilisateur : « aucun intérêt ») — champ et bouton « Renommer »
+   supprimés, la ligne de synthèse affiche « image de fond ». Le nom reste **persisté en
+   base et exporté** (R6/R10). *Non-régression* : `15-map-draw` — aucun champ/bouton de
+   nom dans les options, mais `bg_name` toujours envoyé à la sauvegarde.
+4. **Nom de l'image retiré de la liste des calques** + **« Carte N » rebaptisée au
+   chargement d'un fond** (D15) : la carte prend le nom du fichier image **sans son
+   extension** ; un nom déjà personnalisé n'est jamais écrasé (heuristique `/^Carte \d+$/i`).
+   *Non-régression* : `15-map-draw` — rebaptisage `plan-du-donjon.png` → `plan-du-donjon`,
+   non-écrasement par un second fond, nom absent de la liste et des options.
+5. **Export / import = calque actif, titres explicites** : « Exporter le JSON » devient
+   **« Exporter le JSON / ZIP »** ; les feuilles portent le **nom du calque actif**
+   (« Donjon de la Reine », « Export — Donjon de la Reine », « Import — … ») — ces actions
+   ne portent que sur lui et l'import **écrase son dessin** (aucun calque créé).
+   *Non-régression* : `15-map-draw` — titres vérifiés + import sans création de calque.
+6. **Entrée unique « image de fond »** (D16) : **« Choisir une image de fond »** (charge
+   **ou** remplace) et **« Retirer l'image de fond »** (inactive sans image) dans la feuille
+   du calque ; le bloc image est **retiré d'« Options de la carte »** (nom + suppression
+   seulement) — fini le doublon « Charger » / « Remplacer ». « Retirer » écrit en base
+   **immédiatement** (sans debounce). *Non-régression* : `15-map-draw` — entrées présentes
+   dans la feuille du calque, absentes des options, état du bouton « Retirer », suppression
+   effective du fichier + de la référence.
+
+### Extensions PHP activées (`D:\VS_Code_Workspaces\php\php.ini`)
+
+- `extension=gd` et `extension=zip` décommentées (les DLL `php_gd.dll` / `php_zip.dll` étaient déjà présentes dans `ext/`) → **conversion png/jpg → webp côté serveur** et **export/import ZIP** opérationnels localement.
+- `php -m` confirme : `gd`, `zip`, `sqlite3`.
+
+### Points laissés ouverts
+
+- **Captures d'écran** : 11 requises + 4 optionnelles listées dans `plan1/PLAN-CARTE.md` § 18 ; les `<img>` du manuel/README pointent déjà vers ces noms (à prendre sur le rendu réel).
+- Dimension maximale d'une image : aucun plafond retenu (option étudiable : redimensionnement au-delà de 4096 px de plus grand côté).
+- À vérifier sur le PHP du NAS : `gd` et `zip` y sont-ils aussi disponibles (sinon les replis `.json` / navigateur prennent le relais, comme testé).
+
+### Validation
+
+- `node tests\run.js` : **2183/2183 OK, 9 skip** (17 suites : `15-map-draw` 105, `16-map-persist` 34, `17-map-export` 32 en plus des 2012 existantes).
+- `php -l` : `api/db.php`, `api/maps.php`, `api/map-image.php` sans erreur de syntaxe.
+- **Smoke test réel** (PHP 8.2 + SQLite, 22 vérifications × 2 passes) : session, CRUD calques, prefs, upload webp → UID, service d'image, **conversion PNG → webp (GD, RIFF/WEBP vérifié)**, `check_images`, limite 10 (409), **export ZIP réel (1,6 Mo)**, `import_map` JSON + rapport d'UID manquant, refus sans fichier (400), **rafale de 40 requêtes concurrentes sans 5xx**, suppression carte + image (404) — aucun `database is locked` dans le log serveur.
+- Vérification visuelle à faire sur `http://localhost:8000` : ouverture/fermeture par la croix, dessin + toast 💾, fond webp (png/jpg converti), remplacement/suppression d'image, suppression de carte, export ZIP aller-retour, mobile (pincement, clavier virtuel, safe-areas).

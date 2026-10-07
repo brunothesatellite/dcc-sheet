@@ -1,0 +1,756 @@
+/* =========================================================================
+   MAQUETTES — evolution « Carte »  (plan1/maquettes)
+   Fichier de maquette UNIQUEMENT : il ne doit jamais etre reference par
+   l'application (index.html ne doit le lier que dans les maquettes).
+   Il apporte :
+     1. les cadres d'appareils (mobile / desktop) et encarts d'annotation
+     2. les styles PROPOSES du module Carte (icone topbar, coque plein
+        ecran, chrome, dock, feuilles, toasts) — a rapatrier dans
+        style.css le jour J (section « Module Carte »)
+   ========================================================================= */
+
+/* -------------------------------------------------------------------------
+   0. Outils de maquette
+   ---------------------------------------------------------------------- */
+.mq-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+}
+
+.mq-lead {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.mq-lead code,
+.mq-note code {
+  background: var(--field-bg);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 0 4px;
+  font-size: 12px;
+}
+
+.mq-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  align-items: flex-start;
+  margin: 18px 0 8px;
+}
+
+.mq-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 100%;
+}
+
+/* Cadre telephone : boitier + encoche */
+.mq-phone {
+  width: 390px;
+  max-width: 100%;
+  height: 780px;
+  border: 10px solid #17171c;
+  border-radius: 42px;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+  flex: none;
+}
+
+.mq-phone::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 116px;
+  height: 24px;
+  border-radius: 14px;
+  background: #17171c;
+  z-index: 50;
+}
+
+.mq-desktop {
+  width: 100%;
+  max-width: 1020px;
+  height: 620px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg);
+  box-shadow: 0 12px 30px var(--shadow);
+  flex: none;
+}
+
+.mq-cap {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+}
+
+/* Encarts d'annotation */
+.mq-note {
+  border-left: 4px solid var(--yellow);
+  background: var(--paper);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink);
+  max-width: 720px;
+}
+
+.mq-note--q {
+  border-left-color: var(--tab-active);
+}
+
+.mq-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--yellow);
+  color: #17171c;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 12px;
+  flex: none;
+}
+
+.mq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+
+/* -------------------------------------------------------------------------
+   1. Topbar — icone « carte » (propose)
+   ---------------------------------------------------------------------- */
+.map-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--header-text);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.map-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.map-toggle svg {
+  width: 19px;
+  height: 19px;
+}
+
+/* -------------------------------------------------------------------------
+   2. Module Carte — coque plein ecran (propose)
+   ---------------------------------------------------------------------- */
+.map-module {
+  position: absolute;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* --- chrome haut : 1 ligne flottante --- */
+.md-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 8px;
+  pointer-events: none;
+}
+
+.md-top > * {
+  pointer-events: auto;
+}
+
+.md-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 19px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 8px var(--shadow);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.md-chip svg {
+  width: 17px;
+  height: 17px;
+}
+
+.md-chip .md-count {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--tab-active);
+  color: #fff;
+  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.md-chip--status {
+  max-width: 46%;
+  overflow: hidden;
+}
+
+.md-chip--status span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.md-topright {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.md-close {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 2px 8px var(--shadow);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.md-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.md-close:hover {
+  background: var(--tab-active);
+  border-color: var(--tab-active);
+  color: #fff;
+}
+
+/* --- scene + canvas --- */
+.md-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.md-viewport {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.md-scene {
+  position: relative;
+  width: 720px;
+  height: 470px;
+  transform-origin: 0 0;
+}
+
+.md-bg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Grille de repli : pas d'image de fond */
+.md-scene.is-empty {
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.md-canvas {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+/* --- chrome bas : dock --- */
+.md-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 10px calc(10px + env(safe-area-inset-bottom, 0px));
+}
+
+.md-dock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+  box-shadow: 0 4px 16px var(--shadow);
+}
+
+.md-seg {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--tab-bg);
+}
+
+.md-tool,
+.md-rbtn {
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.md-tool svg,
+.md-rbtn svg {
+  width: 21px;
+  height: 21px;
+}
+
+.md-tool[aria-pressed="true"] {
+  background: var(--paper);
+  color: var(--tab-active);
+  box-shadow: 0 1px 4px var(--shadow);
+}
+
+.md-rbtn {
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--paper);
+}
+
+.md-rbtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.md-colorwell {
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.md-colorwell i {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--c, #2563eb);
+  border: 2px solid var(--line);
+}
+
+.md-spacer {
+  flex: 1;
+}
+
+/* Tiroir de couleurs */
+.md-tray {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper);
+  box-shadow: 0 4px 16px var(--shadow);
+  align-self: center;
+}
+
+.md-swatch {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: var(--c);
+  cursor: pointer;
+}
+
+.md-swatch[aria-pressed="true"] {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px var(--paper) inset;
+}
+
+/* --- etagere texte --- */
+.md-shelf {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper);
+  box-shadow: 0 4px 16px var(--shadow);
+}
+
+.md-shelf textarea {
+  resize: none;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  background: var(--field-bg);
+  color: var(--ink);
+  padding: 8px 10px;
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.md-shelfrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.md-shelfrow select {
+  padding: 8px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  background: var(--field-bg);
+  color: var(--ink);
+}
+
+.md-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* -------------------------------------------------------------------------
+   3. Feuilles (dialog) du module — rendu statique en maquette
+   ---------------------------------------------------------------------- */
+.md-sheet {
+  border: 2px solid var(--border, var(--line));
+  border-radius: var(--radius);
+  background: var(--paper);
+  box-shadow: 4px 4px 0 var(--yellow);
+  overflow: hidden;
+  max-width: 420px;
+  width: 100%;
+}
+
+.md-dhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--header-bg);
+  color: var(--header-text);
+}
+
+.md-dhead h2 {
+  font-family: var(--font-heading);
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.md-dbody {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.md-group {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.md-group h3 {
+  padding: 8px 12px;
+  background: var(--tab-bg);
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+}
+
+.md-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 12px;
+  border: none;
+  border-top: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.md-item:first-of-type {
+  border-top: none;
+}
+
+.md-item svg {
+  width: 19px;
+  height: 19px;
+  flex: none;
+}
+
+.md-item .md-val {
+  margin-left: auto;
+  font-family: var(--font-heading);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.md-item--danger {
+  color: var(--red);
+}
+
+.md-item[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.md-confirm {
+  padding: 12px;
+  border-top: 1px solid var(--line);
+  background: rgba(224, 74, 61, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.md-confirm p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.md-confirm .md-sub {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.md-row {
+  display: flex;
+  gap: 8px;
+}
+
+.md-btn {
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+
+.md-btn--primary {
+  background: var(--tab-active);
+  border-color: var(--tab-active);
+  color: #fff;
+}
+
+.md-btn--danger {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
+.md-meta {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.md-mono {
+  width: 100%;
+  min-height: 132px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--field-bg);
+  color: var(--ink);
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+/* Liste des calques */
+.md-maplist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.md-maprow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  cursor: pointer;
+  text-align: left;
+}
+
+.md-maprow[aria-current="true"] {
+  border-color: var(--tab-active);
+  box-shadow: 3px 3px 0 var(--yellow);
+}
+
+.md-maprow .md-mname {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.md-maprow .md-mmeta {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.md-uid {
+  margin-left: auto;
+  padding: 2px 8px;
+  border: 1px dashed var(--input-border);
+  border-radius: 10px;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* -------------------------------------------------------------------------
+   4. Toasts (couche globle dcc-sheet + cas du module)
+   ---------------------------------------------------------------------- */
+.mq-toast-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 460px;
+}
+
+/* -------------------------------------------------------------------------
+   5. Diagrammes de flux (maquette 04)
+   ---------------------------------------------------------------------- */
+.mq-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.mq-step {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 260px;
+}
+
+.mq-step b {
+  display: block;
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.mq-arrow {
+  color: var(--muted);
+  font-size: 18px;
+}
+
+/* -------------------------------------------------------------------------
+   6. Ajustements responsive des maquettes elles-memes
+   ---------------------------------------------------------------------- */
+@media (max-width: 460px) {
+  .mq-phone {
+    height: 640px;
+    border-width: 6px;
+    border-radius: 28px;
+  }
+}

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette 01 — icone « carte » de la topbar</title>
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="maquettes.css">
+</head>
+<body>
+
+<div class="mq-wrap">
+
+  <div class="section-title" style="font-size:26px;">1. Icone « carte » de la topbar</div>
+  <p class="mq-lead">
+    Nouveau bouton <code>#btn-carte</code> place <strong>immediatement a gauche</strong> de
+    l'icone de theme (<code>#btn-theme</code>), dans le bloc de droite de la topbar, apres le
+    <code>.topbar-spacer</code>. Clic = ouverture du module de dessin en plein ecran
+    (maquette 02). <strong>Visible uniquement pour un utilisateur connecte</strong> (D5) :
+    les invites conservent la topbar actuelle.
+  </p>
+  <p class="mq-lead">
+    <button class="md-btn" type="button" id="mq-theme">Basculer clair / sombre</button>
+  </p>
+
+  <div class="section-bar">Rendu desktop</div>
+  <div class="mq-row">
+    <div class="mq-col" style="width:100%;">
+
+      <!-- ===== Topbar REELLE + insertion ===== -->
+      <div class="sticky-header" style="position:static;">
+        <header class="topbar">
+          <button class="btn-equipe-mobile" title="Equipe">&#9876;</button>
+          <a href="#" class="logo">Dungeon Crawl Classics</a>
+          <div class="topbar-spacer"></div>
+
+          <!-- ===== NOUVEAU : icone carte ===== -->
+          <button class="map-toggle" id="btn-carte" type="button"
+                  title="Cartes &amp; dessin" aria-label="Ouvrir le module carte">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m9 4-6 3v13l6-3 6 3 6-3V4l-6 3z"/><path d="M9 4v13"/><path d="M15 7v13"/>
+            </svg>
+          </button>
+          <!-- ===== fin nouveau ===== -->
+
+          <button class="theme-toggle" id="btn-theme" title="Changer de theme">&#9789;</button>
+          <div class="user-avatar-container">
+            <button class="auth-avatar" type="button" aria-label="Menu utilisateur">BM</button>
+          </div>
+        </header>
+
+        <nav class="tab-bar">
+          <button class="tab tab-equipe" data-class="equipe">Equipe</button>
+          <button class="tab active" data-class="clerc">Clerc</button>
+          <button class="tab" data-class="elfe">Elfe</button>
+          <button class="tab" data-class="guerrier">Guerrier</button>
+          <button class="tab" data-class="halfelin">Halfelin</button>
+          <button class="tab" data-class="mage">Mage</button>
+          <button class="tab" data-class="nain">Nain</button>
+          <button class="tab" data-class="voleur">Voleur</button>
+          <button class="tab tab-lvl0"><span class="tab-lbl-full">Niveau 0</span></button>
+        </nav>
+      </div>
+
+      <div class="mq-note">
+        <span class="mq-num">1</span><b>Position</b> : l'icone carte est a gauche de l'icone
+        theme, jamais entre le logo et le spacer (elle doit rester dans le groupe d'actions
+        de droite, alignee avatar / theme).
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">2</span><b>Style</b> : clone exact de <code>.theme-toggle</code>
+        (36 px, cercle, fond blanc 10 % sur le bandeau sombre) — meme cercle, meme survol.
+        En tactile la cible reste a 44 px via la zone de clic du bouton (padding invisible).
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">3</span><b>Icone</b> : symbole <code>#i-map</code> de
+        <code>draw-on-map</code> (plan deplie, trait 1,8 px) — il est reutilise tel quel dans
+        le module (pastille « cartes » de la barre haute).
+      </div>
+      <div class="mq-note mq-note--q">
+        <span class="mq-num">4</span><b>Connecte uniquement</b> : sans session, les API de
+        sauvegarde refusent (401) — l'icone n'apparait donc pas pour les invites (comme le
+        menu utilisateur). <i>Variante possible : icone visible + message « Connectez-vous
+        pour dessiner ».</i>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section-bar">Rendu mobile (&le; 600 px)</div>
+  <div class="mq-row">
+
+    <div class="mq-phone">
+      <div class="sticky-header" style="position:absolute;top:0;left:0;right:0;">
+        <header class="topbar">
+          <button class="btn-equipe-mobile" title="Equipe">&#9876;</button>
+          <a href="#" class="logo" style="font-size:15px;">Dungeon Crawl Classics</a>
+          <div class="topbar-spacer"></div>
+          <button class="map-toggle" type="button" title="Cartes &amp; dessin" aria-label="Ouvrir le module carte">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m9 4-6 3v13l6-3 6 3 6-3V4l-6 3z"/><path d="M9 4v13"/><path d="M15 7v13"/>
+            </svg>
+          </button>
+          <button class="theme-toggle" title="Changer de theme">&#9789;</button>
+          <div class="user-avatar-container">
+            <button class="auth-avatar" type="button" aria-label="Menu utilisateur">BM</button>
+          </div>
+        </header>
+        <nav class="tab-bar">
+          <button class="tab tab-equipe">Equipe</button>
+          <button class="tab active">Clerc</button>
+          <button class="tab">Elfe</button>
+          <button class="tab">Guerrier</button>
+          <button class="tab">Halfelin</button>
+          <button class="tab">Mage</button>
+          <button class="tab">Nain</button>
+          <button class="tab">Voleur</button>
+          <button class="tab tab-lvl0"><span class="tab-lbl-short">Niv 0</span></button>
+        </nav>
+      </div>
+
+      <div style="padding:110px 14px 14px;">
+        <div class="char-card">
+          <div class="char-card-top" style="display:block;">
+            <div class="char-card-name">Clerc — Frère Anselme</div>
+            <div class="char-card-meta" style="margin-top:6px;">Exemple de contenu masque par le module plein ecran.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mq-col" style="max-width:380px;">
+      <div class="mq-note">
+        <span class="mq-num">5</span><b>Mobile</b> : meme ordre (carte puis theme). Le logo
+        se compresse deja en &le; 600 px, l'ajout ne provoque pas de defilement horizontal
+        (les deux pastilles font 36 px + 8 px d'ecart).
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">6</span><b>Zone cliquable</b> : le bouton fait 36 px comme
+        <code>.theme-toggle</code>, mais sa zone tactile est portee a 44 px (pseudo-element
+        etendu) — regle d'accessibilite de l'application.
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">7</span><b>Ouverture</b> : un seul clic ouvre le module en plein
+        ecran (maquette 02) ; rien d'autre ne bouge derriere (aucun rechargement, l'etat des
+        fiches est conserve).
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-bar">Questions ouvertes</div>
+  <div class="mq-note mq-note--q">
+    L'icone reste-t-elle visible en mode invite (avec un message) ? Choix retenu : non (D5).
+  </div>
+
+</div>
+
+<script>
+document.getElementById('mq-theme').addEventListener('click', function () {
+  var root = document.documentElement;
+  root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+</script>
+</body>
+</html>

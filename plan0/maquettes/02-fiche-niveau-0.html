@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette 2 — Fiche de personnage de niveau 0</title>
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="maquettes.css">
+</head>
+<body>
+
+<nav class="mq-nav">
+  <span>Maquette :</span>
+  <a href="index.html">Sommaire</a>
+  <a href="01-onglet-niveau-0.html">1. Onglet</a>
+  <a href="02-fiche-niveau-0.html">2. Fiche</a>
+  <a href="03-promotion.html">3. Promotion</a>
+</nav>
+
+<header class="topbar">
+  <button class="btn-equipe-mobile" title="Equipe">&#9876;</button>
+  <a href="#" class="logo">Dungeon Crawl Classics</a>
+  <div class="topbar-spacer"></div>
+  <button class="theme-toggle" title="Changer de theme">&#9789;</button>
+</header>
+
+<nav class="tab-bar">
+  <button class="tab tab-equipe">Equipe</button>
+  <button class="tab">Clerc</button>
+  <button class="tab">Elfe</button>
+  <button class="tab">Guerrier</button>
+  <button class="tab">Halfelin</button>
+  <button class="tab">Mage</button>
+  <button class="tab">Nain</button>
+  <button class="tab">Voleur</button>
+  <button class="tab tab-lvl0 active">Niveau 0</button>
+</nav>
+
+<div class="main">
+  <div class="tab-panel active" data-class="lvl0">
+    <div class="view-sheet active">
+
+      <!-- En-tête de fiche : ligne 1 = boutons, ligne 2 = le nom ------------ -->
+      <div class="sheet-header">
+        <div class="sheet-header-left">
+          <button class="btn-back">&#9664;</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-export">Export</button>
+          <!-- NOUVEAUX : Autre tirage (session de tirage) / Promouvoir (spec 4 et 6) -->
+          <button class="btn-reroll" title="Tirer un autre personnage et remplacer celui-ci">Autre tirage</button>
+          <button class="btn-promote" title="Transformer en personnage de niveau 1">Promouvoir</button>
+          <div class="toggle-inn">
+            <label class="switch"><input type="checkbox" checked><span class="switch-slider"></span></label>
+            <div class="toggle-inn-label">EN EXPÉDITION</div>
+          </div>
+        </div>
+        <!-- Nom en dernière ligne, pleine largeur : il ne décale plus les boutons -->
+        <span class="sheet-title">Adrik Graybeard — Niv.0<span class="lvl0-power" title="Puissance : somme des modificateurs des 6 caractéristiques"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false" fill="currentColor"><ellipse cx="6.6" cy="13.4" rx="4.9" ry="3.5"></ellipse><rect x="1.4" y="14" width="12.2" height="5.4" rx="2.7"></rect><circle cx="13.2" cy="16.7" r="3.1"></circle><path d="M15.7 6.2 L20.3 8.8 L15.3 17.8 L10.7 15.2 Z"></path><rect x="15.2" y="1.4" width="7.4" height="7.4" rx="2.4"></rect></svg><span class="lvl0-power-value">+1</span></span></span>
+      </div>
+
+      <div class="mq-note">
+        <strong>« Autre tirage »</strong> : relance un tirage complet et écrase la fiche ouverte
+        (permet de refuser un tirage). <strong>« Promouvoir »</strong> : ouvre la modale de
+        conversion vers le niveau 1 → <a href="03-promotion.html">maquette 3</a>.
+        Le bouton d'interrupteur expédition/auberge est conservé (spec point 3).
+        <br><strong>Décision :</strong> le bouton <strong>« Autre tirage »</strong> n'existe
+        <strong>que pendant la session de tirage</strong> — proposé à la création
+        (<em>+ Nouveau</em>), conservé après chaque re-tirage, puis <strong>retiré dès qu'on
+        quitte la fiche</strong> (retour à la liste, changement d'onglet, ouverture d'un autre
+        personnage) : la maquette ci-dessus montre donc l'état <em>juste après la création</em>.
+      </div>
+
+      <!-- PAGE 1 : BLOC_COMMUN simplifié ---------------------------------- -->
+      <div class="sheet-page">
+
+        <div class="row" style="margin-bottom:4px;">
+          <div class="field"><div class="field-label">Nom</div><input type="text" data-key="lvl0-7-nom" value="Adrik Graybeard"></div>
+          <div class="field"><div class="field-label">Titre</div><input type="text" data-key="lvl0-7-titre" value="" placeholder="Titre"></div>
+        </div>
+        <div class="row" style="margin-bottom:4px;">
+          <div class="field" style="flex:2"><div class="field-label">Metier</div><input type="text" data-key="lvl0-7-metier" value="Bûcheron"></div>
+          <div class="field"><div class="field-label">Alignement</div><input type="text" data-key="lvl0-7-alignement" value="" placeholder="Alignement"></div>
+          <div class="field"><div class="field-label">Mouvement</div><input type="text" data-key="lvl0-7-mouvement" value="30" placeholder="30"></div>
+        </div>
+        <div class="row" style="margin-bottom:8px;">
+          <div class="field"><div class="field-label">Niveau</div><input type="text" data-key="lvl0-7-niveau" value="0" placeholder="1"></div>
+          <div class="field"><div class="field-label">PX</div><input type="text" data-key="lvl0-7-px" value="0" placeholder="0"></div>
+        </div>
+
+        <!-- Defense + Combat -->
+        <div class="row">
+          <div style="flex:1;">
+            <div class="defense-area">
+              <div class="shield">
+                <div class="shield-shape"><input type="text" data-key="lvl0-7-classe_armure" value="11" placeholder="10"></div>
+                <div class="shield-label">Classe d'armure</div>
+              </div>
+              <div class="helmet">
+                <div class="helmet-shape mq-hide">
+                  <input type="text" data-key="lvl0-7-points_de_vie" value="3" placeholder="0">
+                  <div class="helmet-max">Max: <input type="text" data-key="lvl0-7-max_pv" value="3" placeholder="0"></div>
+                  <!-- PAS de <div class="hit-die"> : le dé de vie n'existe pas en niveau 0 (spec 2) -->
+                </div>
+                <div class="helmet-label">Points de vie</div>
+              </div>
+            </div>
+            <div class="mq-note">
+              <span class="mq-flag">SPEC 2</span> Le casque ne contient <strong>pas de dé de vie</strong>
+              (le <code>&lt;div class="hit-die"&gt;</code> est retiré : <code>d4</code> n'a pas de sens ici).
+            </div>
+          </div>
+          <div style="flex:1;">
+            <div class="combat-box">
+              <div class="section-bar">Combat</div>
+              <div class="combat-field"><label>Initiative:</label><input type="text" data-key="lvl0-7-initiative" value="1d20+1" placeholder="0"></div>
+              <div class="combat-field"><label>Dé(s) d'action:</label><input type="text" data-key="lvl0-7-des_action" value="1d20" placeholder="1d20"></div>
+              <div class="combat-field"><label>Attaque:</label><input type="text" data-key="lvl0-7-attaque" value="+0" placeholder="+0"></div>
+              <div class="combat-field"><label>Dés critique:</label><input type="text" data-key="lvl0-7-des_critique" value="d4" placeholder="d20"></div>
+              <div class="combat-field"><label>Table critique:</label><input type="text" data-key="lvl0-7-table_critique" value="I"></div>
+            </div>
+            <div class="mq-note" style="border-left-color:#3f7d4f;background:rgba(63,125,79,.08);">
+              <span class="mq-flag" style="background:#3f7d4f;">DÉCIDÉ</span>
+              Le champ <strong>« Attaque »</strong> est rempli avec <strong><code>+0</code></strong>
+              (le bonus d'attaque de classe n'existe pas au niveau 0).
+              Initiative = <code>1d20+1</code> (mod AGI), Dés d'action = <code>1d20</code>,
+              Dés critique = <code>d4</code>, Table = <code>I</code>.
+            </div>
+          </div>
+        </div>
+
+        <div style="border-top: 2px solid var(--ink); margin: 8px 0;"></div>
+
+        <div class="stats-and-combat">
+          <div class="stats-col">
+            <div class="stat-block">
+              <div class="stat-block-top">
+                <div class="stat-name">Force</div>
+                <div class="stat-value"><input type="text" data-key="lvl0-7-force" value="12"></div>
+              </div>
+              <div class="stat-block-bottom">
+                <div class="stat-mod">Modif.: <input type="text" data-key="lvl0-7-force_mod" value="0"></div>
+              </div>
+            </div>
+            <div class="stat-block">
+              <div class="stat-block-top">
+                <div class="stat-name">Agilité</div>
+                <div class="stat-value"><input type="text" data-key="lvl0-7-agilite" value="13"></div>
+                <div class="stat-circle">
+                  <input type="text" data-key="lvl0-7-js_reflexe" value="+1" placeholder="0">
+                  <div class="stat-circle-label">JS Ref</div>
+                </div>
+              </div>
+              <div class="stat-block-bottom">
+                <div class="stat-mod">Modif.: <input type="text" data-key="lvl0-7-agilite_mod" value="+1"></div>
+              </div>
+            </div>
+            <div class="stat-block">
+              <div class="stat-block-top">
+                <div class="stat-name">Endurance</div>
+                <div class="stat-value"><input type="text" data-key="lvl0-7-endurance" value="9"></div>
+                <div class="stat-circle">
+                  <input type="text" data-key="lvl0-7-js_vigueur" value="0" placeholder="0">
+                  <div class="stat-circle-label">JS Vig</div>
+                </div>
+              </div>
+              <div class="stat-block-bottom">
+                <div class="stat-mod">Modif.: <input type="text" data-key="lvl0-7-endurance_mod" value="0"></div>
+              </div>
+            </div>
+            <div class="stat-block">
+              <div class="stat-block-top">
+                <div class="stat-name">Présence</div>
+                <div class="stat-value"><input type="text" data-key="lvl0-7-presence" value="8"></div>
+                <div class="stat-circle">
+                  <input type="text" data-key="lvl0-7-js_volonte" value="-1" placeholder="0">
+                  <div class="stat-circle-label">JS Vol</div>
+                </div>
+              </div>
+              <div class="stat-block-bottom">
+                <div class="stat-mod">Modif.: <input type="text" data-key="lvl0-7-presence_mod" value="-1"></div>
+              </div>
+            </div>
+            <div class="stat-block">
+              <div class="stat-block-top">
+                <div class="stat-name">Chance</div>
+                <div class="stat-value"><input type="text" data-key="lvl0-7-chance" value="10"></div>
+                <div class="stat-extra">
+                  <div class="field">
+                    <div class="field-label">Jet chanceux</div>
+                    <textarea data-key="lvl0-7-jet_chanceux" rows="1">Jour de chance : Jets d'attaque à distance</textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="stat-block-bottom">
+                <div class="stat-mod">Modif.: <input type="text" data-key="lvl0-7-chance_mod" value="0"></div>
+              </div>
+            </div>
+            <div class="stat-block">
+              <div class="stat-block-top">
+                <div class="stat-name">Intelligence</div>
+                <div class="stat-value"><input type="text" data-key="lvl0-7-intelligence" value="11"></div>
+                <div class="stat-extra">
+                  <div class="field">
+                    <div class="field-label">Langues</div>
+                    <textarea data-key="lvl0-7-langues" rows="1">commun</textarea>
+                  </div>
+                </div>
+              </div>
+              <div class="stat-block-bottom">
+                <div class="stat-mod">Modif.: <input type="text" data-key="lvl0-7-intelligence_mod" value="0"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="combat-ext-col">
+            <div class="combat-ext">
+              <div class="combat-ext-field"><label>Attaque CàC</label><input type="text" data-key="lvl0-7-attaque_cac" value="+0" placeholder="+0"></div>
+              <div class="combat-ext-field"><label>Degats CàC</label><input type="text" data-key="lvl0-7-degats_cac" value="" placeholder="1d6"></div>
+              <div class="combat-ext-field"><label>Att. à distance</label><input type="text" data-key="lvl0-7-att_distance" value="+1" placeholder="+0"></div>
+              <div class="combat-ext-field"><label>Degats à distance</label><input type="text" data-key="lvl0-7-degats_distance" value="1d6+1" placeholder="1d6"></div>
+            </div>
+            <div class="portrait-area">
+              <input type="hidden" data-key="lvl0-7-portrait_source" value="funnel">
+              <input type="hidden" data-key="lvl0-7-portrait_index" value="12">
+              <img class="portrait-img clickable" src="../../icons/funnel-tokens/DCC_0-level_Blacksmith_Male_280px.png" alt="Portrait">
+            </div>
+            <div class="mq-note">
+              <strong>Portrait :</strong> source dédiée <code>funnel</code>
+              (<code>icons/funnel-tokens/funnel-tokens.json</code>), tiré par métier à la création,
+              mais le clic ouvre la liste <strong>de tous</strong> les tokens du dossier (76 images)
+              pour éviter les doublons. <em>→ nouvelle source de portraits à ajouter au sélecteur.</em>
+            </div>
+          </div>
+        </div>
+
+        <div class="mq-note" style="border-left-color:#3f7d4f;background:rgba(63,125,79,.08);">
+          <span class="mq-flag" style="background:#3f7d4f;">DÉCIDÉ</span> Les cercles
+          <strong>JS Ref / JS Vig / JS Vol</strong> restent visibles et sont renseignés au tirage :
+          <strong>JS Ref = mod d'agilité</strong> (<code>+1</code> ici),
+          <strong>JS Vig = mod d'endurance</strong> (<code>0</code>),
+          <strong>JS Vol = mod de présence</strong> (<code>-1</code>).
+          Ils restent éditables (un joueur peut ajuster après coup).
+        </div>
+
+      </div>
+
+      <!-- PAGE 2 : équipement (identique aux autres classes) -------------- -->
+      <div class="sheet-page">
+        <div class="row" style="align-items: stretch;">
+          <div class="field">
+            <div class="section-bar">Armes</div>
+            <textarea data-key="lvl0-7-armes" rows="5">Hachette 1d6 3/6/9</textarea>
+          </div>
+          <div class="field">
+            <div class="section-bar">Équipement</div>
+            <textarea data-key="lvl0-7-equipement" rows="5">Fagot de bois
+Torche, unité
+Bougie
+Rations, par jour</textarea>
+          </div>
+        </div>
+        <div class="row" style="align-items: stretch;">
+          <div class="field">
+            <div class="section-bar">Trésor</div>
+            <textarea data-key="lvl0-7-tresor" rows="4">5d12 pc = 27 pc</textarea>
+          </div>
+          <div class="field">
+            <div class="section-bar">Armure</div>
+            <textarea data-key="lvl0-7-armure" rows="4" placeholder="Description de l'armure..."></textarea>
+          </div>
+        </div>
+
+        <!-- NOTES : pas dans BLOC_COMMUN, à ajouter par le module lvl0 ----- -->
+        <div class="section-bar">Notes</div>
+        <div>
+          <textarea data-key="lvl0-7-notes" rows="6" placeholder="Notes du personnage..."></textarea>
+        </div>
+        <div class="mq-note">
+          <span class="mq-flag">Q4</span> <strong>Notes</strong> n'existe pas dans BLOC_COMMUN
+          (chaque classe l'ajoute elle-même) : le module niveau 0 l'ajoutera en fin de fiche.
+          La règle d'auto-remplissage : « nain »/<em>halfelin</em> → <em>Infravision</em>,
+          « elfe » → <em>Sens très développés et sensibles au fer</em>.
+          <br><span class="mq-flag" style="background:#3f7d4f;">DÉCIDÉ</span>
+          <strong>Classification de l'arme :</strong> une plage chiffrée de 3 nombres
+          (<code>3/6/9</code>, <code>15/30/45</code>, <code>6/12/18</code>) = arme
+          <strong>à distance</strong> → ici « Hachette 1d6 <strong>3/6/9</strong> » →
+          dégâts CàC vides, dégâts distance = <code>1d6</code> + mod AGI.
+          <code>1d4/1d10</code> est de la notation de dégâts (2 jetons) → arme de CàC.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

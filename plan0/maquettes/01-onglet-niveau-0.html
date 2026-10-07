@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette 1 — Onglet « Niveau 0 »</title>
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="maquettes.css">
+</head>
+<body>
+
+<!-- Barre de navigation entre maquettes (hors application) -->
+<nav class="mq-nav">
+  <span>Maquette :</span>
+  <a href="index.html">Sommaire</a>
+  <a href="01-onglet-niveau-0.html">1. Onglet</a>
+  <a href="02-fiche-niveau-0.html">2. Fiche</a>
+  <a href="03-promotion.html">3. Promotion</a>
+</nav>
+
+<header class="topbar">
+  <button class="btn-equipe-mobile" title="Equipe">&#9876;</button>
+  <a href="#" class="logo">Dungeon Crawl Classics</a>
+  <div class="topbar-spacer"></div>
+  <button class="theme-toggle" title="Changer de theme">&#9789;</button>
+</header>
+
+<nav class="tab-bar">
+  <button class="tab tab-equipe">Equipe</button>
+  <button class="tab">Clerc</button>
+  <button class="tab">Elfe</button>
+  <button class="tab">Guerrier</button>
+  <button class="tab">Halfelin</button>
+  <button class="tab">Mage</button>
+  <button class="tab">Nain</button>
+  <button class="tab">Voleur</button>
+  <!-- NOUVEAU : onglet après « Voleur » (spec 1) -->
+  <button class="tab tab-lvl0 active"><span class="tab-lbl-full">Niveau 0</span><span class="tab-lbl-short">Niv 0</span></button>
+</nav>
+
+<div class="main">
+  <div class="tab-panel active" data-class="lvl0">
+    <div class="view-list active">
+      <div class="section-header">
+        <div>
+          <div class="section-title">Niveau 0</div>
+          <div class="mq-hint">Liste des personnages de niveau 0 (4 en expédition, 1 à l'auberge)</div>
+        </div>
+        <div class="btn-group">
+          <!-- NOUVEAU : « + Nouveau » tire un personnage au sort (spec 4) -->
+          <button class="btn-new">+ Nouveau</button>
+          <button class="btn-import">Import</button>
+        </div>
+      </div>
+
+      <div class="mq-note">
+        <strong>Comportement « + Nouveau » :</strong> tirage aléatoire complet (métier, 6×3d6, jet
+        chanceux, équipement, portrait) <em>puis</em> ouverture directe de la fiche tirée.
+        <strong>« Import »</strong> : même fichier JSON que les autres onglets.
+      </div>
+
+      <div class="char-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;">
+
+        <div class="char-card">
+          <div class="char-card-top">
+            <img class="char-card-portrait" src="../../icons/funnel-tokens/DCC_0-level_Blacksmith_Male_280px.png" alt="">
+            <div style="flex:1;min-width:0;">
+              <div class="char-card-name">Adrik Graybeard — Niv.0</div>
+              <div class="char-card-meta">Bûcheron - CL 11 - PV 3/3</div>
+            </div>
+            <div class="toggle-inn">
+              <label class="switch"><input type="checkbox" checked><span class="switch-slider"></span></label>
+              <div class="toggle-inn-label">EN EXPÉDITION</div>
+            </div>
+          </div>
+          <div class="char-card-actions">
+            <div class="char-card-btns">
+              <button class="btn-open">&#9998;</button>
+              <button class="btn-delete">&#10006;</button>
+            </div>
+            <div class="toggle-inn" style="display:none"></div>
+          </div>
+        </div>
+
+        <div class="char-card inactive">
+          <div class="char-card-top">
+            <img class="char-card-portrait" src="../../icons/funnel-tokens/DCC_0-level_Alchemist_Female_280px.png" alt="">
+            <div style="flex:1;min-width:0;">
+              <div class="char-card-name">Adrie Xiloscient — Niv.0</div>
+              <div class="char-card-meta">Alchimiste - CL 9 - PV 2/4</div>
+            </div>
+            <div class="toggle-inn">
+              <label class="switch"><input type="checkbox"><span class="switch-slider"></span></label>
+              <div class="toggle-inn-label">À L'AUBERGE</div>
+            </div>
+          </div>
+          <div class="char-card-actions">
+            <div class="char-card-btns">
+              <button class="btn-open">&#9998;</button>
+              <button class="btn-delete">&#10006;</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="char-card">
+          <div class="char-card-top">
+            <img class="char-card-portrait" src="../../icons/funnel-tokens/DCC_0-level_Beekeeper_Male_280px.png" alt="">
+            <div style="flex:1;min-width:0;">
+              <div class="char-card-name">Adran Emberforge — Niv.0</div>
+              <div class="char-card-meta">Forgeron - CL 12 - PV 5/5</div>
+            </div>
+            <div class="toggle-inn">
+              <label class="switch"><input type="checkbox" checked><span class="switch-slider"></span></label>
+              <div class="toggle-inn-label">EN EXPÉDITION</div>
+            </div>
+          </div>
+          <div class="char-card-actions">
+            <div class="char-card-btns">
+              <button class="btn-open">&#9998;</button>
+              <button class="btn-delete">&#10006;</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="mq-note">
+        <strong>Cartes :</strong> structure identique aux autres onglets — portrait, nom suivi de
+        « — Niv.0 », <strong>1<sup>re</sup> ligne de méta = le métier tiré</strong> (au lieu du dieu),
+        portrait + nom cliquables pour ouvrir, bâton éditer / croix supprimer,
+        interrupteur expédition/auberge identique.
+      </div>
+
+      <div class="mq-note" style="border-left-color:#3f7d4f;background:rgba(63,125,79,.08);">
+        <span class="mq-flag" style="background:#3f7d4f;">DÉCIDÉ</span>
+        <strong>Stockage :</strong> pseudo-classe <strong><code>lvl0</code></strong> dans
+        <code>characters.class</code> → listes, CRUD, export/import et onglets existants sont
+        réutilisés tels quels ; l'onglet « Niveau 0 » devient la 8<sup>e</sup> classe.
+        Un niveau 0 en expédition apparaît aussi dans l'onglet Équipe (PV, tour, ordre de marche).
+      </div>
+
+      <div class="mq-note" style="border-left-color:#3f7d4f;background:rgba(63,125,79,.08);">
+        <span class="mq-flag" style="background:#3f7d4f;">DÉCIDÉ</span>
+        En <strong>mobile</strong> (≤ 600 px), l'onglet <strong>reste visible</strong> sous sa
+        forme courte <strong>« Niv 0 »</strong> : les 8 onglets partagent toute la largeur
+        (<code>flex: 1</code>, troncature par points de suspension) <strong>sans défilement
+        horizontal</strong>. La <strong>pastille</strong> « Lvl 0 » prévue par la spec initiale
+        a été <strong>abandonnée</strong> — seule la pastille « ⚔ Équipe » subsiste (l'onglet
+        Équipe, lui, reste masqué en mobile).
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

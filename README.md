@@ -11,6 +11,10 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 |:--------------:|:---------------:|
 | <img src="captures/fiche0.png" alt="Fiche de personnage de niveau 0 : en-tête sur deux lignes avec les boutons Export, Autre tirage et Promouvoir, le nom suivi du badge de puissance (bras musclé rouge), le casque de points de vie sans dé de vie, les caractéristiques, l'équipement et les notes" width="420"> | <img src="captures/onglet0.png" alt="Onglet Niveau 0 : liste des personnages de niveau 0 avec portrait, nom suivi de Niv.0, métier en sous-titre, interrupteur expédition / auberge et boutons + Nouveau / Import" width="420"> |
 
+| Module Carte (mobile) | Tiroir des calques |
+|:---------------------:|:------------------:|
+| <img src="captures/carte-module-mobile.png" alt="Module carte sur mobile : carte de fond webp annotée de traits, barre d'état en haut et barre d'outils en bas" width="420"> | <img src="captures/carte-liste-calques.png" alt="Tiroir des cartes : liste des calques avec leur nom, nombre d'opérations, nom de l'image de fond et son identifiant" width="420"> |
+
 ## Fonctionnalites
 
 ### Authentification
@@ -90,6 +94,17 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - Notes d'equipe (sauvegardees en base via l'API, inclues dans l'export/import global JSON)
 - L'onglet Equipe n'est **recharge qu'une fois** par session ; a chaque retour sur l'onglet, les valeurs persos (nom, initiative, AC, PV, details, stats) sont **resynchronisees sur place** depuis la base, l'**etat combat** (Init. combat / compteurs / ennemis) affiche est conserve car il est deja en base ; **rechargement complet de la page** si la composition change (create / delete / toggle / import) — l'etat combat est alors relu en base ; PV synchronises bidirectionnellement Equipe <-> fiche ouverte
 
+### Module Carte (dessin de carte)
+- Page de dessin **plein ecran** ouverte par l'icone `carte` de la topbar (a gauche de l'icone de theme, utilisateur connecte), fermee par une croix ou Echap
+- Meme outillage que l'application `draw-on-map` : **crayon, gomme, texte, deplacer, annuler**, palette de 6 couleurs, zoom (boutons / curseur / 100 % / ajuster / **pincement**), multi-cartes (calques), mode focus
+- Dessin **vectoriel** (traits/gomme/texte en unites de scene, epaisseur = ecran/zoom), rendu canvas transparent au-dessus de l'image
+- **Images de fond** png/jpg/jpeg/webp : converties en **webp**, stockees `data/maps/[UID].webp` (UID unique genere a chaque import), servies par `api/map-image.php` (session obligatoire) ; nom d'origine conserve en base et dans les exports (ni affiche ni modifiable dans l'interface), remplacement (ancien fichier supprime) et suppression effective ; une carte encore nommee « Carte N » est **rebaptee du nom du fichier** (sans extension)
+- **Sauvegarde automatique** pendant le dessin (toast disquette) ; outil/couleur/taille et **zoom/position par carte** restaures a la reouverture
+- **10 cartes maximum** par compte (message d'erreur invitant a supprimer un calque)
+- **Export/Import par calque** (JSON `v:3` avec UID du fond) ou **global** (`Exporter tout` / `Importer tout`) : JSON seul, ou **ZIP** (JSON + `images/<uid>.webp`) des qu'un fond existe ; image introuvable a l'import = toast d'erreur + grille par defaut, dessin conserve
+- Suppression d'une carte = suppression de son image de fond (si plus referencee)
+- Suites `15-map-draw` (52 assertions), `16-map-persist` (34), `17-map-export` (32)
+
 ### Sauvegarde automatique
 - Debounce 600ms sur tous les champs modifiables
 - Toast de confirmation (icone disquette) a chaque sauvegarde
@@ -136,10 +151,13 @@ dcc-sheet/
 ├── team-state.js               # Logique pure etat combat equipe (init, tours, ennemis, export, import)
 ├── dead-overlay.js             # Overlay "tete de mort" sur les portraits (PV courants <= 0)
 ├── portrait-guard.js           # Placeholder « aucune image disponible » si un dossier de portraits est absent (optionnel)
+├── map-draw.js                 # Module Carte : dessin de carte plein ecran (port de draw-on-map, persistance BDD)
 ├── api/
 │   ├── db.php                  # SQLite3 + helpers (users, characters, session)
 │   ├── auth.php                # Authentification (login, register, logout, change_password, delete_account)
 │   ├── characters.php          # CRUD personnages (list, get, create, save, set_active, delete)
+│   ├── maps.php                # Calques de cartes (CRUD, prefs, export ZIP, import JSON/ZIP, check_images)
+│   ├── map-image.php           # Images de fond des cartes (upload webp, service, suppression) -> data/maps/[UID].webp
 │   └── icons.php               # Dossiers de portraits presents sur le serveur (action=list)
 ├── classes/
 │   ├── bloc_commun.js          # Bloc commun + portrait (identite, combat, stats, portrait, equipement)
@@ -218,6 +236,30 @@ dcc-sheet/
 | Action | Methode | Parametres | Description |
 |--------|---------|------------|-------------|
 | `list` | GET | — | Sous-dossiers presents dans `icons/` `{ok, dirs}` (protège la popup portraits, 1 requete / session) |
+
+### Calques de cartes (`api/maps.php`)
+
+| Action | Methode | Parametres | Description |
+|--------|---------|------------|-------------|
+| `list` | GET | — | Calques du compte `{ok, maps, max}` (nom, `bg_uid`, `bg_name`, nombre d'ops, `ui`) |
+| `get` | GET | `id` | Un calque complet (modele `v:3` : `w`, `h`, `ops`, `bg`, `ui`) |
+| `create` | POST | `name` (optionnel) | Cree un calque — **refuse au-dela de 10** (409) |
+| `save` | POST | `id`, `data`/`ui`/`bg_uid`/`bg_name` (optionnels) | Sauvegarde partielle (dessin, vue, image de fond) |
+| `rename` | POST | `id`, `name` | Renomme un calque |
+| `delete` | POST | `id` | Supprime le calque **et** son image de fond si plus referencee |
+| `prefs_get` / `prefs_save` | GET/POST | `prefs` | Outil, couleur, taille, gras, calque actif (par compte) |
+| `check_images` | POST | `uids` | UIDs absents de `data/maps/` `{ok, missing}` |
+| `export_zip` | POST | `file`, `json`, `images` | ZIP `json + images/<uid>.webp` (+ `rapport.txt` si manques) |
+| `import_all` | POST multipart | `file` (.json ou .zip) | Extrait les images, renvoie `{json, missing}` |
+| `import_map` | POST multipart | `file` (.json ou .zip) | Un calque `{map, missing}` |
+
+### Images de fond (`api/map-image.php`)
+
+| Action | Methode | Parametres | Description |
+|--------|---------|------------|-------------|
+| `upload` | POST multipart | `file`, `name` (nom utilisateur) | Conversion webp (GD), stocke `data/maps/[UID].webp`, renvoie `{uid, name}` |
+| `get` | GET | `uid` | Sert l'image (ETag, `Cache-Control: private`) |
+| `delete` | POST | `uid` | Supprime le fichier |
 
 ### Requetes / Reponses
 

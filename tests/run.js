@@ -18,6 +18,9 @@ const suites = [
   require('./12-lvl0.test'),
   require('./13-portrait-guard.test'),
   require('./14-clerc-sorts.test'),
+  require('./15-map-draw.test'),
+  require('./16-map-persist.test'),
+  require('./17-map-export.test'),
 ];
 
 function pad(s, n) {

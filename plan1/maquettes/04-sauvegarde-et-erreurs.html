@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette 04 — sauvegarde automatique, toasts et flux</title>
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="maquettes.css">
+</head>
+<body>
+
+<div class="mq-wrap">
+
+  <div class="section-title" style="font-size:26px;">4. Sauvegarde automatique, toasts et flux</div>
+  <p class="mq-lead">
+    Le dessin est <b>sauvegarde pendant le geste</b> (debounce 400 ms, comme l'auto-save des
+    fiches) et signale par le <b>toast de sauvegarde existant</b> (<code>showToastSave()</code>,
+    disquette 💾, anti-rebond 600 ms). Aucune action « Enregistrer » n'existe dans le module.
+  </p>
+  <p class="mq-lead">
+    <button class="md-btn" type="button" id="mq-theme">Basculer clair / sombre</button>
+  </p>
+
+  <div class="section-bar">Toasts utilises</div>
+  <div class="mq-row">
+    <div class="mq-toast-demo">
+
+      <div class="toast toast-save">&#128190;</div>
+      <p class="md-meta"><b>💾 Sauvegarde (R7)</b> — apres chaque tracé, texte pose, annulation,
+        chargement de fond, renommage… (debounce 600 ms, identique aux fiches).</p>
+
+      <div class="toast toast-save" style="border-left-color:var(--green);">Export reussi (4 persos, 3 cartes)</div>
+      <p class="md-meta"><b>Export global</b> — mentionne le nombre de calques embarques et le
+        format telecharge (.json ou .zip).</p>
+
+      <div class="toast toast-error">Image de fond introuvable (UID 3f2b7c1e…)</div>
+      <p class="md-meta"><b>Import — image absente (R11)</b> — un toast par UID introuvable ;
+        la grille par defaut est conservee, le dessin est lui importe.</p>
+
+      <div class="toast toast-error">Erreur de sauvegarde</div>
+      <p class="md-meta"><b>Echec reseau / session expiree</b> — le dessin reste en memoire,
+        un nouvel evenement de dessin relance la sauvegarde.</p>
+
+      <div class="toast toast-error">Image trop lourde (max 16 Mo)</div>
+      <p class="md-meta"><b>Upload refuse (413)</b> — limite PHP a documenter dans
+        <code>MANUAL.md</code> / <code>deploy/</code>.</p>
+
+    </div>
+
+    <div class="mq-col" style="max-width:430px;">
+      <div class="mq-note">
+        <span class="mq-num">1</span><b>Couche unique de toasts</b> : le snackbar interne de
+        <code>draw-on-map</code> disparait au profit de <code>window.showToast /
+        showToastSave</code> (D7). Le toast du module passe <b>au-dessus</b> du module
+        (<code>z-index</code> du conteneur &gt; 3000).
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">2</span><b>Extension retrocompatible</b> de
+        <code>showToast(message, type, actionLabel?, action?)</code> : seule la confirmation
+        « Effacer tout le dessin » utilise l'action « Annuler » (5 s), comme dans
+        <code>draw-on-map</code>.
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">3</span><b>Pas de toast pour le zoom / le defilement</b> :
+        sauvegarde silencieuse de <code>maps.ui</code> (trop frequent, inutile a l'ecran).
+      </div>
+    </div>
+  </div>
+
+  <div class="section-bar">Flux — image de fond</div>
+  <div class="mq-flow">
+    <div class="mq-step"><b>1. Choix</b>« Charger une image de fond » → selecteur de fichiers
+      (<code>image/webp,image/*</code>)</div>
+    <div class="mq-arrow">→</div>
+    <div class="mq-step"><b>2. Upload</b><code>POST api/map-image.php</code> → UID genere
+      (<code>bin2hex(random_bytes(16))</code>) + conversion webp (GD, qualite 85)</div>
+    <div class="mq-arrow">→</div>
+    <div class="mq-step"><b>3. Stockage</b><code>data/maps/[UID].webp</code> — jamais de binaire
+      en base, jamais dans le JSON</div>
+    <div class="mq-arrow">→</div>
+    <div class="mq-step"><b>4. Affichage</b><code>&lt;img src="api/map-image.php?uid=[UID]"&gt;</code>
+      (session obligatoire, <code>Cache-Control: private</code>)</div>
+    <div class="mq-arrow">→</div>
+    <div class="mq-step"><b>5. Sauvegarde</b><code>maps.save(bg_uid, bg_name)</code> + 💾 —
+      le nom utilisateur = nom de fichier d'origine, editable</div>
+  </div>
+
+  <div class="section-bar">Flux — suppression d'une carte (R12)</div>
+  <div class="mq-flow">
+    <div class="mq-step"><b>1. Confirmation</b>« Supprimer cette carte » → confirmation en 2 temps
+      (rappel du fichier <code>data/maps/[UID].webp</code>)</div>
+    <div class="mq-arrow">→</div>
+    <div class="mq-step"><b>2. API</b><code>maps.php?action=delete</code> → suppression de la ligne
+      <code>maps</code></div>
+    <div class="mq-arrow">→</div>
+    <div class="mq-step"><b>3. Image</b>si plus aucune carte ne cite cet UID →
+      <code>unlink data/maps/[UID].webp</code> (D9 : comptage des references)</div>
+    <div class="mq-arrow">→</div>
+    <div class="mq-step"><b>4. Retour</b>calque suivant charge, toast « Carte supprimee »</div>
+  </div>
+
+  <div class="section-bar">Flux — « Importer tout » (.zip)</div>
+  <div class="mq-flow">
+    <div class="mq-step"><b>1. Fichier</b><code>.json</code> ou <code>.zip</code> (json + images)
+      depuis le menu utilisateur</div>
+    <div class="mq-arrow">→</div>
+    <div class="mq-step"><b>2. Confirmation</b>« remplace tous vos personnages <b>et vos
+      cartes</b> » (action irreversible)</div>
+    <div class="mq-arrow">→</div>
+    <div class="mq-step"><b>3. Extraction</b><code>maps.php?action=import_all</code> lit le JSON,
+      pose <code>images/[UID].webp</code> dans <code>data/maps/</code></div>
+    <div class="mq-arrow">→</div>
+    <div class="mq-step"><b>4. Rapport</b><code>{maps, images, missing[]}</code> → toast succes +
+      <b>un toast d'erreur par UID manquant</b> (R11)</div>
+  </div>
+
+  <div class="section-bar">Flux — reouverture du module (R13)</div>
+  <div class="mq-flow">
+    <div class="mq-step"><b>1. Clic icone carte</b><code>DCCMapDraw.open()</code></div>
+    <div class="mq-arrow">→</div>
+    <div class="mq-step"><b>2. Etat global</b><code>prefs_get</code> → outil, couleur, taille,
+      gras, mode dessin (A2)</div>
+    <div class="mq-arrow">→</div>
+    <div class="mq-step"><b>3. Calque actif</b><code>maps.list</code> + <code>active_map</code>
+      → <code>maps.ui</code> → zoom + position de defilement</div>
+    <div class="mq-arrow">→</div>
+    <div class="mq-step"><b>4. Rendu</b><code>layout() → render() → syncZoomUI()</code> :
+      la carte apparait exactement la ou elle a ete laissee</div>
+  </div>
+
+  <div class="section-bar">Questions ouvertes — arbitrees le 07/10/2026</div>
+  <div class="mq-note">
+    <span class="mq-num">A</span><b>Limite de 10 cartes par compte</b> (D12) : creation refusee
+    des la 11ᵉ avec le message « Limite de 10 cartes atteinte — supprimez-en une pour en creer
+    une nouvelle ». Un import « tout » au dela importe les 10 premiers et liste les calques
+    ecartes dans un toast d'erreur (D13).
+  </div>
+  <div class="mq-note">
+    <span class="mq-num">B</span><b>Concurrence multi-onglets : dernier ecrit gagne, sans
+    risque de corruption</b> (D14) — SQLite (mode WAL) ecrit par transactions atomiques : la
+    base reste coherente meme en cas de crash. Seul risque reel : une <b>perte d'ecriture</b>
+    si deux onglets modifient la <b>meme</b> carte (le sauvegarde le tableau d'operations
+    complet) ; deux cartes distinctes ne se genent pas. Mesures : <code>busyTimeout(5000)</code>
+    cote serveur + comportement documente dans <code>MANUAL.md</code>.
+  </div>
+  <div class="mq-note">
+    <span class="mq-num">C</span><b>Partage d'une image entre deux cartes : interdit</b> (D9) —
+    chaque image appartient a un seul calque, ce qui simplifie la suppression effective du
+    fichier (R12).
+  </div>
+  <div class="mq-note">
+    <span class="mq-num">D</span><b>PNG / JPG / JPEG : convertis en webp a l'import</b> (D4) —
+    conversion serveur (GD, qualite 85), les metadonnees EXIF (dont le GPS des photos) sont
+    effacees ; replis : conversion cote navigateur (<code>canvas.toBlob('image/webp')</code>)
+    puis, en dernier recours, refus avec message explicite. Un webp est conserve tel quel.
+  </div>
+
+  <div class="section-bar">Reste ouvert (mineur)</div>
+  <div class="mq-note mq-note--q">
+    <span class="mq-num">?</span><b>Dimension maximale d'une image</b> : aucun plafond retenu ;
+    option etudiable (redimensionnement au dela de 4096 px de plus grand cote) si les gros
+    fonds deviennent lourds sur mobile.
+  </div>
+
+</div>
+
+<script>
+document.getElementById('mq-theme').addEventListener('click', function () {
+  var root = document.documentElement;
+  root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+</script>
+</body>
+</html>

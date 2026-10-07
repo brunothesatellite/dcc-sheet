@@ -2,7 +2,7 @@
 <html lang="fr" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>DCC Fiches de Personnage</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,6 +31,13 @@
   <button class="btn-equipe-mobile" id="btn-equipe-mobile" title="Equipe">&#9876;</button>
   <a href="index.html" class="logo">Dungeon Crawl Classics</a>
   <div class="topbar-spacer"></div>
+  <button class="map-toggle" id="btn-carte" type="button" title="Cartes &amp; dessin"
+          aria-label="Ouvrir le module carte" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="m9 4-6 3v13l6-3 6 3 6-3V4l-6 3z"/><path d="M9 4v13"/><path d="M15 7v13"/>
+    </svg>
+  </button>
   <button class="theme-toggle" id="btn-theme" title="Changer de theme">&#9789;</button>
   <div id="auth-guest" style="display:none">
     <a href="login.php" class="auth-btn">Connexion</a>
@@ -83,6 +90,7 @@
 <script src="portrait-guard.js"></script>
 <script src="lvl0-data.js"></script>
 <script src="lvl0-roll.js"></script>
+<script src="map-draw.js"></script>
 <script src="script.js"></script>
 <script src="spell-reader.js"></script>
 <script src="classes/equipe.js"></script>

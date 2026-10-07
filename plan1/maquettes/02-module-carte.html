@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette 02 — module de dessin « carte » plein ecran</title>
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="maquettes.css">
+</head>
+<body>
+
+<div class="mq-wrap">
+
+  <div class="section-title" style="font-size:26px;">2. Module de dessin « carte » — plein ecran</div>
+  <p class="mq-lead">
+    Page de dessin occupe <strong>100 % de l'ecran</strong> (<code>#map-module</code>,
+    <code>position:fixed; inset:0; z-index:3000</code>) par-dessus l'application, sans
+    rechargement. Fonctions identiques a <code>draw-on-map</code> : crayon, gomme, texte,
+    deplacer, annuler, palette de 6 couleurs, zoom (+/curseur/100 %/ajuster/pincement),
+    multi-cartes, feuilles « Plus / Export / Import / Cartes / Options ». Ajouts propres a
+    l'integration : <b>croix de fermeture</b> (3), <b>fond webp servi par
+    <code>api/map-image.php?uid=…</code></b> (5), <b>toast de sauvegarde</b> pendant le
+    dessin (voir maquette 04).
+  </p>
+  <p class="mq-lead">
+    <button class="md-btn" type="button" id="mq-theme">Basculer clair / sombre</button>
+  </p>
+
+  <div class="section-bar">Rendu mobile — palette de couleurs ouverte</div>
+  <div class="mq-row">
+
+    <div class="mq-phone">
+      <!-- ================= MODULE ================= -->
+      <div class="map-module">
+
+        <div class="md-top">
+          <button class="md-chip md-chip--status" type="button" aria-pressed="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21.2 6.8a1 1 0 0 0-4-4L3.8 16.2a2 2 0 0 0-.5.8l-1.3 4.4a.5.5 0 0 0 .6.6l4.4-1.3a2 2 0 0 0 .8-.5z"/><path d="m15 5 4 4"/>
+            </svg>
+            <span role="status">Dessin actif &middot; crayon</span>
+          </button>
+          <div class="md-topright">
+            <button class="md-chip" type="button" aria-label="Cartes ouvertes : 3">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m12 2 10 5-10 5L2 7z"/><path d="m2 12 10 5 10-5"/><path d="m2 17 10 5 10-5"/>
+              </svg>
+              <span class="md-count">3</span>
+            </button>
+            <button class="md-chip" type="button" aria-label="Zoom : toucher pour 100 %"><span>125%</span></button>
+            <!-- ===== NOUVEAU : croix de fermeture ===== -->
+            <button class="md-close" type="button" aria-label="Fermer le module carte">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                   stroke-linecap="round" aria-hidden="true">
+                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="md-stage">
+          <div class="md-viewport">
+            <div class="md-scene">
+              <!-- fond webp (simule ici par un SVG) -->
+              <svg class="md-bg" viewBox="0 0 720 470" preserveAspectRatio="none" aria-label="Carte de fond">
+                <rect width="720" height="470" fill="#e9dcbc"/>
+                <g stroke="#c9b78c" stroke-width="1" fill="none">
+                  <path d="M0 60 H720 M0 140 H720 M0 220 H720 M0 300 H720 M0 380 H720"/>
+                  <path d="M80 0 V470 M200 0 V470 M320 0 V470 M440 0 V470 M560 0 V470 M680 0 V470"/>
+                </g>
+                <g fill="none" stroke="#9c8557" stroke-width="2.5" stroke-linejoin="round">
+                  <path d="M60 380 L60 250 L150 250 L150 180 L260 180 L260 120 L420 120"/>
+                  <path d="M420 120 L520 120 L520 210 L640 210 L640 330 L520 330"/>
+                  <path d="M150 250 L150 330 L300 330 L300 400"/>
+                </g>
+                <path d="M0 430 C120 400 180 470 300 430 S520 400 720 440 L720 470 L0 470Z" fill="#a9c6d6" opacity="0.8"/>
+                <g fill="#8ba86a" opacity="0.75">
+                  <circle cx="120" cy="90" r="16"/><circle cx="160" cy="70" r="12"/><circle cx="95" cy="120" r="11"/>
+                  <circle cx="600" cy="420" r="15"/><circle cx="640" cy="440" r="11"/>
+                </g>
+                <g fill="#6b5a3c" font-family="Georgia, serif" font-size="17">
+                  <text x="70" y="360">Crypte</text>
+                  <text x="470" y="180">Salle du trone</text>
+                  <text x="285" y="315">Couloir</text>
+                </g>
+              </svg>
+
+              <!-- calque de dessin (ops vectorielles) -->
+              <svg class="md-canvas" viewBox="0 0 720 470" preserveAspectRatio="none" aria-hidden="true">
+                <g fill="none" stroke="#2563eb" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M110 300 C160 260 220 275 250 240"/>
+                  <path d="M250 240 C300 205 330 160 380 150"/>
+                </g>
+                <g fill="none" stroke="#c0392b" stroke-width="7" stroke-linecap="round">
+                  <path d="M430 250 L470 250"/><path d="M450 230 L450 270"/>
+                  <circle cx="560" cy="300" r="26"/>
+                </g>
+                <text x="300" y="380" fill="#111827" font-family="Inter, sans-serif"
+                      font-size="32" font-weight="700">Entree</text>
+                <!-- pastille en cours de tracé -->
+                <circle cx="620" cy="150" r="4" fill="#2563eb"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- palette de couleurs : TIROIR OUVERT -->
+        <div class="md-bottom">
+          <div class="md-tray" role="group" aria-label="Couleurs">
+            <button class="md-swatch" style="--c:#2563eb" aria-label="Couleur bleu" aria-pressed="true"></button>
+            <button class="md-swatch" style="--c:#c0392b" aria-label="Couleur rouge" aria-pressed="false"></button>
+            <button class="md-swatch" style="--c:#111827" aria-label="Couleur noir" aria-pressed="false"></button>
+            <button class="md-swatch" style="--c:#27ae60" aria-label="Couleur vert" aria-pressed="false"></button>
+            <button class="md-swatch" style="--c:#f2bd3d" aria-label="Couleur jaune" aria-pressed="false"></button>
+            <button class="md-swatch" style="--c:#fff" aria-label="Couleur blanc" aria-pressed="false"></button>
+          </div>
+
+          <nav class="md-dock" aria-label="Barre d'outils">
+            <div class="md-seg" role="group" aria-label="Outils">
+              <button class="md-tool" type="button" aria-pressed="false" aria-label="Deplacer la carte">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0"/><path d="M14 10V4a2 2 0 0 0-4 0v2"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.3l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/></svg>
+              </button>
+              <button class="md-tool" type="button" aria-pressed="true" aria-label="Crayon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 6.8a1 1 0 0 0-4-4L3.8 16.2a2 2 0 0 0-.5.8l-1.3 4.4a.5.5 0 0 0 .6.6l4.4-1.3a2 2 0 0 0 .8-.5z"/><path d="m15 5 4 4"/></svg>
+              </button>
+              <button class="md-tool" type="button" aria-pressed="false" aria-label="Gomme">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+              </button>
+              <button class="md-tool" type="button" aria-pressed="false" aria-label="Texte">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+              </button>
+            </div>
+            <button class="md-rbtn" type="button" aria-label="Annuler la derniere action">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5A5.5 5.5 0 0 1 20 14.5 5.5 5.5 0 0 1 14.5 20H11"/></svg>
+            </button>
+            <button class="md-colorwell" type="button" aria-expanded="true" aria-label="Couleur du trait"><i style="--c:#2563eb"></i></button>
+            <button class="md-rbtn" type="button" aria-label="Plus d'actions">
+              <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>
+            </button>
+          </nav>
+        </div>
+
+      </div>
+      <!-- ================= FIN MODULE ================= -->
+    </div>
+
+    <div class="mq-col" style="max-width:420px;">
+      <div class="mq-note">
+        <span class="mq-num">1</span><b>Chrome haut flottant</b> : chip etat (outil actif),
+        chip cartes (compteur), chip zoom, puis la <b>croix</b>. Il se masque des qu'un doigt
+        touche la carte et reapparait au relachement (comportement draw-on-map).
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">2</span><b>Zoom mémorisé</b> : 125 % ici — repris de la base a la
+        reouverture (<code>maps.ui.zoom</code>), avec la position de defilement (R13).
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">3</span><b>Croix de fermeture</b> (nouveau, R3) : 38 px visibles /
+        44 px cliquables, meme langage que <code>.spell-viewer-close</code>. Ferme sans
+        confirmation (tout est deja en base) + touche <code>Echap</code>.
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">4</span><b>Dock</b> : 7 actions, 46 px, en bas = zone du pouce ;
+        la pastille de couleur ouvre le tiroir de 6 couleurs (ci-dessous, ouvert).
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">5</span><b>Fond webp</b> : <code>&lt;img&gt;</code> jamais modifie,
+        servi par <code>api/map-image.php?uid=…</code>. Le dessin reste sur un canvas
+        transparent au-dessus (aucun pixel d'image n'est jamais recopié).
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-bar">Rendu desktop — outil texte actif</div>
+  <div class="mq-row">
+    <div class="mq-col" style="width:100%;">
+      <div class="mq-desktop">
+        <div class="map-module">
+
+          <div class="md-top">
+            <button class="md-chip md-chip--status" type="button" aria-pressed="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+              <span role="status">Dessin actif &middot; texte</span>
+            </button>
+            <div class="md-topright">
+              <button class="md-chip" type="button" aria-label="Cartes ouvertes : 3">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 10 5-10 5L2 7z"/><path d="m2 12 10 5 10-5"/><path d="m2 17 10 5 10-5"/></svg>
+                <span class="md-count">3</span>
+              </button>
+              <button class="md-chip" type="button" aria-label="Zoom : toucher pour 100 %"><span>100%</span></button>
+              <button class="md-close" type="button" aria-label="Fermer le module carte">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="md-stage">
+            <div class="md-viewport">
+              <div class="md-scene" style="width:820px;height:520px;">
+                <svg class="md-bg" viewBox="0 0 820 520" preserveAspectRatio="none" aria-label="Carte de fond">
+                  <rect width="820" height="520" fill="#e9dcbc"/>
+                  <g stroke="#c9b78c" stroke-width="1" fill="none">
+                    <path d="M0 70 H820 M0 170 H820 M0 270 H820 M0 370 H820 M0 470 H820"/>
+                    <path d="M100 0 V520 M240 0 V520 M380 0 V520 M520 0 V520 M660 0 V520"/>
+                  </g>
+                  <g fill="none" stroke="#9c8557" stroke-width="2.5" stroke-linejoin="round">
+                    <path d="M80 430 L80 280 L190 280 L190 190 L320 190 L320 130 L470 130"/>
+                    <path d="M470 130 L590 130 L590 230 L730 230 L730 360 L590 360"/>
+                  </g>
+                  <g fill="#6b5a3c" font-family="Georgia, serif" font-size="18">
+                    <text x="95" y="395">Crypte</text>
+                    <text x="520" y="200">Salle du trone</text>
+                  </g>
+                </svg>
+                <svg class="md-canvas" viewBox="0 0 820 520" preserveAspectRatio="none" aria-hidden="true">
+                  <g fill="none" stroke="#2563eb" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M140 330 C210 300 260 320 320 270"/>
+                  </g>
+                  <text x="350" y="300" fill="#111827" font-family="Inter, sans-serif" font-size="32" font-weight="700">Entree</text>
+                  <rect x="344" y="272" width="2" height="34" fill="#111827"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="md-bottom">
+            <!-- etagere texte : outil texte actif -->
+            <div class="md-shelf">
+              <textarea rows="1" placeholder="Votre texte…" aria-label="Texte a inserer">Entree</textarea>
+              <div class="md-shelfrow">
+                <select aria-label="Taille de police">
+                  <option>18 px</option>
+                  <option selected>24 px</option>
+                  <option>32 px</option>
+                  <option>48 px</option>
+                </select>
+                <button class="md-rbtn" type="button" aria-pressed="true" aria-label="Gras"
+                        style="font-family:var(--font-heading);font-weight:800;">B</button>
+                <span class="md-hint">Touchez la carte pour placer</span>
+              </div>
+            </div>
+
+            <nav class="md-dock" aria-label="Barre d'outils">
+              <div class="md-seg" role="group" aria-label="Outils">
+                <button class="md-tool" type="button" aria-pressed="false" aria-label="Deplacer la carte">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0"/><path d="M14 10V4a2 2 0 0 0-4 0v2"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.3l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/></svg>
+                </button>
+                <button class="md-tool" type="button" aria-pressed="false" aria-label="Crayon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.2 6.8a1 1 0 0 0-4-4L3.8 16.2a2 2 0 0 0-.5.8l-1.3 4.4a.5.5 0 0 0 .6.6l4.4-1.3a2 2 0 0 0 .8-.5z"/><path d="m15 5 4 4"/></svg>
+                </button>
+                <button class="md-tool" type="button" aria-pressed="false" aria-label="Gomme">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg>
+                </button>
+                <button class="md-tool" type="button" aria-pressed="true" aria-label="Texte">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+                </button>
+              </div>
+              <button class="md-rbtn" type="button" aria-label="Annuler la derniere action">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5A5.5 5.5 0 0 1 20 14.5 5.5 5.5 0 0 1 14.5 20H11"/></svg>
+              </button>
+              <button class="md-colorwell" type="button" aria-expanded="false" aria-label="Couleur du trait"><i style="--c:#2563eb"></i></button>
+              <button class="md-rbtn" type="button" aria-label="Plus d'actions">
+                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>
+              </button>
+            </nav>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="mq-row">
+        <div class="mq-note" style="flex:1;min-width:280px;">
+          <span class="mq-num">6</span><b>Desktop</b> : meme composants, largeur libre ; les
+          feuilles s'ouvrent centrees (et non en feuille basse), le curseur est
+          <code>crosshair</code> en crayon / <code>move</code> en deplacement. Le pointeur
+          souris passe par la meme machine a etats que le doigt.
+        </div>
+        <div class="mq-note" style="flex:1;min-width:280px;">
+          <span class="mq-num">7</span><b>Outil texte</b> : l'etagere contextuelle pousse le
+          dock vers le bas ; tap/clic sur la carte = placement du texte (taille exprimee en
+          px ecran, convertie en unites de scene au moment du placement).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-bar">Variante — aucune image de fond (grille de repli)</div>
+  <div class="mq-row">
+    <div style="border:1px solid var(--line);border-radius:8px;overflow:hidden;width:420px;max-width:100%;">
+      <div class="md-scene is-empty" style="width:100%;height:240px;">
+        <svg class="md-canvas" viewBox="0 0 420 240" preserveAspectRatio="none" aria-hidden="true">
+          <g fill="none" stroke="#c0392b" stroke-width="5" stroke-linecap="round">
+            <path d="M60 170 C110 120 170 150 220 100"/><circle cx="320" cy="120" r="20"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <div class="mq-note" style="max-width:420px;">
+      <span class="mq-num">8</span><b>Grille de repli</b> (<code>.md-scene.is-empty</code>) :
+      conservee quand aucune image n'est definie <b>et</b> quand une image referencee par UID
+      est introuvable a l'import (R11) — le dessin reste lui toujours affiche.
+    </div>
+  </div>
+
+</div>
+
+<script>
+document.getElementById('mq-theme').addEventListener('click', function () {
+  var root = document.documentElement;
+  root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+</script>
+</body>
+</html>

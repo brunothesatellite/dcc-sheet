@@ -1,0 +1,72 @@
+Evolution pour les personnages de niveau 0
+
+1- ajouter un onglet "Niveau 0" après l'onget "Voleur". En mode mobile, cet onglet est accessible via une pastille "Lvl 0" positionnée à droite du titre de l'aplication "DUNGEON CRAWL CLASSICS", même principe que la pastille "Équipe"
+2- un personnage de niveau 0 a une fiche simplifiée : uniquement la partie BLOC_COMMUN et NOTES avec ces changements :
+Dans le bouclier "Point de Vie", le dé de vie n'est pas affiché (il n'existe pas pour les niveaux 0)
+3- dans l'onglet "Niveau 0", il y aura un bouton "+ Nouveau", "Import" pour importer un json d'un personnage. Comme pour les autres onglets un personnage peut être en expédition ou à l'auberge, on peut le supprimer ou le modifier.
+4- quand je fais "+ Nouveau", cela va tirer aléatoirement un personnage de niveau zéro selon les règles indiquées plus loin dans le prompt. Cela ouvre la fiche du personnage tiré aléatoirement, je retrouve le bouton "Export" mais aussi un bouton "Retire" et "Promouvoir". Le bouton "Retire" va tirer un nouveau personnage et remplacer celui ouvert, cela permet de tirer un nouveau facilement si on n'est pas satisfait. Le bouton "Promouvoir" est erxpliqué plus loin.
+5- Comment tirer un personnage aléatoire (convertis les listes sources en fichiers js si besoin) :
+Nom : tiré au hasard dans la liste noms.txt
+Titre : vide
+Metier : tiré au hasard dans metiers.csv. Ce fichier contient un tableau de 3 colonnes (métier, arme, équipement)
+Alignement : vide
+Mouvement : 30  ou 20 si le métier contient "halfelin" ou "nain"
+Niveau : 0
+PX : 0
+Classe d'armure : 10 auquel on ajoute le modificateur d'agilité
+Points de vie MAX : tirer aléatoirement 1d4 auquel on ajoute le modificateur d'endurance
+Points de vie courant = point de vie MAX à la création
+Initiative : texte "1d20" auquel on ajoute le modificateur d'agilité
+Dés d'action : texte "1d20"
+Dés critique : texte "1d4"
+Table critique : texte "I"
+Valeurs FORCE, AGILITE, ENDURANCE, PRESENCE, CHANCE, INTELLIGENCE : tirer aléatoirement 3d6 pour chaque valeur
+Pour calculer les modificateurs associés à chaque cartactéristique, on regarde la valeur de la caractéristique :
+3 => mod -3
+4-5 => mod -2
+6-8 => mod -1
+9-12 => mod 0
+13-15 => mod +1
+16-17 => mod +2
+18 => mod +3
+pense à ajouter ces modificateurs aux valeurs de classe d'armure, PV, initiative comme indiqué précédemment
+Jet chanceux : à tirer dans la liste chance.txt
+Langue : "commun". Si le métier contient "halfelin" on ajoute aussi "halfelin". Si le métier contient "elfe" on ajoute aussi "elfique".Si le métier contient "nain" on ajoute aussi "nain".
+Armes : prendre l'arme associée au métier tiré (colonne 2 de "metier.txt")
+Equipement : tirer aléatoirement dans "equipement.txt" et ajouter l'équipement associé au métier tiré (colonne 3 de "metier.txt")
+Trésor : tirer aléatoirement 5d12 (5 fois 1d12) pièces de cuivre
+Armure : vide
+
+Pour CàC et Distance, on regarde l'arme associée au métier tiré (colonne 2 de "metier.txt").
+Si celle-ci contient une chaine comme x/y/z alors c'est une arme de distance : son dégàt Càc sera vide. Par contre son dégat distance sera le premier dé trouvé dans la description de l'arme (par exemple 1d4 = 1d4; 1d4/1d10 = 1d4)
+Si celle-ci NE CONTIENT PAS une chaine comme x/y/z alors c'est une arme de Càc : son dégàt distance sera vide. Par contre son dégat Càc sera le premier dé trouvé dans la description de l'arme (par exemple 1d4 = 1d4; 1d4/1d10 = 1d4)
+Attaque CàC : on ajoute le modificateur de force
+Dégâts CàC : celui de l'arme et on ajoute le modificateur de force
+Attaque Distance : on ajoute le modificateur d'agilité 
+Dégâts Distance : celui de l'arme et on ajoute le modificateur d'agilité
+Portrait : tiré aléatoirement dans la liste des portraits disponibles pour le métier. La liste est ici icons\funnel-tokens\funnel-tokens.json   ensuite l'utilisateur pourra toujours cliquer sur le portrait et choisir un portrait dans la liste de tous les portraits disponibles dans icons\funnel-tokens\funnel-tokens.json quel que soit son métier (évite les portraits en doublon)
+Notes : si le métier contient "nain" ou "halfelin" on ajoute "Infravision". Si le métier contient "elfe" on ajoute "Sens sur développés et sensibles au fer"
+
+
+Indique moi les champs oubliés dans BLOC_COMMUN
+
+
+6- Transformer un niveau 0 en Niveau 1 : via le bouton "Promouvoir" on peut transformer un personnage niveau 0 en un personnage niveau 1 de la bonne classe. Quand on clique sur "Promouvoir", l'utilisateur peut choisir dans une liste la classe niveau qu'il assignera à son personnage niveau 0 :
+* si le personnage contient "halfelin" dans son métier, alors il ne pourra choisir que "Halfelin" comme classe
+* si le personnage contient "nain" dans son métier, alors il ne pourra choisir que "nain" comme classe
+* si le personnage contient "elfe" dans son métier, alors il ne pourra choisir que "elfe" comme classe
+* sinon il pourra choisir parmi les classes "clerc", "guerrier", "mage", voleur"
+Dans cette fenêtre il aura  aussi le choix de supprimer le personnage niveau 0 après la conversion (faux par défaut)
+Lorsqu'il lance la conversion, crée un personnage de niveau 1 de la casse indiqué en recopiant les champs du niveau 0 et en laissant les autres vides. Pour le portrait, tire un nouveau portrait aléatoire dans les portraits disponibles pour la classe.
+Si l'utilisateur a choisi de supprimer le personnage de niveau 0 après promotion, alors supprime le
+Ouvre ensuite directement le nouveau personnage niveau 1
+
+
+Q1 — Stockage : classe technique lvl0
+Q2 — Portée des pastilles : je confirme ton choix
+Q3 - le champ attaque : remplir avec +0
+Q3bis : 
+JS Reflexes : valeur du modificateur d'agilité
+JS Vigueur : valeur du modificateur d'endurance 
+JS Volonté : valeur du modificateur de présence
+

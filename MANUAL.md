@@ -14,8 +14,9 @@ Manuel d'utilisation de l'application web **DCC Fiches de Personnage** : créez 
 6. [La fiche de personnage](#6-la-fiche-de-personnage)
 7. [Le portrait (8 sources)](#7-le-portrait-8-sources)
 8. [Onglet Équipe (suivi de partie)](#8-onglet-équipe-suivi-de-partie)
-9. [Personnalisation & responsive](#9-personnalisation--responsive)
-10. [Astuces & dépannage](#10-astuces--dépannage)
+9. [Dessiner une carte](#9-dessiner-une-carte)
+10. [Personnalisation & responsive](#10-personnalisation--responsive)
+11. [Astuces & dépannage](#11-astuces--dépannage)
 - [Annexe A : format JSON d'export/import](#annexe-a--format-json-dexportimport)
 - [Annexe B : dés de vie et portraits par classe](#annexe-b--dés-de-vie-et-portraits-par-classe)
 - [Annexe C : glossaire](#annexe-c--glossaire)
@@ -129,7 +130,7 @@ Tous vos personnages sont supprimés avec le compte : vous êtes redirigé vers 
 
 - **Bouton ⚔** : ouvre l'onglet **Equipe** — affiché uniquement en basse résolution (≤ 600 px), où l'onglet lui-même est masqué.
 - **Texte « Dungeon Crawl Classics »**
-- **Bouton ☾ / ☀** : bascule le thème sombre/clair (§ 9).
+- **Bouton ☾ / ☀** : bascule le thème sombre/clair (§ 10).
 - **Avatar** : menu utilisateur (une fois connecté) — ou boutons **Connexion / Inscription** sinon.
 
 
@@ -249,7 +250,7 @@ La carte affiche `NOM — Niv.X` si un niveau est renseigné, le **portrait** du
 1. Vous modifiez un champ de la fiche.
 2. Après ~**0,4 s** sans nouvelle frappe (anti-rafale), l'ensemble des champs de la fiche est envoyé au serveur.
 3. Le toast **disquette** confirme (les toasts sont eux-mêmes espacés d'environ 0,6 s).
-4. En cas d'échec : toast **« Erreur sauvegarde »** → rechargez la page et vérifiez votre connexion (§ 10).
+4. En cas d'échec : toast **« Erreur sauvegarde »** → rechargez la page et vérifiez votre connexion (§ 11).
 
 Le champ **Nom** de la fiche met à jour le titre de la carte dans la liste. Les boutons de statut, eux, sont enregistrés immédiatement.
 
@@ -597,7 +598,128 @@ Entre **Ennemis** et **Notes** : un tableau des PJ **en expédition** avec les 6
 
 ---
 
-## 9. Personnalisation & responsive
+## 9. Dessiner une carte
+
+Le module **Carte** permet de dessiner une carte (donjon, village, expédition) directement
+dans l'application, éventuellement sur une **image de fond** (plan scanné, carte webp…).
+Le dessin est **vectoriel** (traits, gomme, texte) : il est léger, net à tous les zooms, et
+**sauvegardé en base automatiquement** pendant que vous dessinez.
+
+### Ouvrir et fermer le module
+
+1. Cliquez sur l'icône **carte** de la topbar, **à gauche de l'icône de thème**
+   (visible uniquement connecté).
+2. La page de dessin occupe **tout l'écran**, par-dessus l'application (rien n'est perdu
+   derrière).
+3. Pour la fermer : la **croix** en haut à droite, ou la touche **Échap**. Aucune
+   confirmation n'est demandée : tout est déjà enregistré.
+
+<img src="captures/topbar-icone-carte.png" alt="Topbar avec la nouvelle icône « carte » placée à gauche de l'icône de thème, entre le logo et le menu utilisateur" width="380">
+
+### La page de dessin
+
+- **En haut** : l'état (outil actif), le nombre de cartes ouvertes, le zoom, et la croix.
+- **Au centre** : la carte (l'image de fond si vous en chargez une, sinon une grille) —
+  dessinez au doigt sur mobile, à la souris sur ordinateur.
+- **En bas** : la barre d'outils (à portée du pouce sur mobile).
+
+Le chrome (barres du haut et du bas) se masque dès que vous touchez la carte et réapparaît
+au relâchement ; en mode *focus* (bouton « Masquer l'interface »), la flèche du bas le
+ramène.
+
+<img src="captures/carte-module-mobile.png" alt="Module carte sur mobile : carte de fond webp annotée de traits bleus et rouges, barre d'état en haut, barre d'outils en bas avec déplacer, crayon, gomme, texte, annuler, couleur et plus" width="380">
+<img src="captures/carte-module-desktop.png" alt="Même module carte sur ordinateur : surface de dessin plus large, mêmes outils en bas, fenêtres centrées" width="420">
+
+### Les outils
+
+| Action | Rôle |
+|---|---|
+| **Déplacer** | fait défiler la carte sans dessiner ; le double-clic alterne *Ajuster à l'écran* / *100 %* |
+| **Crayon** | trace un trait de la couleur choisie |
+| **Gomme** | efface ce qui est sous le tracé (large) |
+| **Texte** | tapez votre texte, choisissez la taille et le gras, puis touchez la carte pour le poser |
+| **Annuler** | retire le dernier geste |
+| **Couleur** | ouvre le tiroir de 6 couleurs |
+| **Plus** | zoom, export/import, image de fond, mode focus, effacer le dessin |
+
+**Zoom** : boutons `−` / `+`, curseur dans la feuille « Plus », toucher du chip de zoom
+(= 100 %, appui long = ajuster à l'écran), et **pincement à deux doigts** sur mobile.
+L'épaisseur du trait dépend du zoom **au moment du geste** : un trait tracé zoomé reste
+visible quand on dézoome.
+
+<img src="captures/carte-feuille-plus.png" alt="Feuille « Plus » du module carte : section Vue avec zoom et ajuster à l'écran, section Fichier avec exporter, importer et charger une image de fond, section Affichage et section Dessin" width="380">
+
+### L'image de fond
+
+1. Feuille **<nom du calque>** → **« Choisir une image de fond »** (png, jpg, jpeg ou webp) :
+   l'image est **convertie en webp** et enregistrée sur le serveur sous un identifiant
+   unique. C'est l'**entrée unique** du module pour l'image : elle **charge ou remplace**
+   le fond — la nouvelle prend la place de l'ancienne (supprimée du serveur) et votre
+   dessin est **recalé** sur les nouvelles dimensions.
+2. Son **nom d'origine** est conservé en base et dans les exports (traçabilité) : il n'est
+   **ni affiché ni modifiable** dans l'interface. Si la carte porte encore son nom par
+   défaut (« Carte N »), elle est **automatiquement rebaptisée** avec le nom du fichier
+   image, sans son extension ; un nom déjà personnalisé est conservé.
+3. **« Retirer l'image de fond »** (même feuille, inactive tant qu'il n'y en a pas) : le
+   fichier est retiré du serveur, la grille revient.
+
+> Le dessin reste sur un calque transparent **au-dessus** de l'image : votre image de fond
+> n'est jamais modifiée, et elle n'est **jamais incluse dans un export JSON** (seul son
+> identifiant l'est).
+
+### Les calques (cartes)
+
+L'icône **calques** (en haut) ouvre la liste des cartes : touchez-en une pour l'ouvrir.
+**10 cartes maximum** par compte. « Nouvelle carte » au-delà affiche un message invitant à
+en supprimer une.
+
+Dans **Options de la carte** : renommer la carte ou la supprimer — **l'image de fond
+associée est alors aussi supprimée** du serveur si plus aucune carte ne l'utilise.
+
+<img src="captures/carte-liste-calques.png" alt="Tiroir des cartes : liste de trois calques avec leur nom, le nombre d'opérations et l'identifiant tronqué de leur image de fond, la carte courante étant mise en avant" width="380">
+<img src="captures/carte-options.png" alt="Options de la carte : champ de nom de la carte, boutons remplacer et supprimer l'image de fond, et suppression de la carte avec sa confirmation" width="380">
+<img src="captures/carte-limite-10.png" alt="Message « Limite de 10 cartes atteinte — supprimez-en une pour en créer une nouvelle » affiché dans le tiroir des cartes" width="380">
+
+### Sauvegarde automatique
+
+Chaque geste (trait, texte, gomme, annulation…) est **enregistré en base** une demi-seconde
+plus tard, signalé par le **toast disquette** 💾. Le zoom et la position de défilement le
+sont aussi, de même que l'outil et la couleur actifs : **en fermant puis en rouvrant le
+module, vous retrouvez exactement votre travail** (dessin, fond, zoom, position, outil,
+couleur).
+
+<img src="captures/carte-toast-sauvegarde.png" alt="Toast disquette de sauvegarde affiché au-dessus de la carte juste après un trait" width="380">
+
+### Exporter / importer une carte
+
+Ces deux actions ne portent que sur le **calque actif** : la feuille et les fenêtres
+d'export/import affichent **son nom en titre** (« Donjon de la Reine », « Export — Donjon
+de la Reine », « Import — Donjon de la Reine ») — l'import **remplace le dessin du calque
+actif**, sans créer de nouvelle carte.
+
+Feuille **<nom du calque>** → **« Exporter le JSON / ZIP »** : le dessin est affiché en
+JSON (Copier / .json / Partager) ; si un fond existe, le bouton **« .zip (avec image) »**
+produit une archive qui contient aussi l'image. **« Importer un JSON / ZIP »** accepte les
+deux formats.
+
+Si une image de fond référencée **n'existe pas** sur l'appareil/serveur d'arrivée : un
+**toast d'erreur** signale son identifiant, **la grille est conservée** et le dessin est
+importé normalement.
+
+<img src="captures/carte-export-json.png" alt="Fenêtre d'export JSON d'une carte : contenu au format v3 avec l'identifiant et le nom de l'image de fond, et les boutons Partager, Copier, .json et .zip avec image" width="380">
+<img src="captures/carte-import-erreur-uid.png" alt="Toast d'erreur « Image de fond introuvable (UID …) » pendant qu'une importation conserve la grille par défaut" width="380">
+
+### Exporter / importer toutes les cartes
+
+Le menu utilisateur (avatar) → **Exporter tout (JSON ou ZIP)** inclut les cartes dans
+l'export global. Dès qu'**une image de fond** est utilisée, le téléchargement devient un
+**ZIP** contenant le JSON et les images (`images/<identifiant>.webp`). **Importer tout**
+accepte indifféremment un `.json` ou un `.zip` de ce format : les images sont réinstallées
+sur le serveur, et les calques au-delà de 10 sont signalés par un toast.
+
+---
+
+## 10. Personnalisation & responsive
 
 ### Thème clair / sombre
 
@@ -608,7 +730,7 @@ Entre **Ennemis** et **Notes** : un tableau des PJ **en expédition** avec les 6
 
 *Le thème sombre sur la fiche d'Alovnek : fond noir, champs gris clair, libellés blancs.*
 
-Si le thème ne « tient » pas après un rechargement : videz le cache du navigateur, puis réappliquez-le une fois (§ 10).
+Si le thème ne « tient » pas après un rechargement : videz le cache du navigateur, puis réappliquez-le une fois (§ 11).
 
 ### Ce que le navigateur mémorise localement
 
@@ -620,6 +742,8 @@ Si le thème ne « tient » pas après un rechargement : videz le cache du navig
 | Notes d'équipe | **Base de données serveur** | Oui (export JSON) |
 | Ordre de marche | **Base de données serveur** | Oui (export JSON) |
 | État combat de l'équipe (Init. combat, tours, ennemis) | **Base de données serveur** | Oui (export JSON) |
+| Cartes dessinées (dessin, outil, couleur, zoom, position) | **Base de données serveur** | Oui (export JSON / ZIP) |
+| Images de fond des cartes | **Serveur** (`data/maps/[UID].webp`) | Oui (export **ZIP**) |
 
 ### Comportement mobile (< 600 px)
 
@@ -630,15 +754,18 @@ Si le thème ne « tient » pas après un rechargement : videz le cache du navig
 
 ---
 
-## 10. Astuces & dépannage
+## 11. Astuces & dépannage
 
 ### Les signes visuels
 
 | Signal | Signification | Que faire |
 |---|---|---|
-| Toast **disquette** | Sauvegarde réussie | Rien |
+| Toast **disquette** | Sauvegarde réussie (fiches, cartes, notes) | Rien |
 | Toast **« Données restaurées »** | Chargement initial terminé | Rien |
 | Toast **« Erreur sauvegarde »** | Envoi échoué (réseau/serveur) | Rechargez la page, vérifiez la connexion ; rechargez ensuite la fiche pour vérifier les dernières valeurs |
+| Toast **« Image de fond introuvable (UID …) »** (carte) | L'image référencée n'existe pas sur ce serveur | Le dessin est conservé ; rechargez une image via *Options de la carte* |
+| Toast **« Limite de 10 cartes atteinte »** | 10 calques déjà ouverts | Supprimez-en une (*Options de la carte*) |
+| Toast **« Calques non importés (limite de 10) »** | Un import contenait plus de 10 cartes | Les 10 premières sont importées ; supprimez-en pour réimporter les autres |
 | Toast **« Import reussi (N persos) »** | Import terminé | Vérifiez les onglets |
 | Spinner prolongé | Serveur lent | Patientez ; en cas de blocage, rechargez |
 | Placeholder **« Aucune image disponible »** (silhouette grise en pointillé) | Dossier de portraits absent du serveur (droits d'image) — fiche, cartes, Équipe, ordre de marche | Installer le dossier d'images concerné ; le choix de portrait est conservé et réapparaîtra |
@@ -703,7 +830,7 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 
 ```json
 {
-  "version": 1,
+  "version": 2,
   "exported_at": "2026-09-22T18:00:00.000Z",
   "team_notes": "Session 3 : descendedre dans les catacombes, garder la potion pour Travok.",
   "marching_order": { "0": 1, "1": 0 },
@@ -715,7 +842,17 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
   "characters": [
     { "name": "Travok", "class": "clerc", "is_active": 1, "data": { "nom": "Travok", "dieu": "AHRIMAN" } },
     { "name": "Sergiu", "class": "mage", "is_active": 1, "data": { "nom": "Sergiu" } }
-  ]
+  ],
+  "maps": [
+    {
+      "name": "Donjon de la Reine",
+      "w": 1600, "h": 900,
+      "bg": { "uid": "3f2b7c1e9a044d5b8c6f2a1d7e5b4c3a", "name": "plan-du-donjon.webp" },
+      "ops": [{ "k": "s", "c": "#2563eb", "w": 7.5, "p": [[110, 300], [250, 240]] }],
+      "ui": { "zoom": 1.25, "left": 120, "top": 40 }
+    }
+  ],
+  "map_prefs": { "tool": "pen", "color": "#2563eb", "size": 24, "bold": false, "drawMode": true }
 }
 ```
 
@@ -727,6 +864,30 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 - Fichier **sans** `team_notes` (anciens exports) : les notes actuelles sont **conservées** ; fichier **avec** `team_notes` (même vide) : les notes sont **remplacées**.
 - Fichier **sans** `marching_order`, ou ordre **invalide** (doublon, hors bornes) : l'ordre est **reconstruit** (gauche→droite, haut→bas) — jamais d'erreur bloquante.
 - Fichier **sans** `team_state`, ou état **invalide** : l'état combat est **remis à zéro** (Init. combat et tours vides, aucun ennemi).
+- `maps` : **calques de cartes** du module *Dessiner une carte* — `name`, dimensions de la scène `w`/`h`, opérations vectorielles `ops` (`s` trait, `e` gomme, `t` texte), `ui` (zoom et position de défilement) et `bg` = **identifiant (`uid`) + nom (`name`) de l'image de fond** (**champ optionnel**, absent d'un export sans carte).
+- `map_prefs` : outil, couleur, taille et gras du module carte (**champ optionnel**).
+- **Les images de fond ne sont jamais dans le JSON** : seul leur `uid` y figure. Si au moins une image est utilisée, l'export devient un **ZIP** `dcc-persos-AAAA-MM-JJ.zip` contenant `dcc-persos-AAAA-MM-JJ.json` + `images/<uid>.webp` (+ `rapport.txt` si des images manquaient). L'import accepte **un JSON ou un ZIP** de ce format.
+- Version `1` (anciens exports, sans cartes) : toujours importée ; version `2` (avec `maps`) : importée normalement, **10 calques maximum** (les suivants sont signalés par un toast).
+
+### Calque de carte isolé (module Carte → Exporter / Importer)
+
+```json
+{
+  "v": 3, "kind": "dcc-map",
+  "w": 1600, "h": 900,
+  "bg": { "uid": "3f2b7c1e9a044d5b8c6f2a1d7e5b4c3a", "name": "plan-du-donjon.webp" },
+  "ops": [
+    { "k": "s", "c": "#2563eb", "w": 7.5, "p": [[110, 300], [250, 240]] },
+    { "k": "e", "w": 32, "p": [[50, 50], [120, 60]] },
+    { "k": "t", "c": "#111827", "x": 300, "y": 380, "s": 32, "b": 1, "t": "Entrée" }
+  ],
+  "ui": { "zoom": 1.25, "left": 120, "top": 40 }
+}
+```
+
+- `ops` : `s` = trait (`c` couleur, `w` largeur, `p` points), `e` = gomme (`w`, `p`), `t` = texte (`c`, `x`, `y`, `s` taille, `b` gras, `t` contenu). Les opérations invalides sont **ignorées** à l'import.
+- `bg` : présent seulement si une image de fond est définie ; si son `uid` est **introuvable** à l'import, un toast d'erreur s'affiche et la grille par défaut est conservée (le dessin, lui, est importé).
+- Un export `v:2` (ancien format `draw-on-map`, `bg` = simple nom de fichier) reste lisible.
 
 ---
 

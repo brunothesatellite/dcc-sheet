@@ -1,0 +1,30 @@
+ Hiver rigoureux : Tous les jets d’attaque
+ Le taureau : Jets d’attaque au corps à corps
+ Jour de chance : Jets d’attaque à distance
+ Élevé par les loups : Jets d’attaque à mains nues
+ Conçu à cheval : Jets d’attaque montée
+ Né sur le champ de bataille : Jets de dégâts
+ Voie de l’ours : Jets de dégâts au corps à corps
+ Œil de faucon : Jets de dégâts à distance
+ Chasseur en meute : Jets d’attaque et dégâts avec l’arme de départ de niveau
+ Né dans l’atelier : Tests de compétence (y compris les compétences de voleur)
+ Ruse du renard : Détecter/désamorcer les pièges
+ Trèfle à quatre feuilles : Trouver les passages secrets
+ Septième fils : Tests d’incantation
+ La tempête déchaînée : Dégâts des sorts
+ Cœur vertueux : Tests pour Repousser les impies
+ Survivant de la peste : Soins magiques*
+ Bon présage : Jets de sauvegarde
+ Ange gardien : Jets de sauvegarde pour échapper aux pièges
+ Mordu par une araignée : Jets de sauvegarde contre le poison
+ Frappé par la foudre : Jets de sauvegarde de Réflexes
+ Survivant d’une famine : Jets de sauvegarde de Vigueur
+ A résisté à la tentation : Jets de sauvegarde de Volonté
+ Maison protégée : Classe d’Armure
+ Vitesse du cobra : Initiative
+ Récolte abondante : Points de vie (s’applique à chaque niveau)
+ Bras du guerrier : Tables de coups critiques**
+ Demeure maudite : Jets de corruption
+ L’étoile brisée : Maladresses**
+ Chant d’oiseau : Nombre de langues
+ Enfant sauvage : Vitesse (chaque +1/-1 = mouvement +1,5 m/-1,5 m)

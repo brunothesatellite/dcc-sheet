@@ -19,7 +19,16 @@ function getDB() {
 
     $db = new SQLite3($DB_PATH);
     $db->enableExceptions(true);
-    $db->exec('PRAGMA journal_mode=WAL');
+    /* ATTENTION a l'ordre : le timeout DOIT etre pos AVANT tout pragma, sinon
+       un verrou concurrent fait echouer le setup en Fatal error (D14). */
+    $db->busyTimeout(5000);
+    try {
+        /* journal_mode est persistant dans le fichier : echec = deja en WAL
+           ou autre connexion active — jamais bloquant. */
+        $db->exec('PRAGMA journal_mode=WAL');
+    } catch (Exception $e) {
+        // Base deja en WAL ou verrouillee : on continue
+    }
     $db->exec('PRAGMA foreign_keys=ON');
     $db->exec('CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,6 +55,11 @@ function getDB() {
     } catch (Exception $e) {
         // Colonne deja presente sur une base existante
     }
+    try {
+        $db->exec('ALTER TABLE users ADD COLUMN map_prefs TEXT NOT NULL DEFAULT \'{}\'');
+    } catch (Exception $e) {
+        // Colonne deja presente sur une base existante
+    }
     $db->exec('CREATE TABLE IF NOT EXISTS characters (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
@@ -57,6 +71,21 @@ function getDB() {
         updated_at TEXT DEFAULT (datetime(\'now\')),
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
     )');
+    /* Calques de cartes (module dessin) : data = {v,w,h,ops}, ui = {zoom,left,top},
+       bg_uid/bg_name = image de fond (data/maps/[UID].webp). */
+    $db->exec('CREATE TABLE IF NOT EXISTS maps (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        name TEXT NOT NULL DEFAULT \'Carte\',
+        data TEXT NOT NULL DEFAULT \'{"v":3,"w":0,"h":0,"ops":[]}\',
+        ui TEXT NOT NULL DEFAULT \'{}\',
+        bg_uid TEXT NOT NULL DEFAULT \'\',
+        bg_name TEXT NOT NULL DEFAULT \'\',
+        created_at TEXT DEFAULT (datetime(\'now\')),
+        updated_at TEXT DEFAULT (datetime(\'now\')),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )');
+    $db->exec('CREATE INDEX IF NOT EXISTS idx_maps_user ON maps(user_id)');
     return $db;
 }
 

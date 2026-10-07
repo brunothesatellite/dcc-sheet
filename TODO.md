@@ -20,23 +20,8 @@
 
 
 **EVOLUTIONS**
-* Evolution Carte : travaille dans D:\VS Code\dcc-sheet
-crée une branche "evol-draw-map"
-je veux ajouter une nouvelle fonction pour dessiner une carte, éventuellement sur un fond d'image au format webp
-Pour cela ajoute une icone "carte" à gauche de l'icone pour le choix du thème
-quand je clique sur cet icone cela ouvre sur la totalité de l'écran une page permettant de dessiner une carte : je veux les mêmes fonctions que l'application D:\VS Code\draw-on-map
-je peux pouvoir fermer cette fenêtre de dessin avec un clic sur une croix
-cela doit absolument fonctionner sur PC et sur mobile.
-par rapport à D:\VS Code\draw-on-map, voici les changements à appliquer :
-- lorsque j'importe une image de fond, elle est stockée dans le dossier data/ avec un nom [UID].webp, UID étant un id unique généré automatiquement.
-- le dessin est automatiquement sauvé en BD quand je le réalise, avec l'uid et le nom utilisateur de l'image de fond si elle est définie.
-- le toast de sauvegarde doit être utilisé lors du dessin pour signifier qu'une sauvegarde a été réalisée
-- le dessin peut être exporté / importé en JSON soit manuellement depuis l'application pour un calque de carte donné, soit pour l'intégralité des calques via l'export "exporter tout en json" / "importer tout en json". Les images de fond sont pas exportées si elles existent, dans ce cas là, on exporte un zip avec le json et les images de fond utilisées. "importer tout en json" permet d'importer soit un json complet, soit un zip au format de l'export (json + images)
-- l'UID de chaque image doit être stocké en base et dans les exports / imports json
-- lors d'un import, si l'image n'est pas retrouvée par son uid, on affiche un toast d'erreur et on n'affiche pas d'image de fond (on garde la grille par défaut)
-- lorsque je supprime une carte, l'image de fond associée doit aussi être supprimée de data/
-- si je ferme le module de dessin de carte et que je l'ouvre à nouveau, je feux retrouver les derniers outils / couleur sélectionnées, le niveau de zoom, la position dans la carte. Tout cela doit aussi être stocké en DB.
-Fait une plan détaillé, une ou plusieurs maquette html, n'implémente pas encore dans l'application.
+* Evolution Carte : **implémentée le 07/10/2026** (branche `evol-draw-map`) — module de dessin plein écran (icône « carte » de la topbar), images de fond webp en `data/maps/[UID].webp`, sauvegarde auto + toast 💾, reprise outil/couleur/zoom/position, export/import JSON ou ZIP (par calque et global), limite de 10 cartes. Voir `plan1/PLAN-CARTE.md` (plan + décisions D1-D14), `plan1/maquettes/` (maquettes validées) et `JOURNAL.md` (7 octobre 2026).
+  * Reste à faire : captures d'écran (liste : `plan1/PLAN-CARTE.md` § 18) et vérification visuelle sur PC + mobile.
 
 
 dis moi quelles captures d'écran je dois faire pour cette nouvelle fonctionnalité de cartes ?

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquettes — Evolution « Carte »</title>
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="maquettes.css">
+</head>
+<body>
+
+<div class="mq-wrap">
+
+  <div class="section-title" style="font-size:26px;">Evolution « Carte » — maquettes</div>
+  <p class="mq-lead">
+    Documents de travail pour la branche <code>evol-draw-map</code> — <strong>maquettes HTML
+    statiques</strong>, aucune logique applicative. Elles se servent du <code>style.css</code>
+    reel de l'application pour etre au plus pres du rendu final. Source de la spec :
+    <code>TODO.md</code> § EVOLUTIONS — plan detaille : <code>plan1/PLAN-CARTE.md</code> —
+    application de reference : <code>D:\VS Code\draw-on-map</code>.
+  </p>
+
+  <div class="section-bar">Les 4 maquettes</div>
+  <div class="mq-grid">
+
+    <a href="01-topbar-icone-carte.html" style="text-decoration:none;">
+      <div class="char-card" style="height:100%;">
+        <div class="char-card-top" style="display:block;">
+          <div class="char-card-name">1. Icone « carte » de la topbar</div>
+          <div class="char-card-meta" style="margin-top:8px;">
+            Bouton place a gauche de l'icone de theme &middot; style clone de
+            <code>.theme-toggle</code> &middot; rendus desktop et mobile &middot; visible
+            uniquement pour un utilisateur connecte
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="02-module-carte.html" style="text-decoration:none;">
+      <div class="char-card" style="height:100%;">
+        <div class="char-card-top" style="display:block;">
+          <div class="char-card-name">2. Module de dessin plein ecran</div>
+          <div class="char-card-meta" style="margin-top:8px;">
+            Chrome haut + croix de fermeture &middot; scene avec fond webp, dessin vectoriel,
+            grille de repli &middot; dock 7 actions, tiroir de couleurs, etagere texte
+            &middot; mobile et desktop
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="03-feuilles-dialogues.html" style="text-decoration:none;">
+      <div class="char-card" style="height:100%;">
+        <div class="char-card-top" style="display:block;">
+          <div class="char-card-name">3. Feuilles et dialogues</div>
+          <div class="char-card-meta" style="margin-top:8px;">
+            Feuille « Plus » &middot; tiroir des calques (UID visibles) &middot; options de la
+            carte (image : nom + UID + suppression) &middot; export/import JSON et ZIP
+            &middot; menu utilisateur « tout »
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="04-sauvegarde-et-erreurs.html" style="text-decoration:none;">
+      <div class="char-card" style="height:100%;">
+        <div class="char-card-top" style="display:block;">
+          <div class="char-card-name">4. Sauvegarde, toasts et flux</div>
+          <div class="char-card-meta" style="margin-top:8px;">
+            Toast de sauvegarde pendant le dessin &middot; toasts d'erreur (image introuvable,
+            image trop lourde) &middot; flux image / suppression / import ZIP / reouverture
+            &middot; arbitrages (limite 10 cartes, concurrence, conversion webp)
+          </div>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="section-bar">Ce que les maquettes arbitrent</div>
+  <div class="mq-note">
+    <b>D1</b> une « carte » = un calque persiste (<code>maps</code>) &middot;
+    <b>A1</b> images en <code>data/maps/[UID].webp</code>, servies par PHP &middot;
+    <b>A2</b> outil/couleur globaux, zoom/position par calque &middot;
+    <b>A3</b> ZIP construit cote serveur &middot;
+    <b>D5</b> icone reservee aux utilisateurs connectes &middot;
+    <b>D7</b> toasts de la couche globale &middot;
+    <b>R11</b> image introuvable = toast d'erreur + grille par defaut.
+  </div>
+
+</div>
+</body>
+</html>

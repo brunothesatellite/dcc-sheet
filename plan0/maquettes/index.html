@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquettes — Évolution « Niveau 0 »</title>
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="maquettes.css">
+</head>
+<body>
+
+<div style="max-width:900px;margin:0 auto;padding:32px 20px;">
+
+  <div class="section-title" style="font-size:26px;">Évolution « Niveau 0 » — maquettes</div>
+  <p style="color:var(--muted);font-size:14px;line-height:1.6;">
+    Documents de travail pour la branche <code>evol-level0</code> — <strong>maquettes HTML statiques</strong>,
+    aucune logique applicative. Elles se servent du <code>style.css</code> réel de l'application pour
+    être au plus près du rendu final. Source de la spec : <code>plan0/lvl0-spec.txt</code>.
+  </p>
+
+  <div class="section-bar">Les 3 maquettes</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:24px;">
+
+    <a href="01-onglet-niveau-0.html" style="text-decoration:none;">
+      <div class="char-card" style="height:100%;">
+        <div class="char-card-top" style="display:block;">
+          <div class="char-card-name">1. Onglet « Niveau 0 »</div>
+          <div class="char-card-meta" style="margin-top:8px;">
+            Onglet après Voleur · libellé mobile « Niv 0 » (onglets à largeur maximale, sans défilement) · liste des cartes ·
+            boutons + Nouveau / Import · carte expédition/auberge
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="02-fiche-niveau-0.html" style="text-decoration:none;">
+      <div class="char-card" style="height:100%;">
+        <div class="char-card-top" style="display:block;">
+          <div class="char-card-name">2. Fiche de niveau 0</div>
+          <div class="char-card-meta" style="margin-top:8px;">
+            BLOC_COMMUN sans dé de vie + Notes · en-tête Export / Autre tirage / Promouvoir ·
+            exemple de tirage complété · champs à décider encadrés en bleu
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="03-promotion.html" style="text-decoration:none;">
+      <div class="char-card" style="height:100%;">
+        <div class="char-card-top" style="display:block;">
+          <div class="char-card-name">3. Promotion → niveau 1</div>
+          <div class="char-card-meta" style="margin-top:8px;">
+            Modale de choix de classe · contrainte raciale (État B) · case « supprimer après
+            conversion » · comportement après validation
+          </div>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="section-bar">Décisions validées (06/10/2026)</div>
+  <div class="mq-note" style="border-left-color:#3f7d4f;background:rgba(63,125,79,.08);">
+    <strong>Q1 Stockage :</strong> pseudo-classe <code>lvl0</code> dans <code>characters.class</code>
+    (8ᵉ classe technique, CRUD/export/import existants réutilisés).<br>
+    <strong>Q5 Arme de distance :</strong> plage chiffrée de 3 nombres <code>3/6/9</code> → distance ;
+    <code>1d4/1d10</code> reste de la notation de dégâts → CàC.<br>
+    <strong>Q7 Promotion :</strong> recopie <strong>intégrale</strong> de la fiche — identité
+    (titre/alignement), caracs + mods, <strong>JS Ref/Vig/Vol</strong>, attaque, dés/table de
+    critique, jet chanceux, langues, armes/équipement/trésor/notes/armure, PV/CA —
+    <strong>seul le portrait est retiré</strong> (tiré pour la classe) ; aucun champ n'est vidé.<br>
+    <strong>Q9 Équipe :</strong> un niveau 0 en expédition apparaît dans l'onglet Équipe et suit le
+    combat (PV, initiative, tour, ordre de marche) comme les autres personnages.<br>
+    <strong>Q2 Onglet mobile :</strong> la pastille « Lvl 0 » prévue initialement est
+    <strong>abandonnée</strong> : l'onglet reste visible en mobile sous la forme courte
+    <strong>« Niv 0 »</strong>, les 8 onglets occupent toute la largeur <strong>sans
+    défilement horizontal</strong> (seule la pastille « ⚔ Équipe » subsiste).<br>
+    <strong>Q3 Champ « Attaque » :</strong> rempli avec <strong><code>+0</code></strong>
+    (pas de bonus de classe au niveau 0).<br>
+    <strong>Q3 bis Jets de sauvegarde :</strong> JS Ref = mod d'agilité, JS Vig = mod d'endurance,
+    JS Vol = mod de présence — renseignés au tirage, éditables.<br>
+    <strong>Q6 Promotion :</strong> bouton inactif tant qu'aucune classe n'est choisie ;
+    classe raciale pré-sélectionnée quand elle est imposée.<br>
+    <strong>Q8 Race :</strong> détection par <strong>« commence par »</strong>
+    <code>elfe</code> / <code>nain</code> / <code>halfelin</code> (Mouvement 20, langues, Notes,
+    contrainte de promotion).
+  </div>
+
+  <div class="section-bar">Points restant à trancher</div>
+  <div class="mq-note" style="border-left-color:#3f7d4f;background:rgba(63,125,79,.08);">
+    Aucun — l'ensemble des points de la spec est tranché (Q4 étant une remarque d'implémentation :
+    la section Notes est hors BLOC_COMMUN et sera ajoutée par le module niveau 0).
+  </div>
+
+  <div class="section-bar">Conventions retenues dans les maquettes</div>
+  <div class="mq-note">
+    <strong>Portraits :</strong> source dédiée <code>funnel</code> =
+    <code>icons/funnel-tokens/*.png</code> (76 images, indexés par
+    <code>funnel-tokens.json</code> qui mappe métier → images).
+    <strong>Liste :</strong> carte comme les autres onglets, 1<sup>re</sup> ligne de méta = métier.
+    <strong>Fiche :</strong> structure identique à BLOC_COMMUN (mêmes <code>data-key</code>,
+    préfixe <code>lvl0</code>), sans le dé de vie, + section Notes.
+    <strong>Nouveau :</strong> tirage → ouverture directe de la fiche.
+  </div>
+
+</div>
+
+</body>
+</html>

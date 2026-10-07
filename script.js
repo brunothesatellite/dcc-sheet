@@ -59,11 +59,27 @@
     return toastContainer;
   }
 
-  function showToast(message, type) {
+  /* type : 'save' (defaut) | 'success' | 'error'.
+     actionLabel + action (optionnels) : bouton d'action du toast, utilise
+     par le module carte (« Annuler » de « Effacer tout le dessin »). */
+  function showToast(message, type, actionLabel, action) {
     var container = getToastContainer();
     var toast = document.createElement('div');
     toast.className = 'toast toast-' + (type || 'save');
     toast.innerHTML = message;
+
+    if (actionLabel) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'toast-action';
+      btn.textContent = actionLabel;
+      btn.addEventListener('click', function () {
+        if (action) action();
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      });
+      toast.appendChild(btn);
+    }
+
     container.appendChild(toast);
 
     setTimeout(function () {
@@ -71,7 +87,7 @@
       setTimeout(function () {
         if (toast.parentNode) toast.parentNode.removeChild(toast);
       }, 200);
-    }, 1500);
+    }, actionLabel ? 4500 : 1500);
   }
 
   function showToastSave() {
@@ -322,6 +338,10 @@
       guestEl.style.display = 'flex';
       loggedEl.style.display = 'none';
     }
+
+    /* Module carte : les API exigent une session (D5) — icone aux connectes */
+    var mapBtn = $('#btn-carte');
+    if (mapBtn) mapBtn.style.display = currentUser ? 'flex' : 'none';
   }
 
   async function logout() {
@@ -441,7 +461,7 @@
       }
 
       var exportObj = {
-        version: 1,
+        version: 2,
         exported_at: new Date().toISOString(),
         team_notes: '',
         characters: fullCharacters,
@@ -469,34 +489,114 @@
         }
       } catch (e) { /* export maintenu meme si l'etat echoue */ }
 
-      var json = JSON.stringify(exportObj, null, 2);
-      var blob = new Blob([json], { type: 'application/json' });
-      var url = URL.createObjectURL(blob);
+      /* Calques de cartes (evolution Carte) : model v:3 complet par calque,
+         l'UID de l'image de fond est seul reference — jamais de binaire (R10). */
+      var maps = [];
+      try {
+        var mapsList = await api('maps.php', { method: 'GET', data: { action: 'list' } });
+        var mapRows = mapsList.maps || [];
+        for (var mi = 0; mi < mapRows.length; mi++) {
+          var mapDetail = await api('maps.php', { method: 'GET', data: { action: 'get', id: mapRows[mi].id } });
+          if (mapDetail.map && mapDetail.map.model) {
+            var model = mapDetail.map.model;
+            model.name = mapDetail.map.name;
+            maps.push(model);
+          }
+        }
+      } catch (e) { /* export maintenu meme si les cartes echouent */ }
+      if (maps.length) exportObj.maps = maps;
 
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = 'dcc-persos-' + new Date().toISOString().slice(0, 10) + '.json';
-      a.click();
-      URL.revokeObjectURL(url);
+      try {
+        var prefsRes = await api('maps.php', { method: 'GET', data: { action: 'prefs_get' } });
+        if (prefsRes.prefs && Object.keys(prefsRes.prefs).length) exportObj.map_prefs = prefsRes.prefs;
+      } catch (e) { /* preferences non indispensables a l'export */ }
 
-      showToast('Export reussi (' + fullCharacters.length + ' persos)', 'success');
+      var images = [];
+      maps.forEach(function (m) { if (m.bg && m.bg.uid) images.push(m.bg.uid); });
+
+      var date = new Date().toISOString().slice(0, 10);
+      var filename = 'dcc-persos-' + date;
+
+      if (images.length) {
+        /* Au moins un fond : l'export devient un ZIP (json + images) — R9/A3.
+           Si le serveur ne sait pas zipper (ZipArchive absent) : repli sur le
+           .json seul, avec un avertissement. */
+        var zipBlob = null;
+        try {
+          var zipRes = await fetch('api/maps.php?action=export_zip', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ file: filename + '.json', json: exportObj, images: images }),
+          });
+          if (zipRes.ok) zipBlob = await zipRes.blob();
+        } catch (e) { zipBlob = null; }
+
+        if (zipBlob) {
+          var zipUrl = URL.createObjectURL(zipBlob);
+          var zipLink = document.createElement('a');
+          zipLink.href = zipUrl;
+          zipLink.download = filename + '.zip';
+          zipLink.click();
+          URL.revokeObjectURL(zipUrl);
+        } else {
+          var jsonOnly = JSON.stringify(exportObj, null, 2);
+          var blobOnly = new Blob([jsonOnly], { type: 'application/json' });
+          var urlOnly = URL.createObjectURL(blobOnly);
+          var linkOnly = document.createElement('a');
+          linkOnly.href = urlOnly;
+          linkOnly.download = filename + '.json';
+          linkOnly.click();
+          URL.revokeObjectURL(urlOnly);
+          showToast('Images non embarquees (ZIP indisponible) : export JSON seul', 'error');
+        }
+      } else {
+        var json = JSON.stringify(exportObj, null, 2);
+        var blob = new Blob([json], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename + '.json';
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      showToast('Export reussi (' + fullCharacters.length + ' persos' +
+        (maps.length ? ', ' + maps.length + ' cartes' : '') + ')', 'success');
     } catch (err) {
       await showModal({ title: 'Erreur', message: 'Erreur lors de l\'export : ' + err.message, type: 'alert' });
     }
   }
 
+  /* Import global : JSON complet OU ZIP (json + images de fond) — R9/R11. */
   async function importAllCharacters() {
     var input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.json';
+    input.accept = '.json,.zip,application/json,application/zip';
 
     input.addEventListener('change', async function (e) {
       var file = e.target.files[0];
       if (!file) return;
 
       try {
-        var text = await file.text();
-        var obj = JSON.parse(text);
+        var obj, missing = [];
+        if (/\.zip$/i.test(file.name || '') || (file.type || '').indexOf('zip') !== -1) {
+          /* ZIP : le serveur extrait les images dans data/maps/ puis renvoie le JSON */
+          var form = new FormData();
+          form.append('file', file);
+          var res = await fetch('api/maps.php?action=import_all', {
+            method: 'POST', credentials: 'same-origin', body: form,
+          });
+          var payload = await res.json();
+          if (!res.ok || payload.ok === false) throw new Error(payload.error || 'Erreur serveur');
+          obj = payload.json;
+          missing = payload.missing || [];
+        } else {
+          var text = await file.text();
+          obj = JSON.parse(text);
+          missing = await checkMapImages(obj && obj.maps);
+        }
 
         if (!obj.characters || !Array.isArray(obj.characters) || obj.characters.length === 0) {
           await showModal({ title: 'Format invalide', message: 'Le fichier JSON ne contient aucun personnage valide.', type: 'alert' });
@@ -511,7 +611,7 @@
 
         var confirmed = await showModal({
           title: 'Importer ' + obj.characters.length + ' personnage(s) ?',
-          message: 'Cela remplacera tous vos personnages actuels. Cette action est irreversible.',
+          message: 'Cela remplacera tous vos personnages et vos cartes actuels. Cette action est irreversible.',
           type: 'confirm',
           danger: true,
         });
@@ -594,7 +694,21 @@
           }
         }
 
-        showToast('Import reussi (' + obj.characters.length + ' persos)', 'success');
+        /* Calques de cartes : remplacement complet (D8), puis rapport des
+           images de fond introuvables (R11) et de la limite de 10 (D13) */
+        var mapsImported = 0;
+        try {
+          await deleteAllMaps();
+          mapsImported = await importMaps(obj.maps);
+        } catch (e) {
+          showToast('Erreur sauvegarde des cartes', 'error');
+        }
+        (missing || []).forEach(function (uid) {
+          showToast('Image de fond introuvable (UID ' + String(uid).slice(0, 8) + '…)', 'error');
+        });
+
+        showToast('Import reussi (' + obj.characters.length + ' persos' +
+          (mapsImported ? ', ' + mapsImported + ' cartes' : '') + ')', 'success');
         invalidateEquipePanel();
         await switchTab(activeTab);
       } catch (err) {
@@ -603,6 +717,70 @@
     });
 
     input.click();
+  }
+
+  /* --- Cartes (evolution Carte) : utilitaires d'import --- */
+
+  /* UIDs de fond references par le fichier mais absents de data/maps/ (R11) */
+  async function checkMapImages(maps) {
+    var uids = [];
+    (maps || []).forEach(function (m) {
+      if (m && m.bg && m.bg.uid) uids.push(m.bg.uid);
+    });
+    if (!uids.length) return [];
+    try {
+      var res = await api('maps.php', { method: 'POST', body: { action: 'check_images', uids: uids } });
+      return res.missing || [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /* L'import « tout » remplace aussi les calques (D8) */
+  async function deleteAllMaps() {
+    var res = await api('maps.php', { method: 'GET', data: { action: 'list' } });
+    var rows = res.maps || [];
+    for (var i = 0; i < rows.length; i++) {
+      await api('maps.php', { method: 'POST', body: { action: 'delete', id: rows[i].id } });
+    }
+  }
+
+  /* Cree les calques du fichier ; au-dela de 10, les suivants sont signales
+     dans un toast d'erreur (D13) plutot que de faire echouer tout l'import. */
+  async function importMaps(maps) {
+    if (!Array.isArray(maps) || !maps.length) return 0;
+    var created = 0;
+    var skipped = [];
+    for (var i = 0; i < maps.length; i++) {
+      var m = maps[i];
+      if (!m || typeof m !== 'object') continue;
+      try {
+        var res = await api('maps.php', {
+          method: 'POST',
+          body: { action: 'create', name: m.name || ('Carte ' + (i + 1)) },
+        });
+        if (res.map) {
+          await api('maps.php', {
+            method: 'POST',
+            body: {
+              action: 'save',
+              id: res.map.id,
+              data: { w: m.w || 0, h: m.h || 0, ops: m.ops || [] },
+              ui: m.ui || {},
+              bg_uid: (m.bg && m.bg.uid) || '',
+              bg_name: (m.bg && m.bg.name) || '',
+            },
+          });
+          created++;
+        }
+      } catch (e) {
+        skipped.push(m.name || ('Carte ' + (i + 1)));
+      }
+    }
+    if (skipped.length) {
+      showToast('Calques non importes (limite de 10) : ' + skipped.join(', '), 'error');
+    }
+    return created;
   }
 
   function showChangePasswordModal() {
@@ -2152,6 +2330,14 @@
     var themeBtn = $('.theme-toggle');
     if (themeBtn) {
       themeBtn.addEventListener('click', toggleTheme);
+    }
+
+    /* Module carte (evolution Carte) : ouverture de la page de dessin */
+    var mapBtn = $('#btn-carte');
+    if (mapBtn) {
+      mapBtn.addEventListener('click', function () {
+        if (window.DCCMapDraw) window.DCCMapDraw.open();
+      });
     }
 
     $$('.tab').forEach(function (btn) {

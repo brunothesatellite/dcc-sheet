@@ -1,0 +1,166 @@
+/* =========================================================================
+   MAQUETTES — niveau 0  (plan0/maquettes)
+   Fichier de maquette UNIQUEMENT : il ne doit jamais être référencé par
+   l'application (index.html ne doit le lier que dans les maquettes).
+   Il apporte :
+     1. la mise en avant des éléments masqués en desktop (pastilles mobiles)
+     2. les styles PROPOSÉS des nouveaux éléments (onglet, pastille,
+        boutons Autre tirage / Promouvoir) — à rapatrier dans style.css le jour J
+     3. les encarts d'annotation et la légende des questions ouvertes
+   ========================================================================= */
+
+/* 1. Pastilles mobiles visibles sur la maquette (réel : media <= 600px) --- */
+.btn-equipe-mobile {
+  display: flex;
+}
+
+/* 2a. Onglet « Niveau 0 » : style commun des onglets de classe — aucun
+      réglage ici, il hérite de `.tab` comme Voleur, Nain, etc. ---------- */
+
+/* 2b. Boutons de la fiche niveau 0 -------------------------------------- */
+.btn-reroll,
+.btn-promote {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: filter 0.2s, background 0.2s, border-color 0.2s;
+}
+
+.btn-reroll {
+  color: #fff;
+  background: #b3441f; /* tirage / remplacer */
+  border: 1px solid #b3441f;
+}
+
+.btn-reroll:hover {
+  filter: brightness(1.1);
+}
+
+.btn-promote {
+  color: var(--ink);
+  background: var(--field-bg);
+  border: 1px solid var(--green, #3f7d4f);
+}
+
+.btn-promote:hover {
+  background: var(--paper);
+}
+
+/* 2c. Modale de promotion : liste radio de classes ---------------------- */
+.promo-class-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 14px 0;
+  padding: 12px;
+  background: var(--field-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+}
+
+.promo-class-list label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.promo-class-list input[type="radio"]:disabled + span {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+.promo-delete-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+/* 3. Annotations de maquette (jamais dans l'application) ---------------- */
+.mq-note {
+  margin: 10px 0;
+  padding: 10px 14px;
+  border-left: 4px solid var(--tab-active, #8a4b1f);
+  background: var(--paper);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.mq-note strong {
+  color: var(--ink);
+}
+
+.mq-q {
+  border-left-color: #2f6fa8;
+  background: rgba(47, 111, 168, 0.08);
+}
+
+.mq-flag {
+  display: inline-block;
+  vertical-align: middle;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 10px;
+  background: #2f6fa8;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.mq-hide {
+  outline: 2px dashed #b3441f;
+  outline-offset: 2px;
+  position: relative;
+}
+
+.mq-hint {
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: 3px;
+}
+
+/* Barre de navigation entre maquettes ----------------------------------- */
+.mq-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 16px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.mq-nav a {
+  color: var(--tab-active);
+  font-weight: 700;
+  text-decoration: none;
+  padding: 4px 10px;
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+}
+
+.mq-nav a:hover {
+  background: var(--field-bg);
+}
+
+.mq-nav span {
+  color: var(--muted);
+  margin-right: 6px;
+}

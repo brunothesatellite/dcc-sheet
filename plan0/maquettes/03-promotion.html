@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette 3 — Promotion niveau 0 → niveau 1</title>
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="maquettes.css">
+</head>
+<body>
+
+<nav class="mq-nav">
+  <span>Maquette :</span>
+  <a href="index.html">Sommaire</a>
+  <a href="01-onglet-niveau-0.html">1. Onglet</a>
+  <a href="02-fiche-niveau-0.html">2. Fiche</a>
+  <a href="03-promotion.html">3. Promotion</a>
+</nav>
+
+<header class="topbar">
+  <button class="btn-equipe-mobile" title="Equipe">&#9876;</button>
+  <a href="#" class="logo">Dungeon Crawl Classics</a>
+  <div class="topbar-spacer"></div>
+  <button class="theme-toggle" title="Changer de theme">&#9789;</button>
+</header>
+
+<nav class="tab-bar">
+  <button class="tab tab-equipe">Equipe</button>
+  <button class="tab">Clerc</button>
+  <button class="tab">Elfe</button>
+  <button class="tab">Guerrier</button>
+  <button class="tab">Halfelin</button>
+  <button class="tab">Mage</button>
+  <button class="tab">Nain</button>
+  <button class="tab">Voleur</button>
+  <button class="tab tab-lvl0 active">Niveau 0</button>
+</nav>
+
+<div class="main">
+
+  <!-- =====================================================================
+       ÉTAT A — métier non racial (« Bûcheron ») : 4 classes au choix
+       ===================================================================== -->
+  <div style="position:relative;padding:24px;">
+    <div class="section-title" style="margin-bottom:6px;">État A — métier « Bûcheron » (aucune race)</div>
+    <div class="mq-note">
+      Bouton <strong>Promouvoir</strong> cliqué depuis la fiche → modale de conversion.
+      <strong>Classe par défaut : aucune</strong> (obligation de choisir) ; la case
+      « supprimer » est <strong>fausse par défaut</strong> (spec point 6).
+    </div>
+
+    <div class="modal-overlay">
+      <div class="modal-box">
+        <div class="modal-title">Promouvoir en niveau 1</div>
+        <div class="modal-message">
+          Classe à assigner à <strong>Adrik Graybeard</strong> (métier : Bûcheron) :
+        </div>
+
+        <div class="promo-class-list">
+          <label><input type="radio" name="promo-a" value="clerc"> <span>Clerc</span></label>
+          <label><input type="radio" name="promo-a" value="guerrier"> <span>Guerrier</span></label>
+          <label><input type="radio" name="promo-a" value="mage"> <span>Mage</span></label>
+          <label><input type="radio" name="promo-a" value="voleur"> <span>Voleur</span></label>
+          <label><input type="radio" name="promo-a" value="elfe" disabled> <span>Elfe (métier sans « elfe »)</span></label>
+          <label><input type="radio" name="promo-a" value="halfelin" disabled> <span>Halfelin (métier sans « halfelin »)</span></label>
+          <label><input type="radio" name="promo-a" value="nain" disabled> <span>Nain (métier sans « nain »)</span></label>
+        </div>
+
+        <label class="promo-delete-row">
+          <input type="checkbox">
+          <span>Supprimer le personnage de niveau 0 après la conversion</span>
+        </label>
+
+        <div class="modal-actions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+          <button class="modal-btn-cancel">Annuler</button>
+          <button class="modal-btn-ok" disabled style="opacity:.5;">Promouvoir</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mq-note" style="border-left-color:#3f7d4f;background:rgba(63,125,79,.08);">
+      <span class="mq-flag" style="background:#3f7d4f;">DÉCIDÉ</span> Le bouton
+      <strong>« Promouvoir » reste inactif</strong> tant qu'aucune classe n'est choisie ;
+      quand une classe raciale est imposée (État B), elle est <strong>pré-sélectionnée</strong>
+      et les autres sont <strong>grisées</strong> (et non masquées) pour montrer pourquoi elles
+      sont interdites.
+    </div>
+
+    <div class="mq-note" style="border-left-color:#3f7d4f;background:rgba(63,125,79,.08);">
+      <span class="mq-flag" style="background:#3f7d4f;">DÉCIDÉ</span> Contenu
+      <strong>recopié intégralement</strong> dans le niveau 1 : identité (titre et alignement
+      compris), mouvement, les 6 caractéristiques + mods, <strong>jets de sauvegarde (JS)</strong>,
+      bonus d'attaque, dés et table de critique, initiative, jet chanceux, langues,
+      armes / équipement / trésor / notes / armure, PV et CA — <strong>seul le portrait est
+      retiré</strong> (remplacé par un tirage dans les portraits de la classe). Aucun champ n'est
+      vidé : seuls `niveau` (→ 1) et le portrait changent.
+    </div>
+  </div>
+
+  <div style="border-top:1px solid var(--line);margin:0 24px;"></div>
+
+  <!-- =====================================================================
+       ÉTAT B — métier racial (« Nain mineur ») : une seule classe possible
+       ===================================================================== -->
+  <div style="position:relative;padding:24px;">
+    <div class="section-title" style="margin-bottom:6px;">État B — métier « Nain mineur » (classe imposée)</div>
+    <div class="mq-note">
+      Le métier <strong>commence par « nain »</strong> → seule la classe <strong>Nain</strong> est
+      proposée : les autres sont grisées (interdites), le radio Nain est le seul sélectionnable.
+      Idem pour « elfe … » et « halfelin … ».
+    </div>
+
+    <div class="modal-overlay">
+      <div class="modal-box">
+        <div class="modal-title">Promouvoir en niveau 1</div>
+        <div class="modal-message">
+          Classe à assigner à <strong>Oskar Stonehand</strong> (métier : Nain mineur) :
+        </div>
+
+        <div class="promo-class-list">
+          <label><input type="radio" name="promo-b" value="nain" checked> <span>Nain</span></label>
+          <label><input type="radio" name="promo-b" value="clerc" disabled> <span>Clerc (métier « nain »)</span></label>
+          <label><input type="radio" name="promo-b" value="guerrier" disabled> <span>Guerrier (métier « nain »)</span></label>
+          <label><input type="radio" name="promo-b" value="mage" disabled> <span>Mage (métier « nain »)</span></label>
+          <label><input type="radio" name="promo-b" value="voleur" disabled> <span>Voleur (métier « nain »)</span></label>
+        </div>
+
+        <label class="promo-delete-row">
+          <input type="checkbox" checked>
+          <span>Supprimer le personnage de niveau 0 après la conversion</span>
+        </label>
+
+        <div class="modal-actions" style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+          <button class="modal-btn-cancel">Annuler</button>
+          <button class="modal-btn-ok">Promouvoir</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mq-note">
+      <strong>Après validation :</strong> création d'un personnage de niveau 1 (classe choisie),
+      recopie des champs niveau 0, portrait retiré au profit d'un tirage de la classe,
+      puis <strong>ouverture directe</strong> de la nouvelle fiche (onglet de la classe).
+      Si la case est cochée : le niveau 0 d'origine est supprimé (la liste de l'onglet
+      « Niveau 0 » diminue d'une carte).
+    </div>
+
+    <div class="mq-note" style="border-left-color:#3f7d4f;background:rgba(63,125,79,.08);">
+      <span class="mq-flag" style="background:#3f7d4f;">DÉCIDÉ</span>
+      Détection raciale par <strong>« commence par »</strong> (majuscule/minuscule indifférente)
+      : <code>elfe</code>, <code>nain</code>, <code>halfelin</code>. La même règle s'applique au
+      <strong>Mouvement = 20</strong>, aux <strong>langues</strong> et aux <strong>Notes</strong>
+      (« Elfe avocat » → elfe ; « Chaman » → aucune contrainte, même s'il contient « nain » ailleurs).
+      <br>À la promotion, les cercles <strong>JS sont recopiés</strong> avec le reste de la fiche
+      (ils valent déjà les mods) : le joueur les ajustera ensuite avec les valeurs de sa classe.
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

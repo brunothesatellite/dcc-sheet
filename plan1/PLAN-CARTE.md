@@ -460,7 +460,9 @@ fonctionnalité, référencé dans `MANUAL.md` par
 large, desktop = ≥ 1280 px. Fonds de test : `map1.webp` / `map2.webp` de `draw-on-map`.
 États UI reproductibles d'une capture à l'autre (outil crayon, couleur bleue, zoom 100 %).
 
-**Requises (11)**
+**Requises (11)** — *état au 07/10/2026 : **9 fournies** ; il manque `carte-import-erreur-uid.png`
+et `carte-limite-10.png` (les `<img>` correspondants ont été retirés de `MANUAL.md` § 9 en
+attendant — voir `TODO.md`).*
 
 | Fichier | Contenu | Cadrage |
 |---|---|---|

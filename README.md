@@ -96,14 +96,15 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 
 ### Module Carte (dessin de carte)
 - Page de dessin **plein ecran** ouverte par l'icone `carte` de la topbar (a gauche de l'icone de theme, utilisateur connecte), fermee par une croix ou Echap
-- Meme outillage que l'application `draw-on-map` : **crayon, gomme, texte, deplacer, annuler**, palette de 6 couleurs, zoom (boutons / curseur / 100 % / ajuster / **pincement**), multi-cartes (calques), mode focus
+- Meme outillage que l'application `draw-on-map` : **crayon, gomme, texte, deplacer, annuler**, palette de 6 couleurs, zoom (boutons / curseur / 100 % / ajuster / **pincement** / **reglette verticale permanente sur PC**, masquee sur tactile), multi-cartes (calques), mode focus
 - Dessin **vectoriel** (traits/gomme/texte en unites de scene, epaisseur = ecran/zoom), rendu canvas transparent au-dessus de l'image
+- **Grille infinie** sans image de fond : la scene grandit pour toujours couvrir la vue (visible + 1 ecran de reserve) et le dessin — la grille remplit l'ecran a tout zoom ; « Ajuster a l'ecran » cadre le dessin (ou l'image de fond si presente), 100 % si carte vide
 - **Images de fond** png/jpg/jpeg/webp : converties en **webp**, stockees `data/maps/[UID].webp` (UID unique genere a chaque import), servies par `api/map-image.php` (session obligatoire) ; nom d'origine conserve en base et dans les exports (ni affiche ni modifiable dans l'interface), remplacement (ancien fichier supprime) et suppression effective ; une carte encore nommee « Carte N » est **rebaptee du nom du fichier** (sans extension)
 - **Sauvegarde automatique** pendant le dessin (toast disquette) ; outil/couleur/taille et **zoom/position par carte** restaures a la reouverture
 - **10 cartes maximum** par compte (message d'erreur invitant a supprimer un calque)
-- **Export/Import par calque** (JSON `v:3` avec UID du fond) ou **global** (`Exporter tout` / `Importer tout`) : JSON seul, ou **ZIP** (JSON + `images/<uid>.webp`) des qu'un fond existe ; image introuvable a l'import = toast d'erreur + grille par defaut, dessin conserve
+- **Export/Import par calque** (JSON `v:3` avec UID du fond, portant sur le **calque actif** : l'import remplace son dessin) ou **global** (`Exporter tout` / `Importer tout`) : JSON seul, ou **ZIP** (JSON + `images/<uid>.webp`) des qu'un fond existe ; image introuvable a l'import = toast d'erreur + grille par defaut, dessin conserve
 - Suppression d'une carte = suppression de son image de fond (si plus referencee)
-- Suites `15-map-draw` (52 assertions), `16-map-persist` (34), `17-map-export` (32)
+- Suites `15-map-draw` (122 assertions), `16-map-persist` (34), `17-map-export` (32)
 
 ### Sauvegarde automatique
 - Debounce 600ms sur tous les champs modifiables

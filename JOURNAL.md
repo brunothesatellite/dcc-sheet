@@ -1652,7 +1652,7 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
 
 ### Points laissés ouverts
 
-- **Captures d'écran** : 11 requises + 4 optionnelles listées dans `plan1/PLAN-CARTE.md` § 18 ; les `<img>` du manuel/README pointent déjà vers ces noms (à prendre sur le rendu réel).
+- **Captures d'écran** : 11 requises + 4 optionnelles listées dans `plan1/PLAN-CARTE.md` § 18 ; **9/11 fournies** le 07/10 — il manque `carte-limite-10.png` (D12) et `carte-import-erreur-uid.png` (R11), leurs `<img>` ont été **retirés de `MANUAL.md`** (§ 9) en attendant, et le reliquat est tracé dans `TODO.md`.
 - Dimension maximale d'une image : aucun plafond retenu (option étudiable : redimensionnement au-delà de 4096 px de plus grand côté).
 - À vérifier sur le PHP du NAS : `gd` et `zip` y sont-ils aussi disponibles (sinon les replis `.json` / navigateur prennent le relais, comme testé).
 
@@ -1662,3 +1662,27 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
 - `php -l` : `api/db.php`, `api/maps.php`, `api/map-image.php` sans erreur de syntaxe.
 - **Smoke test réel** (PHP 8.2 + SQLite, 22 vérifications × 2 passes) : session, CRUD calques, prefs, upload webp → UID, service d'image, **conversion PNG → webp (GD, RIFF/WEBP vérifié)**, `check_images`, limite 10 (409), **export ZIP réel (1,6 Mo)**, `import_map` JSON + rapport d'UID manquant, refus sans fichier (400), **rafale de 40 requêtes concurrentes sans 5xx**, suppression carte + image (404) — aucun `database is locked` dans le log serveur.
 - Vérification visuelle à faire sur `http://localhost:8000` : ouverture/fermeture par la croix, dessin + toast 💾, fond webp (png/jpg converti), remplacement/suppression d'image, suppression de carte, export ZIP aller-retour, mobile (pincement, clavier virtuel, safe-areas).
+
+---
+
+## Date : 7 octobre 2026 — Release v2.9 (module Carte)
+
+### Effectue depuis la derniere release (v2.8)
+
+- **Evolution « Carte »** complete (branche `evol-draw-map`, entree du 7 octobre ci-dessus) : module de dessin plein ecran (`map-draw.js`), backend `api/maps.php` + `api/map-image.php`, table `maps` + `users.map_prefs`, images webp `data/maps/[UID].webp` (UID unique, jamais d'ecrasement), export/import JSON/ZIP (calque actif et global), limite de 10 cartes, sauvegarde auto (toast 💾) + reprise outil/couleur/zoom/position.
+- **Retours de test en navigateur traites** : croix de fermeture qui dessinait, croix des feuilles inertes (`data-close`), outils crayon/gomme/texte inertes (`setTool` / `drawMode`), `database is locked` en Fatal error (**D14** : `busyTimeout(5000)` avant tout pragma), entrée unique « image de fond » (**D16**), **grille infinie** (**D17** : scène qui grandit, « Ajuster » cadré sur le dessin), **réglette de zoom verticale sur PC** (**D18** : sous le chip, masquée sur tactile, synchronisée) puis son **centrage** (curseur horizontal pivote à -90° — ni valeur d'`appearance` dépréciée, ni slider vertical natif non fiable).
+- `plan1/` versionne : `PLAN-CARTE.md` (plan + décisions **D1-D18**, § 18 captures) et 5 maquettes HTML ; `plan0/` : spec + maquettes du niveau 0.
+- Environnement : extensions PHP `gd` + `zip` activees dans `php.ini` local (conversion png/jpg → webp cote serveur, export ZIP).
+
+### Documentation de release
+
+- `README.md` : section **Module Carte** mise à jour (grille infinie, réglette PC, export/import limités au calque actif, compteurs de tests), galerie, arborescence, tableaux API.
+- `MANUAL.md` : § 9 « Dessiner une carte » (zoom + réglette, sauvegarde, export/import, limite 10), § 10/11 renumérotés, annexe A (`v:3` / `version: 2`).
+- `TODO.md` : évolution carte **implémentée** + les **2 captures restantes** à faire (`carte-limite-10.png`, `carte-import-erreur-uid.png`) ; leurs `<img>` retirés de `MANUAL.md` § 9 en attendant.
+- `plan1/PLAN-CARTE.md` § 18 : état **9/11** des captures requises.
+
+### Validation
+
+- `node tests\run.js` avec `PHP_BIN` : **2209/2209 OK, 0 skip** (17 suites ; `15-map-draw` 122, `16-map-persist` 34, `17-map-export` 32) — `php -l` des scripts PHP compris (les 9 skips precedents).
+- `php -l` : `api/db.php`, `api/maps.php`, `api/map-image.php` sans erreur de syntaxe.
+- Smoke test reel (PHP 8.2 + SQLite, 22 verifications x 2 passes) : detail dans l'entree du 7 octobre ci-dessus.

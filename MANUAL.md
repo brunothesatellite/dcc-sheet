@@ -685,7 +685,6 @@ associée est alors aussi supprimée** du serveur si plus aucune carte ne l'util
 
 <img src="captures/carte-liste-calques.png" alt="Tiroir des cartes : liste de trois calques avec leur nom, le nombre d'opérations et l'identifiant tronqué de leur image de fond, la carte courante étant mise en avant" width="380">
 <img src="captures/carte-options.png" alt="Options de la carte : champ de nom de la carte, boutons remplacer et supprimer l'image de fond, et suppression de la carte avec sa confirmation" width="380">
-<img src="captures/carte-limite-10.png" alt="Message « Limite de 10 cartes atteinte — supprimez-en une pour en créer une nouvelle » affiché dans le tiroir des cartes" width="380">
 
 ### Sauvegarde automatique
 
@@ -714,7 +713,6 @@ Si une image de fond référencée **n'existe pas** sur l'appareil/serveur d'arr
 importé normalement.
 
 <img src="captures/carte-export-json.png" alt="Fenêtre d'export JSON d'une carte : contenu au format v3 avec l'identifiant et le nom de l'image de fond, et les boutons Partager, Copier, .json et .zip avec image" width="380">
-<img src="captures/carte-import-erreur-uid.png" alt="Toast d'erreur « Image de fond introuvable (UID …) » pendant qu'une importation conserve la grille par défaut" width="380">
 
 ### Exporter / importer toutes les cartes
 

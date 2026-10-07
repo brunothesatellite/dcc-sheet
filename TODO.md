@@ -20,8 +20,12 @@
 
 
 **EVOLUTIONS**
-* Evolution Carte : **implémentée le 07/10/2026** (branche `evol-draw-map`) — module de dessin plein écran (icône « carte » de la topbar), images de fond webp en `data/maps/[UID].webp`, sauvegarde auto + toast 💾, reprise outil/couleur/zoom/position, export/import JSON ou ZIP (par calque et global), limite de 10 cartes. Voir `plan1/PLAN-CARTE.md` (plan + décisions D1-D14), `plan1/maquettes/` (maquettes validées) et `JOURNAL.md` (7 octobre 2026).
-  * Reste à faire : captures d'écran (liste : `plan1/PLAN-CARTE.md` § 18) et vérification visuelle sur PC + mobile.
+* Evolution Carte : **implémentée le 07/10/2026** (branche `evol-draw-map`) — module de dessin plein écran (icône « carte » de la topbar), images de fond webp en `data/maps/[UID].webp`, sauvegarde auto + toast 💾, reprise outil/couleur/zoom/position, export/import JSON ou ZIP (par calque et global), limite de 10 cartes, grille infinie, réglette de zoom PC. Voir `plan1/PLAN-CARTE.md` (plan + décisions D1-D18), `plan1/maquettes/` (maquettes validées) et `JOURNAL.md` (7 octobre 2026).
+  * Reste à faire : **2 captures d'écran sur 11** (liste complète : `plan1/PLAN-CARTE.md` § 18) :
+    * `captures/carte-limite-10.png` — message « Limite de 10 cartes atteinte… » (D12) ;
+    * `captures/carte-import-erreur-uid.png` — toast « Image de fond introuvable (UID …) » (R11) ;
+    * les deux `<img>` correspondants sont **retirés de `MANUAL.md`** (§ 9) et sont à réintégrer au moment de les ajouter dans `captures/`.
+  * Vérification visuelle sur PC + mobile.
 
 
 dis moi quelles captures d'écran je dois faire pour cette nouvelle fonctionnalité de cartes ?

@@ -1766,8 +1766,9 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
 - **Validation** : harness 9/9 ; `npm test` **2223/2223** (+9) ; reconstruction des artefacts + recette.
 
 
-### Release v3.0 refaite avec artefacts (apres-midi)
+### Release v3.0 refaite avec artefacts (après-midi)
 
-- Re-execution du skill release : tests **2223/2223**, commit `176d962` push, build differentiel regenere (depuis l''ancien v3.0 : 9 modifies / 14 ajoutes / 0 supprimes).
-- Artefacts reconstruits en **3.0** : setup 74,5 Mo + portable 84,3 Mo (`build.ps1 -Version 3.0`), webapp 10,3 Mo (`_build.ps1 -Zip -Version 3.0`) ; recette **10/10**, verification 6.3 (0 token), artefacts 3.0.0 supersedes nettoyes.
-- Le tag `v3.0` (pointait `d821e3a`, sans artefacts) a ete **deplace** sur `176d962` : release GitHub **supprimee et recreatee** avec les 3 assets verifies (78 090 239 / 88 366 614 / 10 814 243 octets) - https://github.com/brunothesatellite/dcc-sheet/releases/tag/v3.0
+- Ré-exécution du skill release : tests **2223/2223**, commit `176d962` push, build différentiel régénéré (depuis l'ancien v3.0 : 9 modifiés / 14 ajoutés / 0 supprimés).
+- Artefacts reconstruits en **3.0** : setup 74,5 Mo + portable 84,3 Mo (`build.ps1 -Version 3.0`), webapp 10,3 Mo (`_build.ps1 -Zip -Version 3.0`) ; recette **10/10**, vérification 6.3 (0 token), anciens artefacts `3.0.0` nettoyés.
+- Le tag `v3.0` (pointait `d821e3a`, sans artefacts) a été **déplacé** sur `176d962` : release GitHub **supprimée et recréée** avec les 3 assets vérifiés (78 090 239 / 88 366 614 / 10 814 243 octets) — https://github.com/brunothesatellite/dcc-sheet/releases/tag/v3.0
+- **Notes de release réécrites** (accents mojibake à la première publication : la redirection PowerShell `gh … > fichier` décoder la sortie UTF-8 de `gh` avec la console OEM — CP850). Restauration par re-encoding CP850 → UTF-8 puis `gh release edit --notes-file` ; relecture API : corps publié **identique** au fichier source (8 484 caractères, 0 U+FFFD, 0 résidu de mojibake). Prévention : règle d'encodage ajoutée au skill release (jamais de redirection `>` pour les textes accentués, écriture via `[IO.File]::WriteAllText` UTF-8 sans BOM, vérification des accents après publication).

@@ -63,6 +63,11 @@ Execute les etapes suivantes dans l'ordre :
 7. **Poser le tag et generer la release GitHub avec les 3 artefacts attaches**
    - poser le tag : `git tag -a v3.1.0 -m "Release v3.1.0"` puis `git push origin v3.1.0`
    - le changelog (notes-file) doit inclure la **liste des fichiers modifies / ajoutes / supprimes** depuis l'ancien tag : `git diff --name-status <ancien-tag>` + un paragraphe sur les 3 artefacts (tailles, contenu)
+   - **encodage des notes — PIEGE PowerShell 5.1** : ne JAMAIS ecrire `notes.md` avec une redirection `>` (la sortie UTF-8 de `gh` est alors decodee avec la console OEM — CP850 sur Windows FR — d'ou des accents mojibake publies : `ecrire` → `Ǹcrire`, `—` → `ÔÇö`). Toujours :
+     1. lire le corps/existing via `Invoke-RestMethod` (.NET, pas de console) ;
+     2. ecrire le fichier via `[IO.File]::WriteAllText($path, $texte, (New-Object System.Text.UTF8Encoding($false)))` ;
+     3. **verifier les accents APRES publication** : relecture API + recherche d'U+251C / U+FFFD dans le corps publie.
+     Correction si mojibake : encoder la chaine corrompue avec `Encoding.GetEncoding(850)` puis decoder en UTF-8, puis `gh release edit <tag> --notes-file <fichier>` (depuis la racine du repo).
    - creer la release **avec les pieces jointes** (chemins relatifs a la racine du repo, `gh` authentifie — verifier avec `gh auth status`) :
      ```powershell
      gh release create v3.1.0 --title "v3.1.0" --notes-file <notes.md> `

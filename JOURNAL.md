@@ -1752,3 +1752,15 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
 - **Correctif** (`MainForm.cs`, `NavigationCompleted` succès) : `Controls.Remove(_status)` + `Controls.Remove(_hint)` → le Fill s'étend sur toute la fenêtre (les libellés restent disponibles sur les chemins d'erreur).
 - **Nouveau contrôle visuel** : `installeur/windows/capture.ps1` — lance l'app, attend le rendu réel, capture la fenêtre (topmost, en 0,0) et échoue si la bande y = 35..115 px ne contient presque pas de pixels clairs (= navy vide = bandeau résiduel). Artefact : `%TEMP%\dcc-capture.png`.
 - **Validation** : capture manuelle OK (topbar collé sous la barre de titre, 4625 px clairs dans la zone d'app) ; recette **10/10** sur `package\` et sur le zip extrait ; artefacts reconstruits (zip + setup, `dist\`).
+
+### Correctif du jour (3) — import ZIP de cartes : images écrites en 0 octet (« Image de fond introuvable (UID …) »)
+
+- **Symptome** (instance dev `http://localhost:8000/dcc-sheet/`, import de `dcc-persos-2026-10-08.zip`) : les cartes apparaissent dans la liste mais le fond n'affiche pas → toast « Image de fond introuvable (UID …) » + grille de repli.
+- **Cause** (`api/maps.php`, `readImportFile`) : extraction des images du ZIP avec `$zip->getFromName($i)` — **`getFromName` attend un NOM d'entrée, pas un index** → renvoie `false` → `file_put_contents($dest, false)` crée un fichier **0 octet**. Les 2 webp du zip (1 042 036 o et 993 994 o) existaient donc dans `data/maps/` mais vides. Comme le fichier *existe*, `check_images`/`missingImages` (`is_file` seulement) ne signalaient rien (R11 silencieux à l'import) ; à l'affichage, `<img>` ne décode pas 0 octet → erreur → toast d'UID. Reproduit en isolé : `getFromName(0)` = `false`, `getFromIndex(0)` = le contenu.
+- **Correctifs (`api/maps.php`)** :
+  - extraction : `getFromIndex($i)` + **refus d'écrire un contenu vide** + réécriture d'un fichier existant **seulement s'il fait 0 octet** (une image valide n'est jamais écrasée) ;
+  - `check_images` et `missingImages` : **0 octet = introuvable** (R11) → l'alerte remonte désormais à l'import au lieu de passer inaperçue.
+- **Test de régression (nouveau — la couverture PHP se limitait à `php -l`, d'où la fuite)** : `tests/php/import-zip.php` + suite `tests/18-maps-import.test.js` — test d'intégration HTTP réel : `php -S` sur une copie isolée de `api/` (data/ vierge), inscription, `import_all` d'un ZIP forgé ; vérifie contenu extrait identique, entrée image vide ignorée, uid absent signalé dans `missing`, fichier déjà cassé signalé par `check_images`. **9/9**.
+- **Réparation de l'instance de dev** : ré-extraction des 2 images du zip de l'utilisateur dans `data/maps/` (tailles conformes, entête `RIFF`) — aucun rejeu d'import nécessaire, le fond doit s'afficher en rechargeant.
+- **Contexte** : la base de dev contient 7 comptes de test (9 cartes vides « Carte 0…8 » chacun) + le compte utilisateur (2 cartes réelles) — données héritées des tests, pas une anomalie de l'import.
+- **Validation** : harness 9/9 ; `npm test` **2223/2223** (+9) ; reconstruction des artefacts + recette.

@@ -261,7 +261,9 @@ if ($action === 'check_images') {
     foreach ($uids as $uid) {
         $uid = (string)$uid;
         if (!validUid($uid)) { $missing[] = $uid; continue; }
-        if (!is_file(imageFile($dir, $uid))) { $missing[] = $uid; }
+        $file = imageFile($dir, $uid);
+        /* 0 octet = fichier casse = introuvable (R11) */
+        if (!is_file($file) || filesize($file) === 0) { $missing[] = $uid; }
     }
     jsonResponse(['ok' => true, 'missing' => $missing]);
 }
@@ -337,15 +339,19 @@ function readImportFile($file, $dir, &$imageCount) {
         $json = json_decode($zip->getFromName($jsonEntry), true);
         if (!is_array($json)) { $zip->close(); jsonError('JSON illisible'); }
 
-        /* Images : images/[UID].webp -> data/maps/ (jamais d'ecrasement) */
+        /* Images : images/[UID].webp -> data/maps/ (jamais d'ecrasement d'une
+           image valide ; un fichier casse de 0 octet est refait) */
         for ($i = 0; $i < $zip->numFiles; $i++) {
             $entry = $zip->getNameIndex($i);
             if (!preg_match('#^images/([0-9a-f]{8,64})\.webp$#', $entry, $m)) { continue; }
             $dest = imageFile($dir, $m[1]);
-            if ($dest && !is_file($dest)) {
-                file_put_contents($dest, $zip->getFromName($i));
-                $imageCount++;
-            }
+            if (!$dest || (is_file($dest) && filesize($dest) > 0)) { continue; }
+            /* getFromIndex($i) : getFromName attend un NOM d'entree, pas un
+               index — il renvoyait false et file_put_contents ecrivait un
+               fichier de 0 octet (image de fond « introuvable » a l'affichage) */
+            $data = $zip->getFromIndex($i);
+            if ($data === false || $data === '') { continue; }
+            if (file_put_contents($dest, $data) !== false) { $imageCount++; }
         }
         $zip->close();
         return $json;
@@ -362,7 +368,10 @@ function missingImages($models, $dir) {
     foreach ($models as $model) {
         $uid = is_array($model) && isset($model['bg']['uid']) ? (string)$model['bg']['uid'] : '';
         if ($uid === '') { continue; }
-        if (!validUid($uid) || !is_file(imageFile($dir, $uid))) { $missing[] = $uid; }
+        if (!validUid($uid)) { $missing[] = $uid; continue; }
+        $file = imageFile($dir, $uid);
+        /* 0 octet = fichier casse = introuvable (R11) */
+        if (!is_file($file) || filesize($file) === 0) { $missing[] = $uid; }
     }
     return $missing;
 }

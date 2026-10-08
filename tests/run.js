@@ -21,6 +21,7 @@ const suites = [
   require('./15-map-draw.test'),
   require('./16-map-persist.test'),
   require('./17-map-export.test'),
+  require('./18-maps-import.test'),
 ];
 
 function pad(s, n) {

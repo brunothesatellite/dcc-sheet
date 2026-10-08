@@ -163,9 +163,13 @@ public partial class MainForm : Form
             {
                 if (args.IsSuccess)
                 {
+                    // Retirer l'ecran d'attente : docked en haut (120 px), il resterait
+                    // visible comme un enorme bandeau au-dessus de la page.
+                    Controls.Remove(_status);
+                    Controls.Remove(_hint);
                     _status.Text = "";
                     _hint.Text = "";
-                    _web!.Visible = true;
+                    _web!.Visible = true;   // le Fill s'etend alors sur toute la fenetre
                     _web.Focus();
                 }
                 else

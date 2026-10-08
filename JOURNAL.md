@@ -1744,3 +1744,11 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
   - vérification récursive : **toutes** les refs de l'app sont relatives (aucune `/api/…` absolue) ; `../dcc-spells-reader` résout correctement depuis `/dcc-sheet/` → le dossier latéral reste au bon endroit.
 - **Recette renforcée** (le contrôle initial ne vérifiait que `GET /dcc-sheet/` = 200, donc l'index seul — d'où la fuite) : 4 **assets statiques** exigés en 200, attente 4 s pour que la page charge, puis lecture de `php.log` : **contrôle positif** « la WebView2 a chargé N assets sous `/dcc-sheet/` » + **0 × 404 js/css/svg** (les 404 de `/dcc-spells-reader` vide sont exclus).
 - **Validation après rebuild** : `npm test` **2214/2214** ; recette **10/10** sur `package\` **et** sur le zip portable extrait (**23 assets chargés sous `/dcc-sheet/`, aucun 404**) ; artefacts reconstruits : setup 74,5 Mo + portable 84,3 Mo (11:57).
+
+### Correctif du jour (2) — bandeau vide de 120 px au-dessus de la page (app Windows uniquement)
+
+- **Symptome** : dans l'app Windows, un énorme bandeau bleu nuit (hauteur ≈ 120 px, même `#1a1a2e` que le topbar) séparait la barre de titre de l'en-tête de la page — invisible dans la version webapp/navigateur.
+- **Cause** : l'écran d'attente WinForms (`_status`, `Label` docké en haut, `Height = 120`, fond `#1a1a2e`) restait dans les contrôles une fois la page chargée — le code vidait son texte mais ne le retirait jamais ; `DockStyle.Fill` de la WebView2 ne prenait que l'espace restant **en dessous**. Bug purement côté app, d'où l'absence de différence en webapp.
+- **Correctif** (`MainForm.cs`, `NavigationCompleted` succès) : `Controls.Remove(_status)` + `Controls.Remove(_hint)` → le Fill s'étend sur toute la fenêtre (les libellés restent disponibles sur les chemins d'erreur).
+- **Nouveau contrôle visuel** : `installeur/windows/capture.ps1` — lance l'app, attend le rendu réel, capture la fenêtre (topmost, en 0,0) et échoue si la bande y = 35..115 px ne contient presque pas de pixels clairs (= navy vide = bandeau résiduel). Artefact : `%TEMP%\dcc-capture.png`.
+- **Validation** : capture manuelle OK (topbar collé sous la barre de titre, 4625 px clairs dans la zone d'app) ; recette **10/10** sur `package\` et sur le zip extrait ; artefacts reconstruits (zip + setup, `dist\`).

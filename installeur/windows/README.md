@@ -33,6 +33,22 @@ Icône régénérée depuis les formes du `favicon.svg` :
 powershell -NoProfile -ExecutionPolicy Bypass -File make-icon.ps1
 ```
 
+## Validation
+
+```powershell
+# Recette fonctionnelle (10 contrôles) : serveur 200, assets css/js/svg servis,
+# dcc-spells-reader latéral, fermeture propre, PHP du port 8089 tué, port libre,
+# puis analyse de php.log : la WebView2 a réellement chargé les assets sous
+# /dcc-sheet/ et aucun 404 js/css/svg (recette sur package\ ou sur un zip extrait
+# avec -Package)
+powershell -NoProfile -ExecutionPolicy Bypass -File recette.ps1
+
+# Recette visuelle : lance l'app, attend le rendu, capture la fenêtre en PNG et
+# échoue si un « bandeau d'attente » résiduel (120 px de navy vide au-dessus de
+# la page) est détecté. Capture : %TEMP%\dcc-capture.png
+powershell -NoProfile -ExecutionPolicy Bypass -File capture.ps1
+```
+
 ## Architecture
 
 ```

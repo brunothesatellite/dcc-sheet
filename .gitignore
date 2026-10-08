@@ -11,5 +11,13 @@ deploy/*.zip
 node_modules/
 tests/report.md
 package-lock.json
+
+# --- installeur Windows (artefacts de build, voir installeur/windows/build.ps1) ---
+installeur/windows/package/
+installeur/windows/dist/
+installeur/windows/**/bin/
+installeur/windows/**/obj/
+installeur/windows/**/*.csproj.user
+installeur/windows/setup/WebView2RuntimeBootstrapper.exe
 Jungle Tomb of the Mummy Bride PreGens (DCC).pdf
 Travok2.json

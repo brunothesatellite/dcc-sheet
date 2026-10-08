@@ -1699,3 +1699,48 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
 - `node tests\run.js` avec `PHP_BIN` : **2214/2214 OK, 0 skip** (17 suites ; `15-map-draw` 127, `16-map-persist` 34, `17-map-export` 32) — `php -l` des scripts PHP compris (les 9 skips precedents).
 - `php -l` : `api/db.php`, `api/maps.php`, `api/map-image.php` sans erreur de syntaxe.
 - Smoke test reel (PHP 8.2 + SQLite, 22 verifications x 2 passes) : detail dans l'entree du 7 octobre ci-dessus.
+
+---
+
+## Date : 8 octobre 2026 — Application Windows (installeur + zip portable)
+
+### Livrables (v3.0.0)
+
+- `installeur/windows/` : application .NET 10 WinForms `DccSheet.Desktop` — exécutable **single-file auto-contenu** (47,2 Mo, WebView2 embarqué, `Microsoft.Web.WebView2` 1.0.4258.31 MIT) qui lance `php.exe -S 127.0.0.1:8089 -t public` au démarrage (working directory = racine de l'application, donc chemins relatifs), attend la réponse HTTP (poll 200 ms, timeout 20 s), ouvre `http://127.0.0.1:8089/dcc-sheet` dans WebView2, et tue PHP à la fermeture (arbre de processus, **idempotent** : `FormClosing` + `Application.ApplicationExit` + `AppDomain.ProcessExit`).
+- `build.ps1` produit les **2 livrables** : `dist/dcc-sheet-setup-3.0.0.exe` (**74,5 Mo**, Inno Setup 6.7.3) et `dist/dcc-sheet-portable-3.0.0.zip` (**84,3 Mo**).
+- Instance unique (mutex `Local\DccSheet.SingleInstance`), contrôle d'écriture `data\` au démarrage (message clair si le zip a été extrait en lecture seule), détection VC++ Redistributable, écran d'attente bleu foncé, `PHPRC` pointant sur `php\` (php.ini embarqué : **gd, zip, sqlite3, mbstring**), dossier latéral vide `public\dcc-spells-reader\` servi sur `http://127.0.0.1:8089/dcc-spells-reader`.
+- Port 8089 : si `/dcc-sheet` répond déjà → on l'utilise ; si le port est pris par un autre programme → message clair et sortie.
+- Installateur **per-user** : `{localappdata}\Programs\dcc-sheet` (aucune élévation, `data\` inscriptible), licence Apache-2.0 affichée (`LicenseFile`), détection du WebView2 Runtime (clé `EdgeUpdate\Clients\{F3017226-…}` machine/utilisateur + dossiers `EdgeWebView\Application`) avec **bootstrapper Evergreen** en secours, tâche « icône bureau » décochée par défaut.
+- Icône `app.ico` (16→256 px) régénérable depuis les formes du `favicon.svg` via `make-icon.ps1` (GDI+).
+- PHP 8.2.33 x64 copié depuis `D:\VS Code\servers\php` (allègement : phpdbg/cgi/*.lib/snapshot ; **`license.txt` conservé** — PHP License 3.01) ; `LICENSE` Apache-2.0 présent dans le payload.
+
+### Vérifications bloquantes au build
+
+- Aucun fichier/dossier `icons/dcc-pc-tokens` ni `icons/funnel-tokens` (~25 Mo, redistribution interdite — E9) : détection par nom n'importe où dans le payload, **test négatif validé** (le contrôle échoue bien quand un dossier factice est présent).
+- Fichiers requis (`DccSheet.exe`, `php\php.exe`, `php\license.txt`, `php\php.ini`, `public\dcc-sheet\index.html`, `api\maps.php`, `api\map-image.php`), `public\dcc-spells-reader\` **vide**, `data\` inscriptible, `php -m` : **gd / zip / sqlite3 / mbstring**.
+
+### Validation (recette étape 6)
+
+- `npm test` : **2214/2214 OK** (inchangé — aucun code applicatif modifié).
+- Recette automatisée `installeur/windows/recette.ps1` (5 contrôles : démarrage, HTTP 200 + contenu DCC, `dcc-spells-reader` servi, fermeture WM_CLOSE, php du port 8089 tué + port libre) : **5/5 OK sur × 4 scénarios** — `package\` du build, zip extrait, zip **déplacé** (dossier portable réellement déplaçable, y compris avec espace dans le chemin), application installée.
+- Installation silencieuse (`/VERYSILENT`) : fichiers/raccourcis corrects, `dcc-spells-reader\` vide, **0 token interdit**, raccourci bureau absent (tâche décochée par défaut = conforme).
+- Désinstallation silencieuse : exécutables, PHP, `index.html` et raccourcis supprimés, **`data\` conservé** (seul résidu : le dossier de données).
+- Attention recette : un `php.exe` étranger (`D:\VS_Code_Workspaces\php -S localhost:8000`, serveur de dev) existe sur la machine — `recette.ps1` filtre sur le **port 8089** pour ne pas le confondre avec le nôtre (et ne pas le tuer).
+- Non testé ici : exécution réelle du bootstrapper WebView2 (runtime déjà présent sur la machine) et comportement sur un poste sans VC++ Redistributable.
+
+### Documentation
+
+- `installeur/windows/README.md` (prérequis, build, architecture, cycle de vie, licences auditées : .NET/WebView2 MIT, Inno Setup permissif, PHP 3.01, VC++ redistribuable).
+- `README.md` : section « Application Windows (installeur / portable) » dans « Installation ».
+- `TODO.md` : bloc « Installer et app native windows » soldé ; `.gitignore` : artefacts `installeur/windows/{package,dist,bin,obj}` + bootstrapper.
+
+### Correctif du jour — « URL sans slash » : page sans CSS/JS (installeur ET portable)
+
+- **Symptome rapporté** : l'application s'ouvre mais `index.html` s'affiche **brut** (aucun style, boutons par défaut) ; console : `Failed to load resource: 404` pour `style.css`, tous les `*.js` et `favicon.svg`.
+- **Cause** (tracée dans `%LocalAppData%\DCCSheet\php.log`) : la WebView2 naviguait sur `http://127.0.0.1:8089/dcc-sheet` **sans slash final** ; `php -S` répond **200 (index) sans redirection** sur un dossier sans slash → l'URL de base du document devenait `/` → toutes les **références relatives** résolvaient à la racine du docroot (`GET /style.css - No such file or directory`) alors que les fichiers existent bien sous `/dcc-sheet/`.
+- **Correctifs** :
+  - `PhpServer.AppUrl` = `http://127.0.0.1:8089/dcc-sheet/` (**slash final obligatoire**, commenté dans le code) ; les 3 sondes HTTP (attente démarrage, probe de port) utilisent désormais l'URL complète ;
+  - `index.html` : **garde-fou** en tête de `<head>` → redirection vers `…/dcc-sheet/` si la page est ouverte sans slash (test manuel dans un navigateur, qui avait produit les mêmes 404) ;
+  - vérification récursive : **toutes** les refs de l'app sont relatives (aucune `/api/…` absolue) ; `../dcc-spells-reader` résout correctement depuis `/dcc-sheet/` → le dossier latéral reste au bon endroit.
+- **Recette renforcée** (le contrôle initial ne vérifiait que `GET /dcc-sheet/` = 200, donc l'index seul — d'où la fuite) : 4 **assets statiques** exigés en 200, attente 4 s pour que la page charge, puis lecture de `php.log` : **contrôle positif** « la WebView2 a chargé N assets sous `/dcc-sheet/` » + **0 × 404 js/css/svg** (les 404 de `/dcc-spells-reader` vide sont exclus).
+- **Validation après rebuild** : `npm test` **2214/2214** ; recette **10/10** sur `package\` **et** sur le zip portable extrait (**23 assets chargés sous `/dcc-sheet/`, aucun 404**) ; artefacts reconstruits : setup 74,5 Mo + portable 84,3 Mo (11:57).

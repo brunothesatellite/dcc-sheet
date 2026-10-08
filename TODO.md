@@ -27,7 +27,7 @@
     * les deux `<img>` correspondants sont **retirés de `MANUAL.md`** (§ 9) et sont à réintégrer au moment de les ajouter dans `captures/`.
   * Vérification visuelle sur PC + mobile.
 
-**Installer et app native windows**
+**Installer et app native windows** — **livré le 08/10/2026** ✅ (cible **.NET 10** et non 9 — .NET 9 est arrivé en fin de vie ; voir `installeur/windows/README.md`)
 Create a Windows desktop application in C# .NET 9 WinForms in dcc-sheet\installeur\windows
 - Create a windows 10-11 standalone application for dcc-sheet
 - do not redistribute dcc-pc-tokens and funnel-tokens with the application (no right to redistribute these files)
@@ -41,5 +41,10 @@ Create a Windows desktop application in C# .NET 9 WinForms in dcc-sheet\installe
 - On application close terminate PHP process
 - Single executable deployment
 - Suitable for Inno Setup installer
+
+  **Resultat** (v3.0.0, recette 5/5 x 4 scenarios + install/desinstall silencieuses OK, `npm test` 2214/2214) :
+  * `installeur/windows/build.ps1` → `dist/dcc-sheet-setup-3.0.0.exe` (**74,5 Mo**, Inno Setup per-user, WebView2 detecte + bootstrapper) et `dist/dcc-sheet-portable-3.0.0.zip` (**84,3 Mo**, dossier deplaçable, donnees dans le dossier) ;
+  * `DccSheet.exe` single-file auto-contenu (47,2 Mo) + `php\` (8.2 x64, licence conservee) + `public\` — **assertions bloquantes au build** : aucun `dcc-pc-tokens`/`funnel-tokens`, fichiers requis, extensions `php -m` (gd/zip/sqlite3/mbstring), `dcc-spells-reader\` vide, `data\` inscriptible ;
+  * livrables a distribuer manuellement (le depot git ne versionne pas `dist/`).
 
 

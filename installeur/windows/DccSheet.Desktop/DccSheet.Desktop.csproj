@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWindowsForms>true</UseWindowsForms>
+
+    <!-- Identité de l'application -->
+    <AssemblyName>DccSheet</AssemblyName>
+    <RootNamespace>DccSheet</RootNamespace>
+    <Product>DCC Sheet</Product>
+    <AssemblyTitle>DCC Sheet</AssemblyTitle>
+    <Description>DCC Fiches de Personnage — application de bureau (WebView2 + PHP embarqué)</Description>
+    <Version>3.0.0</Version>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+
+    <!-- Publication « single executable » auto-contenue (.NET 10 + WebView2) -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Licence MIT (WebView2 SDK) -->
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4258.31" />
+  </ItemGroup>
+
+</Project>

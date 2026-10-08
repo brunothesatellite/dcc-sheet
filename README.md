@@ -334,6 +334,14 @@ build-diff.bat
 
 Cree `deploy/dcc-sheet-diff/` avec uniquement les fichiers **modifies / ajoutes depuis le dernier tag** (meme exclusions que le build complet) + `CHANGES.txt` (listes Modified / Added / Deleted ; les suppressions sont a retirer manuellement sur le serveur). Le tag source est detecte dynamiquement (`git describe --tags --abbrev=0`).
 
+**Zip webapp deployable (artefact de release)** :
+
+```bash
+powershell -NoProfile -ExecutionPolicy Bypass -File deploy/_build.ps1 -Zip -Version 3.1.0
+```
+
+Cree `deploy/dcc-sheet-webapp-<version>.zip` : la webapp complete, racine `dcc-sheet/` a extraire dans le web root du serveur. Meme exclusions que le build complet **plus** `installeur/`, `icons/dcc-pc-tokens/` et `icons/funnel-tokens/` (redistribution interdite — assertion bloquante si un token subsiste). Les entrees du zip utilisent `/` (compatible `unzip`/`tar` sous Linux). Le build classique `build.bat` (dossier du NAS, usage prive) n'est pas modifie et contient toujours les tokens. Voir `.opencode/skills/release/SKILL.md` pour l'attachement a une release GitHub.
+
 **Pack minimal des sorts** :
 
 ```bash
@@ -342,6 +350,26 @@ gen-spell-content.bat
 ```
 
 Genere `deploy/dcc-spells-reader-minimal.zip` a partir du dossier frere `../dcc-spells-reader` : uniquement `spell-translation.js`, `content/anchors.js` et les pages `content/127..303` + `322..356` utilisees par `spell-reader.js` (le trou 304-321 est saute). Le zip contient un dossier `dcc-spells-reader/` a sa racine : en le decompressant **a cote** de `dcc-sheet`, on recree le voisinage attendu. Sortie ignoree par git (`.gitignore`).
+
+### Application Windows (installeur / portable)
+
+Application de bureau Windows 10/11 (`installeur/windows/`) : .NET 10 WinForms + WebView2 embarque, qui lance `php.exe -S 127.0.0.1:8089 -t public` au demarrage, attend la reponse HTTP, ouvre `http://127.0.0.1:8089/dcc-sheet/` dans WebView2 (**slash final obligatoire** : `php -S` sert l'index d'un dossier en 200 sans redirection, et sans slash l'URL de base serait `/` et toutes les references relatives renverraient 404), et tue PHP a la fermeture (arbre de processus, idempotent). PHP 8.2 x64 est copie dans le payload (licences conservees : `php/license.txt`, `LICENSE`).
+
+Deux livrables identiques en contenu :
+
+* `dist/dcc-sheet-setup-<version>.exe` — installateur Inno Setup **per-user** (aucun admin, `{localappdata}\Programs\dcc-sheet`, `data\` inscriptible) ;
+* `dist/dcc-sheet-portable-<version>.zip` — version **portable** : dezipper dans un dossier inscriptible, lancer `DccSheet.exe`, les donnees vivent dans le dossier (dossier deplaçable).
+
+Build (prerequis : .NET SDK 10, Inno Setup 6, PHP source `D:\VS Code\servers\php`) :
+
+```powershell
+cd installeur/windows
+powershell -NoProfile -ExecutionPolicy Bypass -File build.ps1            # les 2 livrables
+powershell -NoProfile -ExecutionPolicy Bypass -File build.ps1 -SkipSetup # zip seulement
+powershell -NoProfile -ExecutionPolicy Bypass -File recette.ps1          # recette automatisee
+```
+
+Le build est **bloquant** si des tokens non redistribuables (`icons/dcc-pc-tokens`, `icons/funnel-tokens`) ou si des fichiers/extensions requis sont absents (`php -m` : gd, zip, sqlite3, mbstring). Le WebView2 Runtime est detecte par l'installateur (bootstrapper Evergreen si absent). Voir `installeur/windows/README.md` pour le detail.
 
 ## Dependances
 

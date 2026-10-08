@@ -7,7 +7,7 @@
 
 
 *Majeur*
-* **Mage & Elfe — supprimer un sort peut le faire réapparaître (auto-save comprise)**
+**Mage & Elfe — supprimer un sort peut le faire réapparaître (auto-save comprise)**
   * **Symptôme** : supprimer le **dernier** sort de la fiche ne change rien à l'affichage — la ligne « vierge » recréée contient le sort qu'on vient de supprimer (loupe comprise) ; supprimer un sort puis cliquer sur **+ Ajouter un sort** fait réapparaître le sort supprimé. Comme la sauvegarde lit le DOM, **les clés repartent en base** : la suppression pourtant confirmée par la popup est annulée silencieusement.
   * **Cause** : `_spellRowHTML(charId, n, k, v)` préremplit la ligne créée avec `v(...)`, or `v` lit `data` = snapshot des données **au chargement** (les saisies vont dans le DOM, jamais dans `data`). L'index vient de `getNextIndex()` = `max(lignes) + 1` : vide tant qu'il est inconnu de `data`, mais il **réutilise l'index de la ligne supprimée** (dernière ligne supprimée → `rows.length === 0` → index 1, ou 3 côté Elfe ; ou suppression puis ajout aussitôt).
   * **Emplacements** : `classes/mage.js` — `deleteSpell` L215, `addSpell` L225, `_spellRowHTML` L245 ; `classes/elfe.js` — `deleteSpell` L228, `addSpell` L238, `_spellRowHTML` L258. Les lignes fixes de l'Elfe (1-2) ne sont pas concernées (pas de `data-spell`). Portée : `sort_nom_N`, `sort_niveau_N`, `sort_test_N` **et** `sort_effet_N`.
@@ -27,5 +27,20 @@
     * les deux `<img>` correspondants sont **retirés de `MANUAL.md`** (§ 9) et sont à réintégrer au moment de les ajouter dans `captures/`.
   * Vérification visuelle sur PC + mobile.
 
+**Installer et app native windows**
+Create a Windows desktop application in C# .NET 9 WinForms.
+Requirements:
+- Create a windows 10-11 standalone application for dcc-sheet
+- do not redistribute dcc-pc-tokens and funnel-tokens with the application (no right to redistribute these files)
+- for the application 
+- Embed Microsoft WebView2
+- On startup launch php\php.exe
+- Run command or adapt it : I want to launche the app on http://127.0.0.1:8089/dcc-sheet with the possibility to create a side folder in http://127.0.0.1:8089/dcc-spells-reader
+  php.exe -S 127.0.0.1:8089 -t public
+- Wait until server responds
+- Load http://127.0.0.1:8089/dcc-sheet in WebView2
+- On application close terminate PHP process
+- Single executable deployment
+- Suitable for Inno Setup installer
 
-dis moi quelles captures d'écran je dois faire pour cette nouvelle fonctionnalité de cartes ?
+

@@ -667,8 +667,10 @@ la souris (masquée sur tactile : le pincement suffit). L'épaisseur du trait d�
    **ni affiché ni modifiable** dans l'interface. Si la carte porte encore son nom par
    défaut (« Carte N »), elle est **automatiquement rebaptisée** avec le nom du fichier
    image, sans son extension ; un nom déjà personnalisé est conservé.
-3. **« Retirer l'image de fond »** (même feuille, inactive tant qu'il n'y en a pas) : le
-   fichier est retiré du serveur, la grille revient.
+3. **« Retirer l'image de fond »** (même feuille, inactive tant qu'il n'y en a pas) : une
+   **confirmation** s'affiche (« Retirer l'image de fond de « nom » ? », avec *Oui, retirer*
+   / *Annuler*) — le fichier est ensuite retiré du serveur et la grille revient, **votre
+   dessin est conservé**.
 
 > Le dessin reste sur un calque transparent **au-dessus** de l'image : votre image de fond
 > n'est jamais modifiée, et elle n'est **jamais incluse dans un export JSON** (seul son

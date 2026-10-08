@@ -474,13 +474,29 @@ module.exports = async function suite() {
     h.doc.getElementById('md-moreBtn').click();
     r.ok(!h.doc.getElementById('md-bgClear').disabled, 'retirer est active avec une image');
 
-    /* Retirer -> le fichier part de data/maps/ et la reference aussi */
+    /* Retirer -> confirmation d'abord : rien n'est supprime avant */
     h.doc.getElementById('md-bgClear').click();
+    const bgConfirm = h.doc.getElementById('md-bgConfirm');
+    const countDeletes = function () {
+      return h.server.calls.filter(function (c) {
+        return c.url.indexOf('api/map-image.php') !== -1 && c.action === 'delete';
+      }).length;
+    };
+    r.ok(!bgConfirm.hidden, '« Retirer l image de fond » demande une confirmation');
+    r.ok(h.doc.getElementById('md-bgClear').hidden, 'le bouton cede la place a la confirmation');
+    r.eq(countDeletes(), 0, 'aucune suppression avant confirmation');
+
+    /* Annuler -> retour au bouton, rien touche */
+    h.doc.getElementById('md-bgRemoveCancel').click();
+    r.ok(bgConfirm.hidden && !h.doc.getElementById('md-bgClear').hidden,
+      '« Annuler » referme la confirmation et rend le bouton');
+    r.eq(countDeletes(), 0, 'annuler ne supprime rien');
+
+    /* Confirmer -> le fichier part de data/maps/ et la reference aussi */
+    h.doc.getElementById('md-bgClear').click();
+    h.doc.getElementById('md-bgRemoveDo').click();
     await delay(80);
-    const deletes = h.server.calls.filter(function (c) {
-      return c.url.indexOf('api/map-image.php') !== -1 && c.action === 'delete';
-    });
-    r.eq(deletes.length, 1, 'l image est supprimee de data/maps/');
+    r.eq(countDeletes(), 1, 'l image est supprimee de data/maps/ apres confirmation');
     r.ok(!h.server.maps[0].bg_uid, 'la reference est retiree de la carte');
     r.ok(h.doc.getElementById('md-scene').classList.contains('is-empty'), 'grille de repli revenue');
   }

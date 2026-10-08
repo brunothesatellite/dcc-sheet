@@ -1645,6 +1645,19 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
    *Non-régression* : `15-map-draw` — présence, synchronisation, pilotage du zoom, contrat
    CSS (pivot -90°, masquage tactile, ni valeur dépréciée ni slider vertical natif).
 
+### Correctif : « Retirer l'image de fond » s'exécutait sans confirmation (08/10)
+
+- **Retour utilisateur** : le bouton supprimait **immédiatement** l'image du serveur (et sa
+  référence) — un simple clic mal placé perdait le fond de la carte.
+- **Correctif** (`map-draw.js`) : **validation en 2 temps** dans la feuille « Plus », même
+  motif que « Effacer tout le dessin » — le bouton cède la place au bloc `md-bgConfirm`
+  (« Retirer l'image de fond de « X » ? » + rappel : l'image du serveur est supprimée si
+  plus aucune carte ne l'utilise, le dessin est conservé), boutons **Oui, retirer** /
+  **Annuler** ; fermer la feuille = annulation (réservation remise à plat sur `close`).
+- *Non-régression* : `15-map-draw` **+5 assertions** : rien supprimé avant confirmation,
+  « Annuler » revient au bouton sans toucher au serveur, suppression effective (fichier +
+  référence + grille) uniquement après « Oui, retirer ».
+
 ### Extensions PHP activées (`D:\VS_Code_Workspaces\php\php.ini`)
 
 - `extension=gd` et `extension=zip` décommentées (les DLL `php_gd.dll` / `php_zip.dll` étaient déjà présentes dans `ext/`) → **conversion png/jpg → webp côté serveur** et **export/import ZIP** opérationnels localement.
@@ -1670,7 +1683,7 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
 ### Effectue depuis la derniere release (v2.8)
 
 - **Evolution « Carte »** complete (branche `evol-draw-map`, entree du 7 octobre ci-dessus) : module de dessin plein ecran (`map-draw.js`), backend `api/maps.php` + `api/map-image.php`, table `maps` + `users.map_prefs`, images webp `data/maps/[UID].webp` (UID unique, jamais d'ecrasement), export/import JSON/ZIP (calque actif et global), limite de 10 cartes, sauvegarde auto (toast 💾) + reprise outil/couleur/zoom/position.
-- **Retours de test en navigateur traites** : croix de fermeture qui dessinait, croix des feuilles inertes (`data-close`), outils crayon/gomme/texte inertes (`setTool` / `drawMode`), `database is locked` en Fatal error (**D14** : `busyTimeout(5000)` avant tout pragma), entrée unique « image de fond » (**D16**), **grille infinie** (**D17** : scène qui grandit, « Ajuster » cadré sur le dessin), **réglette de zoom verticale sur PC** (**D18** : sous le chip, masquée sur tactile, synchronisée) puis son **centrage** (curseur horizontal pivote à -90° — ni valeur d'`appearance` dépréciée, ni slider vertical natif non fiable).
+- **Retours de test en navigateur traites** : croix de fermeture qui dessinait, croix des feuilles inertes (`data-close`), outils crayon/gomme/texte inertes (`setTool` / `drawMode`), `database is locked` en Fatal error (**D14** : `busyTimeout(5000)` avant tout pragma), entrée unique « image de fond » (**D16**), **grille infinie** (**D17** : scène qui grandit, « Ajuster » cadré sur le dessin), **réglette de zoom verticale sur PC** (**D18** : sous le chip, masquée sur tactile, synchronisée) puis son **centrage** (curseur horizontal pivote à -90° — ni valeur d'`appearance` dépréciée, ni slider vertical natif non fiable), **confirmation avant « Retirer l'image de fond »** (08/10, entree ci-dessus).
 - `plan1/` versionne : `PLAN-CARTE.md` (plan + décisions **D1-D18**, § 18 captures) et 5 maquettes HTML ; `plan0/` : spec + maquettes du niveau 0.
 - Environnement : extensions PHP `gd` + `zip` activees dans `php.ini` local (conversion png/jpg → webp cote serveur, export ZIP).
 
@@ -1683,6 +1696,6 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
 
 ### Validation
 
-- `node tests\run.js` avec `PHP_BIN` : **2209/2209 OK, 0 skip** (17 suites ; `15-map-draw` 122, `16-map-persist` 34, `17-map-export` 32) — `php -l` des scripts PHP compris (les 9 skips precedents).
+- `node tests\run.js` avec `PHP_BIN` : **2214/2214 OK, 0 skip** (17 suites ; `15-map-draw` 127, `16-map-persist` 34, `17-map-export` 32) — `php -l` des scripts PHP compris (les 9 skips precedents).
 - `php -l` : `api/db.php`, `api/maps.php`, `api/map-image.php` sans erreur de syntaxe.
 - Smoke test reel (PHP 8.2 + SQLite, 22 verifications x 2 passes) : detail dans l'entree du 7 octobre ci-dessus.

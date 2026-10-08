@@ -1324,6 +1324,13 @@
     '<button class="item" id="md-importBtn" type="button">' + use('upload') + 'Importer un JSON / ZIP</button>' +
     '<button class="item" id="md-bgBtn" type="button">' + use('image') + 'Choisir une image de fond</button>' +
     '<button class="item item--danger" id="md-bgClear" type="button">' + use('trash') + 'Retirer l\u2019image de fond</button>' +
+    '<div class="confirm" id="md-bgConfirm" hidden>' +
+    '<p class="confirm-msg">Retirer l\u2019image de fond de \u00ab <b id="md-bgMap"></b> \u00bb ?' +
+    '<span>L\u2019image du serveur est supprim\u00e9e si plus aucune carte ne l\u2019utilise ; le dessin est conserv\u00e9 (sur la grille).</span></p>' +
+    '<div class="row">' +
+    '<button class="btn btn--danger-solid" id="md-bgRemoveDo" type="button">Oui, retirer</button>' +
+    '<button class="btn" id="md-bgRemoveCancel" type="button">Annuler</button>' +
+    '</div></div>' +
     '</div>' +
     '<div class="group"><h3>Affichage</h3>' +
     '<button class="item" id="md-hideBtn" type="button">' + use('eyeoff') + 'Masquer l\u2019interface<span class="val">mode focus</span></button>' +
@@ -1609,8 +1616,22 @@
     $('bgBtn').addEventListener('click', function () { closeDlg('moreDlg'); $('bgInput').click(); });
     /* Entree unique de l'image de fond : choisir (charger OU remplacer) et
        retirer, dans la feuille du calque (D16 — plus aucune entree dans
-       « Options de la carte »). */
+       « Options de la carte »). Retirer demande une confirmation (2 temps,
+       meme motif que « Effacer tout le dessin »). */
     $('bgClear').addEventListener('click', function () {
+      $('bgMap').textContent = docs[cur] ? docs[cur].name : '';
+      $('bgClear').hidden = true;
+      $('bgConfirm').hidden = false;
+      $('bgRemoveDo').focus();
+    });
+    $('bgRemoveCancel').addEventListener('click', function () {
+      $('bgConfirm').hidden = true;
+      $('bgClear').hidden = false;
+      $('bgClear').focus();
+    });
+    $('bgRemoveDo').addEventListener('click', function () {
+      $('bgConfirm').hidden = true;
+      $('bgClear').hidden = false;
       closeDlg('moreDlg');
       removeBackground();
     });
@@ -1651,6 +1672,8 @@
     $('moreDlg').addEventListener('close', function () {
       $('clearConfirm').hidden = true;
       $('clearBtn').hidden = false;
+      $('bgConfirm').hidden = true;
+      $('bgClear').hidden = false;
     });
 
     /* --- calques --- */

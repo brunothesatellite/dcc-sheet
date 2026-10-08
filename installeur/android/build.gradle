@@ -1,0 +1,5 @@
+// Racine du projet APK dcc-sheet.
+// AGP 9.4.1 (stable courant, compatible Gradle 9.8.1 + JDK 25 du JBR d'Android Studio).
+plugins {
+    id 'com.android.application' version '9.4.1' apply false
+}

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Manifeste de l'APK dcc-sheet.
+  AUCUNE permission : tout passe par WebViewAsset (origine
+  https://appassets.androidplatform.net), les requetes externes
+  (fonts, cdn) sont naturellement bloquees par l'absence d'INTERNET —
+  meme comportement hors-ligne que le POC navigateur.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:label="DCC Sheet"
+        android:usesCleartextTraffic="false"
+        android:largeHeap="true"
+        android:allowBackup="true"
+        android:supportsRtl="true">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|keyboardHidden|screenLayout|smallestScreenSize"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

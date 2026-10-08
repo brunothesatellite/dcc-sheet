@@ -38,16 +38,7 @@ const PHP_SOURCES = [
 ];
 
 try {
-  /* 1. Charger les sources PHP brutes. Route /poc/php-src/ : hors
-        portee du SW, donc jamais interceptee (meme apres activation). */
-  const sources = await Promise.all(PHP_SOURCES.map(async (name) => {
-    const r = await fetch('/poc/php-src/' + name);
-    if (!r.ok) throw new Error('source ' + name + ' : HTTP ' + r.status);
-    return { name, bytes: new Uint8Array(await r.arrayBuffer()) };
-  }));
-  log(sources.length + ' sources PHP chargees.');
-
-  /* 2. Enregistrer le Service Worker. La page d'amorçage vit dans la
+  /* 1. Enregistrer le Service Worker. La page d'amorçage vit dans la
         portee /dcc-sheet/ : indispensable, car navigator.serviceWorker
         .ready attend une registration couvrant l'URL de la page. */
   log('Enregistrement du Service Worker…');
@@ -76,38 +67,66 @@ try {
   const bus = Client.forServiceWorkerRegistration(reg);
 
   const manifest = await (await fetch('/poc/manifest.json')).json();
-  const dirs = [
-    '/persist/www',
-    '/persist/www/api',
-    '/persist/www/data',
-    '/persist/www/data/maps',
-    '/persist/www/icons',
-    '/persist/sessions',
-    '/persist/tmp',
-    LIB_DIR,
-    ...manifest.iconDirs.map((d) => '/persist/www/icons/' + d),
-  ];
-  let created = 0;
-  let existing = 0;
-  for (const dir of dirs) {
-    try { await bus.mkdir(dir, 0o777); created++; }
-    catch { existing++; } /* deja cree (execution precedente) : normal */
-  }
-  log(created + '/' + dirs.length + ' dossiers FS crees'
-    + (existing ? ' (' + existing + ' existants)' : '') + '.');
 
-  for (const src of sources) {
-    const slash = src.name.lastIndexOf('/');
-    /* slice(0, slash + 1) conserve le '/' final : 'api/db.php' -> parent
-       '/persist/www/api/' (sinon : '/persist/www/apidb.php' inexistant). */
-    const parent = '/persist/www/' + (slash === -1 ? '' : src.name.slice(0, slash + 1));
-    await bus.writeFile(parent + src.name.slice(slash + 1), src.bytes);
-  }
-  log(sources.length + ' sources PHP ecrites dans /persist/www (IDBFS).');
+  /* Stamp de version : ecrit EN DERNIER (marqueur de commit).
+     - serveur du POC : pas de version -> reecriture complete a chaque
+       passage (comportement historique du POC) ;
+     - APK : stamp different a chaque build -> reecriture unique apres
+       mise a jour (pas de code stale dans l'IDB WebView conservee) ;
+     - stamp identique : demarrage rapide, aucun ecrit. */
+  let stampNow = null;
+  try {
+    const r = await bus.readFile('/config/app-version', { encoding: 'utf8' });
+    stampNow = typeof r === 'string' ? r : new TextDecoder().decode(new Uint8Array(r));
+  } catch { stampNow = null; }
+  const fresh = !manifest.version || stampNow !== manifest.version;
 
-  /* Script de diagnostic : quelles extensions PHP sont reellement
-     disponibles (statiques dans le wasm vs dynamiques via .so). */
-  const diag = `<?php
+  if (!fresh) {
+    log('Stamp identique (' + stampNow + ') : sources et .so deja presents.');
+  } else {
+    log('Amorcage complet (stamp emis=' + (manifest.version || 'sans version')
+      + ', lu=' + stampNow + ').');
+
+    /* Sources PHP brutes : route /poc/php-src/ hors portee du SW. */
+    const sources = await Promise.all(PHP_SOURCES.map(async (name) => {
+      const r = await fetch('/poc/php-src/' + name);
+      if (!r.ok) throw new Error('source ' + name + ' : HTTP ' + r.status);
+      return { name, bytes: new Uint8Array(await r.arrayBuffer()) };
+    }));
+    log(sources.length + ' sources PHP chargees.');
+
+    const dirs = [
+      '/persist/www',
+      '/persist/www/api',
+      '/persist/www/data',
+      '/persist/www/data/maps',
+      '/persist/www/icons',
+      '/persist/sessions',
+      '/persist/tmp',
+      LIB_DIR,
+      ...manifest.iconDirs.map((d) => '/persist/www/icons/' + d),
+    ];
+    let created = 0;
+    let existing = 0;
+    for (const dir of dirs) {
+      try { await bus.mkdir(dir, 0o777); created++; }
+      catch { existing++; } /* deja cree (execution precedente) : normal */
+    }
+    log(created + '/' + dirs.length + ' dossiers FS crees'
+      + (existing ? ' (' + existing + ' existants)' : '') + '.');
+
+    for (const src of sources) {
+      const slash = src.name.lastIndexOf('/');
+      /* slice(0, slash + 1) conserve le '/' final : 'api/db.php' -> parent
+         '/persist/www/api/' (sinon : '/persist/www/apidb.php' inexistant). */
+      const parent = '/persist/www/' + (slash === -1 ? '' : src.name.slice(0, slash + 1));
+      await bus.writeFile(parent + src.name.slice(slash + 1), src.bytes);
+    }
+    log(sources.length + ' sources PHP ecrites dans /persist/www (IDBFS).');
+
+    /* Script de diagnostic : quelles extensions PHP sont reellement
+       disponibles (statiques dans le wasm vs dynamiques via .so). */
+    const diag = `<?php
 header('Content-Type: text/plain; charset=utf-8');
 echo 'php=' . PHP_VERSION . PHP_EOL;
 foreach (get_loaded_extensions() as $e) { echo 'ext:' . $e . PHP_EOL; }
@@ -119,26 +138,28 @@ foreach (['imagewebp','imagecreatefrompng','ZipArchive','mb_substr','SQLite3','g
   echo 'fn:' . $f . '=' . ($ok ? 'OUI' : 'non') . PHP_EOL;
 }
 `;
-  await bus.writeFile('/persist/www/_diag.php', new TextEncoder().encode(diag));
-  log('Script _diag.php ecrit.');
+    await bus.writeFile('/persist/www/_diag.php', new TextEncoder().encode(diag));
+    log('Script _diag.php ecrit.');
 
-  /* 5. Placer les .so des extensions dynamiques dans LIB_DIR (IDBFS).
-        Sauter ceux deja presents : reutilisation de profil = aucun
-        retelechargement des ~8,6 Mo. Une seule lecture de repertoire
-        pour l'etat du dossier. */
-  let libFiles = [];
-  try { libFiles = await bus.readdir(LIB_DIR); } catch { libFiles = []; }
-  let soWritten = 0, soSkipped = 0;
-  for (const lib of SHARED_LIBS) {
-    if (libFiles.includes(lib.file)) { soSkipped++; continue; }
-    const r = await fetch('/poc/vendor/' + lib.pkg + '/' + lib.file);
-    if (!r.ok) throw new Error('.so ' + lib.pkg + '/' + lib.file + ' : HTTP ' + r.status);
-    await bus.writeFile(LIB_DIR + '/' + lib.file, new Uint8Array(await r.arrayBuffer()));
-    soWritten++;
+    /* .so des extensions dynamiques dans LIB_DIR (IDBFS) : ecriture
+       FORCEE a chaque amorcage complet (stamp change = nouveau build). */
+    let soWritten = 0;
+    for (const lib of SHARED_LIBS) {
+      const r = await fetch('/poc/vendor/' + lib.pkg + '/' + lib.file);
+      if (!r.ok) throw new Error('.so ' + lib.pkg + '/' + lib.file + ' : HTTP ' + r.status);
+      await bus.writeFile(LIB_DIR + '/' + lib.file, new Uint8Array(await r.arrayBuffer()));
+      soWritten++;
+    }
+    log(soWritten + ' .so ecrits dans ' + LIB_DIR + '.');
+
+    /* Stamp EN DERNIER : en cas d'arret en cours, le prochain passage
+       reprend un amorcage complet. */
+    await bus.writeFile('/config/app-version',
+      new TextEncoder().encode(String(manifest.version)));
+    log('Stamp ecrit (' + manifest.version + ').');
   }
-  log(soWritten + ' .so ecrits, ' + soSkipped + ' deja presents dans ' + LIB_DIR + '.');
 
-  /* 4. Rediriger vers l'application (nouvelle navigation :
+  /* 7. Rediriger vers l'application (nouvelle navigation :
         le SW la controlera, sa portee couvre /dcc-sheet/). */
   log('Redirection vers /dcc-sheet/ …');
   location.replace('/dcc-sheet/');

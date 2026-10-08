@@ -19,5 +19,14 @@ installeur/windows/**/bin/
 installeur/windows/**/obj/
 installeur/windows/**/*.csproj.user
 installeur/windows/setup/WebView2RuntimeBootstrapper.exe
+
+# --- installeur Android (artefacts de build, voir installeur/android/_build-android.ps1) ---
+installeur/android/.gradle/
+installeur/android/build/
+installeur/android/app/build/
+installeur/android/app/src/main/assets/
+installeur/android/local.properties
+installeur/android/keystore/
+installeur/android/dist/
 Jungle Tomb of the Mummy Bride PreGens (DCC).pdf
 Travok2.json

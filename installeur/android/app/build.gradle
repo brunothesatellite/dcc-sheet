@@ -1,0 +1,38 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.dccsheet.app'
+    // Plateforme installee : Android SDK Platform 17 (API 37.0).
+    compileSdk = 37
+
+    defaultConfig {
+        applicationId 'com.dccsheet.app'
+        minSdk = 26          // ServiceWorkerController (API 26) + WebView moderne
+        targetSdk = 37
+        versionCode = 1
+        // Surcharge par _build-android.ps1 : -PappVersionName=3.0
+        versionName = (findProperty('appVersionName') ?: '3.0') as String
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            // signature debug standard pour adb install rapide
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// Zeron dependance externe : WebView + ServiceWorkerController + WebResourceResponse
+// sont des classes framework. La logique vit dans com.dccsheet.app.AssetRouter.
+dependencies {
+}

@@ -1764,3 +1764,10 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
 - **Réparation de l'instance de dev** : ré-extraction des 2 images du zip de l'utilisateur dans `data/maps/` (tailles conformes, entête `RIFF`) — aucun rejeu d'import nécessaire, le fond doit s'afficher en rechargeant.
 - **Contexte** : la base de dev contient 7 comptes de test (9 cartes vides « Carte 0…8 » chacun) + le compte utilisateur (2 cartes réelles) — données héritées des tests, pas une anomalie de l'import.
 - **Validation** : harness 9/9 ; `npm test` **2223/2223** (+9) ; reconstruction des artefacts + recette.
+
+
+### Release v3.0 refaite avec artefacts (apres-midi)
+
+- Re-execution du skill release : tests **2223/2223**, commit `176d962` push, build differentiel regenere (depuis l''ancien v3.0 : 9 modifies / 14 ajoutes / 0 supprimes).
+- Artefacts reconstruits en **3.0** : setup 74,5 Mo + portable 84,3 Mo (`build.ps1 -Version 3.0`), webapp 10,3 Mo (`_build.ps1 -Zip -Version 3.0`) ; recette **10/10**, verification 6.3 (0 token), artefacts 3.0.0 supersedes nettoyes.
+- Le tag `v3.0` (pointait `d821e3a`, sans artefacts) a ete **deplace** sur `176d962` : release GitHub **supprimee et recreatee** avec les 3 assets verifies (78 090 239 / 88 366 614 / 10 814 243 octets) - https://github.com/brunothesatellite/dcc-sheet/releases/tag/v3.0

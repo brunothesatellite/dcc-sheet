@@ -28,8 +28,7 @@
   * Vérification visuelle sur PC + mobile.
 
 **Installer et app native windows**
-Create a Windows desktop application in C# .NET 9 WinForms.
-Requirements:
+Create a Windows desktop application in C# .NET 9 WinForms in dcc-sheet\installeur\windows
 - Create a windows 10-11 standalone application for dcc-sheet
 - do not redistribute dcc-pc-tokens and funnel-tokens with the application (no right to redistribute these files)
 - for the application 

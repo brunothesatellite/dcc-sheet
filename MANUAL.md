@@ -18,6 +18,7 @@ Manuel d'utilisation de l'application web **DCC Fiches de Personnage** : créez 
 10. [Personnalisation & responsive](#10-personnalisation--responsive)
 11. [Astuces & dépannage](#11-astuces--dépannage)
 12. [Application Android (APK)](#12-application-android-apk)
+13. [Application Windows (installable ou portable)](#13-application-windows-installable-ou-portable)
 - [Annexe A : format JSON d'export/import](#annexe-a--format-json-dexportimport)
 - [Annexe B : dés de vie et portraits par classe](#annexe-b--dés-de-vie-et-portraits-par-classe)
 - [Annexe C : glossaire](#annexe-c--glossaire)
@@ -835,6 +836,45 @@ Un second APK, `dcc-sheet-content-<version>.apk`, fournit deux ressources qui ne
 - **Aucune** pour l'interface : mêmes onglets, mêmes raccourcis, même sauvegarde automatique (locale au téléphone).
 - Les exports de fichiers arrivent dans le dossier **Téléchargements** (autorisation demandée à la première utilisation).
 - Les portraits et le contenu s'affichent depuis l'APK, pas depuis un serveur ; un réglage technique en profondeur (Sauvegarde/restauration) peut demander « Fichiers » (accès aux documents) pour exporter/importer.
+
+---
+
+## 13. Application Windows (installable ou portable)
+
+La fiche existe aussi en **application de bureau Windows** (Windows 10/11, 64 bits) : la même interface que la version navigateur, mais **sans serveur à configurer** — PHP et l'application web sont embarqués. Les données restent en local sur le PC et aucune connexion internet n'est nécessaire au quotidien.
+
+Deux livrables **identiques en contenu**, à télécharger depuis les **releases GitHub** du projet (onglet *Assets*) :
+
+- `dcc-sheet-setup-<version>.exe` — la version **installable** ;
+- `dcc-sheet-portable-<version>.zip` — la version **portable**.
+
+### Installer la version installable
+
+1. Récupérer `dcc-sheet-setup-<version>.exe` depuis les releases GitHub, puis le lancer (double-clic).
+2. L'installation se fait **pour votre compte uniquement** : aucun droit administrateur demandé, tout est installé dans `C:\Users\<vous>\AppData\Local\Programs\dcc-sheet`.
+3. Un raccourci **DCC Sheet** est ajouté au menu Démarrer (et au bureau si la case est cochée) ; l'application apparaît aussi dans **Applications** de Windows, c'est là qu'elle se désinstalle (vos données sont conservées, voir plus bas).
+4. Si le composant **WebView2** de Microsoft (Edge) est absent, l'installateur l'ajoute automatiquement : une connexion internet n'est nécessaire que pour **ce téléchargement**.
+5. Lancer **DCC Sheet** : un écran d'attente démarre le serveur local, puis la page de connexion s'ouvre.
+
+### La version portable
+
+1. Récupérer `dcc-sheet-portable-<version>.zip` depuis les releases GitHub.
+2. Le **dézipper dans un dossier inscriptible** (pas dans `C:\Program Files`).
+3. Lancer `DccSheet.exe` : ni installateur, ni raccourci. **Tout vit dans le dossier** — il est déplaçable (clé USB) et le supprimer suffit à désinstaller.
+
+### Données et mises à jour
+
+- **Où vivent les données** : la base SQLite est dans `public\dcc-sheet\data\`, à côté de `DccSheet.exe`. Elle est **conservée à la désinstallation** comme lors des mises à jour. Pour la sauvegarder ailleurs, copiez ce dossier — ou utilisez les exports JSON et de cartes (§ 4.6, § 9).
+- **Mise à jour** : exécuter simplement le setup de la nouvelle version (il remplace les fichiers, pas vos données) ; en portable, dézipper la nouvelle version en conservant le dossier `public\dcc-sheet\data`.
+- **Une seule instance** : une seconde ouverture affiche un message puis se referme — un seul serveur local, sur le port 8089.
+
+### Différences avec la version navigateur
+
+- **Aucune** pour l'interface : mêmes onglets, mêmes raccourcis, même sauvegarde automatique (locale au PC).
+- L'application passe par `http://127.0.0.1:8089/dcc-sheet/` : **localhost uniquement**, la machine n'est pas exposée sur le réseau.
+- Les exports de fichiers arrivent dans votre dossier **Téléchargements**.
+- Les portraits à jetons (`dcc-pc-tokens`, `funnel-tokens`) et le grimoire latéral ne sont **pas inclus** (redistribution interdite) : comme sans le conteneur Android (§ 12), ces contenus affichent un repli discret, sans erreur bloquante.
+- En cas de message d'erreur au démarrage, vérifiez les prérequis : Windows 10/11 64 bits, WebView2 (déjà présent avec Edge à jour) et le **Visual C++ Redistributable** (présent sur la plupart des PC).
 
 ---
 

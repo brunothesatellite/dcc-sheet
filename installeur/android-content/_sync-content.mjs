@@ -6,12 +6,17 @@
    Copie dans android-content/app/src/main/assets :
      1. icons/dcc-pc-tokens  (racine du repo, >= 20 fichiers)
      2. icons/funnel-tokens  (racine du repo, >= 75 fichiers)
-     3. dcc-spells-reader    (dossier frere du repo) sans les
-        repertoires de developpement (.git, captures, tools,
-        __pycache__, node_modules)
+     3. dcc-spells-reader    (dossier frere du repo) — liste
+        EXPLICITE stricte (deploy/_gen-spell-content.ps1) :
+        spell-translation.js, content/anchors.js + les pages
+        content/127..303 + 322..356 (trou 304-321 saute). Le
+        reste du dossier frere (images pages/*.webp du lecteur
+        autonome, dcc.html, dcc-pages.js — ~84 Mo) n'est JAMAIS
+        charge par dcc-sheet et reste hors APK.
 
    ASSERTIONS BLOQUANTES : les trois ensembles doivent etre
-   complets — un APK de contenu sans contenu est inutile.
+   complets — un APK de contenu sans contenu est inutile — et le
+   lecteur autonome (pages/, dcc.html) doit etre ABSENT.
 
    ATTENTION — USAGE PERSONNEL : cet APK CONTIENT les tokens et le
    lecteur de sorts qui ne doivent JAMAIS etre redistrobues (regle
@@ -106,17 +111,46 @@ const fn = copyTree(path.join(REPO, 'icons', 'funnel-tokens'),
 if (fn < 75) fail('funnel-tokens : ' + fn + ' fichiers (75 attendus)');
 
 /* --- 3. lecteur de sorts (dossier frere) -------------------------- */
-const sp = copyTree(SPELLS, path.join(ASSETS, 'dcc-spells-reader'));
-const spJs = countFiles(path.join(ASSETS, 'dcc-spells-reader', 'content'), '.js');
-const spPages = countFiles(path.join(ASSETS, 'dcc-spells-reader', 'pages'), '.webp')
-    + countFiles(path.join(ASSETS, 'dcc-spells-reader', 'pages'), '.png');
-if (spJs < 100) fail('dcc-spells-reader/content : ' + spJs + ' .js (100 attendus)');
-if (spPages < 100) fail('dcc-spells-reader/pages : ' + spPages + ' images (100 attendues)');
+/* Liste EXPLICITE — l'exacte de deploy/_gen-spell-content.ps1 : ce que
+   spell-reader.js charge reellement (BASE + 3 chemins). Le reste du
+   dossier frere (images pages/*.webp du lecteur autonome, dcc.html,
+   dcc-pages.js — ~84 Mo) n'est jamais demande par dcc-sheet et ne
+   doit PAS entrer dans l'APK. */
+const SPELL_RANGES = [[127, 303], [322, 356]];   /* trou 304-321 saute */
+const spellList = ['spell-translation.js', 'content/anchors.js'];
+for (const r of SPELL_RANGES) {
+  for (let n = r[0]; n <= r[1]; n++) spellList.push('content/' + n + '.js');
+}
+const spellDest = path.join(ASSETS, 'dcc-spells-reader');
+const spellMissing = spellList.filter(
+    (rel) => !fs.existsSync(path.join(SPELLS, rel)));
+if (spellMissing.length) {
+  fail('dcc-spells-reader : ' + spellMissing.length
+      + ' fichier(s) absent(s), ex. ' + spellMissing.slice(0, 5).join(', '));
+}
+for (const rel of spellList) {
+  const dest = path.join(spellDest, rel);
+  mkdirp(path.dirname(dest));
+  fs.copyFileSync(path.join(SPELLS, rel), dest);
+}
+const sp = spellList.length;
+const spJs = countFiles(path.join(spellDest, 'content'), '.js');
+if (spJs !== 213) {
+  fail('dcc-spells-reader/content : ' + spJs
+      + ' .js (213 attendus : anchors.js + 212 pages)');
+}
+if (fs.existsSync(path.join(spellDest, 'pages'))) {
+  fail('dcc-spells-reader/pages ne doit pas etre copie'
+      + ' (lecteur autonome, ~81 Mo, jamais charge par dcc-sheet)');
+}
+if (fs.existsSync(path.join(spellDest, 'dcc.html'))) {
+  fail('dcc.html (lecteur autonome) ne doit pas etre copie');
+}
 
 /* --- rapport ------------------------------------------------------- */
 const total = sizeMo(ASSETS);
 console.log('contenu : dcc-pc-tokens=' + pc + 'f, funnel-tokens=' + fn
-    + 'f, spells=' + sp + 'f (content=' + spJs + ' js, pages=' + spPages
-    + ' img) -> ' + total + ' Mo');
+    + 'f, spells=' + sp + 'f strict (content=' + spJs + ' js, sans pages/)'
+    + ' -> ' + total + ' Mo');
 console.log('ATTENTION : APK STRICTEMENT PERSONNEL — ne jamais partager'
     + ' ni publier (regle de redistribution du projet).');

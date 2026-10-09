@@ -89,7 +89,12 @@ public class MainActivity extends Activity {
        or dcc-pc-tokens/funnel-tokens ne sont JAMAIS dans les assets de
        l'APK (règle de redistribution) alors qu'ils sont bien servis par
        l'APK compagnon (ContentProvider). On déclare ces deux dossiers
-       présents. Webapp inchangée : correctif app-side, idempotent,
+       présents — UNIQUEMENT si l'APK conteneur est bien installé
+       (voir contentInstalled()) : sinon ces hooks déclareraient des
+       dossiers absents comme disponibles, le sélecteur proposerait des
+       sources mortes et chaque vignette rendrait un 403 (icône brisée)
+       au lieu du repli natif de la webapp (placeholder, zéro requête).
+       Webapp inchangée : correctif app-side, idempotent,
        même mécanisme que BLOB_HOOK_JS. */
     private static final String GUARD_HOOK_JS =
             "(function(){"
@@ -121,7 +126,10 @@ public class MainActivity extends Activity {
        funnel-tokens sont servis par l'APK compagnon. Le sélecteur de
        portraits filtre ses vignettes sur ce tableau brut, mis en cache
        dès l'init (iconDirsPromise) : la réponse est donc complétée
-       AVANT qu'api() ne la lise. Webapp inchangée, idempotent ;
+       AVANT qu'api() ne la lise. Injecté UNIQUEMENT si le conteneur est
+       installé (contentInstalled()) : sans lui, la liste native (sans
+       tokens) déclenche le repli de la webapp — pas de source morte.
+       Webapp inchangée, idempotent ;
        le drapeau n'est posé qu'en cas de succès (l'objet window peut
        changer entre onPageStarted et le document final). */
     private static final String FETCH_HOOK_JS =
@@ -151,6 +159,24 @@ public class MainActivity extends Activity {
 
     private WebView webView;
     private ValueCallback<Uri[]> filePathCallback;
+
+    /**
+     * Vrai si l'APK conteneur de contenu (com.dccsheet.content) est
+     * installé. Les hooks tokens (FETCH_HOOK_JS / GUARD_HOOK_JS) ne
+     * s'injectent que dans ce cas : sans conteneur, on laisse la webapp
+     * appliquer son repli natif (sources tokens non proposées,
+     * placeholder portrait-guard) au lieu de liens brisés (403).
+     * Re-testé à chaque page : installer/désinstaller le conteneur
+     * suffit, le prochain chargement s'adapte.
+     */
+    private boolean contentInstalled() {
+        try {
+            return getPackageManager()
+                    .resolveContentProvider("com.dccsheet.content", 0) != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     /** Recuperation des exports blob (téléchargements webapp). */
     private final ConcurrentHashMap<String, PendingBlob> pendingBlobs =
@@ -220,9 +246,15 @@ public class MainActivity extends Activity {
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 Log.d("DCC", "START " + url);
                 /* Des le debut de page : completer icons.php?action=list
-                   avant l'init de la webapp (cache iconDirsPromise). */
-                view.evaluateJavascript(FETCH_HOOK_JS,
-                        v -> Log.d("DCC", "FETCH " + url + " -> " + v));
+                   avant l'init de la webapp (cache iconDirsPromise).
+                   Uniquement avec le conteneur installe : sinon la liste
+                   native (sans tokens) fait office de repli. */
+                if (contentInstalled()) {
+                    view.evaluateJavascript(FETCH_HOOK_JS,
+                            v -> Log.d("DCC", "FETCH " + url + " -> " + v));
+                } else {
+                    Log.d("DCC", "HOOKS-TOKENS conteneur absent -> repli webapp");
+                }
             }
 
             @Override
@@ -235,10 +267,14 @@ public class MainActivity extends Activity {
                    WebView arrive vide). Idempotent. */
                 view.evaluateJavascript(BLOB_HOOK_JS,
                         v -> Log.d("DCC", "HOOK " + url + " -> " + v));
-                view.evaluateJavascript(FETCH_HOOK_JS,
-                        v -> Log.d("DCC", "FETCH " + url + " -> " + v));
-                view.evaluateJavascript(GUARD_HOOK_JS,
-                        v -> Log.d("DCC", "GUARD " + url + " -> " + v));
+                if (contentInstalled()) {
+                    view.evaluateJavascript(FETCH_HOOK_JS,
+                            v -> Log.d("DCC", "FETCH " + url + " -> " + v));
+                    view.evaluateJavascript(GUARD_HOOK_JS,
+                            v -> Log.d("DCC", "GUARD " + url + " -> " + v));
+                } else {
+                    Log.d("DCC", "HOOKS-TOKENS conteneur absent -> repli webapp");
+                }
             }
 
             @Override

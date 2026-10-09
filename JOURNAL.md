@@ -1818,3 +1818,12 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
 - `README.md` : section « Application Android (APK) » dans « Installation ».
 - `MANUAL.md` : § 12 « Application Android (APK) » (installation, conteneur de contenu, différences) + entrée de table des matières.
 - Skill release (`.opencode/skills/release/SKILL.md`) : étape **6.3 APK Android** (les 2 builds), vérifications **6.4** étendues (4 fichiers + scan anti-tokens des 2 zips **et de l'APK**), release avec **4 artefacts attaches** — l'APK DCC Sheet en 4ᵉ pièce jointe, l'APK Conteneur **jamais attaché** (reste dans `installeur\android\dist\`).
+
+### Release v3.1
+
+- Étapes du skill release exécutées dans l'ordre : README / MANUAL / JOURNAL mis à jour, tests **2223/2223 OK** (`PHP_BIN=D:\VS_Code_Workspaces\php\php.exe` — celui de `servers\php` n'a pas l'extension ZipArchive, d'où le skip de `18-maps-import` au premier passage), commit `810217d` sur `evol-android` puis **fast-forward sur `main`** (push `88b51d2..810217d`), build différentiel depuis v3.0 : 5 modifiés / 73 ajoutés / 0 supprimé.
+- Artefacts **3.1** reconstruits **après** le push : setup 74,5 Mo + portable 84,3 Mo (`build.ps1 -Version 3.1`), webapp 10,3 Mo (`_build.ps1 -Zip -Version 3.1`), APK DCC Sheet 23,8 Mo (manifest embarqué `810217d-mv0yk05j`) + APK conteneur 1.1 107,6 Mo — anciens artefacts 3.0 / 3.0.0 purgés avant rebuild.
+- Vérifications 6.4 vertes : 4 fichiers non vides + **scan anti-tokens des 2 zips ET de l'APK DCC Sheet** (237 / 157 / 281 entrées, 0 token interdit).
+- Tag **`v3.1`** poussé sur `810217d` ; release GitHub créée avec **4 assets**, tailles **identiques aux fichiers locaux** : 24 947 337 (APK) / 88 366 640 (portable) / 78 088 190 (setup) / 10 814 243 (webapp) octets — https://github.com/brunothesatellite/dcc-sheet/releases/tag/v3.1
+- Notes vérifiées : corps publié **identique** au fichier source (6 785 caractères, 0 U+FFFD, 0 mojibake, écriture UTF-8 sans BOM hors redirection `>` — règle du skill).
+- **L'APK Conteneur n'est pas parmi les assets** : il reste en local dans `installeur\android\dist\` (contrôle explicite après publication).

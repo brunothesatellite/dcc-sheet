@@ -1,18 +1,48 @@
 package com.dccsheet.app;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.Base64;
+import android.util.Log;
+import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
+import android.webkit.DownloadListener;
+import android.webkit.JavascriptInterface;
+import android.webkit.ServiceWorkerClient;
+import android.webkit.ServiceWorkerController;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
+import android.widget.Toast;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Point d'entree de l'APK : une WebView sur l'origine
@@ -32,8 +62,35 @@ public class MainActivity extends Activity {
             "https://appassets.androidplatform.net/dcc-sheet/boot-poc.html";
     private static final int FILE_CHOOSER_REQUEST = 1001;
 
+    /* Hook injecté à chaque fin de page : conserve les blobs créés par
+       la webapp (elle révoque l'URL immédiatement après a.click()) et
+       retient le dernier attribut download= (nom exact du fichier,
+       le contentDisposition de DownloadListener est vide). */
+    private static final String BLOB_HOOK_JS =
+            "(function(){"
+            + "if(window.__dccBlobReg)return 'deja';"
+            + "var reg={},order=[];window.__dccBlobReg=reg;"
+            + "var oc=URL.createObjectURL;"
+            + "URL.createObjectURL=function(o){"
+            + "var u=oc.call(URL,o);"
+            + "try{if(o instanceof Blob){reg[u]=o;order.push(u);"
+            + "while(order.length>64){delete reg[order.shift()];}}}catch(e){}"
+            + "return u;};"
+            + "var ocl=HTMLAnchorElement.prototype.click;"
+            + "HTMLAnchorElement.prototype.click=function(){"
+            + "try{var d=this.getAttribute('download');"
+            + "if(d&&this.href&&this.href.indexOf('blob:')===0)"
+            + "window.__dccLastDownloadName=d;}catch(e){}"
+            + "return ocl.apply(this,arguments);};"
+            + "return 'installe';})()";
+
     private WebView webView;
     private ValueCallback<Uri[]> filePathCallback;
+
+    /** Recuperation des exports blob (téléchargements webapp). */
+    private final ConcurrentHashMap<String, PendingBlob> pendingBlobs =
+            new ConcurrentHashMap<>();
+    private ExecutorService saveExecutor;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -56,14 +113,78 @@ public class MainActivity extends Activity {
 
         final AssetRouter router = new AssetRouter(getAssets());
 
+        /* LES REQUETES DU SERVICE WORKER NE PASSENT PAS PAR
+           WebViewClient.shouldInterceptRequest : le framework fournit un
+           hook dedie, sans lequel l'enregistrement du SW echoue
+           (\"fetching the script\"). Meme routage que la page. */
+        ServiceWorkerController.getInstance().setServiceWorkerClient(
+                new ServiceWorkerClient() {
+                    @Override
+                    public WebResourceResponse shouldInterceptRequest(
+                            WebResourceRequest request) {
+                        String p = request.getUrl().getPath();
+                        try {
+                            WebResourceResponse r = router.respond(p);
+                            Log.d("DCC", "INT[SW] " + p + " -> "
+                                    + (r == null ? "net" : r.getStatusCode()));
+                            return r;
+                        } catch (Exception e) {
+                            Log.d("DCC", "INT[SW] " + p + " -> EXC " + e);
+                            return null; /* repli reseau reel (bloque : pas de INTERNET) */
+                        }
+                    }
+                });
+
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view,
                                                               WebResourceRequest request) {
+                String p = request.getUrl().getPath();
                 try {
-                    return router.respond(request.getUrl().getPath());
+                    WebResourceResponse r = router.respond(p);
+                    Log.d("DCC", "INT[CV] " + p + " -> "
+                            + (r == null ? "net" : r.getStatusCode()));
+                    return r;
                 } catch (Exception e) {
+                    Log.d("DCC", "INT[CV] " + p + " -> EXC " + e);
                     return null; /* repli reseau reel (bloque : pas de INTERNET) */
+                }
+            }
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                Log.d("DCC", "START " + url);
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                Log.d("DCC", "DONE " + url);
+                /* Garde-fous export : la webapp révoque l'URL blob
+                   juste après a.click() (script.js), un fetch sur cette URL
+                   échoue donc. On conserve les blobs créés (FIFO) et le
+                   dernier attribu download= (contentDisposition de la
+                   WebView arrive vide). Idempotent. */
+                view.evaluateJavascript(BLOB_HOOK_JS,
+                        v -> Log.d("DCC", "HOOK " + url + " -> " + v));
+            }
+
+            @Override
+            public void onReceivedError(WebView view, WebResourceRequest request,
+                                        WebResourceError error) {
+                Log.d("DCC", "ERR " + error.getErrorCode() + " "
+                        + error.getDescription()
+                        + " main=" + request.isForMainFrame()
+                        + " " + request.getUrl());
+            }
+
+            @Override
+            public void onReceivedHttpError(WebView view,
+                                            WebResourceRequest request,
+                                            WebResourceResponse response) {
+                if (response.getStatusCode() >= 400) {
+                    Log.d("DCC", "HTTP " + response.getStatusCode()
+                            + " main=" + request.isForMainFrame()
+                            + " " + request.getUrl());
                 }
             }
 
@@ -96,12 +217,79 @@ public class MainActivity extends Activity {
             }
         });
 
-        setContentView(webView);
+        /* EXPORTS : la webapp génère ses fichiers via <a download> +
+           URL blob. Sans DownloadListener, la WebView avale
+           silencieusement la demande (aucun octet écrit) — d'où
+           « Export réussi » sans fichier. On relit le blob dans le
+           rendu (mémoire locale, aucune permission réseau) par
+           paquets base64 (pont JS→Java limité ~1 Mo) et on écrit
+           dans Téléchargements via MediaStore. */
+        saveExecutor = Executors.newSingleThreadExecutor();
+        webView.addJavascriptInterface(new DccBridge(), "DccBridge");
+        webView.setDownloadListener(this::onDownloadStart);
+
+        /* FENETRE EDGE-TO-EDGE (cible API 35+ imposee) : la WebView couvre
+           tout l'ecran, la barre d'etat et l'encoche recouvreraient le
+           header de la page. On decale la WebView des insets systeme via
+           un parent qui les applique en marges. */
+        FrameLayout root = new FrameLayout(this);
+        root.addView(webView, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT));
+        root.setOnApplyWindowInsetsListener((v, insets) -> {
+            FrameLayout.LayoutParams params =
+                    (FrameLayout.LayoutParams) webView.getLayoutParams();
+            int top;
+            int bottom;
+            if (Build.VERSION.SDK_INT >= 30) {
+                top = insets.getInsets(
+                        WindowInsets.Type.statusBars()
+                                | WindowInsets.Type.displayCutout()).top;
+                bottom = insets.getInsets(
+                        WindowInsets.Type.ime()
+                                | WindowInsets.Type.navigationBars()).bottom;
+            } else {
+                top = insets.getSystemWindowInsetTop();
+                bottom = Math.max(insets.getSystemWindowInsetBottom(),
+                        insets.getStableInsetBottom());
+            }
+            if (params.topMargin != top || params.bottomMargin != bottom) {
+                params.topMargin = top;
+                params.bottomMargin = bottom;
+                webView.setLayoutParams(params);
+            }
+            return insets;
+        });
+
+        /* Barre d'etat sur fond BLANC (theme clair) : les icônes doivent
+           etre SOMBRES, sinon horloge/batterie/notification restent en
+           blanc sur blanc (invisible). */
+        View decor = getWindow().getDecorView();
+        decor.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                        | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        if (Build.VERSION.SDK_INT >= 30) {
+            applyLightBarsModern();
+        }
+
+        setContentView(root);
 
         if (savedInstanceState != null) {
             webView.restoreState(savedInstanceState);
         } else {
             webView.loadUrl(BOOT_URL);
+        }
+    }
+
+    /** Apparence des barres systeme — chemin moderne (API 30+),
+        setSystemUiVisibility est deprecie mais conserve (API 26-29). */
+    @TargetApi(30)
+    private void applyLightBarsModern() {
+        WindowInsetsController ctrl = getWindow().getInsetsController();
+        if (ctrl != null) {
+            int mask = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                    | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+            ctrl.setSystemBarsAppearance(mask, mask);
         }
     }
 
@@ -139,6 +327,231 @@ public class MainActivity extends Activity {
         if (webView != null) {
             webView.destroy();
         }
+        if (saveExecutor != null) {
+            saveExecutor.shutdown();
+        }
         super.onDestroy();
+    }
+
+    /* ------------------------------------------------------------
+       EXPORTS : <a download> + blob -> Telechargements
+       ------------------------------------------------------------ */
+
+    private void onDownloadStart(String url, String userAgent,
+                                 String contentDisposition, String mimetype,
+                                 long contentLength) {
+        if (url == null || !url.startsWith("blob:")) {
+            Log.d("DCC", "DL ignore (non-blob) " + url);
+            return;
+        }
+        final String token = UUID.randomUUID().toString().replace("-", "");
+        final String urlF = url;
+        final String cd = contentDisposition;
+        Log.d("DCC", "DL blob " + token + " " + contentLength + "o ct="
+                + contentDisposition);
+
+        /* 1) Nom exact connu par la page (download= retenu par le
+              hook), sinon contentDisposition, sinon date. */
+        String nameJs = "(function(){try{var n=window.__dccLastDownloadName;"
+                + "if(typeof n==='string'&&n.length)return n;}"
+                + "catch(e){}return null;})()";
+        webView.evaluateJavascript(nameJs, nameJson -> {
+            String name = decodeJsString(nameJson);
+            if (name == null || name.isEmpty()) {
+                name = parseDownloadFilename(cd, mimetype);
+            } else {
+                name = sanitizeFilename(name);
+            }
+            pendingBlobs.put(token, new PendingBlob(name, mimetype));
+            /* 2) Lecture du blob : registre (survit à la révocation)
+                  sinon repli fetch. Paquets base64 vers DccBridge. */
+            String js = "(function(){var T='" + token + "';var u='"
+                    + urlF.replace("\\", "\\\\").replace("'", "\\'") + "';"
+                    + "var b=null;try{var r=window.__dccBlobReg;"
+                    + "if(r)b=r[u];}catch(e){}"
+                    + "var p=b?b.arrayBuffer():"
+                    + "fetch(u).then(function(x){return x.arrayBuffer();});"
+                    + "p.then(function(ab){var bb=new Uint8Array(ab);"
+                    + "var CH=98304,N=Math.max(1,Math.ceil(bb.length/CH));"
+                    + "for(var k=0;k<N;k++){var s=bb.subarray(k*CH,"
+                    + "Math.min(bb.length,(k+1)*CH));var bin='';"
+                    + "for(var j=0;j<s.length;j+=8192){bin+=String.fromCharCode"
+                    + ".apply(null,s.subarray(j,Math.min(s.length,j+8192)));}"
+                    + "DccBridge.blobChunk(T,k,N,window.btoa(bin),k===N-1);}})"
+                    + ".catch(function(e){try{DccBridge.blobFailed(T,String(e));}"
+                    + "catch(e2){}});})()";
+            webView.evaluateJavascript(js,
+                    value -> Log.d("DCC", "DL eval " + token + " -> " + value));
+        });
+    }
+
+    /** Decode une valeur JS serialisee (chaine JSON) en texte. */
+    private static String decodeJsString(String jsonValue) {
+        if (jsonValue == null || jsonValue.equals("null")
+                || jsonValue.equals("undefined")) {
+            return null;
+        }
+        if (jsonValue.length() >= 2 && jsonValue.startsWith("\"")
+                && jsonValue.endsWith("\"")) {
+            return jsonValue.substring(1, jsonValue.length() - 1)
+                    .replace("\\\"", "\"").replace("\\\\", "\\")
+                    .replace("\\/", "/");
+        }
+        return null;
+    }
+
+    /** Nom de fichier : contentDisposition (download=) puis date. */
+    private static String parseDownloadFilename(String contentDisposition,
+                                                String mimetype) {
+        String name = null;
+        if (contentDisposition != null) {
+            Matcher star = Pattern
+                    .compile("filename\\*\\s*=\\s*[^']*''([^;]+)")
+                    .matcher(contentDisposition);
+            Matcher plain = Pattern
+                    .compile("filename\\s*=\\s*\"?([^\";]+)\"?")
+                    .matcher(contentDisposition);
+            if (star.find()) {
+                name = Uri.decode(star.group(1).trim());
+            } else if (plain.find()) {
+                name = plain.group(1).trim();
+            }
+        }
+        if (name == null || name.isEmpty()) {
+            String ext = "bin";
+            if (mimetype != null) {
+                if (mimetype.contains("json")) ext = "json";
+                else if (mimetype.contains("zip")) ext = "zip";
+                else if (mimetype.contains("png")) ext = "png";
+                else if (mimetype.contains("pdf")) ext = "pdf";
+            }
+            name = "export-" + new java.text.SimpleDateFormat(
+                    "yyyyMMdd-HHmmss", java.util.Locale.US)
+                    .format(new java.util.Date()) + "." + ext;
+        }
+        return sanitizeFilename(name);
+    }
+
+    /** Caracteres interdits dans un nom de fichier. */
+    private static String sanitizeFilename(String name) {
+        return name.replaceAll("[\\\\/:*?\"<>|]", "_");
+    }
+
+    /** Un export en cours de recuperation (pont JS -> Java). */
+    private static final class PendingBlob {
+        final String filename;
+        final String mime;
+        final ByteArrayOutputStream data = new ByteArrayOutputStream();
+
+        PendingBlob(String filename, String mime) {
+            this.filename = filename;
+            this.mime = mime;
+        }
+    }
+
+    /** Pont expose a la page : paquets base64 du blob a telecharger. */
+    public class DccBridge {
+        @JavascriptInterface
+        public void blobChunk(String token, int index, int total,
+                              String b64, boolean last) {
+            PendingBlob p = pendingBlobs.get(token);
+            if (p == null) {
+                Log.d("DCC", "DL chunk inconnu " + token);
+                return;
+            }
+            try {
+                if (b64 != null && !b64.isEmpty()) {
+                    p.data.write(Base64.decode(b64, Base64.NO_WRAP));
+                }
+            } catch (Exception e) {
+                pendingBlobs.remove(token);
+                Log.d("DCC", "DL decode KO " + e);
+                runOnUiThread(() -> Toast.makeText(MainActivity.this,
+                        "Export impossible : " + e, Toast.LENGTH_LONG).show());
+                return;
+            }
+            if (last) {
+                pendingBlobs.remove(token);
+                byte[] bytes = p.data.toByteArray();
+                Log.d("DCC", "DL recupere " + p.filename + " "
+                        + bytes.length + "o (" + total + " paquets)");
+                saveExecutor.execute(
+                        () -> finishExport(p.filename, p.mime, bytes));
+            } else {
+                Log.d("DCC", "DL paquet " + token + " " + (index + 1)
+                        + "/" + total + " (" + p.data.size() + "o)");
+            }
+        }
+
+        @JavascriptInterface
+        public void blobFailed(String token, String error) {
+            pendingBlobs.remove(token);
+            Log.d("DCC", "DL KO " + token + " " + error);
+            runOnUiThread(() -> Toast.makeText(MainActivity.this,
+                    "Export impossible : " + error, Toast.LENGTH_LONG).show());
+        }
+    }
+
+    /** Ecrit l'export fini et notifie l'utilisateur. */
+    private void finishExport(String filename, String mime, byte[] bytes) {
+        try {
+            String where;
+            if (Build.VERSION.SDK_INT >= 29) {
+                where = saveToDownloads(filename, mime, bytes);
+            } else {
+                where = saveToAppDownloads(filename, bytes).getAbsolutePath();
+            }
+            Log.d("DCC", "DL OK " + where + " (" + bytes.length + "o)");
+            runOnUiThread(() -> Toast.makeText(getApplicationContext(),
+                    "Export sauvegardé : Téléchargements/" + filename,
+                    Toast.LENGTH_LONG).show());
+        } catch (Exception e) {
+            Log.d("DCC", "DL ecriture KO " + e);
+            String err = String.valueOf(e.getMessage());
+            runOnUiThread(() -> Toast.makeText(getApplicationContext(),
+                    "Export impossible : " + err, Toast.LENGTH_LONG).show());
+        }
+    }
+
+    /** API 29+ : Telechargements systeme via MediaStore. */
+    @TargetApi(29)
+    private String saveToDownloads(String filename, String mime, byte[] bytes)
+            throws IOException {
+        ContentValues v = new ContentValues();
+        v.put(MediaStore.Downloads.DISPLAY_NAME, filename);
+        v.put(MediaStore.Downloads.MIME_TYPE, (mime == null || mime.isEmpty())
+                ? "application/octet-stream" : mime);
+        v.put(MediaStore.Downloads.RELATIVE_PATH,
+                Environment.DIRECTORY_DOWNLOADS);
+        Uri uri = getContentResolver().insert(
+                MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
+        if (uri == null) {
+            throw new IOException("insert MediaStore KO");
+        }
+        try (OutputStream os = getContentResolver().openOutputStream(uri)) {
+            if (os == null) {
+                throw new IOException("openOutputStream KO");
+            }
+            os.write(bytes);
+        }
+        return uri.toString();
+    }
+
+    /** API 26-28 : dossier de l'app (sans permission externe),
+        accessible en USB sous Android/data/.../files/Download. */
+    private File saveToAppDownloads(String filename, byte[] bytes)
+            throws IOException {
+        File dir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        if (dir == null) {
+            dir = getFilesDir();
+        }
+        if (!dir.exists() && !dir.mkdirs()) {
+            throw new IOException("mkdir KO " + dir);
+        }
+        File out = new File(dir, filename);
+        try (FileOutputStream os = new FileOutputStream(out)) {
+            os.write(bytes);
+        }
+        return out;
     }
 }

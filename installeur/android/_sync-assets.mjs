@@ -133,6 +133,94 @@ function syncPoc(stamp) {
 }
 
 /* ============================================================
+   3b. PATCH php-cgi-wasm (Apache-2.0 - modif locale documentee)
+   ------------------------------------------------------------
+   stdin() est appele une fois par OCTET lu par PHP. L'implementation
+   amont fait `String(this.input.shift()).charCodeAt(0)` sur un
+   tableau de N caracteres construit par split('') : chaque shift()
+   est O(N), soit O(N²) au total. Au-dela de quelques dizaines de
+   Ko (import ZIP, image de fond, JSON d'import), le thread du
+   Service Worker se bloque pendant des minutes, le watchdog
+   Chromium le tue ("Service Worker is not responding") et toutes
+   les requetes en file echouent en ERR_FAILED (cascade).
+   Correction : conserver la chaine d'entree et la lire par index
+   O(1) - memes octets, meme contrat. Idempotent (marqueurs).
+   ============================================================ */
+const VENDOR_PATCHES = [
+  {
+    file: 'php-cgi-wasm/PhpCgiWebBase.mjs',
+    edits: [
+      {
+        marker: 'PATCH dcc-sheet : stdin O(1)',
+        re: /, stdin: \(\) =>\s*this\.input\n\t+\? String\(this\.input\.shift\(\)\)\.charCodeAt\(0\)\n\t+: null/,
+        neu: [
+          '\t\t\t/* PATCH dcc-sheet : stdin O(1) par index.',
+          '\t\t\t   Amont : Array.shift() par octet lu = O(N²) ; au-dela de',
+          '\t\t\t   quelques dizaines de Ko le thread du Service Worker se',
+          '\t\t\t   bloquait et le watchdog Chromium le tuait ("Service Worker',
+          '\t\t\t   is not responding") : les requetes en file echouaient en',
+          '\t\t\t   ERR_FAILED. Lecture d\'octets strictement identique. */',
+          '\t\t\t, stdin: () => (this.input && this.inputPos < this.input.length)',
+          '\t\t\t\t? this.input.charCodeAt(this.inputPos++)',
+          '\t\t\t\t: null',
+        ].join('\n'),
+      },
+    ],
+  },
+  {
+    file: 'php-cgi-wasm/PhpCgiBase.mjs',
+    edits: [
+      {
+        marker: 'PATCH dcc-sheet : stdin O(1)',
+        re: /, stdin: \(\) =>\s*this\.input\n\t+\? String\(this\.input\.shift\(\)\)\.charCodeAt\(0\)\n\t+: null/,
+        neu: [
+          '\t\t/* PATCH dcc-sheet : stdin O(1) par index (meme logique que',
+          '\t\t   PhpCgiWebBase ; la classe Node partage cette base). */',
+          '\t\t, stdin: () => (this.input && this.inputPos < this.input.length)',
+          '\t\t\t? this.input.charCodeAt(this.inputPos++)',
+          '\t\t\t: null',
+        ].join('\n'),
+      },
+      {
+        marker: 'PATCH dcc-sheet : chaine + curseur',
+        re: /this\.input = \['POST', 'PUT', 'PATCH'\]\.includes\(method\) \? String\(post \?\? ''\)\.split\(''\) : \[\];/,
+        neu: [
+          '\t\t\t/* PATCH dcc-sheet : chaine + curseur ; le split() en tableau',
+          '\t\t\t   de N caracteres alimentait shift() O(n) par octet (voir',
+          '\t\t\t   stdin dans PhpCgiWebBase). Longueur = octets (entree',
+          '\t\t\t   latin1 construite par String.fromCharCode). */',
+          "\t\t\tthis.input = ['POST', 'PUT', 'PATCH'].includes(method) ? String(post ?? '') : '';",
+          '\t\t\tthis.inputPos = 0;',
+        ].join('\n'),
+      },
+    ],
+  },
+];
+
+function patchVendor() {
+  let applied = 0;
+  for (const p of VENDOR_PATCHES) {
+    const full = path.join(NM, p.file);
+    if (!fs.existsSync(full)) fail('patch php-cgi-wasm : fichier absent ' + p.file);
+    let s = fs.readFileSync(full, 'utf8');
+    let dirty = false;
+    for (const e of p.edits) {
+      if (s.includes(e.marker)) continue;          /* deja applique */
+      if (!e.re.test(s)) {
+        fail('patch php-cgi-wasm : motif introuvable (' + e.marker
+          + ') dans ' + p.file + ' - version de php-cgi-wasm changee ?');
+      }
+      s = s.replace(e.re, e.neu);
+      applied++;
+      dirty = true;
+    }
+    if (dirty) fs.writeFileSync(full, s, 'utf8');
+  }
+  console.log('patch  : php-cgi-wasm PhpCgiBase/PhpCgiWebBase ('
+    + (applied ? applied + ' bloc(s) applique(s)' : 'deja applique') + ')');
+}
+
+/* ============================================================
    3. VENDOR -> graphe d'imports
    ============================================================ */
 const VENDOR_PKGS = [
@@ -154,6 +242,7 @@ const VENDOR_META = ['package.json', 'LICENSE', 'LICENSE-GPL', 'LICENSE-MIT', 'N
 const IMPORT_RE = /(?:import|export)\s[^'"();]*?from\s*['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/g;
 
 function syncVendor() {
+  patchVendor();   /* O(n²) stdin corrige avant copie (POC + assets) */
   const dest = path.join(ASSETS, 'vendor');
   const seen = new Set();
   const queue = [...VENDOR_ENTRIES];
@@ -216,6 +305,26 @@ function syncVendor() {
 }
 
 /* ============================================================
+  4. FONTES LOCALES -> assets/fonts (OFL, Google Fonts hors-ligne)
+   ============================================================ */
+function syncFonts() {
+  const src = path.join(HERE, 'fonts');
+  const dest = path.join(ASSETS, 'fonts');
+  const css = path.join(src, 'fonts.css');
+  if (!fs.existsSync(css)) {
+    fail('fonts/fonts.css absent : lancer node _fetch-fonts.mjs (polices OFL)');
+  }
+  let n = 0;
+  for (const rel of walk(src, '')) {
+    copyFile(path.join(src, rel), path.join(dest, rel));
+    n++;
+  }
+  const woff = walk(src, '').filter((f) => f.endsWith('.woff2')).length;
+  if (woff < 8) fail('fonts : ' + woff + ' woff2 (8 attendus)');
+  console.log('fonts  : ' + n + ' fichiers (Barlow Condensed + Inter, OFL 1.1)');
+}
+
+/* ============================================================
    ASSERTIONS FINALES
    ============================================================ */
 function assertAssets(nbSo) {
@@ -230,6 +339,7 @@ function assertAssets(nbSo) {
     'poc/boot.html', 'poc/cgi-worker.mjs', 'poc/lib-manifest.mjs', 'poc/manifest.json',
     'vendor/php-cgi-wasm/PhpCgiWorker.mjs', 'vendor/php-cgi-wasm/php8.4-cgi-worker.mjs',
     'vendor/quickbus/index.mjs',
+    'fonts/fonts.css', 'fonts/OFL-barlowcondensed.txt', 'fonts/OFL-inter.txt',
   ];
   for (const r of required) {
     if (!fs.existsSync(path.join(ASSETS, r))) fail('asset requis absent : ' + r);
@@ -262,5 +372,6 @@ mkdirp(ASSETS);
 syncWebapp();
 syncPoc(stamp);
 const nbSo = syncVendor();
+syncFonts();
 assertAssets(nbSo);
 console.log('Sync terminee -> ' + ASSETS);

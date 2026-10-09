@@ -92,8 +92,28 @@ public final class AssetRouter {
             return forbidden();
         }
 
-        if (path.equals("/") || path.equals("/dcc-sheet") || path.equals("/dcc-sheet/")) {
+        if (path.equals("/")) {
             return redirect("/dcc-sheet/boot-poc.html");
+        }
+        if (path.equals("/dcc-sheet") || path.equals("/dcc-sheet/")) {
+            /* Racine de la webapp (le serveur du POC servait index.html ;
+               rediriger vers boot-poc.html creerait une boucle). */
+            return asset("www/index.html");
+        }
+        if (path.equals("/css2")) {
+            /* Google Fonts (index.html) remplace par les fontes locales :
+               l'APK n'a pas de permission INTERNET, le fallback systeme
+               debordeait la topbar (bouton Inscription coupe). Familles
+               identiques, sous-ensembles latin/latin-ext, licence OFL 1.1
+               incluse (fonts/OFL-*.txt). */
+            return asset("fonts/fonts.css");
+        }
+        if (path.startsWith("/gfont/")) {
+            String rel = path.substring("/gfont/".length());
+            if (rel.isEmpty() || rel.contains("..")) {
+                return notFound();
+            }
+            return asset("fonts/" + rel);
         }
         if (path.equals("/dcc-sheet/boot-poc.html")) {
             return asset("poc/boot.html");
@@ -157,6 +177,10 @@ public final class AssetRouter {
             String encoding = TEXT_EXT.get(ext(assetPath)); /* null = binaire */
             Map<String, String> headers = new LinkedHashMap<>();
             headers.put("Cache-Control", "no-store"); /* APK mis a jour = assets nouveaux */
+            /* CORS : les @font-face de fonts.css sont charges depuis une
+               autre origine (fonts.googleapis.com) — sans cet en-tete,
+               le navigateur rejette le telechargement des woff2. */
+            headers.put("Access-Control-Allow-Origin", "*");
             return new WebResourceResponse(mime, encoding, stream);
         } catch (IOException e) {
             return notFound();

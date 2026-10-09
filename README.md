@@ -371,6 +371,22 @@ powershell -NoProfile -ExecutionPolicy Bypass -File recette.ps1          # recet
 
 Le build est **bloquant** si des tokens non redistribuables (`icons/dcc-pc-tokens`, `icons/funnel-tokens`) ou si des fichiers/extensions requis sont absents (`php -m` : gd, zip, sqlite3, mbstring). Le WebView2 Runtime est detecte par l'installateur (bootstrapper Evergreen si absent). Voir `installeur/windows/README.md` pour le detail.
 
+### Application Android (APK)
+
+Application Android (`installeur/android/`, minSdk 26 / Android 8+) : la meme webapp embarquee dans une WebView locale, servie par `AssetRouter` depuis les assets de l'APK — aucun serveur, donnees locales privees (`data/data/com.dccsheet.app/`), installation en **un seul fichier** (ADB ou « Sources inconnues »). Deux livrables au release :
+
+* `installeur/android/dist/dcc-sheet-<version>-android.apk` — l'application elle-meme, **attachee aux releases GitHub** (aucun token non redistribuable : assertion bloquante `_sync-assets.mjs`) ;
+* `installeur/android/dist/dcc-sheet-content-<version>.apk` — **APK conteneur de contenu** : fournit les tokens (`dcc-pc-tokens`, `funnel-tokens`) et le grimoire via un `ContentProvider` (`content://com.dccsheet.content/…`). **Strictement personnel : jamais attache ni partage** (redistribution interdite, E9). Sans lui, tokens et grimoire replient proprement (403/404).
+
+Build (prerequis : Android SDK + JDK d'Android Studio ; keystore local `installeur/android/keystore/dcc-sheet.keystore`, alias `dcc-store` — la meme cle signe les 2 APK) :
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File installeur\android\_build-android.ps1 -Version 3.1
+powershell -NoProfile -ExecutionPolicy Bypass -File installeur\android-content\_build-content.ps1 -Version 1.1
+```
+
+Chaque build re-synchronise les assets (assertions de redistribution bloquantes), compile `assembleRelease` et signe avec `apksigner` (ne jamais lancer les 2 builds gradle en parallele : cache partage). L'icone (meme dessin que `favicon.svg` : epees, des, DCC) se regenere via `installeur/android/make-android-icons.ps1` (PNG plein cadre + calque adaptatif `mipmap-anydpi-v26`). Cote applicatif, des hooks injectes par `MainActivity` (Java/manifest, **webapp inchangee**) corrigent le selecteur de portraits et les exports de fichiers.
+
 ## Dependances
 
 - **Backend** : PHP 7.4+ avec SQLite3

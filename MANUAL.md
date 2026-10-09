@@ -17,6 +17,7 @@ Manuel d'utilisation de l'application web **DCC Fiches de Personnage** : créez 
 9. [Dessiner une carte](#9-dessiner-une-carte)
 10. [Personnalisation & responsive](#10-personnalisation--responsive)
 11. [Astuces & dépannage](#11-astuces--dépannage)
+12. [Application Android (APK)](#12-application-android-apk)
 - [Annexe A : format JSON d'export/import](#annexe-a--format-json-dexportimport)
 - [Annexe B : dés de vie et portraits par classe](#annexe-b--dés-de-vie-et-portraits-par-classe)
 - [Annexe C : glossaire](#annexe-c--glossaire)
@@ -803,6 +804,37 @@ Les exports **individuels** (bouton **Export** des fiches) servent au transfert 
 - **Je ne trouve plus l'onglet Niveau 0** : en mobile il s'affiche sous la forme courte **« Niv 0 »**, juste après *Voleur* — les 8 onglets partagent toute la largeur, sans défilement (§ 3, § 4.9).
 - **Import global refusé** : le fichier doit contenir au moins un personnage et une `class` valide pour chacun (annexe A).
 - **Pseudo/mot de passe refusé** : pseudo 3-20 caractères (`a-z A-Z 0-9 - _`), mot de passe 6+ ; une ancienne session peut rester active → rechargez la page.
+
+---
+
+## 12. Application Android (APK)
+
+La fiche est aussi disponible en **application Android** (Android 8 et plus) : la même interface que la version navigateur, sans serveur — les données restent sur le téléphone.
+
+### Installer l'APK
+
+1. Récupérer `dcc-sheet-<version>-android.apk` depuis les **releases GitHub** du projet (onglet *Assets*), puis le transférer sur le téléphone (câble USB, messagerie, …).
+2. Ouvrir le fichier : Android demande l'autorisation d'installer des applications de cette source (« Sources inconnues ») — autoriser, puis **Installer**.
+3. Lancer l'application **DCC** (icône : deux épées croisées, un dé, « DCC ») : la page de connexion s'ouvre directement.
+
+Aucune configuration n'est nécessaire : l'application embarque toute la webapp.
+
+### Le conteneur de contenu (optionnel)
+
+Un second APK, `dcc-sheet-content-<version>.apk`, fournit deux ressources qui ne peuvent pas être redistribuées publiquement :
+
+- les **portraits à jetons** (`dcc-pc-tokens`, `funnel-tokens`) dans le sélecteur de portrait ;
+- la **définition des sorts** (grimoire complet, § 6.3b).
+
+**Sans lui**, l'application reste entièrement utilisable : les autres sources de portraits fonctionnent, et l'onglet des sorts affiche un repli discret (pas d'erreur bloquante). **Avec lui** (installé en complément, à côté de l'application), tout est disponible.
+
+**Cet APK est strictement personnel** : ne jamais le partager ni le publier.
+
+### Différences avec la version navigateur
+
+- **Aucune** pour l'interface : mêmes onglets, mêmes raccourcis, même sauvegarde automatique (locale au téléphone).
+- Les exports de fichiers arrivent dans le dossier **Téléchargements** (autorisation demandée à la première utilisation).
+- Les portraits et le contenu s'affichent depuis l'APK, pas depuis un serveur ; un réglage technique en profondeur (Sauvegarde/restauration) peut demander « Fichiers » (accès aux documents) pour exporter/importer.
 
 ---
 

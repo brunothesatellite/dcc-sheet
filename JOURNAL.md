@@ -1772,3 +1772,49 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
 - Artefacts reconstruits en **3.0** : setup 74,5 Mo + portable 84,3 Mo (`build.ps1 -Version 3.0`), webapp 10,3 Mo (`_build.ps1 -Zip -Version 3.0`) ; recette **10/10**, vérification 6.3 (0 token), anciens artefacts `3.0.0` nettoyés.
 - Le tag `v3.0` (pointait `d821e3a`, sans artefacts) a été **déplacé** sur `176d962` : release GitHub **supprimée et recréée** avec les 3 assets vérifiés (78 090 239 / 88 366 614 / 10 814 243 octets) — https://github.com/brunothesatellite/dcc-sheet/releases/tag/v3.0
 - **Notes de release réécrites** (accents mojibake à la première publication : la redirection PowerShell `gh … > fichier` décoder la sortie UTF-8 de `gh` avec la console OEM — CP850). Restauration par re-encoding CP850 → UTF-8 puis `gh release edit --notes-file` ; relecture API : corps publié **identique** au fichier source (8 484 caractères, 0 U+FFFD, 0 résidu de mojibake). Prévention : règle d'encodage ajoutée au skill release (jamais de redirection `>` pour les textes accentués, écriture via `[IO.File]::WriteAllText` UTF-8 sans BOM, vérification des accents après publication).
+
+## Date : 9 octobre 2026 — Application Android : APK principal, conteneur de contenu, icônes
+
+### Généralités — livrer la webapp en APK sans la modifier
+
+- Objectif : deux APK Android à partir de la **webapp intacte** (aucun code front modifié — tout se passe côté app Java/manifest/hooks injectés) : `com.dccsheet.app` (la fiche) + `com.dccsheet.content` (conteneur de contenu, **strictement personnel**).
+- Commits de la branche `evol-android` : `8decf4f` (POC php-cgi-wasm en WebView locale), `88b51d2` (projet APK + build signé — `dcc-sheet-3.0-android.apk`, 23,5 Mo), `9be63a8` (5 bugs fichiers), `367938a` (APK conteneur + sélecteur de portraits).
+- Le branch `evol-android` reste **non poussée** (sauf demande explicite) ; la release v3.1 intégrera le tout sur `main`.
+
+### APK principal (`installeur/android/`, package `com.dccsheet.app`)
+
+- WebView locale + `AssetRouter` qui sert les assets de l'APK (webapp 144 fichiers/10,7 Mo, poc, vendor 94 fichiers dont le wasm 8,4 Mo, fonts OFL) — URL `…/dcc-sheet/` avec slash final.
+- **5 bugs fichiers corrigés** (`9be63a8`, 17 fichiers) : correctif **O(1) idempotent** sur l'stdin de php-cgi-wasm (SW bloquait sur les gros corps), `BLOB_HOOK_JS` (blobs → téléchargement), `DownloadListener` + `MediaStore` (exports dans Téléchargements, Android 10+).
+- Android 11+ exige `<queries><provider android:authorities="com.dccsheet.content"/>` au manifeste (sinon `FileNotFoundException("Unknown URL")` sur le provider).
+- **2 hooks de portraits injectés** dans `MainActivity` (la webapp reste inchangée, les 2 filtres front bloquaient les portraits) :
+  - `GUARD_HOOK_JS` (onPageFinished) : wrappers `has` / `isMissing` / `folderAvailable` / `isMissingSrc` de `DCCPortraitGuard` — wrappers des points d'entrée, car `has()` appelle `folderAvailable` par fermeture ;
+  - `FETCH_HOOK_JS` (onPageStarted + onPageFinished, drapeau posé seulement en cas de succès) : wrap de `window.fetch` complétant `api/icons.php?action=list` avec `dcc-pc-tokens` / `funnel-tokens` **avant** le cache d'init `iconDirsPromise` (c'est le filtre brut du sélecteur `dirs.indexOf(bare)`).
+
+### APK conteneur de contenu (`installeur/android-content/`, package `com.dccsheet.content`)
+
+- Choix de l'utilisateur : un **ContentProvider** expose les contenus additionnels par pipes depuis ses assets ; lecture via `content://com.dccsheet.content/…`, allowlist de 3 préfixes.
+- Assets : **109,9 Mo** — tokens `dcc-pc-tokens` (20 f) + `funnel-tokens` (75 f), `dcc-spells-reader` 439 pages (sans `.git/`, `captures/`, `tools/`, `__pycache__` ; pages du lecteur en **`.webp`**, pas `.png`).
+- Sync `_sync-content.mjs` : assertions **inversées** (le conteneur doit contenir les tokens, l'inverse du `_sync-assets.mjs` de l'app) ; build `_build-content.ps1` ASCII strict.
+- **Sans lui** : repli propre 403 (tokens) / 404 (grimoire). **Avec lui** : 200 avec le contenu exact.
+
+### Recette effectuée (Pixel 7a, CDP)
+
+- 4 types de contenu servis en **200 / octets exacts** ; repli 403/404 sans l'APK conteneur puis 200 après réinstallation.
+- `_sync-assets.mjs` : **OK — 254 assets, aucun token interdit** ; sélecteur de portraits **4/4 DCC + 75/75 funnel**, `dirs` = 8 entrées, **0 placeholder** ; portraits de fiches OK.
+- Valide par l'utilisateur : « c'est tout bon ».
+
+### Icônes Android identiques à l'app Windows
+
+- `installeur/android/make-android-icons.ps1` (reprend le dessin de `make-icon.ps1` : fond `#1a1a2e`, épées `#c0392b`, dés `#f2bd3d`, texte DCC Arial Bold Pixel) → **24 fichiers générés** (12/projet) : PNG legacy plein cadre (48→192 px × mdpi…xxxhdpi) + calque adaptatif (art seul, boîte 66 dp/108) + `mipmap-anydpi-v26/ic_launcher.xml` + couleur `#1a1a2e` ; `android:icon="@mipmap/ic_launcher"` ajouté aux 2 manifestes.
+- Bug de chemin corrigé au passage : `$root` remontait un cran trop peu → les icônes étaient écrites dans `installeur\installeur\…` (dossier parasite **supprimé**) d'où `resource mipmap/ic_launcher not found` au build — `Split-Path -Parent` ×3, régénérations vérifiées visuellement (rendu 192 px + calque avant conforme au `favicon.svg`).
+
+### Builds release v3.1
+
+- `dcc-sheet-3.1-android.apk` (**23,8 Mo**, signé) et `dcc-sheet-content-1.1-android.apk` (**107,6 Mo**, signé) — les 2 en `assembleRelease` + `apksigner` avec le keystore local `installeur/android/keystore/dcc-sheet.keystore` (alias `dcc-store`), la même cle signant les 2 APK.
+- Piège reconfirmé : **ne jamais builder 2 projets gradle en parallèle** (cache Gradle partagé → verrous : échec + timeout), et ne pas piper la sortie gradle dans `Select-String`/`2>&1` (faux code 1 via `NativeCommandError` sur stderr).
+
+### Documentation
+
+- `README.md` : section « Application Android (APK) » dans « Installation ».
+- `MANUAL.md` : § 12 « Application Android (APK) » (installation, conteneur de contenu, différences) + entrée de table des matières.
+- Skill release (`.opencode/skills/release/SKILL.md`) : étape **6.3 APK Android** (les 2 builds), vérifications **6.4** étendues (4 fichiers + scan anti-tokens des 2 zips **et de l'APK**), release avec **4 artefacts attaches** — l'APK DCC Sheet en 4ᵉ pièce jointe, l'APK Conteneur **jamais attaché** (reste dans `installeur\android\dist\`).

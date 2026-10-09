@@ -13,6 +13,7 @@
 
     <application
         android:label="DCC Contenu"
+        android:icon="@mipmap/ic_launcher"
         android:theme="@android:style/Theme.Material.Light"
         android:usesCleartextTraffic="false"
         android:allowBackup="false"

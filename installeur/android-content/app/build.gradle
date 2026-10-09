@@ -1,0 +1,38 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.dccsheet.content'
+    // Meme SDK que l'APK dcc-sheet (Plateforme installee API 37.0).
+    compileSdk = 37
+
+    defaultConfig {
+        applicationId 'com.dccsheet.content'
+        minSdk = 26
+        targetSdk = 37
+        versionCode = 1
+        // Surchargé par _build-content.ps1 : -PcontentVersionName=1.0
+        versionName = (findProperty('contentVersionName') ?: '1.0') as String
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+        debug {
+            // signature debug standard pour adb install rapide
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// Zeron dependance externe : ContentProvider + Activity sont des
+// classes framework. Le contenu vit dans src/main/assets (genere
+// par _sync-content.mjs, gitignore).
+dependencies {
+}

@@ -84,6 +84,71 @@ public class MainActivity extends Activity {
             + "return ocl.apply(this,arguments);};"
             + "return 'installe';})()";
 
+    /* Hook injecté à chaque fin de page : portrait-guard.js affiche un
+       placeholder SANS requête pour tout dossier absent d'icons.php —
+       or dcc-pc-tokens/funnel-tokens ne sont JAMAIS dans les assets de
+       l'APK (règle de redistribution) alors qu'ils sont bien servis par
+       l'APK compagnon (ContentProvider). On déclare ces deux dossiers
+       présents. Webapp inchangée : correctif app-side, idempotent,
+       même mécanisme que BLOB_HOOK_JS. */
+    private static final String GUARD_HOOK_JS =
+            "(function(){"
+            + "if(window.__dccGuardHooked)return 'deja';"
+            + "window.__dccGuardHooked=1;"
+            + "try{var g=window.DCCPortraitGuard;if(!g)return 'sans-guard';"
+            + "var ok={'dcc-pc-tokens':1,'funnel-tokens':1};"
+            + "var okKey={'dcc':1,'funnel':1};"
+            + "var fa=g.folderAvailable;"
+            + "g.folderAvailable=function(f){"
+            + "if(f&&ok[f])return true;return fa.apply(g,arguments);};"
+            + "var hs=g.has;"
+            + "g.has=function(k){"
+            + "if(okKey[k])return true;return hs.apply(g,arguments);};"
+            + "var ms=g.isMissing;"
+            + "g.isMissing=function(k){"
+            + "if(okKey[k])return false;return ms.apply(g,arguments);};"
+            + "var im=g.isMissingSrc;"
+            + "g.isMissingSrc=function(s){"
+            + "s=String(s||'');"
+            + "if(s.indexOf('icons/')===0){var i=s.lastIndexOf('/');"
+            + "if(i>6&&ok[s.slice(6,i)])return false;}"
+            + "return im.apply(g,arguments);};"
+            + "return 'installe';}catch(e){return 'ERR '+e;}})()";
+
+    /* Hook injecté au DÉBUT de page (onPageStarted) puis en fin de page
+       (filet de sécurité) : api/icons.php?action=list ne connaît que les
+       dossiers PRESENTS DANS LES ASSETS — les tokens dcc-pc-tokens /
+       funnel-tokens sont servis par l'APK compagnon. Le sélecteur de
+       portraits filtre ses vignettes sur ce tableau brut, mis en cache
+       dès l'init (iconDirsPromise) : la réponse est donc complétée
+       AVANT qu'api() ne la lise. Webapp inchangée, idempotent ;
+       le drapeau n'est posé qu'en cas de succès (l'objet window peut
+       changer entre onPageStarted et le document final). */
+    private static final String FETCH_HOOK_JS =
+            "(function(){"
+            + "try{"
+            + "if(window.__dccFetchListHooked)return 'deja';"
+            + "if(typeof window.fetch!=='function')return 'sans-fetch';"
+            + "var of=window.fetch;"
+            + "window.fetch=function(){"
+            + "var u=arguments[0];"
+            + "var url=typeof u==='string'?u:(u&&u.url)||'';"
+            + "if(url.indexOf('icons.php')===-1||url.indexOf('action=list')===-1)"
+            + "return of.apply(window,arguments);"
+            + "return of.apply(window,arguments).then(function(r){"
+            + "if(!r||!r.ok)return r;"
+            + "return r.clone().json().then(function(j){"
+            + "if(!j||!Array.isArray(j.dirs))return r;"
+            + "if(j.dirs.indexOf('dcc-pc-tokens')<0)j.dirs.push('dcc-pc-tokens');"
+            + "if(j.dirs.indexOf('funnel-tokens')<0)j.dirs.push('funnel-tokens');"
+            + "return new Response(JSON.stringify(j),{status:r.status,"
+            + "statusText:r.statusText,headers:r.headers});"
+            + "}).catch(function(){return r;});"
+            + "});};"
+            + "window.__dccFetchListHooked=1;"
+            + "return 'installe';"
+            + "}catch(e){return 'ERR '+e;}})()";
+
     private WebView webView;
     private ValueCallback<Uri[]> filePathCallback;
 
@@ -111,7 +176,7 @@ public class MainActivity extends Activity {
         boolean debuggable = (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         WebView.setWebContentsDebuggingEnabled(debuggable);
 
-        final AssetRouter router = new AssetRouter(getAssets());
+        final AssetRouter router = new AssetRouter(getAssets(), getContentResolver());
 
         /* LES REQUETES DU SERVICE WORKER NE PASSENT PAS PAR
            WebViewClient.shouldInterceptRequest : le framework fournit un
@@ -154,6 +219,10 @@ public class MainActivity extends Activity {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 Log.d("DCC", "START " + url);
+                /* Des le debut de page : completer icons.php?action=list
+                   avant l'init de la webapp (cache iconDirsPromise). */
+                view.evaluateJavascript(FETCH_HOOK_JS,
+                        v -> Log.d("DCC", "FETCH " + url + " -> " + v));
             }
 
             @Override
@@ -166,6 +235,10 @@ public class MainActivity extends Activity {
                    WebView arrive vide). Idempotent. */
                 view.evaluateJavascript(BLOB_HOOK_JS,
                         v -> Log.d("DCC", "HOOK " + url + " -> " + v));
+                view.evaluateJavascript(FETCH_HOOK_JS,
+                        v -> Log.d("DCC", "FETCH " + url + " -> " + v));
+                view.evaluateJavascript(GUARD_HOOK_JS,
+                        v -> Log.d("DCC", "GUARD " + url + " -> " + v));
             }
 
             @Override

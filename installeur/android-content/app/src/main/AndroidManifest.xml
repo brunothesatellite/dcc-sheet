@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Manifeste de l'APK de CONTENU dcc-sheet (compagnon prive).
+  AUCUNE permission : le ContentProvider sert les assets de cet APK
+  a l'application DCC Sheet via content://com.dccsheet.content/...
+
+  ATTENTION - USAGE PERSONNEL : cet APK CONTIENT des contenus qui ne
+  doivent JAMAIS etre redistrobues (regle du projet, identique aux
+  builds Windows et Android de dcc-sheet). Ne jamais le partager,
+  le publier ni l'inclure dans une release.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:label="DCC Contenu"
+        android:theme="@android:style/Theme.Material.Light"
+        android:usesCleartextTraffic="false"
+        android:allowBackup="false"
+        android:supportsRtl="true">
+
+        <provider
+            android:name="com.dccsheet.content.DccContentProvider"
+            android:authorities="com.dccsheet.content"
+            android:exported="true" />
+
+        <activity
+            android:name="com.dccsheet.content.InfoActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

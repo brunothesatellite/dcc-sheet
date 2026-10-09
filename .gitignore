@@ -28,5 +28,11 @@ installeur/android/app/src/main/assets/
 installeur/android/local.properties
 installeur/android/keystore/
 installeur/android/dist/
+# --- APK de contenu compagnon (assets generes par _sync-content.mjs) ---
+installeur/android-content/.gradle/
+installeur/android-content/build/
+installeur/android-content/app/build/
+installeur/android-content/app/src/main/assets/
+installeur/android-content/local.properties
 Jungle Tomb of the Mummy Bride PreGens (DCC).pdf
 Travok2.json

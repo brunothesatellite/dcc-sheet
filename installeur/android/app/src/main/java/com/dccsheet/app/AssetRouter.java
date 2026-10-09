@@ -1,6 +1,9 @@
 package com.dccsheet.app;
 
+import android.content.ContentResolver;
 import android.content.res.AssetManager;
+import android.net.Uri;
+import android.util.Log;
 import android.webkit.WebResourceResponse;
 
 import java.io.ByteArrayInputStream;
@@ -32,8 +35,14 @@ import java.util.Set;
  *   /poc/vendor/*           -> assets/vendor/* (graphe php-cgi-wasm)
  *   /poc/*                  -> assets/poc/* (boot, worker, manifest)
  *
+ *   Contenu additionnel (APK compagnon) :
+ *   /dcc-sheet/icons/{dcc-pc-tokens|funnel-tokens}/* et
+ *   /dcc-spells-reader/* -> ContentProvider com.dccsheet.content
+ *   (JAMAIS dans les assets de cette APK).
+ *
  *   Garde-fou tokens : assets contient deja le resultat de
- *   _sync-assets.mjs (assertion bloquante) — double verification ici.
+ *   _sync-assets.mjs (assertion bloquante) — double verification ici
+ *   (repli 403 quand l'APK de contenu est absent).
  */
 public final class AssetRouter {
 
@@ -71,10 +80,14 @@ public final class AssetRouter {
         }
     }
 
-    private final AssetManager assets;
+    private static final String CONTENT_AUTHORITY = "com.dccsheet.content";
 
-    public AssetRouter(AssetManager assets) {
+    private final AssetManager assets;
+    private final ContentResolver resolver;
+
+    public AssetRouter(AssetManager assets, ContentResolver resolver) {
         this.assets = assets;
+        this.resolver = resolver;
     }
 
     /** @return reponse WebView, ou null si l'URL sort du perimetre (reseau reel). */
@@ -85,11 +98,8 @@ public final class AssetRouter {
         if (path.contains("..")) {
             return notFound();
         }
-        String lower = path.toLowerCase(Locale.ROOT);
-        if (lower.contains("dcc-pc-tokens") || lower.contains("funnel-tokens")) {
-            /* Jamais redistribuable — les assets ne le contiennent pas
-               (assertion de _sync-assets.mjs) ; garde-fou supplementaire. */
-            return forbidden();
+        if (isAdditionalContent(path)) {
+            return additionalContent(path);
         }
 
         if (path.equals("/")) {
@@ -163,6 +173,67 @@ public final class AssetRouter {
         }
 
         return notFound();
+    }
+
+    /**
+     * Chemins du contenu additionnel : tokens DCC et lecteur de sorts,
+     * servis exclusivement par l'APK compagnon (jamais par les assets).
+     */
+    private static boolean isAdditionalContent(String path) {
+        String lower = path.toLowerCase(Locale.ROOT);
+        return lower.startsWith("/dcc-sheet/icons/dcc-pc-tokens/")
+                || lower.startsWith("/dcc-sheet/icons/funnel-tokens/")
+                || path.startsWith("/dcc-spells-reader/");
+    }
+
+    /** Resolution d'un chemin de contenu additionnel. */
+    private WebResourceResponse additionalContent(String path) {
+        String assetPath;
+        if (path.startsWith("/dcc-spells-reader/")) {
+            assetPath = path.substring(1);                    /* -> dcc-spells-reader/... */
+        } else {
+            assetPath = path.substring("/dcc-sheet/".length()); /* -> icons/... */
+        }
+        if (assetPath.contains("..")) {
+            return forbidden();
+        }
+        WebResourceResponse r = fromContentProvider(assetPath);
+        if (r != null) {
+            return r;
+        }
+        /* APK de contenu absente : tokens = 403 (interdiction de
+           redistribution, jamais dans cette APK), reste = 404. */
+        if (assetPath.startsWith("icons/")) {
+            return forbidden();
+        }
+        return notFound();
+    }
+
+    /**
+     * Lecture via le ContentProvider de l'APK compagnon
+     * (com.dccsheet.content) : pipe depuis ses assets, aucune
+     * permission de stockage, aucun fichier copie.
+     * @return null si l'APK de contenu est absente (repli propre).
+     */
+    private WebResourceResponse fromContentProvider(String assetPath) {
+        try {
+            Uri uri = Uri.parse("content://" + CONTENT_AUTHORITY + "/" + assetPath);
+            InputStream stream = resolver.openInputStream(uri);
+            if (stream == null) {
+                return null;
+            }
+            String mime = TYPES.getOrDefault(ext(assetPath), "application/octet-stream");
+            String encoding = TEXT_EXT.get(ext(assetPath)); /* null = binaire */
+            Map<String, String> headers = new LinkedHashMap<>();
+            headers.put("Cache-Control", "no-store");
+            headers.put("Access-Control-Allow-Origin", "*");
+            return new WebResourceResponse(mime, encoding, stream);
+        } catch (Exception e) {
+            /* APK de contenu non installee : comportement normal */
+            Log.d("DCC", "CONTENT absent " + assetPath + " ("
+                    + e.getClass().getSimpleName() + ")");
+            return null;
+        }
     }
 
     private static String ext(String rel) {

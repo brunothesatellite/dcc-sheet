@@ -1,0 +1,5 @@
+// Racine du projet APK de CONTENU dcc-sheet (APK compagnon, prive).
+// memes versions que installeur/android : AGP 9.4.1 + Gradle 9.8.1.
+plugins {
+    id 'com.android.application' version '9.4.1' apply false
+}

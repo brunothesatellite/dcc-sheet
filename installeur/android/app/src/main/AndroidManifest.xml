@@ -8,6 +8,14 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Visibilite de paquet (Android 11+) : autorise la resolution du
+         ContentProvider de l'APK compagnon de contenu (tokens DCC +
+         lecteur de sorts, servis hors APK — regle de redistribution).
+         Aucune permission introduite : simple declaration d'autorite. -->
+    <queries>
+        <provider android:authorities="com.dccsheet.content" />
+    </queries>
+
     <application
         android:label="DCC Sheet"
         android:theme="@style/AppTheme"

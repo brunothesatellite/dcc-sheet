@@ -1,10 +1,10 @@
 {
   "version": 1,
   "class": "voleur",
-  "name": "Burglar Deianira",
+  "name": "Deianira",
   "is_active": 1,
   "data": {
-    "nom": "Burglar Deianira",
+    "nom": "Deianira",
     "titre": "Thief",
     "metier": "Soldier",
     "alignement": "Neutral",

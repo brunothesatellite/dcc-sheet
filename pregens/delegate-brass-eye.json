@@ -1,11 +1,11 @@
 {
   "version": 1,
   "class": "nain",
-  "name": "Delegate Brass-Eye",
+  "name": "Brass-Eye",
   "is_active": 1,
   "data": {
-    "nom": "Delegate Brass-Eye",
-    "titre": "Dwarf",
+    "nom": "Brass-Eye",
+    "titre": "Delegate",
     "metier": "Smith",
     "alignement": "Lawful",
     "mouvement": "20 (15)",
@@ -36,7 +36,7 @@
     "jet_chanceux": "Charmed House (+2 AC)",
     "langues": "Common, Dwarf",
     "portrait_source": "dcc",
-    "portrait_index": "0",
+    "portrait_index": "1",
     "attaque_cac": "+3",
     "degats_cac": "1d8+3",
     "att_distance": "+0",

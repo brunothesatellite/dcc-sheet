@@ -1,11 +1,11 @@
 {
   "version": 1,
   "class": "halfelin",
-  "name": "Collector Briela “the Quick”",
+  "name": "Briela “the Quick”",
   "is_active": 1,
   "data": {
-    "nom": "Collector Briela “the Quick”",
-    "titre": "Halfling",
+    "nom": "Briela “the Quick”",
+    "titre": "Collector",
     "metier": "Halfling gypsy",
     "alignement": "Neutral",
     "mouvement": "20, leap 20",

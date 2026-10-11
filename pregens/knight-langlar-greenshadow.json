@@ -1,11 +1,11 @@
 {
   "version": 1,
   "class": "guerrier",
-  "name": "Knight Langlar “Greenshadow”",
+  "name": "Langlar “Greenshadow”",
   "is_active": 1,
   "data": {
-    "nom": "Knight Langlar “Greenshadow”",
-    "titre": "Warrior",
+    "nom": "Langlar “Greenshadow”",
+    "titre": "Knight",
     "metier": "Turnip Farmer",
     "alignement": "Lawful",
     "mouvement": "30 (25)",

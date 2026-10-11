@@ -1,11 +1,11 @@
 {
   "version": 1,
   "class": "guerrier",
-  "name": "Knight Guldor",
+  "name": "Guldor",
   "is_active": 1,
   "data": {
-    "nom": "Knight Guldor",
-    "titre": "Warrior",
+    "nom": "Guldor",
+    "titre": "Knight",
     "metier": "Gongfarmer",
     "alignement": "Lawful",
     "mouvement": "30 (25)",

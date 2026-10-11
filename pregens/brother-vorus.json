@@ -36,7 +36,7 @@
     "jet_chanceux": "Lucky sign (saving throws)",
     "langues": "Common",
     "portrait_source": "dcc",
-    "portrait_index": "0",
+    "portrait_index": "1",
     "attaque_cac": "+4",
     "degats_cac": "1d6+2",
     "att_distance": "0",
@@ -57,6 +57,7 @@
     "sort_6": "Cure paralysis",
     "sort_7": "Lotus stare",
     "sort_8": "Neutralize poison or disease",
-    "notes": "AC 21 vs. thieves\nPowers: lay on hands; turn unholy (+6 spell check); divine aid\nArtifact: Gorhan’s Hammer, artifact, +2 mace: INT 17; AL L; Bane: sphinxes (Painful wound; sword inflicts an additional 1d4 damage to sphinxes), serpents (Hardiness; when taking damage from serpents, wielder can make a Fort save (DC 1d20+10); success means the attack inflicts only half damage), wizards (+2 damage), golems (Summoning; when battling golems, mace can summon reinforcements, which are a creature type antithetical to the golem (per judge’s discretion) of total HD equal to half of wielder; mace can summon 1/day with 50% chance of success for duration 1d4 turns), gods (+1 damage), thieves (Defender; wielder gains a +2 AC bonus when defending against attacks from thieves); communication: speech and telepathy; SP detect traps within 60’, read Lizard Man and Gnome languages, detect gold within 10’, comprehend languages 1/day, resistance to critical hits ( makes the wielder hard to inflict critical damage upon. The wielder receives an automatic Fort save whenever a critical occurs against them. The DC is equal to the natural die roll used to score the crit (usually 20 but not always). If they make this save, the critical does not take effect)."
+    "notes": "AC 21 vs. thieves\nPowers: lay on hands; turn unholy (+6 spell check); divine aid\nGorhan’s Hammer 1d20+4 melee (1d6+2, 1d6+1d4+2 vs. sphinxes, 1d6+4 vs. wizards, 1d6+3 vs. gods)\nArtifact: Gorhan’s Hammer, artifact, +2 mace: INT 17; AL L; Bane: sphinxes (Painful wound; sword inflicts an additional 1d4 damage to sphinxes), serpents (Hardiness; when taking damage from serpents, wielder can make a Fort save (DC 1d20+10); success means the attack inflicts only half damage), wizards (+2 damage), golems (Summoning; when battling golems, mace can summon reinforcements, which are a creature type antithetical to the golem (per judge’s discretion) of total HD equal to half of wielder; mace can summon 1/day with 50% chance of success for duration 1d4 turns), gods (+1 damage), thieves (Defender; wielder gains a +2 AC bonus when defending against attacks from thieves); communication: speech and telepathy; SP detect traps within 60’, read Lizard Man and Gnome languages, detect gold within 10’, comprehend languages 1/day, resistance to critical hits ( makes the wielder hard to inflict critical damage upon. The wielder receives an automatic Fort save whenever a critical occurs against them. The DC is equal to the natural die roll used to score the crit (usually 20 but not always). If they make this save, the critical does not take effect).",
+    "sort_9": ""
   }
 }

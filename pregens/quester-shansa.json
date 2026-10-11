@@ -1,11 +1,11 @@
 {
   "version": 1,
   "class": "elfe",
-  "name": "Quester Shansa",
+  "name": "Shansa",
   "is_active": 1,
   "data": {
-    "nom": "Quester Shansa",
-    "titre": "Elf",
+    "nom": "Shansa",
+    "titre": "Quester",
     "metier": "Elven glassblower",
     "alignement": "Lawful",
     "mouvement": "30 (25)",
@@ -80,6 +80,10 @@
     "sort_niveau_9": "2",
     "sort_test_9": "",
     "sort_effet_9": "breath of life",
-    "notes": "Features: infravision 60’, immune to sleep and paralysis spells, vulnerable to iron (1 hp/day damage), heightened senses (+4 to detect secret doors, pass within 10’, may check to detect), lucky spell (+1 spell check, sleep)\nSpell notes: Forest walk: patron spell | War horn of Elfland: patron spell | Fixed rows: Invoke patron = powerful caster (1/day); Patron bond = karmic casting\nArtifact: Wizard staff, artifact, +1 staff: +5 melee (1d4+6); light (20’, at will), +1 to spell checks (sleep)."
+    "notes": "Features: infravision 60’, immune to sleep and paralysis spells, vulnerable to iron (1 hp/day damage), heightened senses (+4 to detect secret doors, pass within 10’, may check to detect), lucky spell (+1 spell check, sleep)\nSpell notes: Forest walk: patron spell | War horn of Elfland: patron spell | Fixed rows: Invoke patron = powerful caster (1/day); Patron bond = karmic casting\nArtifact: Wizard staff, artifact, +1 staff: +5 melee (1d4+6); light (20’, at will), +1 to spell checks (sleep).",
+    "sort_nom_10": "",
+    "sort_niveau_10": "",
+    "sort_test_10": "",
+    "sort_effet_10": ""
   }
 }

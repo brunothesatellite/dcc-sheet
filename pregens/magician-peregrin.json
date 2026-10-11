@@ -1,10 +1,10 @@
 {
   "version": 1,
   "class": "mage",
-  "name": "Magician Peregrin",
+  "name": "Peregrin",
   "is_active": 1,
   "data": {
-    "nom": "Magician Peregrin",
+    "nom": "Peregrin",
     "titre": "Wizard",
     "metier": "Astrologer",
     "alignement": "Neutral",
@@ -86,6 +86,10 @@
     "sort_niveau_9": "2",
     "sort_test_9": "",
     "sort_effet_9": "silenced",
-    "notes": "Spell notes: Invoke patron: 2/day | Sequester: patron spell"
+    "notes": "Spell notes: Invoke patron: 2/day | Sequester: patron spell",
+    "sort_nom_10": "",
+    "sort_niveau_10": "",
+    "sort_test_10": "",
+    "sort_effet_10": ""
   }
 }

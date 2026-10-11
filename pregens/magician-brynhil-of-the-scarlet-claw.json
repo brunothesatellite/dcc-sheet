@@ -1,10 +1,10 @@
 {
   "version": 1,
   "class": "mage",
-  "name": "Magician Brynhil “of the Scarlet Claw”",
+  "name": "Brynhil “of the Scarlet Claw”",
   "is_active": 1,
   "data": {
-    "nom": "Magician Brynhil “of the Scarlet Claw”",
+    "nom": "Brynhil “of the Scarlet Claw”",
     "titre": "Wizard",
     "metier": "Wizard’s Apprentice",
     "alignement": "Neutral",
@@ -82,6 +82,10 @@
     "sort_niveau_8": "2",
     "sort_test_8": "",
     "sort_effet_8": "fine control",
-    "notes": ""
+    "notes": "",
+    "sort_nom_9": "",
+    "sort_niveau_9": "",
+    "sort_test_9": "",
+    "sort_effet_9": ""
   }
 }

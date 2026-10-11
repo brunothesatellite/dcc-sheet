@@ -102,7 +102,9 @@ foreach ($d in @('lib', 'extras\sbom', 'snapshots')) {
 $iniPath = Join-Path $phpDir 'php.ini'
 Copy-Item (Join-Path $PhpSource 'php.ini') $iniPath -Force
 $needed = @('gd', 'zip', 'sqlite3', 'mbstring')
-$lines  = [System.Collections.Generic.List[string]](Get-Content $iniPath)
+# Lecture UTF-8 explicite : le php.ini source contient des commentaires
+# accentues (11/10/2026) que le decodage ANSI par defaut corrompait.
+$lines  = [System.Collections.Generic.List[string]](Get-Content $iniPath -Encoding utf8)
 for ($i = 0; $i -lt $lines.Count; $i++) {
   foreach ($m in $needed) {
     if ($lines[$i] -match ('^\s*;\s*extension\s*=\s*' + $m + '\s*$')) { $lines[$i] = "extension=$m" }
@@ -110,6 +112,21 @@ for ($i = 0; $i -lt $lines.Count; $i++) {
 }
 foreach ($m in $needed) {
   if (-not ($lines -contains "extension=$m")) { $lines.Add("extension=$m") }
+}
+[System.IO.File]::WriteAllLines($iniPath, $lines, (New-Object System.Text.UTF8Encoding($false)))
+# Plafonds d'upload de l'export/import global (ZIP json + images, 11/10/2026) :
+# php -S ignore .user.ini (SAPI cli-server) et l'app Windows lance php.exe -S ->
+# memes valeurs dans le php.ini embarque que le php-wasm de l'APK (64M/64M).
+# OPcache coupe (11/10/2026) : sous php -S, ses handlers plates provoquent un
+# « Fatal Error ... unusable due to ASLR » aleatoire au demarrage (serveur
+# mort-ne, constate sur l'app installee). Sans interet pour un php -S local.
+foreach ($kv in @(@('post_max_size', '70M'), @('upload_max_filesize', '64M'),
+                  @('opcache.enable', '0'), @('opcache.enable_cli', '0'))) {
+  $hit = $false
+  for ($i = 0; $i -lt $lines.Count; $i++) {
+    if ($lines[$i] -match ('^\s*;?\s*' + $kv[0] + '\s*=')) { $lines[$i] = "$($kv[0]) = $($kv[1])"; $hit = $true }
+  }
+  if (-not $hit) { $lines.Add("$($kv[0]) = $($kv[1])") }
 }
 [System.IO.File]::WriteAllLines($iniPath, $lines, (New-Object System.Text.UTF8Encoding($false)))
 Ok "php.ini configure (extensions : $($needed -join ', '))"

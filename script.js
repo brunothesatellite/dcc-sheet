@@ -97,6 +97,45 @@
     }, 600);
   }
 
+  /* Modale de progression de l'import global (« Importer tout ») :
+     l'import enchaine ~60 requetes (compter ~30 s sur un NAS lent) sans
+     aucun retour sinon — l'utilisateur croit a un plantage. Barrement
+     par phases ponderees (envoi 15 %, personnages 40 %, equipe 10 %,
+     cartes 30 %, finalisation 5 %). */
+  var importProgressEl = null;
+  var importProgressFill = null;
+  var importProgressStep = null;
+
+  function showImportProgress() {
+    hideImportProgress();
+    var overlay = document.createElement('div');
+    overlay.className = 'import-progress-overlay';
+    overlay.innerHTML = '<div class="import-progress-box">'
+      + '<div class="import-progress-title">Import en cours…</div>'
+      + '<div class="import-progress-track"><div class="import-progress-fill"></div></div>'
+      + '<div class="import-progress-step"></div>'
+      + '</div>';
+    document.body.appendChild(overlay);
+    importProgressEl = overlay;
+    importProgressFill = overlay.querySelector('.import-progress-fill');
+    importProgressStep = overlay.querySelector('.import-progress-step');
+    setImportProgress(0, 'Préparation…');
+  }
+
+  function setImportProgress(frac, label) {
+    if (!importProgressEl) return;
+    var pct = Math.max(0, Math.min(1, frac)) * 100;
+    if (importProgressFill) importProgressFill.style.width = pct.toFixed(1) + '%';
+    if (importProgressStep && label !== undefined) importProgressStep.textContent = label;
+  }
+
+  function hideImportProgress() {
+    if (importProgressEl && importProgressEl.parentNode) {
+      importProgressEl.parentNode.removeChild(importProgressEl);
+    }
+    importProgressEl = importProgressFill = importProgressStep = null;
+  }
+
   function hideSpinner() {
     clearTimeout(spinnerTimer);
     var spinner = $('#loading-spinner');
@@ -581,30 +620,61 @@
 
       try {
         var obj, missing = [];
+        showImportProgress();
+        setImportProgress(0.02, 'Lecture du fichier…');
         if (/\.zip$/i.test(file.name || '') || (file.type || '').indexOf('zip') !== -1) {
-          /* ZIP : le serveur extrait les images dans data/maps/ puis renvoie le JSON */
+          /* ZIP : le serveur extrait les images dans data/maps/ puis renvoie le JSON.
+             Plafond documenté 64 Mo (api/.user.ini + php-wasm) : au-delà, PHP
+             rejette le POST avant tout code (Warning HTML + $_FILES vide). */
+          if (file.size > 64 * 1024 * 1024) {
+            throw new Error('Fichier trop lourd (' + Math.round(file.size / 1048576) +
+              ' Mo) : plafond 64 Mo (post_max_size/upload_max_filesize).');
+          }
           var form = new FormData();
           form.append('file', file);
+          setImportProgress(0.05, 'Envoi du fichier…'
+            + (file.size ? ' (' + Math.round(file.size / 1048576) + ' Mo)' : ''));
           var res = await fetch('api/maps.php?action=import_all', {
             method: 'POST', credentials: 'same-origin', body: form,
           });
-          var payload = await res.json();
-          if (!res.ok || payload.ok === false) throw new Error(payload.error || 'Erreur serveur');
+          /* Le corps peut ne pas être du JSON (ex. Warning HTML de PHP si le
+             POST dépasse post_max_size malgré le plafond : res.json() lèverait
+             un SyntaxError cryptique) : on parse en texte d'abord. */
+          var rawText = '';
+          var payload = null;
+          try {
+            rawText = await res.text();
+            payload = JSON.parse(rawText);
+          } catch (e) { payload = null; }
+          if (!res.ok || !payload || payload.ok === false) {
+            if (payload && payload.error) throw new Error(payload.error);
+            if (rawText.charAt(0) === '<') {
+              throw new Error('Le serveur a renvoyé une page d\u2019erreur au lieu du JSON' +
+                ' (fichier trop lourd pour la config PHP ? post_max_size/upload_max_filesize' +
+                ' — voir api/.user.ini).');
+            }
+            throw new Error('Erreur serveur');
+          }
           obj = payload.json;
           missing = payload.missing || [];
+          setImportProgress(0.15, 'Fichier reçu, préparation…');
         } else {
           var text = await file.text();
           obj = JSON.parse(text);
+          setImportProgress(0.10, 'Fichier lu, vérification des images…');
           missing = await checkMapImages(obj && obj.maps);
+          setImportProgress(0.15, 'Préparation…');
         }
 
         if (!obj.characters || !Array.isArray(obj.characters) || obj.characters.length === 0) {
+          hideImportProgress();
           await showModal({ title: 'Format invalide', message: 'Le fichier JSON ne contient aucun personnage valide.', type: 'alert' });
           return;
         }
 
         var valid = obj.characters.every(function (c) { return c.class; });
         if (!valid) {
+          hideImportProgress();
           await showModal({ title: 'Format invalide', message: 'Un ou plusieurs personnages n\'ont pas de classe.', type: 'alert' });
           return;
         }
@@ -616,16 +686,26 @@
           danger: true,
         });
 
-        if (!confirmed) return;
+        if (!confirmed) { hideImportProgress(); return; }
 
         var existing = await api('characters.php', { method: 'GET', data: { action: 'list' } });
+        /* Unites de la phase personnages (15 % -> 55 %) : 1 suppression +
+           2 requetes (creation + sauvegarde) par personnage importe. */
+        var charUnits = (existing.characters || []).length + 2 * obj.characters.length;
+        var charDone = 0;
+        var charStep = function (label) {
+          charDone++;
+          setImportProgress(0.15 + 0.40 * (charUnits > 0 ? charDone / charUnits : 1), label);
+        };
         for (var i = 0; i < (existing.characters || []).length; i++) {
+          charStep('Suppression des anciens personnages… ' + (i + 1) + '/' + (existing.characters || []).length);
           await api('characters.php', { method: 'POST', body: { action: 'delete', id: existing.characters[i].id } });
         }
 
         var createdIds = [];
         for (var j = 0; j < obj.characters.length; j++) {
           var c = obj.characters[j];
+          charStep('Import des personnages… ' + (j + 1) + '/' + obj.characters.length);
           var res = await api('characters.php', {
             method: 'POST',
             body: {
@@ -638,9 +718,12 @@
           });
           if (res.character) {
             createdIds[j] = res.character.id;
+            charStep('Sauvegarde des personnages… ' + (j + 1) + '/' + obj.characters.length);
             await saveCharacter(res.character.id, c.data || {}, c.name);
           }
         }
+
+        setImportProgress(0.57, 'Données d\u2019équipe…');
 
         if (Object.prototype.hasOwnProperty.call(obj, 'team_notes')) {
           try {
@@ -695,11 +778,20 @@
         }
 
         /* Calques de cartes : remplacement complet (D8), puis rapport des
-           images de fond introuvables (R11) et de la limite de 10 (D13) */
+           images de fond introuvables (R11) et de la limite de 10 (D13).
+           Phase cartes (65 % -> 95 %) : suppression des anciens, puis
+           2 requetes (creation + sauvegarde) par carte importee. */
         var mapsImported = 0;
+        setImportProgress(0.65, 'Préparation des cartes…');
         try {
-          await deleteAllMaps();
-          mapsImported = await importMaps(obj.maps);
+          await deleteAllMaps(function (i, n) {
+            setImportProgress(0.65 + 0.10 * (n ? (i + 1) / n : 1),
+              'Suppression des anciennes cartes… ' + (i + 1) + '/' + n);
+          });
+          mapsImported = await importMaps(obj.maps, function (i, n) {
+            setImportProgress(0.75 + 0.20 * (n ? (i + 1) / n : 1),
+              'Import des cartes… ' + (i + 1) + '/' + n);
+          });
         } catch (e) {
           showToast('Erreur sauvegarde des cartes', 'error');
         }
@@ -707,11 +799,14 @@
           showToast('Image de fond introuvable (UID ' + String(uid).slice(0, 8) + '…)', 'error');
         });
 
+        setImportProgress(1, 'Terminé !');
+        hideImportProgress();
         showToast('Import reussi (' + obj.characters.length + ' persos' +
           (mapsImported ? ', ' + mapsImported + ' cartes' : '') + ')', 'success');
         invalidateEquipePanel();
         await switchTab(activeTab);
       } catch (err) {
+        hideImportProgress();
         await showModal({ title: 'Erreur', message: 'Erreur lors de l\'import : ' + err.message, type: 'alert' });
       }
     });
@@ -736,24 +831,30 @@
     }
   }
 
-  /* L'import « tout » remplace aussi les calques (D8) */
-  async function deleteAllMaps() {
+  /* L'import « tout » remplace aussi les calques (D8).
+     keep_images : l'import vient d'extraire les images du ZIP et va
+     re-referencer les MEMES uids — sans ce drapeau, chaque delete efface
+     l'image des qu'elle devient orpheline et toutes les cartes importees
+     pointent vers des fichiers absents (« Image de fond introuvable »). */
+  async function deleteAllMaps(onStep) {
     var res = await api('maps.php', { method: 'GET', data: { action: 'list' } });
     var rows = res.maps || [];
     for (var i = 0; i < rows.length; i++) {
-      await api('maps.php', { method: 'POST', body: { action: 'delete', id: rows[i].id } });
+      if (onStep) onStep(i, rows.length);
+      await api('maps.php', { method: 'POST', body: { action: 'delete', id: rows[i].id, keep_images: true } });
     }
   }
 
   /* Cree les calques du fichier ; au-dela de 10, les suivants sont signales
      dans un toast d'erreur (D13) plutot que de faire echouer tout l'import. */
-  async function importMaps(maps) {
+  async function importMaps(maps, onStep) {
     if (!Array.isArray(maps) || !maps.length) return 0;
     var created = 0;
     var skipped = [];
     for (var i = 0; i < maps.length; i++) {
       var m = maps[i];
       if (!m || typeof m !== 'object') continue;
+      if (onStep) onStep(i, maps.length);
       try {
         var res = await api('maps.php', {
           method: 'POST',

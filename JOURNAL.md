@@ -1827,3 +1827,25 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
 - Tag **`v3.1`** poussé sur `810217d` ; release GitHub créée avec **4 assets**, tailles **identiques aux fichiers locaux** : 24 947 337 (APK) / 88 366 640 (portable) / 78 088 190 (setup) / 10 814 243 (webapp) octets — https://github.com/brunothesatellite/dcc-sheet/releases/tag/v3.1
 - Notes vérifiées : corps publié **identique** au fichier source (6 785 caractères, 0 U+FFFD, 0 mojibake, écriture UTF-8 sans BOM hors redirection `>` — règle du skill).
 - **L'APK Conteneur n'est pas parmi les assets** : il reste en local dans `installeur\android\dist\` (contrôle explicite après publication).
+
+## Date : 11 octobre 2026 - Release v3.2 (FIX-TAB sorts, robustesse import/export, NOUVEAU keystore Android)
+
+### Portage FIX-TAB (descriptions de sorts, non-regression totale)
+
+- `FIX-TAB.md` du lecteur : tableaux `results-tbl` coupes entre 2 pages (orphelin `<p>` + reprise) — porte tel quel dans dcc-sheet (`table-continuation.js` copie octet pour octet, hash verifie).
+- Adaptations §5/§7 : voisins via `previous/nextElementSibling` (robuste au trou 304-321 et au `preloadAround` p-2..p+5), CSS prefixe `.spell-viewer`, raccord **avant** la mesure du delta de scroll et avant `reAnchor()`.
+- Suite `19-table-continuation` (109 assertions) : cible 132→133, 30 cas A + 4 cas B re-verifies sur le corpus frere (allowlist identique, jamais elargie), balayage complet, 9 negatifs, 2 sens d'insertion, trou 303→322, `stackable` intacts.
+
+### Robustesse export/import global (bug « images non trouvees » du 11/10)
+
+- Cause 1 (PC dev) : ZIP ~15 Mo > `post_max_size` 8M → Warning HTML devant le JSON (`Unexpected token '<'`). Fix : `D:\VS_Code_Workspaces\php\php.ini` (zip/gd/mbstring actives, 70M/64M, `display_errors=Off`), `api/.user.ini` (CGI/FPM), `-d` dans `deploy/start.bat` + `startup.bat` (`php -S` ignore `.user.ini`, verifie), plafonds dans le `php.ini` embarque Windows (`build.ps1`).
+- Cause 2 (toutes plateformes) : `deleteAllMaps` effacait les images que `import_all` venait d'extraire (chaque `delete` rendait l'UID orphelin) → 10 cartes sans fond apres un import reussi. Fix : drapeau `keep_images: true` sur `action=delete` pendant l'import (R12 inchange en suppression manuelle). Prouve sur le telephone via CDP (debug/apk debuggable temporaire, `check_images` + `dumpFs` : `data/maps/` vide → 10/10 apres re-import).
+- **Modale de progression** de l'import (barre + phases : envoi, personnages i/N, equipe, cartes i/M) : ~60 requetes, ~30 s sur NAS sans retour sinon. Bloquante, sous la modale de confirmation, retiree sur tous les chemins.
+- Suites : `17-map-export` (flux complet avec fond pre-existant), `18-maps-import` (+ keep/R12, 15 assertions), `20-import-limits` (plafonds, parse defensif, `.user.ini` deploie, opcache).
+
+### ⚠️ NOUVEAU keystore Android (ancien perdu, cf. message valide pre-release)
+
+- `installeur/android/keystore/dcc-sheet.keystore` recree (gitignore, sauvegarde hors PC imperatif) ; `INSTALL_FAILED_UPDATE_INCOMPATIBLE` constate sur l'appareil : mise a jour par-dessus impossible.
+- Migration utilisateur obligatoire : Exporter tout (ancienne app) → desinstaller ancienne app (+ ancien conteneur) → installer v3.2 → Importer tout. Communique en tete des notes de release + README (section APK) + MANUAL (§12 + §4.6 progression).
+- Toolchains Windows reinstallees per-user (pas d'admin) : .NET SDK 10.0.401 (`%LOCALAPPDATA%\dotnet-sdk-10`), Inno Setup 6.7.3 (`%LOCALAPPDATA%\Programs\Inno Setup 6`).
+- Recette Windows : OPcache coupe dans le `php.ini` embarque (`Fatal ASLR` aleatoire au demarrage du `php -S` embarque, reproduit 6/6 avec le payload, jamais avec le binaire de dev) + lecture UTF-8 explicite dans `build.ps1` (accents corrompus a la reecriture).

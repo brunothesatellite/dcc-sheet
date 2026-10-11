@@ -228,9 +228,10 @@ Le fichier contient la classe, le nom, le statut et **toutes les données de la 
 
 **Importer une collection** :
 1. Menu utilisateur → **Importer tout (JSON)**.
-2. Sélectionnez le fichier (format de l'[annexe A](#annexe-a--format-json-dexportimport)).
-3. Le fichier est validé (présence d'au moins un personnage, classe de chacun).
-4. Confirmez l'avertissement **« Cela remplacera tous vos personnages actuels. Cette action est irreversible. »** (bouton rouge).
+2. Sélectionnez le fichier (format de l'[annexe A](#annexe-a--format-json-dexportimport)) : `.json` seul, ou `.zip` (JSON + images de fond des cartes, produit automatiquement par l'export dès qu'un fond existe).
+3. Une **modale de progression** suit l'import (envoi, personnages `i/N`, équipe, cartes `i/M`) : l'import enchaîne de nombreuses requêtes et peut durer **~30 secondes** (surtout sur NAS) — **ne fermez pas**, attendez le message final.
+4. Le fichier est validé (présence d'au moins un personnage, classe de chacun). Un fichier trop lourd (> 64 Mo) est refusé avec un message explicite avant tout envoi.
+5. Confirmez l'avertissement **« Cela remplacera tous vos personnages actuels. Cette action est irreversible. »** (bouton rouge).
 5. **Tous** vos personnages actuels sont supprimés, puis le contenu du fichier est recréé ; un toast annonce le nombre importé.
 6. Si le fichier contient le champ **`team_notes`** (même vide), vos **notes d'équipe** sont remplacées par son contenu ; les anciens exports, dépourvus de ce champ, **laissent vos notes actuelles intactes**.
 7. **Le statut de chaque personnage est conservé** : un PJ exporté **à l'auberge** repart **à l'auberge** (il n'apparaît ni dans l'onglet Équipe, ni dans l'ordre de marche) ; un PJ en expédition repart en expédition.
@@ -819,6 +820,15 @@ La fiche est aussi disponible en **application Android** (Android 8 et plus) : l
 3. Lancer l'application **DCC** (icône : deux épées croisées, un dé, « DCC ») : la page de connexion s'ouvre directement.
 
 Aucune configuration n'est nécessaire : l'application embarque toute la webapp.
+
+### Mettre à jour vers une version signée avec une autre clé (v3.2+)
+
+> **⚠️ À partir de la v3.2, l'application est signée avec une NOUVELLE clé** (l'ancien keystore est perdu). Android **refuse** d'installer la mise à jour par-dessus l'ancienne version, et **désinstaller efface vos données** : suivez impérativement cet ordre, sinon vos personnages seront définitivement perdus.
+
+1. Dans l'**ancienne** application : menu utilisateur → **Exporter tout** — conservez le fichier `dcc-persos-<date>.zip` en lieu sûr (idéalement hors du téléphone).
+2. **Désinstallez** l'ancienne application « DCC Sheet » (et l'ancien « DCC Contenu » si présent).
+3. **Installez** la nouvelle version (et le nouveau conteneur de contenu si vous l'utilisez).
+4. Dans la nouvelle application : **Importer tout** → votre fichier — vérifiez personnages, notes, cartes et fonds de cartes.
 
 ### Le conteneur de contenu (optionnel)
 

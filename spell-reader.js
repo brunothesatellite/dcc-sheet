@@ -414,6 +414,30 @@
        la page est ajoutee au-dessus de la position courante.
        NB : .spell-viewer-body porte overflow-anchor:none (style.css) : sinon le
        navigateur epingle deja la vue et la compensation serait doublee. */
+    /* Raccord des tableaux results-tbl coupes entre 2 pages (rendu seul,
+       content/*.js intact, portage de FIX-TAB du dcc-spells-reader) :
+       "14-17 (suite)" en tete de page suivante (cas A) ou rattachement de
+       la queue a la derniere cellule (cas B, rang final). Idempotent
+       (marqueur data-tbl-cont-fixed), independant de l'ordre d'insertion :
+       on teste les 2 paires autour du noeud insere, via ses voisins DOM
+       (robuste au trou 304-321). Ne touche jamais aux tableaux d'index
+       (stackable) et ne jette jamais (jamais de crash de rendu). */
+    function fixTableContinuationsFor(node) {
+      if (!window.DCC_TABLE_CONT || !node) return;
+      var prev = node.previousElementSibling;
+      var next = node.nextElementSibling;
+      if (prev && prev.tagName === 'SECTION' && node.tagName === 'SECTION') {
+        try {
+          window.DCC_TABLE_CONT.tryFixPair(prev, node, document);
+        } catch (_) { /* jamais de crash de rendu */ }
+      }
+      if (node.tagName === 'SECTION' && next && next.tagName === 'SECTION') {
+        try {
+          window.DCC_TABLE_CONT.tryFixPair(node, next, document);
+        } catch (_) { /* jamais de crash de rendu */ }
+      }
+    }
+
     function insert(n, html) {
       if (pages.querySelector('[data-loaded-page="' + n + '"]')) return null;
       var wrap = document.createElement('div');
@@ -430,11 +454,16 @@
       if (refNode) {
         var before = body.scrollHeight;
         pages.insertBefore(node, refNode);
+        /* Raccord AVANT la mesure du delta : le correctif modifie les
+           hauteurs (ligne "(suite)" ou fusion), y compris dans la page
+           precedente situee au-dessus, donc la compensation doit l'inclure. */
+        fixTableContinuationsFor(node);
         var delta = body.scrollHeight - before;
         body.scrollTop += delta;
         if (anchorScroll !== null) anchorScroll += delta;
       } else {
         pages.appendChild(node);
+        fixTableContinuationsFor(node);
       }
       if (pages.firstElementChild) first = parseInt(pages.firstElementChild.getAttribute('data-loaded-page'), 10);
       if (pages.lastElementChild) last = parseInt(pages.lastElementChild.getAttribute('data-loaded-page'), 10);

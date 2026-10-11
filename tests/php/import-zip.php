@@ -77,6 +77,11 @@ function req($port, $method, $path, $body, array $headers, &$cookie) {
 foreach (glob($repo . '/api/*.php') as $f) {
     copy($f, $tmp . '/webroot/api/' . basename($f));
 }
+/* Fidelite : l'api embarquee est livree avec son .user.ini (plafonds
+   post_max_size/upload_max_filesize, cf. 20-import-limits). */
+if (is_file($repo . '/api/.user.ini')) {
+    copy($repo . '/api/.user.ini', $tmp . '/webroot/api/.user.ini');
+}
 
 $UID_OK = 'a1b2c3d4e5f60718293a4b5c6d7e8f90';   // presente dans le ZIP
 $UID_ABSENT = 'ffeeddccbbaa99887766554433221100'; // referencee mais pas dans le ZIP
@@ -109,7 +114,10 @@ $zip->close();
 /* ---------- serveur de test ---------- */
 $descriptors = [1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
 $server = proc_open(
-    [PHP_BINARY, '-S', '127.0.0.1:' . $port, '-t', $tmp . '/webroot'],
+    // Fidelite : memes plafonds que les lanceurs dev (start.bat/startup.bat),
+    // php -S ignorant .user.ini (SAPI cli-server).
+    [PHP_BINARY, '-d', 'post_max_size=70M', '-d', 'upload_max_filesize=64M',
+     '-S', '127.0.0.1:' . $port, '-t', $tmp . '/webroot'],
     $descriptors, $pipes, $tmp
 );
 $ready = false;
@@ -173,6 +181,50 @@ if ($ready) {
         && in_array($UID_ABSENT, $missing, true)
         && !in_array($UID_OK, $missing, true),
         'check_images : fichier casse (0 octet) signale missing — got ' . json_encode($missing));
+
+    /* ---------- flux complet d'import : le remplacement des calques ne
+       doit PAS effacer les images que import_all vient d'extraire
+       (regression 11/10/2026 sur l'APK : deleteAllMaps rendait chaque UID
+       orphelin -> toutes les cartes importees sans fond). ---------- */
+    $body = json_encode(['action' => 'create', 'name' => 'Carte importee']);
+    [$st, $resp] = req($port, 'POST', '/api/maps.php', $body,
+        ['Content-Type: application/json'], $cookie);
+    $j = json_decode($resp, true);
+    $mapId = isset($j['map']['id']) ? (int)$j['map']['id'] : 0;
+    ok($st === 200 && $mapId > 0, 'create : calque cree pour le flux complet');
+
+    $body = json_encode(['action' => 'save', 'id' => $mapId,
+        'bg_uid' => $UID_OK, 'bg_name' => 'fond1.webp']);
+    [$st, $resp] = req($port, 'POST', '/api/maps.php', $body,
+        ['Content-Type: application/json'], $cookie);
+    ok($st === 200, 'save : calque reference le fond extrait (R10)');
+
+    // remplacement type import (« Importer tout ») : delete avec keep_images
+    $body = json_encode(['action' => 'delete', 'id' => $mapId, 'keep_images' => true]);
+    [$st, $resp] = req($port, 'POST', '/api/maps.php', $body,
+        ['Content-Type: application/json'], $cookie);
+    $j = json_decode($resp, true);
+    ok($st === 200 && !empty($j['ok']) && empty($j['image_deleted']),
+        'delete keep_images : reponse ok sans suppression');
+    ok(is_file($f) && file_get_contents($f) === $payload,
+        'delete keep_images : le fond extrait est conserve');
+
+    // suppression manuelle (module dessin) : R12 inchange, l'image part
+    $body = json_encode(['action' => 'create', 'name' => 'Carte ephemere']);
+    [$st, $resp] = req($port, 'POST', '/api/maps.php', $body,
+        ['Content-Type: application/json'], $cookie);
+    $j = json_decode($resp, true);
+    $mapId2 = isset($j['map']['id']) ? (int)$j['map']['id'] : 0;
+    $body = json_encode(['action' => 'save', 'id' => $mapId2,
+        'bg_uid' => $UID_OK, 'bg_name' => 'fond1.webp']);
+    req($port, 'POST', '/api/maps.php', $body,
+        ['Content-Type: application/json'], $cookie);
+    $body = json_encode(['action' => 'delete', 'id' => $mapId2]);
+    [$st, $resp] = req($port, 'POST', '/api/maps.php', $body,
+        ['Content-Type: application/json'], $cookie);
+    $j = json_decode($resp, true);
+    ok($st === 200 && !empty($j['image_deleted']), 'delete sans drapeau : image supprimee (R12)');
+    ok(!is_file($f), 'delete sans drapeau : fichier parti');
 }
 
 if (is_resource($server)) {

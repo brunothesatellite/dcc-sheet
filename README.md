@@ -63,9 +63,10 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - **Loupe a gauche de chaque nom de sort renseigne** (Mage, Elfe, Clerc ; ligne vide = pas d'icone) ; sur les lignes fixes de l'Elfe : loupe sur *Lier un patron*, **loupe + loupe patron** sur *Invoquer un Patron* (lit le champ « Patron(s) » au moment du clic)
 - **Plusieurs patrons dans « Patron(s) »** : la loupe rouge ouvre d'abord une **petite fenetre de selection** listant les patrons saisis, puis la description de celui clique (separateurs `;`, `/`, `+`, ` et ` — la virgule ne separe **jamais**, certains noms de patrons en contiennent) ; une saisie inconnue reste affichee en grise et declenche la modale **« Patron introuvable »** ; un seul patron : ouverture directe, inchangee
 - **Popup plein ecran** dans le theme de la fiche : texte HTML complet du sort (stats, description, table de resultats), **defilement infini** (haut + bas, plages 127-303 / 322-356, trou 304-321 saute), demarrage sur le sort clique ; bouton « page scannee » masque
+- **Tableaux de resultats coupes entre 2 pages raccordes au rendu** (`table-continuation.js`, porte du lecteur) : la fin de ligne tombee sur la page suivante devient une ligne `« 14-17 (suite) »` (tableau qui continue) ou est fusionnee dans la derniere cellule (rang final `32+`, cesure absorbee) ; `content/*.js` intacts, tableaux d'index jamais touches, doute = statu quo
 - **Nom ignore le numero de page** (`Boule de feu 203`), accents/casse/spaces sans importance, singulier/pluriel et petites fautes de frappe toleres ; echec → modale **« Sort introuvable »** (verifier le nom du sort)
 - **Noms en anglais** : `../dcc-spells-reader/spell-translation.js` (module ES lu en texte, 130 paires FR/EN) traduit la saisie avant resolution — la popup ouvre le **titre francais** du livre et affiche le **nom anglais saisi en sous-titre** ; fichier absent ou erreur reseau → comportement precedent, inchange (1 seule requete `fetch`, memorisee)
-- Fermeture : bouton X ou touche Echap ; suite `09-spell-reader` (143 assertions) + smoke sur les donnees reelles (144/144 noms resolus, 130/130 traductions FR et EN sans divergence de page)
+- Fermeture : bouton X ou touche Echap ; suite `09-spell-reader` (143 assertions) + `19-table-continuation` (109 : cas 132→133, 30 cas A, 4 cas B, balayage anti-regression du corpus, negatifs, insertion dans les 2 sens) + smoke sur les donnees reelles (144/144 noms resolus, 130/130 traductions FR et EN sans divergence de page)
 
 ### Portrait
 - 8 sources d'images : **DCC** (tokens officiels, 20 images), **D&D Red Box 1983** (7 illustrations), **Leremy Gan** (7 silhouettes), **Shadowdark** (12 images), **Jeff Stevens** (8 planches), **Gonzo** (30 images), **Old School** (17 images) et **Funnel - niveau 0** (75 tokens `icons/funnel-tokens/`, catalogue `funnel-icons.js`)
@@ -103,8 +104,9 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - **Sauvegarde automatique** pendant le dessin (toast disquette) ; outil/couleur/taille et **zoom/position par carte** restaures a la reouverture
 - **10 cartes maximum** par compte (message d'erreur invitant a supprimer un calque)
 - **Export/Import par calque** (JSON `v:3` avec UID du fond, portant sur le **calque actif** : l'import remplace son dessin) ou **global** (`Exporter tout` / `Importer tout`) : JSON seul, ou **ZIP** (JSON + `images/<uid>.webp`) des qu'un fond existe ; image introuvable a l'import = toast d'erreur + grille par defaut, dessin conserve
+- **Import global : modale de progression** (barre + phase : envoi, personnages `i/N`, equipe, cartes `i/M`) — l'import enchaine ~60 requetes (~30 s sur NAS lent) ; **plafond 64 Mo** refuse explicitement au-dela ; **les images extraites du ZIP survivent au remplacement des calques** (`keep_images`, sinon tous les fonds importes etaient effaces) ; limites PHP documentees dans `api/.user.ini` (CGI/FPM) + `-d` des lanceurs `php -S` + `php.ini` embarque Windows ; OPcache coupe dans le payload Windows (fatal ASLR aleatoire au demarrage du `php -S` embarque)
 - Suppression d'une carte = suppression de son image de fond (si plus referencee)
-- Suites `15-map-draw` (127 assertions), `16-map-persist` (34), `17-map-export` (32)
+- Suites `15-map-draw` (127 assertions), `16-map-persist` (34), `17-map-export` (38), `18-maps-import` (15), `20-import-limits` (36)
 
 ### Sauvegarde automatique
 - Debounce 600ms sur tous les champs modifiables
@@ -386,6 +388,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File installeur\android-content\_
 ```
 
 Chaque build re-synchronise les assets (assertions de redistribution bloquantes), compile `assembleRelease` et signe avec `apksigner` (ne jamais lancer les 2 builds gradle en parallele : cache partage). L'icone (meme dessin que `favicon.svg` : epees, des, DCC) se regenere via `installeur/android/make-android-icons.ps1` (PNG plein cadre + calque adaptatif `mipmap-anydpi-v26`). Cote applicatif, des hooks injectes par `MainActivity` (Java/manifest, **webapp inchangee**) corrigent le selecteur de portraits et les exports de fichiers.
+
+> **⚠️ A partir de la v3.2 : NOUVELLE cle de signature Android** (l'ancien keystore est perdu). Android **refuse** d'installer la v3.2 par-dessus l'ancienne version : il faut **exporter ses donnees** (« Exporter tout ») depuis l'ancienne app, **desinstaller** l'ancienne app (et l'ancien conteneur de contenu), **installer** la v3.2 puis **reimporter** (« Importer tout »). Sans export prealable, la desinstallation efface definitivement la base locale. PC Windows et webapp serveur : mise a jour normale, `data/` conservee.
 
 ## Dependances
 

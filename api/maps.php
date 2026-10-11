@@ -221,8 +221,21 @@ if ($action === 'delete') {
     $stmt->bindValue(':id', $id, SQLITE3_INTEGER);
     $stmt->execute();
 
+    /* Import global (« Importer tout », script.js deleteAllMaps) : l'import
+       vient d'extraire les images du ZIP (import_all) et va re-referencer
+       les MEMES uids (importMaps). Sans ce drapeau, chaque delete effacait
+       l'image a l'instant ou sa ligne disparaissait (deleteImageIfOrphan :
+       compteur retombe a 0) et l'import se terminait avec 10 references
+       vers 0 fichier — « Image de fond introuvable » sur toutes les cartes
+       (bug constate le 11/10/2026 sur l'APK, reproductible sur PC : le flux
+       complet n'etait couvert nulle part, ni POC G5 ni tests 17/18 qui
+       s'arretent a import_all). La suppression manuelle d'un calque
+       (module dessin) n'envoie jamais ce drapeau : R12 inchange. */
+    $keepImages = !empty($input['keep_images']);
     $dir = mapsDir($MAPS_DIR);
-    $imageDeleted = $dir ? deleteImageIfOrphan($db, $user['id'], $row['bg_uid'], $dir) : false;
+    $imageDeleted = (!$keepImages && $dir)
+        ? deleteImageIfOrphan($db, $user['id'], $row['bg_uid'], $dir)
+        : false;
     jsonResponse(['ok' => true, 'image_deleted' => $imageDeleted]);
 }
 
@@ -290,7 +303,10 @@ if ($action === 'export_zip') {
     foreach ($uids as $uid) {
         $uid = (string)$uid;
         $src = imageFile($dir, $uid);
-        if (!$src || !is_file($src)) { $missing[] = $uid; continue; }
+        /* 0 octet = fichier casse = introuvable (R11, comme check_images et
+           missingImages) : on l'exclut du ZIP et on le signale dans le
+           rapport au lieu d'embarquer une image vide. */
+        if (!$src || !is_file($src) || filesize($src) === 0) { $missing[] = $uid; continue; }
         $zip->addFile($src, 'images/' . $uid . '.webp');
         $added++;
     }

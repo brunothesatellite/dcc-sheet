@@ -154,7 +154,10 @@ function createHarness() {
         data = { ok: true };
       } else if (action === 'delete') {
         const m = state.maps.find(function (x) { return x.id === Number(body.id); });
-        if (m && m.bg_uid) delete state.images[m.bg_uid];
+        /* Import global : keep_images preserve les images que l'import va
+           re-referencer (regression 11/10/2026 : sans lui, deleteAllMaps
+           effacait les fonds que import_all venait d'extraire). */
+        if (m && m.bg_uid && !body.keep_images) delete state.images[m.bg_uid];
         state.maps = state.maps.filter(function (x) { return x.id !== Number(body.id); });
         data = { ok: true, image_deleted: true };
       } else if (action === 'check_images') {
@@ -178,6 +181,9 @@ function createHarness() {
       ok: true,
       status: 200,
       json: async function () { return data; },
+      /* import_all lit res.text() puis JSON.parse (parse défensif : le
+         serveur peut renvoyer du HTML si le POST dépasse post_max_size) */
+      text: async function () { return JSON.stringify(data); },
       blob: async function () { return { size: 42 }; },
     };
   }
@@ -354,6 +360,69 @@ module.exports = async function suite() {
     }), 'UID manquant signale meme depuis un ZIP (R11)');
   }
 
+  /* ---------------- 4b. import .zip : les fonds extraits survivent au
+     remplacement des calques (regression 11/10/2026 : deleteAllMaps
+     effacait les images que import_all venait d'extraire, car chaque
+     delete rendait l'UID orphelin -> toutes les cartes importees
+     pointaient vers des fichiers absents) */
+  {
+    const h = createHarness();
+    const UID = '9c1a44e20b3d4f5a8e7c6b5a4d3c2b1a';
+    // fichier extrait par import_all + ancien calque qui le reference
+    h.state.images[UID] = { name: 'fond.webp' };
+    h.state.maps.push({
+      id: 4, name: 'Ancienne',
+      data: { v: 3, w: 1, h: 1, ops: [] }, ui: {}, bg_uid: UID, bg_name: 'fond.webp',
+    });
+    h.state.importResponse = {
+      ok: true,
+      json: {
+        version: 2,
+        characters: [{ name: 'Delta', class: 'clerc', is_active: 1, data: {} }],
+        maps: [{
+          name: 'Donjon ZIP', w: 1600, h: 900, ops: [], ui: {},
+          bg: { uid: UID, name: 'fond.webp' },
+        }],
+      },
+      images: 1,
+      missing: [],
+    };
+
+    await waitFor(function () {
+      return !!h.doc.querySelector('#user-menu button[data-action="import-all"]');
+    }, 3000);
+    h.doc.querySelector('#user-menu button[data-action="import-all"]').click();
+    await waitFor(function () { return !!h.input(); }, 3000);
+
+    Object.defineProperty(h.input(), 'files', {
+      value: [{ name: 'sauvegarde.zip', type: 'application/zip' }],
+      configurable: true,
+    });
+    h.input().dispatchEvent(new h.win.Event('change'));
+
+    const confirmed = await waitFor(function () {
+      return !!h.doc.querySelector('#modal-actions .modal-btn-danger');
+    }, 4000);
+    if (confirmed) h.doc.querySelector('#modal-actions .modal-btn-danger').click();
+
+    const done = await waitFor(function () {
+      return h.state.toasts.some(function (t) { return /Import reussi/.test(t.message); });
+    }, 8000);
+    r.ok(done, 'import du ZIP avec fond termine');
+
+    const delCall = h.state.calls.filter(function (c) {
+      return c.action === 'delete' && c.body && c.body.id === 4;
+    })[0];
+    r.ok(!!delCall && delCall.body.keep_images === true,
+      'deleteAllMaps preserve les images (keep_images: true)');
+    r.ok(!!h.state.images[UID], 'le fond extrait survit au remplacement des calques');
+    const donjon = h.state.maps.find(function (m) { return m.name === 'Donjon ZIP'; });
+    r.ok(donjon && donjon.bg_uid === UID, 'le calque importe reference le fond (R10)');
+    r.ok(!h.state.toasts.some(function (t) {
+      return t.type === 'error' && /Image de fond introuvable/.test(t.message);
+    }), 'aucun faux "Image de fond introuvable" apres un import complet');
+  }
+
   /* ---------------- 5. import au-dela de 10 calques (D13) */
   {
     const h = createHarness();
@@ -393,6 +462,10 @@ module.exports = async function suite() {
     r.ok(h.state.toasts.some(function (t) {
       return t.type === 'error' && /Calques non importes/.test(t.message);
     }), 'calques ecartes signales (D13)');
+    // la modale de progression ne doit jamais rester affichee (ni en succes,
+    // ni derriere la confirmation) : elle est retiree avant le toast final.
+    r.ok(!h.doc.querySelector('.import-progress-overlay'),
+      'aucune modale de progression residuelle apres import');
   }
 
   return r;

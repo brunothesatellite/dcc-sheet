@@ -38,6 +38,8 @@ module.exports = function suite() {
     '.spell-viewer-sub',
     '.spell-viewer .page',
     '.spell-viewer .page h3.spell-title',
+    '.spell-viewer table.data td.range.suite',
+    '.import-progress-overlay',
     '.spell-viewer table.stackable',
     '@media (max-width: 599px)',
     '.patron-pick-overlay',
@@ -167,6 +169,21 @@ module.exports = function suite() {
   if (deadBlock) {
     r.ok(deadBlock[0].indexOf('position: absolute') !== -1, '.dead-overlay is absolute');
     r.ok(deadBlock[0].indexOf('pointer-events: none') !== -1, '.dead-overlay never blocks clicks');
+  }
+
+  // Progression de l'import global : modale bloquante plein ecran, sous la
+  // modale de confirmation (10001) et au-dessus des toasts (9999).
+  const progOverlay = css.match(/\.import-progress-overlay \{[^}]+\}/);
+  r.ok(!!progOverlay, '.import-progress-overlay block found');
+  if (progOverlay) {
+    r.ok(progOverlay[0].indexOf('position: fixed') !== -1, '.import-progress-overlay is fixed');
+    r.ok(progOverlay[0].indexOf('z-index: 10000') !== -1,
+      '.import-progress-overlay below the confirm modal (10000 < 10001)');
+  }
+  const progFill = css.match(/\.import-progress-fill \{[^}]+\}/);
+  r.ok(!!progFill, '.import-progress-fill block found');
+  if (progFill) {
+    r.ok(progFill[0].indexOf('width: 0%') !== -1, '.import-progress-fill starts at 0%');
   }
 
   return r;

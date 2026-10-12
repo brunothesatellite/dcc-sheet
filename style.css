@@ -201,6 +201,37 @@ ul, ol {
   }
 }
 
+/* --- Icone « reference » : meme cercle que carte/theme, placee a gauche
+   de la carte (aide des classes : resume de classe ou document integral).
+   32 px en mobile comme le bouton de theme (mesure 360 px : le logo
+   14 px fait ~148 px, il reste ~140 px pour les 4 pastilles). --- */
+.ref-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--header-text);
+  cursor: pointer;
+  font-size: 17px;
+  line-height: 1;
+  transition: background 0.2s;
+  flex: none;
+}
+
+.ref-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.ref-toggle svg {
+  width: 19px;
+  height: 19px;
+}
+
 .auth-user {
   display: flex;
   align-items: center;
@@ -487,6 +518,13 @@ ul, ol {
 .btn-export:hover {
   background: var(--line);
   border-color: var(--muted);
+}
+
+.btn-import svg,
+.btn-export svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -2692,10 +2730,31 @@ tr.team-stats-detail.open .team-detail-wrap {
     display: none;
   }
 
+/* Tres petits ecrans : le logo s'efface en ellipsis en dernier recours
+   (4 pastilles de 28-36 px + libelle), sans toucher au reste. */
+@media (max-width: 380px) {
+  .topbar {
+    gap: 4px;
+  }
+
+  .logo {
+    font-size: 13px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
   .theme-toggle {
     width: 32px;
     height: 32px;
     font-size: 16px;
+  }
+
+  .ref-toggle {
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
   }
 
   #auth-guest .auth-btn {
@@ -3625,6 +3684,282 @@ html:not(.has-spell-reader) .spell-lookup,
   margin-bottom: 0;
 }
 
+/* --- Visionneuse d'aide des classes (aide-classes.js) : meme pattern que
+   le lecteur de sorts (overlay plein ecran, colonne 520 px). --- */
+.help-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  background: var(--bg);
+}
+
+.help-viewer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.help-header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--header-bg);
+  color: var(--header-text);
+}
+
+.help-names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.help-title {
+  font-family: var(--font-heading);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.help-sub {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-style: italic;
+  opacity: 0.75;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.help-close {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.help-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.help-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-anchor: none;
+  -webkit-overflow-scrolling: touch;
+  background: var(--bg);
+}
+
+.help-column {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 10px 8px 48px;
+}
+
+/* Sommaire (mode integral) : retour a la ligne, jamais de defilement
+   horizontal (inutilisable a la souris sur PC). */
+.help-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 2px 2px 10px;
+}
+
+.help-toc button {
+  flex: none;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--input-border);
+  border-radius: 12px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.help-toc button:hover {
+  border-color: var(--tab-active);
+  color: var(--tab-active);
+}
+
+.help-section {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto 6px;
+  padding: 8px 14px 16px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.help-section h2 {
+  font-family: var(--font-heading);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink);
+  margin: 16px 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 2px solid var(--tab-active);
+  scroll-margin-top: 6px;
+  overflow: hidden;
+}
+
+.help-section h2 .dv {
+  float: right;
+  font-size: 12px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--header-text);
+  background: var(--tab-active);
+  padding: 3px 10px;
+  border-radius: 10px;
+  margin: 4px 0 4px 8px;
+  white-space: nowrap;
+}
+
+.help-section .sub {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--muted);
+  margin: 2px 0 10px;
+}
+
+.help-section h3 {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--tab-active);
+  margin: 18px 0 8px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--line);
+  scroll-margin-top: 6px;
+}
+
+.help-section p {
+  margin: 0 0 0.6em;
+  text-align: justify;
+}
+
+.help-section ul {
+  margin: 6px 0;
+  padding-left: 20px;
+}
+
+.help-section li {
+  margin-bottom: 6px;
+}
+
+.help-section .table-wrap {
+  overflow-x: auto;
+  margin: 8px 0 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.help-section table.ref {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.help-section table.ref.compact {
+  font-size: 12.5px;
+}
+
+.help-section table.ref th,
+.help-section table.ref td {
+  border: 1px solid var(--line);
+  padding: 5px 7px;
+  vertical-align: top;
+  text-align: center;
+}
+
+.help-section table.ref tr:first-child th {
+  background: var(--field-bg);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.help-section table.ref td:first-child,
+.help-section table.ref th:first-child {
+  background: var(--field-bg);
+  font-weight: 700;
+  white-space: nowrap;
+  position: sticky;
+  left: 0;
+}
+
+.help-section table.ref.fit {
+  min-width: 0;
+}
+
+.help-section table.ref.fit th,
+.help-section table.ref.fit td {
+  white-space: normal;
+}
+
+.help-section .note {
+  background: var(--field-bg);
+  border-left: 3px solid var(--tab-active);
+  padding: 6px 10px;
+  margin: 8px 0;
+  font-size: 13.5px;
+}
+
+.help-divider {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 14px 0 8px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+.help-divider::before,
+.help-divider::after {
+  content: " — ";
+}
+
+.help-foot {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 8px 14px 0;
+  text-align: center;
+  font-size: 12.5px;
+  font-style: italic;
+  color: var(--muted);
+}
+
 /* --- Choix d'un patron : "Patron(s)" en contient plusieurs --- */
 .patron-pick-overlay {
   position: fixed;
@@ -3788,6 +4123,24 @@ html:not(.has-spell-reader) .spell-lookup,
 
   .spell-viewer table.data.results-tbl td.range {
     width: 68px;
+  }
+
+  .help-column {
+    padding: 0 0 48px;
+  }
+
+  .help-section {
+    max-width: none;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    padding: 8px 10px 16px;
+  }
+
+  .help-section h2 .dv {
+    float: none;
+    display: inline-block;
+    margin: 6px 0 2px;
   }
 }
 

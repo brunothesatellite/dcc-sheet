@@ -2084,6 +2084,20 @@
       onClick: function () { exportCharacter(charData); },
     });
 
+    /* Aide de la classe (cas 1) : fiche de la classe + Table 1-1.
+       Une seule place, pour les 8 classes (module optionnel). */
+    var helpBtn = el('button', {
+      className: 'btn-export',
+      innerHTML: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+        'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<path d="M12 5.5C10 4 7.5 3.5 4 3.5v13.5c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2V3.5c-3.5 0-6 .5-8 2z"/>' +
+        '<path d="M12 5.5V19"/></svg> Résumé',
+      title: 'Résumé de la classe + Table 1-1 des caractéristiques',
+      onClick: function () {
+        if (window.DCCClassHelp) window.DCCClassHelp.openClass(cls);
+      },
+    });
+
     var toggleWrapper = el('div', { className: 'toggle-inn' });
     var toggle = el('label', { className: 'switch' });
     var input = el('input', { type: 'checkbox' });
@@ -2110,6 +2124,7 @@
 
     header.appendChild(left);
     header.appendChild(exportBtn);
+    header.appendChild(helpBtn);
 
     /* Niveau 0 : « Autre tirage » (session de tirage uniquement) / Promouvoir */
     if (cls === 'lvl0') {
@@ -2438,6 +2453,15 @@
     if (mapBtn) {
       mapBtn.addEventListener('click', function () {
         if (window.DCCMapDraw) window.DCCMapDraw.open();
+      });
+    }
+
+    /* Aide des classes (cas 2, global) : document integral + sommaire.
+       Module optionnel, comme le lecteur de sorts : sans lui, rien. */
+    var helpBtn = $('#btn-aide');
+    if (helpBtn) {
+      helpBtn.addEventListener('click', function () {
+        if (window.DCCClassHelp) window.DCCClassHelp.openFull();
       });
     }
 

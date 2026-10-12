@@ -73,6 +73,24 @@ function testCss(r) {
 
   r.ok(/body \{[^}]*background-image: var\(--teximg, none\), var\(--vig, none\), var\(--noise, none\)/.test(css),
     'body : texture du couple avec replis (uni sinon)');
+  r.ok(/body \{[^}]*background-blend-mode: var\(--tblend, normal\), normal, normal/.test(css),
+    'body : --tblend vise la couche texture (meme ordre de couches)');
+
+  // dosage par couple (12/10/2026) : lighten = taches claires sur fond clair,
+  // screen = adoucit un motif sombre ou releve un grain sur fond sombre,
+  // multiply = motif plus sombre que le fond (creme sur ivoire)
+  const tblends = css.match(/--tblend: (lighten|screen|multiply);/g) || [];
+  r.eq(tblends.length, 12, '6 couples doses x2 scopes (got ' + tblends.length + ')');
+  r.ok(tblends.filter(function (t) { return t === '--tblend: lighten;'; }).length === 4,
+    'lighten x4 (parchemin/reliquaire clairs x2 scopes)');
+  r.ok(tblends.filter(function (t) { return t === '--tblend: screen;'; }).length === 6,
+    'screen x6 (sorcier clair + guerre clair/sombre x2 scopes)');
+  r.ok(tblends.filter(function (t) { return t === '--tblend: multiply;'; }).length === 2,
+    'multiply x2 (enluminure clair x2 scopes)');
+  const texsizes = css.match(/--texsize: \d+px;/g) || [];
+  r.eq(texsizes.length, 6, 'tuiles densifiees x6 (parchemin/sorcier/guerre clairs x2 scopes)');
+  r.ok(/body \{[^}]*background-size: var\(--texsize, auto\), auto, auto/.test(css),
+    'body : --texsize ne vise que la couche texture');
 }
 
 function testParity(r) {
@@ -134,6 +152,28 @@ function testClient(r) {
   if (!r.ok(!!ov, 'selecteur ouvert')) return;
   r.eq(ov.querySelectorAll('.theme-card').length, 17, '17 cartes (got ' +
     ov.querySelectorAll('.theme-card').length + ')');
+
+  // cadrage a l'ouverture : scrollIntoView appele une fois, sur la carte
+  // selectionnee (ici sylve). Sans scrollIntoView (vieux moteurs),
+  // l'ouverture ne plante pas (couvert par les tests precedents).
+  (function () {
+    const env2 = createEnv();
+    stubFetch(env2, function () { return jsonOk({ ok: true, pair: 'defaut' }); });
+    env2.load('themes.js');
+    const T2 = env2.window.DCCThemes;
+    T2.apply('sylve', 'light');
+    const seen = [];
+    env2.window.Element.prototype.scrollIntoView = function (opts) {
+      seen.push({ selected: this.classList.contains('selected'), opts: opts || null });
+    };
+    T2.openPicker();
+    r.eq(seen.length, 1, 'cadrage : 1 appel scrollIntoView (got ' + seen.length + ')');
+    if (seen.length === 1) {
+      r.ok(seen[0].selected, 'cadrage : sur la carte selectionnee');
+      r.eq(seen[0].opts && seen[0].opts.block, 'center', 'cadrage : centre verticalement');
+    }
+    delete env2.window.Element.prototype.scrollIntoView;
+  })();
   r.eq(ov.querySelectorAll('.theme-seg button').length, 2, 'bascule Clair/Sombre');
   r.ok(!!ov.querySelector('.theme-card.selected .theme-check'), 'carte courante cochee');
 
@@ -226,6 +266,8 @@ function testWiring(r) {
     ['--teximg: none', '--vig: none', '--noise: none'].forEach(function (decl) {
       r.ok(pvBlock[0].indexOf(decl) !== -1, '.theme-card .pv : coupe-circuit ' + decl);
     });
+    r.ok(pvBlock[0].indexOf('background-blend-mode: var(--tblend, normal), normal, normal') !== -1,
+      '.theme-card .pv : --tblend vise la couche texture (meme ordre que body)');
   }
 
   /* Chrome fige sur Defaut : l'apercu en direct ne doit re-teinter que

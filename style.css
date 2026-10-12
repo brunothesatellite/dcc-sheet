@@ -4290,7 +4290,11 @@ html[data-theme="dark"] .theme-overlay {
   font-size: 10px;
   line-height: 1.4;
   background: var(--bg);
-  background-image: var(--vig, none), var(--teximg, none), var(--noise, none);
+  /* Meme ordre de couches que body (texture, halo, grain) pour que
+     --tblend vise la texture ; tuilage dense = aide d'apercu only,
+     le rendu reel garde l'echelle 1:1. */
+  background-image: var(--teximg, none), var(--vig, none), var(--noise, none);
+  background-blend-mode: var(--tblend, normal), normal, normal;
   /* Coupe-circuit anti-fuite (11/10/2026) : --teximg/--vig/--noise ne sont
      definis que pour les couples textures ; sans cette assignation, un
      apercu non texture HERITAIT la texture du couple applique en direct
@@ -4300,9 +4304,7 @@ html[data-theme="dark"] .theme-overlay {
   --teximg: none;
   --vig: none;
   --noise: none;
-  /* Apercu seul : la texture est tuilée plus dense qu'en vrai (les motifs
-     d'origine font 100 à 500 px et seraient invisibles en miniature).
-     Le rendu réel garde l'échelle 1:1. */
+  /* Apercu seul : tuilage dense (motifs 100-500 px invisibles en miniature). */
   background-size: auto, 160px, auto;
   color: var(--ink);
 }

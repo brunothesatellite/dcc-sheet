@@ -239,6 +239,16 @@
     render();
     document.body.appendChild(overlay);
     document.body.style.overflow = 'hidden';
+
+    /* Cadrage : la grille demarre en haut, le theme courant peut etre
+       17 cartes plus bas — on centre dessus (garde jsdom : scrollIntoView
+       n'existe pas partout). */
+    var sel = grid.querySelector('.theme-card.selected');
+    if (sel && typeof sel.scrollIntoView === 'function') {
+      try {
+        sel.scrollIntoView({ block: 'center' });
+      } catch (e) { /* defilement indisponible : la grille reste en haut */ }
+    }
   }
 
   function pairName(id) {

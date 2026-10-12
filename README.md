@@ -67,6 +67,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - **Nom ignore le numero de page** (`Boule de feu 203`), accents/casse/spaces sans importance, singulier/pluriel et petites fautes de frappe toleres ; echec → modale **« Sort introuvable »** (verifier le nom du sort)
 - **Noms en anglais** : `../dcc-spells-reader/spell-translation.js` (module ES lu en texte, 130 paires FR/EN) traduit la saisie avant resolution — la popup ouvre le **titre francais** du livre et affiche le **nom anglais saisi en sous-titre** ; fichier absent ou erreur reseau → comportement precedent, inchange (1 seule requete `fetch`, memorisee)
 - Fermeture : bouton X ou touche Echap ; suite `09-spell-reader` (143 assertions) + `19-table-continuation` (109 : cas 132→133, 30 cas A, 4 cas B, balayage anti-regression du corpus, negatifs, insertion dans les 2 sens) + smoke sur les donnees reelles (144/144 noms resolus, 130/130 traductions FR et EN sans divergence de page)
+- **Aide de classe** : bouton « Résumé » dans l'en-tete de chaque fiche (fiche de la classe + Table 1-1) + bouton « Référence » dans la topbar (document integral Niveau 0 & 7 classes + sommaire) ; donnees generees depuis le HTML source (`aide-classes-data.js`), 100 % hors-ligne, suite `21-aide-classes` (125 assertions)
 
 ### Portrait
 - 8 sources d'images : **DCC** (tokens officiels, 20 images), **D&D Red Box 1983** (7 illustrations), **Leremy Gan** (7 silhouettes), **Shadowdark** (12 images), **Jeff Stevens** (8 planches), **Gonzo** (30 images), **Old School** (17 images) et **Funnel - niveau 0** (75 tokens `icons/funnel-tokens/`, catalogue `funnel-icons.js`)
@@ -122,6 +123,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 
 ### UI / UX
 - Theme sombre / clair (localStorage)
+- **17 couples de themes** clair + sombre (Defaut, Taverne, Crypte, Sylve, Arcanes, Brasier, Grimoire, Papyrus, Brume, Herbier, Cuir, Cendre + 5 Gemini : Parchemin, Sorcier, Enluminure, Guerre, Reliquaire) : choix dans une IHM dediee avec apercu (menu utilisateur → Changer de theme), bascule clair/sombre conservee, choix persiste en base + export/import, polices et textures embarquees (hors-ligne)
 - Popups custom (alert / confirm) au lieu de alert() natifs
 - Spinner de chargement (affiche apres 500ms si chargement lent)
 - Design responsive (breakpoint 600px)

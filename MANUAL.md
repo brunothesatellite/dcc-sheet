@@ -439,6 +439,13 @@ Les listes de sorts du Mage (2 lignes par sort), de l'Elfe (2 lignes par sort + 
 
 > En cas d'échec, comparez le nom tapé avec celui du livre, **sans son numéro de page**.
 
+### 6.3c Résumé de classe et référence (aide)
+
+- Chaque fiche affiche un bouton **« Résumé »** (en-tête, à côté d'« Export ») : il ouvre une popup plein écran avec la **fiche de la classe** (progression, titres, pouvoirs) suivie de la **Table 1-1 des caractéristiques**.
+- Le bouton **« Référence »** de la barre du haut ouvre le **document intégral** (Niveau 0 & 7 classes) avec un **sommaire cliquable**.
+- Contenu embarqué dans l'application : fonctionne **hors-ligne** (y compris dans l'application Android), sans le dossier `dcc-spells-reader`.
+- Fermeture : bouton **✕**, touche **Échap** ou clic hors de la colonne.
+
 ---
 
 ## 7. Le portrait (8 sources)
@@ -742,11 +749,43 @@ sur le serveur, et les calques au-delà de 10 sont signalés par un toast.
 
 Si le thème ne « tient » pas après un rechargement : videz le cache du navigateur, puis réappliquez-le une fois (§ 11).
 
+### Couples de thèmes
+
+Au-delà du mode clair / sombre, l'application propose **17 couples de thèmes** (ambiance complète : couleurs, textures de fond, typographies) : *Défaut* (le thème d'origine, appliqué à la création du compte), *Taverne*, *Crypte*, *Sylve*, *Arcanes*, *Brasier*, *Grimoire*, *Papyrus*, *Brume*, *Herbier*, *Cuir*, *Cendre*, *Parchemin*, *Sorcier*, *Enluminure*, *Guerre*, *Reliquaire*.
+
+1. Ouvrez le **menu utilisateur** (avatar) → **Changer de thème** (juste au-dessus d'« Exporter tout »).
+2. Une fenêtre affiche les 17 couples avec un **aperçu** : la bascule **Clair / Sombre** en haut change tous les aperçus ; cliquez une carte pour **prévisualiser en direct** derrière la fenêtre.
+3. **Valider** enregistre le couple **sur votre compte** (utilisable sur tous vos appareils) ; **Annuler** (ou Échap) restaure le précédent.
+4. Le bouton **☾ / ☀** de la topbar continue de basculer clair / sombre **dans le couple choisi**.
+
+Le couple choisi voyage avec **Exporter / Importer tout** (comme les notes d'équipe). Toutes les polices et textures sont **embarquées** : les thèmes fonctionnent hors-ligne (y compris dans l'application Android).
+
+| Couple | Clair | Sombre |
+|---|---|---|
+| Défaut | <img src="captures/theme-defaut-light.png" alt="Thème Défaut clair" width="300"> | <img src="captures/theme-defaut-dark.png" alt="Thème Défaut sombre" width="300"> |
+| Taverne | <img src="captures/theme-taverne-light.png" alt="Thème Taverne clair" width="300"> | <img src="captures/theme-taverne-dark.png" alt="Thème Taverne sombre" width="300"> |
+| Crypte | <img src="captures/theme-crypte-light.png" alt="Thème Crypte clair" width="300"> | <img src="captures/theme-crypte-dark.png" alt="Thème Crypte sombre" width="300"> |
+| Sylve | <img src="captures/theme-sylve-light.png" alt="Thème Sylve clair" width="300"> | <img src="captures/theme-sylve-dark.png" alt="Thème Sylve sombre" width="300"> |
+| Arcanes | <img src="captures/theme-arcanes-light.png" alt="Thème Arcanes clair" width="300"> | <img src="captures/theme-arcanes-dark.png" alt="Thème Arcanes sombre" width="300"> |
+| Brasier | <img src="captures/theme-brasier-light.png" alt="Thème Brasier clair" width="300"> | <img src="captures/theme-brasier-dark.png" alt="Thème Brasier sombre" width="300"> |
+| Grimoire | <img src="captures/theme-grimoire-light.png" alt="Thème Grimoire clair" width="300"> | <img src="captures/theme-grimoire-dark.png" alt="Thème Grimoire sombre" width="300"> |
+| Papyrus | <img src="captures/theme-papyrus-light.png" alt="Thème Papyrus clair" width="300"> | <img src="captures/theme-papyrus-dark.png" alt="Thème Papyrus sombre" width="300"> |
+| Brume | <img src="captures/theme-brume-light.png" alt="Thème Brume clair" width="300"> | <img src="captures/theme-brume-dark.png" alt="Thème Brume sombre" width="300"> |
+| Herbier | <img src="captures/theme-herbier-light.png" alt="Thème Herbier clair" width="300"> | <img src="captures/theme-herbier-dark.png" alt="Thème Herbier sombre" width="300"> |
+| Cuir | <img src="captures/theme-cuir-light.png" alt="Thème Cuir clair" width="300"> | <img src="captures/theme-cuir-dark.png" alt="Thème Cuir sombre" width="300"> |
+| Cendre | <img src="captures/theme-cendre-light.png" alt="Thème Cendre clair" width="300"> | <img src="captures/theme-cendre-dark.png" alt="Thème Cendre sombre" width="300"> |
+| Parchemin | <img src="captures/theme-g-parchemin-light.png" alt="Thème Parchemin clair" width="300"> | <img src="captures/theme-g-parchemin-dark.png" alt="Thème Parchemin sombre" width="300"> |
+| Sorcier | <img src="captures/theme-g-crypte-light.png" alt="Thème Sorcier clair" width="300"> | <img src="captures/theme-g-crypte-dark.png" alt="Thème Sorcier sombre" width="300"> |
+| Enluminure | <img src="captures/theme-g-enluminure-light.png" alt="Thème Enluminure clair" width="300"> | <img src="captures/theme-g-enluminure-dark.png" alt="Thème Enluminure sombre" width="300"> |
+| Guerre | <img src="captures/theme-g-guerre-light.png" alt="Thème Guerre clair" width="300"> | <img src="captures/theme-g-guerre-dark.png" alt="Thème Guerre sombre" width="300"> |
+| Reliquaire | <img src="captures/theme-g-reliquaire-light.png" alt="Thème Reliquaire clair" width="300"> | <img src="captures/theme-g-reliquaire-dark.png" alt="Thème Reliquaire sombre" width="300"> |
+
 ### Ce que le navigateur mémorise localement
 
 | Donnée | Clé / emplacement | Transférée avec un export ? |
 |---|---|---|
-| Thème | localStorage | Non |
+| Thème (mode clair / sombre) | localStorage | Non (préférence d'affichage locale) |
+| Thème (couple choisi) | **Base de données serveur** | Oui (export JSON, champ `theme_pair`) |
 | Onglet actif | localStorage | Non |
 | Fiches de personnages | **Base de données serveur** | Oui (export JSON) |
 | Notes d'équipe | **Base de données serveur** | Oui (export JSON) |

@@ -1849,3 +1849,24 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
 - Migration utilisateur obligatoire : Exporter tout (ancienne app) → desinstaller ancienne app (+ ancien conteneur) → installer v3.2 → Importer tout. Communique en tete des notes de release + README (section APK) + MANUAL (§12 + §4.6 progression).
 - Toolchains Windows reinstallees per-user (pas d'admin) : .NET SDK 10.0.401 (`%LOCALAPPDATA%\dotnet-sdk-10`), Inno Setup 6.7.3 (`%LOCALAPPDATA%\Programs\Inno Setup 6`).
 - Recette Windows : OPcache coupe dans le `php.ini` embarque (`Fatal ASLR` aleatoire au demarrage du `php -S` embarque, reproduit 6/6 avec le payload, jamais avec le binaire de dev) + lecture UTF-8 explicite dans `build.ps1` (accents corrompus a la reecriture).
+
+
+## Date : 12 octobre 2026 - Aide des classes + themes clair/sombre (release v3.3)
+
+### Aide des classes (Niveau 0 & 7 classes)
+
+- Depuis `D:/tmp/dcc/resume_classes_dcc_v4.html` : bouton « Résumé » dans l'en-tete de chaque fiche (fiche de la classe + Table 1-1) + bouton « Référence » dans la topbar (document integral + sommaire wrappé, sans scroll horizontal).
+- `aide-classes-data.js` GENERE par script depuis le HTML source (fidelite testee en 21) + `aide-classes.js` (visionneuse, pattern spell-reader) + pastille topbar `.ref-toggle` (32 px mobile, logo en ellipsis < 380 px, ergonomie onglets inchangee) + icone livre SVG au langage du theme.
+- Suite `21-aide-classes` (125 assertions), tag local `aide-classes` pose puis SUPPRIME avant release (il faussait `git describe` pour le build differentiel).
+
+### Themes : 17 couples clair + sombre, persistance base
+
+- Menu utilisateur → « Changer de thème » (au-dessus d'Exporter tout) : dialogue 17 cartes avec mini-apercus independants du theme courant, bascule Clair/Sombre, apercu en direct (Annuler restaure), Valider persiste (`users.theme_pair`, defaut a la creation, allowlist serveur stricte).
+- Bouton theme inchange (bascule dans le couple) ; `theme_pair` exporte/importe (mode conserve) ; polices + textures embarquees (100 % hors-ligne : `fonts/*.woff2` auto-heberges latin, `textures/*.png` Gemini).
+- Correctifs integres : chrome du selecteur fige sur Defaut, anti-fuite texture (`--teximg/--vig/--noise: none`), dosage par fusion (`--tblend` lighten/screen/multiply + `--texsize`), cadrage sur theme courant, grille `max-content` (troncature mobile), verts WCAG uniformes (#1e7e34/#218838), secondaires limites, crypte-dark et guerre-clair (ivoire #f7ecd4, 5,03:1), fond scene carte suit le theme.
+- Suite `22-themes` (708 assertions) : 34 blocs CSS complets, zero URL externe, parite client/serveur, endpoints, builds (textures non exclues).
+
+### Release v3.3 (skill RELEASE)
+
+- Docs : README (themes, aide), MANUAL (§4.6 progression, §6.3c aide, §10 couples + 34 captures, §12 migration), JOURNAL.
+- Tests 3228/3228 OK -> commit evol-themes -> fast-forward main -> push -> build differentiel depuis v3.1 -> artefacts rebuildés post-push.

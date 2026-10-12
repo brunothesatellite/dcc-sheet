@@ -91,6 +91,20 @@ function testCss(r) {
   r.eq(texsizes.length, 6, 'tuiles densifiees x6 (parchemin/sorcier/guerre clairs x2 scopes)');
   r.ok(/body \{[^}]*background-size: var\(--texsize, auto\), auto, auto/.test(css),
     'body : --texsize ne vise que la couche texture');
+
+  // pistes 3+4 (contrastes, sans commit) : verts uniformes WCAG + cas
+  // crypte-sombre et onglets guerre-clair (fond sans compromis : 2,77 max)
+  const greens = css.match(/--green: (#[0-9a-f]{6});/g) || [];
+  r.eq(Array.from(new Set(greens)).sort().join(' '),
+    '--green: #1e7e34; --green: #218838;',
+    'piste 4 : verts uniformes (got ' + Array.from(new Set(greens)).join(' ') + ')');
+  r.ok(css.indexOf('html[data-pair="g-crypte"][data-theme="dark"]') !== -1,
+    'piste 3 : bloc g-crypte/dark present');
+  const sheet = read('style.css');
+  r.ok(sheet.indexOf('html[data-pair="g-guerre"][data-theme="light"] .tab') !== -1,
+    'piste 3 : onglets inactifs guerre-clair en ivoire clair (5,03:1 mesure, fond sans compromis)');
+  r.ok(sheet.indexOf('color: #f7ecd4') !== -1,
+    'piste 3 : ivoire #f7ecd4 (le max mesurable sans denaturer le cuir)');
 }
 
 function testParity(r) {
@@ -230,9 +244,10 @@ function testWiring(r) {
   const iData = html.indexOf('themes.js');
   const iMain = html.indexOf('script.js');
   r.ok(iData !== -1 && iMain !== -1 && iData < iMain, 'themes.js avant script.js');
-  r.ok(html.indexOf('Cinzel') !== -1 && html.indexOf('MedievalSharp') !== -1 &&
-    html.indexOf('Uncial+Antiqua') !== -1,
-    'index.html : polices des couples declarees');
+  r.ok(html.indexOf('fonts/fonts.css') !== -1,
+    'index.html : polices auto-hebergees (fonts/fonts.css, hors-ligne)');
+  r.ok(html.indexOf('fonts.googleapis.com') === -1,
+    'index.html : zero appel Google Fonts (100 % local)');
   const iMenu = html.indexOf('data-action="change-theme"');
   const iExport = html.indexOf('data-action="export-all"');
   r.ok(iMenu !== -1 && iExport !== -1 && iMenu < iExport,

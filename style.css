@@ -4546,6 +4546,18 @@ html[data-theme="dark"] .theme-overlay {
   }
 }
 
+/* Onglets inactifs sur fond de page : le cuir sombre de g-guerre (clair)
+   n'offre aucun compromis encre/papier (2,77 max mesure) — les onglets
+   inactifs y prennent un ivoire clair (#f7ecd4, 5,03:1 mesure).
+   Portee limitee a ce couple/mode : le cuir sombre (dark) est inchange. */
+html[data-pair="g-guerre"][data-theme="light"] .tab {
+  color: #f7ecd4;
+}
+
+html[data-pair="g-guerre"][data-theme="light"] .tab:hover {
+  color: #f7ecd4;
+}
+
 
 /* --------------------------------------------------------------------------
    Portraits indisponibles (dossier absent du serveur : droits)
@@ -4628,6 +4640,24 @@ html[data-theme="dark"] .theme-overlay {
 
 [data-theme="dark"] #map-module {
   --shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+}
+
+/* Fond de scene du module carte : zones en dur trop lumineuses en theme
+   sombre (constat : blanc aveuglant hors image). Suit le theme via les
+   variables (couples clair/sombre) au lieu de gris fixes. */
+#map-module .viewport {
+  background: var(--tab-bg);
+}
+
+#map-module .scene.is-empty {
+  background:
+    linear-gradient(var(--grid-line, rgba(37,99,235,.10)) 1px,transparent 1px) 0 0/40px 40px,
+    linear-gradient(90deg,var(--grid-line, rgba(37,99,235,.10)) 1px,transparent 1px) 0 0/40px 40px,
+    var(--field-bg);
+}
+
+[data-theme="dark"] #map-module .scene.is-empty {
+  --grid-line: rgba(127,209,192,.14);
 }
 
 #map-module *,
@@ -4750,7 +4780,6 @@ html[data-theme="dark"] .theme-overlay {
 #map-module .frame{position:absolute;inset:0;}
 #map-module .viewport{
   position:absolute;inset:0;overflow:auto;
-  background:#e7eaef;
   -webkit-overflow-scrolling:touch;
   overscroll-behavior:contain;
 }
@@ -4758,12 +4787,6 @@ html[data-theme="dark"] .theme-overlay {
 #map-module .scene img{position:absolute;inset:0;width:100%;height:100%;display:block;
   user-select:none;-webkit-user-drag:none;pointer-events:none;object-fit:fill;}
 #map-module .scene.is-empty img{display:none;}
-#map-module .scene.is-empty{
-  background:
-    linear-gradient(rgba(37,99,235,.10) 1px,transparent 1px) 0 0/40px 40px,
-    linear-gradient(90deg,rgba(37,99,235,.10) 1px,transparent 1px) 0 0/40px 40px,
-    #eef1f5;
-}
 #map-module #md-cv{position:absolute;inset:0;width:100%;height:100%;display:block;
   touch-action:none;cursor:crosshair;z-index:5;}
 #map-module .stage[data-tool="move"] #md-cv{cursor:grab;}

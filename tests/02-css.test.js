@@ -158,7 +158,7 @@ module.exports = function suite() {
   }
 
   // Overlay "tete de mort" : ancre positionnee + aucun interception de clic
-  // (portrait cliquable, drag & drop de l'ordre de marche preserves)
+  // (portrait cliquable, drag & drop de l'ordre de marche preserves)  // (portrait cliquable, drag & drop de l'ordre de marche preserves)
   const holderBlock = css.match(/\.portrait-holder \{[^}]+\}/);
   r.ok(!!holderBlock, '.portrait-holder block found');
   if (holderBlock) {
@@ -170,6 +170,17 @@ module.exports = function suite() {
     r.ok(deadBlock[0].indexOf('position: absolute') !== -1, '.dead-overlay is absolute');
     r.ok(deadBlock[0].indexOf('pointer-events: none') !== -1, '.dead-overlay never blocks clicks');
   }
+
+  // Fond de scene du module carte : suit le theme (variables), jamais de
+  // gris clair en dur (aveuglant hors image en theme sombre)
+  r.ok(/#map-module \.viewport \{\s*background: ?var\(--tab-bg\);?\s*\}/.test(css),
+    'viewport du module carte : fond du theme (var(--tab-bg))');
+  r.ok(!/#map-module \.viewport\{[^}]*#(e7eaef|eef1f5)/i.test(css),
+    'viewport : aucun gris en dur');
+  r.ok(/#map-module \.scene\.is-empty \{\s*background:[\s\S]*?var\(--field-bg\);?\s*\}/.test(css),
+    'grille vide : fond du theme (var(--field-bg))');
+  r.ok(css.indexOf('[data-theme="dark"] #map-module .scene.is-empty') !== -1,
+    'grille vide : variante theme sombre (lignes adoucies)');
 
   // Progression de l'import global : modale bloquante plein ecran, sous la
   // modale de confirmation (10001) et au-dessus des toasts (9999).

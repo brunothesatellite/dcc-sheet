@@ -11,7 +11,7 @@ if ($user) { header('Location: index.html'); exit; }
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inscription - DCC Fiches</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="style-auth.css">
 <script>
 (function(){var t=localStorage.getItem('dcc-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();

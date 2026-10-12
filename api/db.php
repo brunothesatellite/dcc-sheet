@@ -60,6 +60,11 @@ function getDB() {
     } catch (Exception $e) {
         // Colonne deja presente sur une base existante
     }
+    try {
+        $db->exec('ALTER TABLE users ADD COLUMN theme_pair TEXT NOT NULL DEFAULT \'defaut\'');
+    } catch (Exception $e) {
+        // Colonne deja presente sur une base existante
+    }
     $db->exec('CREATE TABLE IF NOT EXISTS characters (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,

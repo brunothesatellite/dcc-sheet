@@ -4062,6 +4062,406 @@ html:not(.has-spell-reader) .spell-lookup,
   font-style: italic;
 }
 
+/* --- Choix du theme (themes.js) : rubrique du menu utilisateur --- */
+#user-menu button[data-action="change-theme"]::before {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--input-border);
+  background: conic-gradient(var(--tab-active) 0 50%, var(--header-bg) 50% 100%);
+}
+
+/* --- Choix du theme (themes.js) : dialogue de selection ---
+   Meme pattern que .patron-pick-overlay (carte centree, au-dessus). */
+.theme-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.55);
+  /* Chrome du selecteur fige sur Defaut : l'apercu en direct re-teinte
+     toute la page (y compris sous le dialogue) ; sans ce scope, chaque
+     clic recolorerait aussi l'entete, les noms et les boutons du
+     selecteur lui-meme. Seuls les mini-apercus .pv varient. */
+  --bg: #f1eee8;
+  --paper: #fff;
+  --ink: #171717;
+  --muted: #706d68;
+  --line: #d7d1c8;
+  --green: #27ae60;
+  --field-bg: #dde4f0;
+  --input-border: #9aa5b4;
+  --header-bg: #1a1a2e;
+  --header-text: #fff;
+  --tab-active: #c0392b;
+  --font-heading: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --font-body: 'Inter', 'Segoe UI', sans-serif;
+  --shadow: rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="dark"] .theme-overlay {
+  --bg: #1a1917;
+  --paper: #242320;
+  --ink: #e8e4dc;
+  --muted: #9a9590;
+  --line: #4a4744;
+  --green: #4caf50;
+  --field-bg: #2a2926;
+  --input-border: #5a5754;
+  --header-bg: #0d0d1a;
+  --header-text: #e8e4dc;
+  --tab-active: #e84535;
+  --shadow: rgba(0, 0, 0, 0.3);
+}
+
+.theme-picker {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 760px;
+  max-height: calc(100vh - 32px);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px var(--shadow);
+  overflow: hidden;
+  animation: modal-scale-in 0.2s ease;
+}
+
+.theme-head {
+  flex: none;
+  padding: 14px 16px 10px;
+  background: var(--header-bg);
+  color: var(--header-text);
+}
+
+.theme-title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.theme-sub {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+.theme-tools {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.theme-seg {
+  display: inline-flex;
+  border: 1px solid var(--input-border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.theme-seg button {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 6px 16px;
+}
+
+.theme-seg button.active {
+  background: var(--header-bg);
+  color: var(--header-text);
+}
+
+.theme-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.theme-grid {
+  overflow-y: auto;
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  align-content: start;
+  grid-auto-rows: max-content;
+}
+
+.theme-card {
+  position: relative;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--paper);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  padding: 0;
+  align-self: start;
+}
+
+.theme-card:hover {
+  border-color: var(--muted);
+}
+
+.theme-card:focus-visible {
+  outline: 2px solid var(--tab-active);
+  outline-offset: 2px;
+}
+
+.theme-card.selected {
+  border-color: var(--tab-active);
+  box-shadow: 0 0 0 1px var(--tab-active);
+}
+
+.theme-card .theme-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.theme-card.selected .theme-check {
+  display: flex;
+}
+
+.theme-card .theme-name {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 10px 0;
+}
+
+.theme-card .theme-desc {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 0 10px 8px;
+  min-height: 32px;
+}
+
+.theme-card .theme-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--header-text);
+  background: var(--muted);
+  border-radius: 8px;
+  padding: 1px 8px;
+  margin-left: 6px;
+  vertical-align: 2px;
+}
+
+/* Mini-apercu : chrome de l'app rendu avec les vars du couple
+   (themes.css : .theme-picker .pv[data-pair][data-mode]). */
+.theme-card .pv {
+  border-top: 1px solid var(--line);
+  font-size: 10px;
+  line-height: 1.4;
+  background: var(--bg);
+  background-image: var(--vig, none), var(--teximg, none), var(--noise, none);
+  /* Coupe-circuit anti-fuite (11/10/2026) : --teximg/--vig/--noise ne sont
+     definis que pour les couples textures ; sans cette assignation, un
+     apercu non texture HERITAIT la texture du couple applique en direct
+     (var(--x, none) ne protege PAS de l'heritage : le repli ne joue que
+     si la propriete est absente, pas si elle est heritee). Les blocs
+     .pv[data-pair][data-mode], plus specifiques, reprennent la main. */
+  --teximg: none;
+  --vig: none;
+  --noise: none;
+  /* Apercu seul : la texture est tuilée plus dense qu'en vrai (les motifs
+     d'origine font 100 à 500 px et seraient invisibles en miniature).
+     Le rendu réel garde l'échelle 1:1. */
+  background-size: auto, 160px, auto;
+  color: var(--ink);
+}
+
+.theme-card .pv-top {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  background: var(--header-bg);
+  color: var(--header-text);
+}
+
+.theme-card .pv-logo {
+  font-family: var(--fhead, var(--font-heading));
+  font-weight: 800;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.theme-card .pv-dots {
+  margin-left: auto;
+  display: flex;
+  gap: 3px;
+}
+
+.theme-card .pv-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.theme-card .pv-tab {
+  display: inline-block;
+  margin: 6px 0 0 8px;
+  padding: 2px 10px;
+  font-family: var(--fhead, var(--font-heading));
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  background: var(--paper);
+  color: var(--tab-active);
+  border-radius: 4px 4px 0 0;
+}
+
+.theme-card .pv-body {
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+  padding: 6px 8px 8px;
+}
+
+.theme-card .pv-sec {
+  font-family: var(--fhead, var(--font-heading));
+  font-weight: 800;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--header-text);
+  background: var(--header-bg);
+  border-radius: 3px;
+  padding: 3px 6px;
+  margin-bottom: 5px;
+}
+
+.theme-card .pv-field {
+  border: 1px solid var(--input-border);
+  background: var(--field-bg);
+  border-radius: 3px;
+  padding: 3px 6px;
+  margin-bottom: 4px;
+  color: var(--muted);
+}
+
+.theme-card .pv-row {
+  display: flex;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.theme-card .pv-btn {
+  flex: 1;
+  text-align: center;
+  font-family: var(--fhead, var(--font-heading));
+  font-weight: 700;
+  font-size: 9px;
+  text-transform: uppercase;
+  border-radius: 3px;
+  padding: 3px 0;
+}
+
+.theme-card .pv-btn.go {
+  background: var(--green);
+  color: #fff;
+}
+
+.theme-card .pv-btn.alt {
+  background: var(--field-bg);
+  color: var(--ink);
+  border: 1px solid var(--input-border);
+}
+
+.theme-card .pv-mode {
+  display: block;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  padding: 3px 0 5px;
+}
+
+.theme-foot {
+  flex: none;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+}
+
+.theme-foot .theme-cancel,
+.theme-foot .theme-valid {
+  padding: 8px 16px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.theme-foot .theme-valid {
+  background: var(--green);
+  color: #fff;
+  border: none;
+}
+
+.theme-foot .theme-cancel {
+  background: var(--field-bg);
+  color: var(--ink);
+  border: 1px solid var(--input-border);
+}
+
+@media (max-width: 700px) {
+  .theme-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 460px) {
+  .theme-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* --- Tableaux a colonnes empilées sous 600 px --- */
 @media (max-width: 599px) {
   .spell-viewer .page {

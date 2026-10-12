@@ -232,6 +232,11 @@
     if (saved) {
       document.documentElement.setAttribute('data-theme', saved);
     }
+    /* Couple clair/sombre (themes.js) : localStorage immediat, puis la
+       base fait foi (non connecte : on garde le local). */
+    if (window.DCCThemes && typeof window.DCCThemes.init === 'function') {
+      window.DCCThemes.init();
+    }
     updateThemeIcon();
   }
 
@@ -510,6 +515,12 @@
         exportObj.team_notes = await getTeamNotes();
       } catch (e) { /* export des personnages maintenu meme si les notes echouent */ }
 
+      /* Couple de themes : applique tel quel a l'import (avec sauvegarde
+         serveur), comme les notes d'equipe. */
+      try {
+        if (window.DCCThemes) exportObj.theme_pair = window.DCCThemes.current().pair;
+      } catch (e) { /* export maintenu meme si le theme echoue */ }
+
       try {
         if (window.DCCMarching) {
           var orderMap = await getMarchingOrder();
@@ -730,6 +741,18 @@
             await saveTeamNotes(typeof obj.team_notes === 'string' ? obj.team_notes : '');
           } catch (e) {
             showToast('Erreur sauvegarde des notes', 'error');
+          }
+        }
+
+        /* Couple de themes : applique + sauvegarde serveur (mode conserve).
+           Invalide/absent : theme actuel inchange. */
+        if (Object.prototype.hasOwnProperty.call(obj, 'theme_pair') && window.DCCThemes) {
+          try {
+            var curMode = window.DCCThemes.current().mode;
+            var appliedTheme = window.DCCThemes.apply(obj.theme_pair, curMode);
+            await window.DCCThemes.save(appliedTheme.pair);
+          } catch (e) {
+            showToast('Erreur sauvegarde du thème', 'error');
           }
         }
 
@@ -2512,6 +2535,9 @@
           avatarBtn.setAttribute('aria-expanded', 'false');
           var action = btn.getAttribute('data-action');
           if (action === 'logout') logout();
+          else if (action === 'change-theme') {
+            if (window.DCCThemes) window.DCCThemes.openPicker();
+          }
           else if (action === 'export-all') exportAllCharacters();
           else if (action === 'import-all') importAllCharacters();
           else if (action === 'change-password') showChangePasswordModal();

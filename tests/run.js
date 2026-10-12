@@ -25,6 +25,7 @@ const suites = [
   require('./19-table-continuation.test'),
   require('./20-import-limits.test'),
   require('./21-aide-classes.test'),
+  require('./22-themes.test'),
 ];
 
 function pad(s, n) {

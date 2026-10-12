@@ -13,7 +13,9 @@ if (location.pathname.endsWith('/dcc-sheet')) location.replace(location.pathname
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cinzel+Decorative:wght@700&family=MedievalSharp&family=Uncial+Antiqua&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="themes.css">
 <script>
 (function(){var t=localStorage.getItem('dcc-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})();
 </script>
@@ -61,6 +63,7 @@ if (location.pathname.endsWith('/dcc-sheet')) location.replace(location.pathname
             aria-label="Menu utilisateur" aria-expanded="false"></button>
     <div class="user-menu" id="user-menu" hidden>
       <div class="menu-welcome" id="user-welcome"></div>
+      <button data-action="change-theme">Changer de thème</button>
       <button data-action="export-all">Exporter tout (JSON)</button>
       <button data-action="import-all">Importer tout (JSON)</button>
       <hr>
@@ -106,6 +109,7 @@ if (location.pathname.endsWith('/dcc-sheet')) location.replace(location.pathname
 <script src="map-draw.js"></script>
 <script src="aide-classes-data.js"></script>
 <script src="aide-classes.js"></script>
+<script src="themes.js"></script>
 <script src="script.js"></script>
 <script src="table-continuation.js"></script>
 <script src="spell-reader.js"></script>

@@ -11,6 +11,40 @@ session_start();
 $input = json_decode(file_get_contents('php://input'), true);
 $action = $_GET['action'] ?? ($input['action'] ?? '');
 
+/* Couples de themes clair + sombre (miroir de themes.js PAIRS — toute
+   entree/sortie est validee contre cette liste, jamais de valeur libre). */
+const THEME_PAIRS = [
+    'defaut', 'taverne', 'crypte', 'sylve', 'arcanes', 'brasier',
+    'grimoire', 'papyrus', 'brume', 'herbier', 'cuir', 'cendre',
+    'g-parchemin', 'g-crypte', 'g-enluminure', 'g-guerre', 'g-reliquaire',
+];
+
+if ($action === 'theme_get') {
+    $db = getDB();
+    $user = requireLogin($db);
+    $stmt = $db->prepare('SELECT theme_pair FROM users WHERE id = :id');
+    $stmt->bindValue(':id', $user['id'], SQLITE3_INTEGER);
+    $result = $stmt->execute();
+    $row = $result->fetchArray(SQLITE3_ASSOC);
+    $pair = ($row && is_string($row['theme_pair'])) ? $row['theme_pair'] : 'defaut';
+    if (!in_array($pair, THEME_PAIRS, true)) { $pair = 'defaut'; }
+    jsonResponse(['ok' => true, 'pair' => $pair]);
+}
+
+if ($action === 'theme_save') {
+    $pair = $input['pair'] ?? '';
+    if (!is_string($pair) || !in_array($pair, THEME_PAIRS, true)) {
+        jsonError('Couple de thème inconnu');
+    }
+    $db = getDB();
+    $user = requireLogin($db);
+    $stmt = $db->prepare('UPDATE users SET theme_pair = :pair WHERE id = :id');
+    $stmt->bindValue(':pair', $pair, SQLITE3_TEXT);
+    $stmt->bindValue(':id', $user['id'], SQLITE3_INTEGER);
+    $stmt->execute();
+    jsonResponse(['ok' => true, 'pair' => $pair]);
+}
+
 if ($action === 'check') {
     $db = getDB();
     $user = getUserFromSession($db);

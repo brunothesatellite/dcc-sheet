@@ -35,7 +35,7 @@ const BANNED = /dcc-pc-tokens|funnel-tokens/i;
 /* --- filtre webapp : union server.js (BLOCK_*) + deploy/_build.ps1 --- */
 const BLOCK_DIRS = new Set([
   'node_modules', '.git', '.opencode', '.vscode', 'tests', 'deploy',
-  'installeur', 'tools', 'plan0', 'plan1', 'pregens', 'captures',
+  'installeur', 'tools', 'plan0', 'plan1', 'plan2', 'pregens', 'captures',
   'pdf-sheets', 'exemples', 'data', 'vendor', 'dist', 'maquettes',
 ]);
 const BLOCK_FILES = [

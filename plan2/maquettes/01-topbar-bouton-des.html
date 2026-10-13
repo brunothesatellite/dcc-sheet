@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette 01 — bouton « Dés » de la topbar</title>
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="maquettes.css">
+</head>
+<body>
+
+<div class="mq-wrap">
+
+  <div class="section-title" style="font-size:26px;">1. Bouton « Dés » de la topbar</div>
+  <p class="mq-lead">
+    Nouveau bouton <code>#btn-des</code> place <strong>immediatement a gauche</strong> du bouton
+    « Cartes &amp; dessin » (<code>#btn-carte</code>), donc entre la reference des classes et le
+    module carte. Clic = ouverture du <strong>dice tray plein ecran</strong> (maquette 03).
+    Contrairement au bouton carte, il est <strong>visible pour tous</strong>, invites compris
+    (le dice tray ne requiert aucune session, aucune persistance) — validé V2.
+  </p>
+  <p class="mq-lead">
+    <button class="md-btn" type="button" id="mq-theme">Basculer clair / sombre</button>
+  </p>
+
+  <div class="section-bar">Rendu desktop (utilisateur connecte)</div>
+  <div class="mq-row">
+    <div class="mq-col" style="width:100%;">
+
+      <!-- ===== Topbar REELLE + insertion ===== -->
+      <div class="sticky-header" style="position:static;">
+        <header class="topbar">
+          <button class="btn-equipe-mobile" title="Equipe">&#9876;</button>
+          <a href="#" class="logo">Dungeon Crawl Classics</a>
+          <div class="topbar-spacer"></div>
+          <button class="ref-toggle" type="button" title="Référence des classes"
+                  aria-label="Ouvrir la référence des classes">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 5.5C10 4 7.5 3.5 4 3.5v13.5c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2V3.5c-3.5 0-6 .5-8 2z"/><path d="M12 5.5V19"/>
+            </svg>
+          </button>
+
+          <!-- ===== NOUVEAU : icone « dés » ===== -->
+          <button class="dice-toggle" id="btn-des" type="button" title="Dés"
+                  aria-label="Ouvrir le tapis de dés">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3.5" y="3.5" width="17" height="17" rx="4"/>
+              <circle cx="8.5" cy="8.5" r="1.3" fill="currentColor" stroke="none"/>
+              <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/>
+              <circle cx="15.5" cy="15.5" r="1.3" fill="currentColor" stroke="none"/>
+            </svg>
+          </button>
+          <!-- ===== fin nouveau ===== -->
+
+          <button class="map-toggle" type="button" title="Cartes &amp; dessin"
+                  aria-label="Ouvrir le module carte">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m9 4-6 3v13l6-3 6 3 6-3V4l-6 3z"/><path d="M9 4v13"/><path d="M15 7v13"/>
+            </svg>
+          </button>
+          <button class="theme-toggle" id="btn-theme" title="Changer de theme">&#9789;</button>
+          <div class="user-avatar-container">
+            <button class="auth-avatar" type="button" aria-label="Menu utilisateur">BM</button>
+          </div>
+        </header>
+
+        <nav class="tab-bar">
+          <button class="tab tab-equipe" data-class="equipe">Equipe</button>
+          <button class="tab active" data-class="clerc">Clerc</button>
+          <button class="tab" data-class="elfe">Elfe</button>
+          <button class="tab" data-class="guerrier">Guerrier</button>
+          <button class="tab" data-class="halfelin">Halfelin</button>
+          <button class="tab" data-class="mage">Mage</button>
+          <button class="tab" data-class="nain">Nain</button>
+          <button class="tab" data-class="voleur">Voleur</button>
+          <button class="tab tab-lvl0"><span class="tab-lbl-full">Niveau 0</span></button>
+        </nav>
+      </div>
+
+      <div class="mq-note">
+        <span class="mq-num">1</span><b>Position</b> : le bouton Des est place a gauche du
+        bouton carte — jamais entre le logo et le spacer : il reste dans le groupe d'actions
+        de droite (reference · Des · carte · theme · avatar).
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">2</span><b>Style</b> : clone exact de <code>.map-toggle</code>
+        (cercle 36 px, fond blanc 10 %, survol 20 %, cible tactile +4 px en
+        <code>pointer: coarse</code>, 32 px en &le; 600 px) — nouvelle classe
+        <code>.dice-toggle</code>.
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">3</span><b>Icone</b> : SVG inline dans le langage des icones
+        topbar (viewBox 24, trait 1,8 px, <code>currentColor</code>) — un de cubique en
+        perspective avec 3 pips. Elle se recolore donc automatiquement avec le thème
+        clair / sombre.
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section-bar">Rendu mobile (&le; 600 px) — connecte et invite</div>
+  <div class="mq-row">
+
+    <!-- ===== Mobile CONNECTE : thème + référence partent au menu (maquette 02) ===== -->
+    <div class="mq-phone">
+      <div class="sticky-header" style="position:absolute;top:0;left:0;right:0;">
+        <header class="topbar">
+          <button class="btn-equipe-mobile" title="Equipe">&#9876;</button>
+          <a href="#" class="logo" style="font-size:15px;">Dungeon Crawl Classics</a>
+          <div class="topbar-spacer"></div>
+          <!-- Des + carte restent ; ref-toggle et theme-toggle MASQUES (R1) -->
+          <button class="dice-toggle" type="button" title="Dés" aria-label="Ouvrir le tapis de dés">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3.5" y="3.5" width="17" height="17" rx="4"/>
+              <circle cx="8.5" cy="8.5" r="1.3" fill="currentColor" stroke="none"/>
+              <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/>
+              <circle cx="15.5" cy="15.5" r="1.3" fill="currentColor" stroke="none"/>
+            </svg>
+          </button>
+          <button class="map-toggle" type="button" title="Cartes &amp; dessin" aria-label="Ouvrir le module carte">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m9 4-6 3v13l6-3 6 3 6-3V4l-6 3z"/><path d="M9 4v13"/><path d="M15 7v13"/>
+            </svg>
+          </button>
+          <div class="user-avatar-container">
+            <button class="auth-avatar" type="button" aria-label="Menu utilisateur">BM</button>
+          </div>
+        </header>
+        <nav class="tab-bar">
+          <button class="tab tab-equipe">Equipe</button>
+          <button class="tab active">Clerc</button>
+          <button class="tab">Elfe</button>
+          <button class="tab">Guerrier</button>
+          <button class="tab">Halfelin</button>
+          <button class="tab">Mage</button>
+          <button class="tab">Nain</button>
+          <button class="tab">Voleur</button>
+          <button class="tab tab-lvl0"><span class="tab-lbl-short">Niv 0</span></button>
+        </nav>
+      </div>
+
+      <div style="padding:110px 14px 14px;">
+        <div class="mq-note" style="margin-bottom:10px;">
+          <span class="mq-num">4</span><b>Connecte</b> : les boutons « reference » et
+          « theme » <strong>quittent la topbar</strong> — leurs fonctions migrent dans le
+          menu utilisateur (maquette 02). Le logo se compresse deja en &le; 600 px :
+          aucun defilement horizontal.
+        </div>
+        <div class="char-card">
+          <div class="char-card-top" style="display:block;">
+            <div class="char-card-name">Clerc — Frère Anselme</div>
+            <div class="char-card-meta" style="margin-top:6px;">Le Des reste toujours visible : il ouvre le dice tray (maquette 03).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Mobile INVITE : MASQUAGE INCONDITIONNEL (validé V3) ===== -->
+    <div class="mq-phone">
+      <div class="sticky-header" style="position:absolute;top:0;left:0;right:0;">
+        <header class="topbar">
+          <button class="btn-equipe-mobile" title="Equipe">&#9876;</button>
+          <a href="#" class="logo" style="font-size:15px;">Dungeon Crawl Classics</a>
+          <div class="topbar-spacer"></div>
+          <!-- meme topbar, meme masquage : aucun data-auth (A2) -->
+          <button class="dice-toggle" type="button" title="Dés" aria-label="Ouvrir le tapis de dés">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3.5" y="3.5" width="17" height="17" rx="4"/>
+              <circle cx="8.5" cy="8.5" r="1.3" fill="currentColor" stroke="none"/>
+              <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/>
+              <circle cx="15.5" cy="15.5" r="1.3" fill="currentColor" stroke="none"/>
+            </svg>
+          </button>
+          <div id="auth-guest">
+            <a href="#" class="auth-btn">Connexion</a>
+            <a href="#" class="auth-btn auth-btn-outline">Inscription</a>
+          </div>
+        </header>
+        <nav class="tab-bar">
+          <button class="tab tab-equipe">Equipe</button>
+          <button class="tab active">Clerc</button>
+          <button class="tab">Elfe</button>
+          <button class="tab">Guerrier</button>
+          <button class="tab">Halfelin</button>
+          <button class="tab">Mage</button>
+          <button class="tab">Nain</button>
+          <button class="tab">Voleur</button>
+          <button class="tab tab-lvl0"><span class="tab-lbl-short">Niv 0</span></button>
+        </nav>
+      </div>
+
+      <div style="padding:110px 14px 14px;">
+        <div class="mq-note mq-note--q" style="margin-bottom:10px;">
+          <span class="mq-num">5</span><b>Invite</b> : le masquage est
+          <strong>inconditionnel</strong> (validé V3) — pas de menu utilisateur pour les
+          invites, donc la reference des classes et la bascule de theme sont
+          <strong>perdues sur mobile</strong>. Le bouton Des, lui, reste (aucune session
+          requise). <i>Sur desktop, l'invite conserve les deux boutons : la media query
+          ne vise que &le; 600 px.</i>
+        </div>
+        <div class="char-card">
+          <div class="char-card-top" style="display:block;">
+            <div class="char-card-name">Sans session</div>
+            <div class="char-card-meta" style="margin-top:6px;">Fiches en lecture seule + dice tray accessible.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mq-col" style="max-width:340px;">
+      <div class="mq-note">
+        <span class="mq-num">6</span><b>Media query unique</b> :
+        <code>@media (max-width: 600px)</code> masque <code>.theme-toggle</code> et
+        <code>.ref-toggle</code> — sans condition d'authentification, donc sans aucun
+        changement dans <code>renderAuthUI()</code>.
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">7</span><b>Ouverture</b> : un seul clic sur le bouton Des
+        ouvre le dice tray plein ecran (maquette 03). Au chargement de la page, le moteur
+        3D (three.js, 1,85 Mo) n'est <strong>pas</strong> charge : il ne le sera qu'a la
+        premiere ouverture (lazy-loading).
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">8</span><b>Retour</b> : rien d'autre ne bouge derriere
+        (aucun rechargement) — et le tapis conserve ses des jusqu'a la fermeture de la
+        page (maquette 03, note 6).
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+document.getElementById('mq-theme').addEventListener('click', function () {
+  var root = document.documentElement;
+  root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+</script>
+</body>
+</html>

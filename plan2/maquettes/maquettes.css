@@ -1,0 +1,585 @@
+/* =========================================================================
+   MAQUETTES — evolution « Dice Tray »  (plan2/maquettes)
+   Fichier de maquette UNIQUEMENT : il ne doit jamais etre reference par
+   l'application (index.html ne doit le lier que dans les maquettes).
+   Il apporte :
+     1. les cadres d'appareils (mobile / desktop) et encarts d'annotation
+     2. les styles PROPOSES de l'evolution (bouton Des de la topbar, entrees
+        menu utilisateur, coque plein ecran du dice tray) — a rapatrier dans
+        style.css / dice/dice.css le jour J (voir plan2/PLAN-DICE-TRAY.md)
+   Le tapis reprend a l'identique la palette de dice-box-dcc (feutrine,
+   cadre bois, badges) — validé V4.
+   ========================================================================= */
+
+/* -------------------------------------------------------------------------
+   0. Outils de maquette
+   ---------------------------------------------------------------------- */
+.mq-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+}
+
+.mq-lead {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.mq-lead code,
+.mq-note code {
+  background: var(--field-bg);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 0 4px;
+  font-size: 12px;
+}
+
+.mq-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  align-items: flex-start;
+  margin: 18px 0 8px;
+}
+
+.mq-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 100%;
+}
+
+/* Cadre telephone : boitier + encoche */
+.mq-phone {
+  width: 390px;
+  max-width: 100%;
+  height: 780px;
+  border: 10px solid #17171c;
+  border-radius: 42px;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+  flex: none;
+}
+
+.mq-phone::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 116px;
+  height: 24px;
+  border-radius: 14px;
+  background: #17171c;
+  z-index: 50;
+}
+
+.mq-desktop {
+  width: 100%;
+  max-width: 1020px;
+  height: 620px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  background: var(--bg);
+  box-shadow: 0 12px 30px var(--shadow);
+  flex: none;
+}
+
+.mq-cap {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+/* Encarts d'annotation */
+.mq-note {
+  border-left: 4px solid var(--yellow);
+  background: var(--paper);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink);
+  max-width: 720px;
+}
+
+.mq-note--q {
+  border-left-color: var(--tab-active);
+}
+
+.mq-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--yellow);
+  color: #17171c;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 12px;
+  flex: none;
+}
+
+.mq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+
+/* Diagrammes de flux */
+.mq-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.mq-step {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 260px;
+}
+
+.mq-step b {
+  display: block;
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.mq-arrow {
+  color: var(--muted);
+  font-size: 18px;
+}
+
+/* -------------------------------------------------------------------------
+   1. Topbar — bouton « Des » (propose, section « a rapatrier dans style.css »)
+   ---------------------------------------------------------------------- */
+.dice-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--header-text);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dice-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dice-toggle svg {
+  width: 19px;
+  height: 19px;
+}
+
+/* -------------------------------------------------------------------------
+   2. Menu utilisateur — entrees ajoutees (propose)
+   ---------------------------------------------------------------------- */
+#user-menu button[data-action="class-ref"]::before {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5.5C10 4 7.5 3.5 4 3.5v13.5c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2V3.5c-3.5 0-6 .5-8 2z'/%3E%3Cpath d='M12 5.5V19'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5.5C10 4 7.5 3.5 4 3.5v13.5c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2V3.5c-3.5 0-6 .5-8 2z'/%3E%3Cpath d='M12 5.5V19'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+#user-menu button[data-action="toggle-theme"]::before {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--input-border);
+  background: linear-gradient(90deg, var(--ink) 0 50%, transparent 50% 100%);
+}
+
+/* -------------------------------------------------------------------------
+   3. Dice Tray — coque plein ecran (propose, a rapatrier dans dice/dice.css)
+      Chrome dans le theme de l'app ; feutrine + cadre bois + badges = look
+      d'origine dice-box-dcc conserve (validé V4).
+   ---------------------------------------------------------------------- */
+.dt-module {
+  position: absolute;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* --- chrome haut : barre dans le theme de l'app (langage .help-header) --- */
+.dt-top {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px;
+  background: var(--header-bg);
+  color: var(--header-text);
+}
+
+.dt-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dt-title svg {
+  width: 19px;
+  height: 19px;
+}
+
+.dt-close {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.dt-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dt-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* --- barre de choix des des (portage dice-box-dcc) --- */
+.dt-pickerbar {
+  flex: none;
+  background: #0d1512;
+  border-bottom: 1px solid #000;
+  padding: 8px 8px 8px;
+}
+
+.dt-picker {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  padding: 2px 4px 6px;
+}
+
+.dt-pick {
+  width: auto;
+  min-width: 0;
+  border: 1px solid #ffffff22;
+  background: #16211c;
+  border-radius: 12px;
+  padding: 6px 2px 4px;
+  color: #f3efe4;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font: inherit;
+}
+
+.dt-pick i {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dt-pick i svg {
+  width: 40px;
+  height: 40px;
+}
+
+.dt-pick span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* --- scene : cadre bois + tapis de feutrine (copie fidele du source) --- */
+.dt-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  padding: 10px;
+}
+
+.dt-frame {
+  flex: 1;
+  min-height: 0;
+  border-radius: 20px;
+  padding: 12px;
+  border: 1px solid #3d2712;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(0, 0, 0, 0.28)),
+    repeating-linear-gradient(93deg, #7a4e2c 0 26px, #6f4526 26px 28px, #82562f 28px 54px),
+    #6f4526;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.dt-tray {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  overflow: visible;
+  background: radial-gradient(120% 100% at 50% 20%, #127a44 0%, #0c5c31 45%, #073a20 100%);
+  box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.6), inset 0 2px 10px rgba(0, 0, 0, 0.65);
+}
+
+.dt-tray::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  border-radius: 12px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* --- des statiques de maquette (SVG 2D, comme la maquette de l'auteur) --- */
+.dt-die {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  filter: drop-shadow(0 7px 6px rgba(0, 0, 0, 0.55));
+}
+
+/* --- badges de resultat (copie fidele) --- */
+.dt-blayer {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.bdg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 7px;
+  border-radius: 14px;
+  background: rgba(8, 12, 10, 0.88);
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 15px;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}
+
+/* bouton aide du tapis */
+.dt-helpbtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(8, 12, 10, 0.7);
+  color: #f3efe4;
+  border: 1px solid #ffffff44;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 6;
+}
+
+/* --- barre d'actions (portage fidele) --- */
+.dt-actionbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px max(12px, env(safe-area-inset-bottom));
+  background: #0d1512;
+  border-top: 1px solid #000;
+}
+
+.dt-act {
+  border-radius: 999px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 800;
+  border: 1px solid #00000055;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  font: inherit;
+  min-height: 48px;
+  white-space: nowrap;
+}
+
+.dt-act.primary {
+  background: linear-gradient(#ffd76a, #e8a81c);
+  color: #3a2503;
+}
+
+.dt-act.ghost {
+  background: rgba(16, 29, 23, 0.85);
+  color: #f3efe4;
+  border-color: #ffffff33;
+}
+
+.dt-total {
+  background: linear-gradient(#ffd76a, #e8a81c);
+  color: #3a2503;
+  border: 1px solid #00000055;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 16px;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+}
+
+/* --- modale d'aide des gestes (portage, ids dice-) --- */
+.dt-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.62);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.dt-card {
+  background: #14201a;
+  border: 1px solid #ffffff2a;
+  border-radius: 16px;
+  padding: 22px;
+  width: min(360px, 100%);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  color: #f3efe4;
+}
+
+.dt-card h2 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.dt-card ul {
+  margin: 0 0 6px;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.9;
+  color: #d8d2c2;
+}
+
+.dt-card .dt-row {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.dt-card .dt-btn {
+  border-radius: 10px;
+  padding: 11px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font: inherit;
+  border: 1px solid #ffffff33;
+  background: #24352c;
+  color: #f3efe4;
+  min-height: 46px;
+}
+
+/* --- etat « tapis vide » : aucune aide visuelle, juste la feutrine --- */
+.dt-empty-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  color: rgba(243, 239, 228, 0.55);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+/* --- toasts internes du tapis (portes par window.showToast le jour J) --- */
+.dt-toast {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  background: rgba(8, 12, 10, 0.85);
+  border: 1px solid #ffffff33;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f3efe4;
+  white-space: nowrap;
+}
+
+/* -------------------------------------------------------------------------
+   4. Variante desktop du picker (14 colonnes, comme le source a >= 900 px)
+   ---------------------------------------------------------------------- */
+@media (min-width: 900px) {
+  .dt-picker--desktop {
+    grid-template-columns: repeat(14, 1fr);
+  }
+}
+
+/* -------------------------------------------------------------------------
+   5. Ajustements responsive des maquettes elles-memes
+   ---------------------------------------------------------------------- */
+@media (max-width: 460px) {
+  .mq-phone {
+    height: 640px;
+    border-width: 6px;
+    border-radius: 28px;
+  }
+}

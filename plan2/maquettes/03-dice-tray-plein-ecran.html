@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette 03 — dice tray plein écran</title>
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="maquettes.css">
+</head>
+<body>
+
+<div class="mq-wrap">
+
+  <div class="section-title" style="font-size:26px;">3. Dice tray plein écran</div>
+  <p class="mq-lead">
+    Portage a l'identique de <code>D:\VS Code\dice-box-dcc</code> dans une coque plein ecran
+    <code>#dice-module</code>, sur le principe des autres fenetres plein ecran de la webapp
+    (module Carte, reference des classes) : barre de chrome + <strong>croix de fermeture en
+    haut a droite</strong> + <code>Échap</code>. Le chrome (barre, croix) suit le theme de
+    l'app ; <strong>la feutrine, le cadre bois, les des et les badges gardent leur identité
+    d'origine</strong> (validé V4). Tapis <strong>vide au demarrage</strong> (R5) — contrairement
+    au projet source qui ajoute 3 des de demo.
+  </p>
+  <p class="mq-lead">
+    <button class="md-btn" type="button" id="mq-theme">Basculer clair / sombre</button>
+  </p>
+
+  <div class="section-bar">Rendu desktop — 1re ouverture : tapis vide (etat par defaut)</div>
+  <div class="mq-row">
+    <div class="mq-col" style="width:100%;">
+      <div class="mq-desktop">
+        <div class="dt-module">
+
+          <header class="dt-top">
+            <div class="dt-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3.5" y="3.5" width="17" height="17" rx="4"/>
+                <circle cx="8.5" cy="8.5" r="1.3" fill="currentColor" stroke="none"/>
+                <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/>
+                <circle cx="15.5" cy="15.5" r="1.3" fill="currentColor" stroke="none"/>
+              </svg>
+              Tapis de dés
+            </div>
+            <button class="dt-close" type="button" aria-label="Fermer le tapis de dés" title="Fermer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                   stroke-linecap="round" aria-hidden="true">
+                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+              </svg>
+            </button>
+          </header>
+
+          <div class="dt-pickerbar">
+            <div class="dt-picker dt-picker--desktop">
+              <!-- 14 des du source : aplats colorees (miniatures 3D le jour J) -->
+              <button class="dt-pick" type="button"><i style="background:#d94848"></i><span>D3</span></button>
+              <button class="dt-pick" type="button"><i style="background:#ef7d23"></i><span>D4</span></button>
+              <button class="dt-pick" type="button"><i style="background:#d9a416"></i><span>D5</span></button>
+              <button class="dt-pick" type="button"><i style="background:#12a0a8"></i><span>D6</span></button>
+              <button class="dt-pick" type="button"><i style="background:#2f6fed"></i><span>D7</span></button>
+              <button class="dt-pick" type="button"><i style="background:#6a4de0"></i><span>D8</span></button>
+              <button class="dt-pick" type="button"><i style="background:#c93b8f"></i><span>D10</span></button>
+              <button class="dt-pick" type="button"><i style="background:#f272a8"></i><span>D%</span></button>
+              <button class="dt-pick" type="button"><i style="background:#9a6a2f"></i><span>D12</span></button>
+              <button class="dt-pick" type="button"><i style="background:#7ba428"></i><span>D14</span></button>
+              <button class="dt-pick" type="button"><i style="background:#64748b"></i><span>D16</span></button>
+              <button class="dt-pick" type="button"><i style="background:#23262b"></i><span>D20</span></button>
+              <button class="dt-pick" type="button"><i style="background:#9aa7b5"></i><span>D24</span></button>
+              <button class="dt-pick" type="button"><i style="background:#f2ead8"></i><span>D30</span></button>
+            </div>
+          </div>
+
+          <main class="dt-stage">
+            <div class="dt-frame">
+              <div class="dt-tray">
+                <button class="dt-helpbtn" type="button" aria-label="Aide et gestes">?</button>
+                <div class="dt-empty-hint">Tapis vide par defaut &mdash; choisis un dé en haut, ou clique « Lancer » apres en avoir ajoute</div>
+              </div>
+            </div>
+          </main>
+
+          <footer class="dt-actionbar">
+            <button class="dt-act ghost" type="button">🗑 <span>Vider</span></button>
+            <div></div>
+            <button class="dt-act primary" type="button">🎲 <span>Lancer</span></button>
+          </footer>
+
+        </div>
+      </div>
+
+      <div class="mq-note" style="margin-top:14px;">
+        <span class="mq-num">1</span><b>Chrome</b> : barre haute dans le theme de l'app
+        (langage <code>.help-header</code> / <code>#md-close</code> : croix ronde 38 px,
+        hover accent) + <code>Échap</code>. Sous la barre, la coquille du portage reprend
+        fidelement le source : picker de 14 des (miniatures 3D), cadre bois, tapis de
+        feutrine, barre d'actions « Vider / Total / Lancer ».
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">2</span><b>Vide par defaut (R5)</b> : contrairement au projet
+        source (demo D20 + D6 + D8 au demarrage), le tapis demarre <strong>strictement
+        vide</strong>. Le bandeau « ouvre via un serveur » du source est ecarte : dcc-sheet
+        est toujours servi en http(s).
+      </div>
+    </div>
+  </div>
+
+  <div class="section-bar">Rendu desktop — tapis en cours de partie (badges + total)</div>
+  <div class="mq-row">
+    <div class="mq-col" style="width:100%;">
+      <div class="mq-desktop">
+        <div class="dt-module">
+
+          <header class="dt-top">
+            <div class="dt-title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3.5" y="3.5" width="17" height="17" rx="4"/>
+                <circle cx="8.5" cy="8.5" r="1.3" fill="currentColor" stroke="none"/>
+                <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/>
+                <circle cx="15.5" cy="15.5" r="1.3" fill="currentColor" stroke="none"/>
+              </svg>
+              Tapis de dés
+            </div>
+            <button class="dt-close" type="button" aria-label="Fermer le tapis de dés" title="Fermer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                   stroke-linecap="round" aria-hidden="true">
+                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+              </svg>
+            </button>
+          </header>
+
+          <div class="dt-pickerbar">
+            <div class="dt-picker dt-picker--desktop">
+              <button class="dt-pick" type="button"><i style="background:#d94848"></i><span>D3</span></button>
+              <button class="dt-pick" type="button"><i style="background:#ef7d23"></i><span>D4</span></button>
+              <button class="dt-pick" type="button"><i style="background:#d9a416"></i><span>D5</span></button>
+              <button class="dt-pick" type="button"><i style="background:#12a0a8"></i><span>D6</span></button>
+              <button class="dt-pick" type="button"><i style="background:#2f6fed"></i><span>D7</span></button>
+              <button class="dt-pick" type="button"><i style="background:#6a4de0"></i><span>D8</span></button>
+              <button class="dt-pick" type="button"><i style="background:#c93b8f"></i><span>D10</span></button>
+              <button class="dt-pick" type="button"><i style="background:#f272a8"></i><span>D%</span></button>
+              <button class="dt-pick" type="button"><i style="background:#9a6a2f"></i><span>D12</span></button>
+              <button class="dt-pick" type="button"><i style="background:#7ba428"></i><span>D14</span></button>
+              <button class="dt-pick" type="button"><i style="background:#64748b"></i><span>D16</span></button>
+              <button class="dt-pick" type="button"><i style="background:#23262b"></i><span>D20</span></button>
+              <button class="dt-pick" type="button"><i style="background:#9aa7b5"></i><span>D24</span></button>
+              <button class="dt-pick" type="button"><i style="background:#f2ead8"></i><span>D30</span></button>
+            </div>
+          </div>
+
+          <main class="dt-stage">
+            <div class="dt-frame">
+              <div class="dt-tray">
+                <button class="dt-helpbtn" type="button" aria-label="Aide et gestes">?</button>
+
+                <!-- D20 (17) -->
+                <svg class="dt-die" viewBox="0 0 64 64" style="left:26%;top:34%;transform:rotate(-7deg);">
+                  <polygon points="32,3 58,18 58,46 32,61 6,46 6,18" fill="#23262b" stroke="#000" stroke-width="1.5"/>
+                  <path d="M32 3 46 26 32 33 18 26Z" fill="#3b4048"/>
+                  <path d="M6 18 18 26 12 44Z" fill="#2c3036"/>
+                  <path d="M58 18 46 26 52 44Z" fill="#2c3036"/>
+                  <path d="M12 44 32 61 32 33Z" fill="#33383f"/>
+                  <path d="M52 44 32 61 32 33Z" fill="#2f343b"/>
+                </svg>
+                <div class="dt-blayer"></div>
+                <div class="bdg" style="left:calc(26% + 6px);top:calc(34% - 8px);border-color:#23262b;">17</div>
+
+                <!-- D6 (4) -->
+                <svg class="dt-die" viewBox="0 0 64 64" style="left:47%;top:52%;transform:rotate(9deg);">
+                  <rect x="5" y="5" width="54" height="54" rx="12" fill="#12a0a8" stroke="#0a6e73" stroke-width="1.5"/>
+                  <circle cx="20" cy="20" r="4.4" fill="#fff"/>
+                  <circle cx="44" cy="20" r="4.4" fill="#fff"/>
+                  <circle cx="32" cy="32" r="4.4" fill="#fff"/>
+                  <circle cx="20" cy="44" r="4.4" fill="#fff"/>
+                  <circle cx="44" cy="44" r="4.4" fill="#fff"/>
+                </svg>
+                <div class="bdg" style="left:calc(47% + 46px);top:calc(52% + 40px);border-color:#12a0a8;">4</div>
+
+                <!-- D8 (10) -->
+                <svg class="dt-die" viewBox="0 0 64 64" style="left:68%;top:30%;transform:rotate(-12deg);">
+                  <polygon points="32,3 59,32 32,61 5,32" fill="#6a4de0" stroke="#4a35ad" stroke-width="1.5"/>
+                  <path d="M5 32h54" stroke="#4a35ad" stroke-width="1.5"/>
+                  <path d="M32 3 45 32 32 61 19 32Z" fill="#7d61e8"/>
+                </svg>
+                <div class="bdg" style="left:calc(68% + 46px);top:calc(30% - 4px);border-color:#6a4de0;">10</div>
+
+                <div class="dt-toast">Total : 31</div>
+              </div>
+            </div>
+          </main>
+
+          <footer class="dt-actionbar">
+            <button class="dt-act ghost" type="button">🗑 <span>Vider</span></button>
+            <div class="dt-total">Total : 31</div>
+            <button class="dt-act primary" type="button">🎲 <span>Lancer</span></button>
+          </footer>
+
+        </div>
+      </div>
+
+      <div class="mq-note" style="margin-top:14px;">
+        <span class="mq-num">3</span><b>Gestes (inchangees du source)</b> : toucher un dé du
+        picker l'ajoute au tapis (max 10) &middot; toucher un dé du tapis le relance &middot;
+        appui long 500 ms le retire &middot; glisser-deplacer &middot; lacher avec elan = lancer
+        manuel &middot; « Lancer » lance tout (+ total pendant 8 s, cliquable pour masquer).
+        Tirage crypto equitable (<code>crypto.getRandomValues</code>), d'abord le resultat,
+        puis l'animation.
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">4</span><b>Resultats</b> : chaque dé stabilise sur sa face
+        resultat, un badge(colore au bordure du dé) s'affiche aupres de lui ; le total
+        (regle percentile : D% + D10 lisent 00+0 = 100) apparait en pastille dans la barre
+        d'actions et dans le toast interne.
+      </div>
+    </div>
+  </div>
+
+  <div class="section-bar">Rendu mobile (&le; 600 px) + modale d'aide des gestes</div>
+  <div class="mq-row">
+
+    <div class="mq-phone">
+      <div class="dt-module" style="position:absolute;">
+        <header class="dt-top">
+          <div class="dt-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3.5" y="3.5" width="17" height="17" rx="4"/>
+              <circle cx="8.5" cy="8.5" r="1.3" fill="currentColor" stroke="none"/>
+              <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/>
+              <circle cx="15.5" cy="15.5" r="1.3" fill="currentColor" stroke="none"/>
+            </svg>
+            Tapis de dés
+          </div>
+          <button class="dt-close" type="button" aria-label="Fermer le tapis de dés" title="Fermer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" aria-hidden="true">
+              <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+            </svg>
+          </button>
+        </header>
+
+        <div class="dt-pickerbar">
+          <div class="dt-picker">
+            <button class="dt-pick" type="button"><i style="width:44px;height:44px;background:#d94848"></i><span>D3</span></button>
+            <button class="dt-pick" type="button"><i style="width:44px;height:44px;background:#ef7d23"></i><span>D4</span></button>
+            <button class="dt-pick" type="button"><i style="width:44px;height:44px;background:#d9a416"></i><span>D5</span></button>
+            <button class="dt-pick" type="button"><i style="width:44px;height:44px;background:#12a0a8"></i><span>D6</span></button>
+            <button class="dt-pick" type="button"><i style="width:44px;height:44px;background:#2f6fed"></i><span>D7</span></button>
+            <button class="dt-pick" type="button"><i style="width:44px;height:44px;background:#6a4de0"></i><span>D8</span></button>
+            <button class="dt-pick" type="button"><i style="width:44px;height:44px;background:#c93b8f"></i><span>D10</span></button>
+          </div>
+        </div>
+
+        <main class="dt-stage">
+          <div class="dt-frame">
+            <div class="dt-tray">
+              <button class="dt-helpbtn" type="button" aria-label="Aide et gestes">?</button>
+              <svg class="dt-die" viewBox="0 0 64 64" style="width:54px;height:54px;left:24%;top:30%;transform:rotate(6deg);">
+                <rect x="5" y="5" width="54" height="54" rx="12" fill="#12a0a8" stroke="#0a6e73" stroke-width="1.5"/>
+                <circle cx="20" cy="20" r="4.4" fill="#fff"/>
+                <circle cx="44" cy="20" r="4.4" fill="#fff"/>
+                <circle cx="32" cy="32" r="4.4" fill="#fff"/>
+                <circle cx="20" cy="44" r="4.4" fill="#fff"/>
+                <circle cx="44" cy="44" r="4.4" fill="#fff"/>
+              </svg>
+              <div class="bdg" style="left:calc(24% + 42px);top:calc(30% + 34px);border-color:#12a0a8;">6</div>
+            </div>
+          </div>
+        </main>
+
+        <footer class="dt-actionbar">
+          <button class="dt-act ghost" type="button" style="padding:11px 14px;font-size:15px;">🗑</button>
+          <div></div>
+          <button class="dt-act primary" type="button" style="padding:11px 16px;font-size:15px;">🎲 <span>Lancer</span></button>
+        </footer>
+      </div>
+    </div>
+
+    <div class="mq-phone" style="height:560px;">
+      <div class="dt-module" style="position:absolute;">
+        <header class="dt-top">
+          <div class="dt-title">Tapis de dés</div>
+          <button class="dt-close" type="button" aria-label="Fermer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+                 stroke-linecap="round" aria-hidden="true">
+              <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+            </svg>
+          </button>
+        </header>
+        <div class="dt-stage">
+          <div class="dt-frame">
+            <div class="dt-tray"></div>
+          </div>
+        </div>
+        <!-- modale d'aide (ids dice-) -->
+        <div class="dt-modal">
+          <div class="dt-card" role="dialog" aria-modal="true" aria-label="Gestes">
+            <h2>Gestes</h2>
+            <ul>
+              <li>Toucher un dé <b>en haut</b> : l'ajouter au tapis</li>
+              <li>Toucher un dé <b>sur le tapis</b> : le lancer</li>
+              <li><b>Appui long</b> sur un dé : le retirer</li>
+              <li><b>Glisser-deposer</b> : deplacer · <b>lacher avec elan</b> : lancer manuel</li>
+              <li><b>D%</b> : dizaines (00–90) · avec un D10 : 00 + 0 = 100</li>
+              <li>🎲 <b>Lancer</b> : lance tous les dés (+ total)</li>
+              <li>🗑 <b>Vider</b> : tout retirer, sans confirmation</li>
+            </ul>
+            <div class="dt-row"><button class="dt-btn" type="button">Fermer</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mq-col" style="max-width:360px;">
+      <div class="mq-note">
+        <span class="mq-num">5</span><b>Mobile</b> : picker sur 7 colonnes, barre d'actions
+        compacte (Vider reduit a l'icone), <code>100dvh</code> + safe-areas. Le canvas WebGL
+        repond au tactile (glisser, pincer n'est pas necessaire : le tapis recadre la camera
+        a tout redimensionnement).
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">6</span><b>Fermeture = masquage (R6, R7)</b> : la croix et
+        <code>Échap</code> ne font que <code>hidden = true</code> + pause de la boucle de
+        rendu (CPU/batterie) — <strong>aucune destruction, aucune persistance</strong>. En
+        rouvrant, le tapis est exactement celui de la veille (des, positions, valeurs).
+        Seul un rechargement de la page remet le tapis a zero.
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">7</span><b>Modale d'aide</b> : le « ? » du coin ouvre la
+        visionneuse des gestes (portee telle quelle) ; <code>Échap</code> la ferme d'abord,
+        puis le module — comportement source conserve.
+      </div>
+      <div class="mq-note mq-note--q">
+        <span class="mq-num">8</span><b>Sans WebGL</b> : si le moteur 3D ne peut pas demarrer
+        (navigateur ancien), un toast d'erreur s'affiche et le module se ferme — pas d'ecran
+        casse. Le module reste re-testable a chaque ouverture.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-bar">Cycle de vie de l'etat (aucune persistance)</div>
+  <div class="mq-flow">
+    <div class="mq-step"><b>1re ouverture</b> Tapis vide (R5). Le moteur (three.js, 1,85 Mo) est charge a ce moment-la uniquement (lazy-loading).</div>
+    <div class="mq-arrow">&rarr;</div>
+    <div class="mq-step"><b>Partie en cours</b> Des ajoutes, lances, deplaces — tout vit en memoire JS.</div>
+    <div class="mq-arrow">&rarr;</div>
+    <div class="mq-step"><b>Fermeture</b> Croix ou Échap : masquage + pause du rendu. Rien en base, rien en JSON, rien au localStorage (R7).</div>
+    <div class="mq-arrow">&rarr;</div>
+    <div class="mq-step"><b>Reouverture</b> Meme noeud DOM, meme memoire : le tapis est identique a avant (R6).</div>
+    <div class="mq-arrow">&rarr;</div>
+    <div class="mq-step"><b>Rechargement de la page</b> Tout est perdu — comportement voulu : le tapis redemarre vide.</div>
+  </div>
+
+</div>
+
+<script>
+document.getElementById('mq-theme').addEventListener('click', function () {
+  var root = document.documentElement;
+  root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+</script>
+</body>
+</html>

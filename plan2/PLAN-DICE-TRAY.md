@@ -4,6 +4,7 @@
 > Application de référence à porter : `D:\VS Code\dice-box-dcc`
 > (`INTEGRATION.md` = guide d'intégration de l'auteur, `NOTICE.md` = licences).
 > Maquette UI de l'auteur (référence IHM, non livrée) : `dice-box-dcc/maquette.html`.
+> Arbitrages V1–V5 **validés par l'utilisateur le 13/10/2026** (§ 7).
 > **Aucune ligne applicative n'est écrite à ce stade** — la maquette HTML de la
 > nouvelle interface sera créée après validation du présent plan.
 
@@ -13,7 +14,7 @@
 
 | # | Exigence (formulation retenue) |
 |---|--------------------------------|
-| **R1** | En **mode mobile / Android** (≤ 600 px), les boutons topbar « Changer de thème » (`#btn-theme`) et « Référence des classes » (`#btn-aide`) **quittent la topbar** et deviennent des entrées du **menu utilisateur**, placées **au-dessus** de l'entrée existante « Changer de thème » (sélecteur de couple de couleurs). |
+| **R1** | En **mode mobile / Android** (≤ 600 px), les boutons topbar « Changer de thème » (`#btn-theme`) et « Référence des classes » (`#btn-aide`) **quittent la topbar** et deviennent des entrées du **menu utilisateur**, placées **au-dessus** de l'entrée existante « Changer de thème » (sélecteur de couple de couleurs). Le masquage vaut **pour tous, invités compris** (validé V3) : les invités n'ont donc aucun accès à ces deux fonctions sur mobile. |
 | **R2** | Ajouter dans la topbar un bouton **« Dés »**, doté d'une **icône de dé** dans le style des icônes de la webapp (SVG inline, trait `currentColor`, cercle comme `.map-toggle`), placé **immédiatement à gauche** du bouton « Cartes & dessin ». |
 | **R3** | Le bouton « Dés » ouvre un **dice tray plein écran**, selon **le même principe que les autres fenêtres plein écran** de la webapp (overlay `position:fixed`, **bouton fermer en haut à droite**, fermeture aussi par `Échap`). |
 | **R4** | Le dice tray est un **portage à l'identique** de `D:\VS Code\dice-box-dcc` : **aucune dépendance** avec ce projet (pas de sous-module git, pas de lien), **tous les fichiers nécessaires sont intégrés** dans dcc-sheet. |
@@ -31,10 +32,10 @@
 | # | Sujet | Décision |
 |---|-------|----------|
 | **A1** | Mécanisme de masquage mobile | **CSS pur**, conformément à la convention de la webapp (aucune détection JS de mobile n'existe) : `@media (max-width: 600px)` masque `.theme-toggle` et `.ref-toggle`. |
-| **A2** | Cas des invités | Le menu utilisateur **n'existe pas** pour les invités (`#auth-logged` masqué). Le masquage mobile ne s'applique donc **que si connecté** : `renderAuthUI()` pose `data-auth="logged"` sur `<html>`, et la media query vise `html[data-auth="logged"] .theme-toggle`. **Les invités conservent les deux boutons topbar sur mobile.** *(Précédent D5 de l'évolution Carte : les invités ne voient pas le menu.)* |
+| **A2** | Cas des invités | Le masquage mobile est **inconditionnel** : les deux boutons topbar sont retirés à ≤ 600 px **y compris pour les invités**, qui n'ont donc plus accès à la référence des classes ni à la bascule de thème sur mobile (choix validé V3). **Conséquence technique : aucun attribut `data-auth` n'est nécessaire — `renderAuthUI()` reste inchangé.** |
 | **A3** | Nouvelles entrées du menu | Deux `<button data-action>` insérées **au-dessus** de l'entrée « Changer de thème » : **« Référence des classes »** (`data-action="class-ref"` → `DCCClassHelp.openFull()`) et **« Mode clair / sombre »** (`data-action="toggle-theme"` → `toggleTheme()`, libellé mis à jour dynamiquement ☾/☀ comme la pastille topbar). |
 | **A4** | Icônes des entrées | Même technique que l'entrée existante : `::before` en CSS. « Référence des classes » = petit livre en SVG data-URI (reprise du tracé de `#btn-aide`) ; « Mode clair / sombre » = disque jour/nuit (moitié pleine, même esprit que le conic-gradient de l'entrée « Changer de thème »). |
-| **A5** | Libellé de l'entrée bascule | Le bouton topbar déplacé s'appelle **« Mode clair / sombre »** pour ne pas le confondre avec l'entrée existante « Changer de thème » (sélecteur de couple), qui conserve son libellé. *(À valider — § 7.)* |
+| **A5** | Libellé de l'entrée bascule | Le bouton topbar déplacé s'appelle **« Mode clair / sombre »** pour ne pas le confondre avec l'entrée existante « Changer de thème » (sélecteur de couple), qui conserve son libellé. *(Validé V1.)* |
 
 ### 2.2 Parti 2 — Bouton « Dés » (R2)
 
@@ -43,7 +44,7 @@
 | **B1** | Nature du bouton | Pastille ronde **clonée de `.map-toggle`** (cercle 36 px → 32 px ≤ 600 px, fond `rgba(255,255,255,.1)`, cible tactile +4 px), **nouvelle classe `.dice-toggle`**, id `#btn-des`, `title="Dés"`. |
 | **B2** | Icône | **SVG inline** dans `index.html`, dans le langage exact des icônes topbar existantes : `viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" round` — un dé cubique en perspective avec 3 points (pips). |
 | **B3** | Position | Dans `index.html`, **immédiatement avant** `#btn-carte` (ordre desktop : `#btn-aide` · `#btn-des` · `#btn-carte` · `#btn-theme`). |
-| **B4** | Visibilité | **Tous les utilisateurs, invités compris** : le dice tray n'a besoin d'aucune session (aucune écriture en base, voir R7), contrairement au module Carte. Pas de `style="display:none"` conditionnel. *(À valider — § 7.)* |
+| **B4** | Visibilité | **Tous les utilisateurs, invités compris** : le dice tray n'a besoin d'aucune session (aucune écriture en base, voir R7), contrairement au module Carte. Pas de `style="display:none"` conditionnel. *(Validé V2.)* |
 
 ### 2.3 Parti 3 — Portage du dice tray (R3, R4, R6, R7)
 
@@ -57,7 +58,7 @@
 | **C6** | Fermeture / état (R6, R7) | **Masquage seul** (`moduleEl.hidden = true`) + **pause de la boucle de rendu** (`renderer.setAnimationLoop(null)`) pour ne pas consommer CPU/batterie. Les dés, positions et valeurs restent **en mémoire JS**. Réouverture : `hidden = false` + reprise de la boucle + `resize()`. **Zéro persistance** : pas de `localStorage`, pas d'appel `api/*`, pas d'écriture dans les JSON d'export/import. |
 | **C7** | Tapis vide (R5) | Suppression des 3 lignes de **démo de démarrage** de `app.js` (`addDie(D20/D6/D8)`) et du **bandeau `#fileHint`** (inutile : dcc-sheet est toujours servi en http(s)). |
 | **C8** | Fallback | Si le `import()` échoue ou si WebGL est indisponible : **`showToast` d'erreur** (« Dés 3D indisponibles sur ce navigateur ») + fermeture propre du module. L'échec n'est pas mémorisé (l'utilisateur peut réessayer). |
-| **C9** | Thème | Le chrome du module (header, croix, barre d'actions) réutilise les **variables CSS de l'app** (`--header-bg`, `--bg`, `--line`, …) comme `#map-module` : le dice tray suit donc le thème clair/sombre. La **feutrine et les dés gardent leur identité visuelle d'origine** (portage à l'identique). |
+| **C9** | Thème | Le chrome du module (header, croix, barre d'actions) réutilise les **variables CSS de l'app** (`--header-bg`, `--bg`, `--line`, …) comme `#map-module` : le dice tray suit donc le thème clair/sombre. La **feutrine et les dés gardent leur identité visuelle d'origine** (portage à l'identique). *(Validé V4.)* |
 | **C10** | `Échap` | Comportement source conservé : `Échap` ferme d'abord la **modale d'aide des gestes**, puis le module (comme `#map-module` gère ses raccourcis). |
 | **C11** | Licences (obligatoire) | Copiés dans `dice/lib/` : `THREE-LICENSE.txt` (MIT, three.js r186) ; en-tête de crédit **dicebox (SOND LecT, MIT)** conservé dans `dice/solids.js` ; mention des licences ajoutée à `README.md` et `MANUAL.md`. `LICENSE` du projet source (MIT, © 2026 Bruno) recopié en `dice/LICENSE`. |
 | **C12** | Guides source | `INTEGRATION.md`, `PLAN.md`, `TODO.md`, `maquette.html`, `deploy/` du projet source **ne sont pas copiés**. |
@@ -72,8 +73,8 @@ dcc-sheet/
 │                       + 2 entrées menu utilisateur (au-dessus de « Changer de thème »)
 │                       + <link href="dice/dice.css"> et <script src="dice-tray.js">
 ├── style.css           + section « Bouton Dés / entrées menu » (.dice-toggle, media queries,
-│                       ::before des entrées, html[data-auth] )
-├── script.js           ~ renderAuthUI (data-auth), dispatch menu (class-ref, toggle-theme),
+│                       ::before des entrées )
+├── script.js           ~ dispatch menu (class-ref, toggle-theme),
 │                       init() : branchement #btn-des
 ├── dice-tray.js        ← NOUVEAU : module IIFE, window.DCCDiceTray, overlay #dice-module
 ├── dice/
@@ -100,7 +101,7 @@ dcc-sheet/
 
 ```
       topbar ──── [ 🎲 btn-des ] [ 🗺 btn-carte ] [ ☾ thème ]     (desktop)
-                  [ 🎲 btn-des ] [ 🗺 btn-carte ]                 (mobile connecté : thème/aide → menu)
+                  [ 🎲 btn-des ] [ 🗺 btn-carte ]     (mobile : thème/aide → menu si connecté, perdus si invité)
                       │ clic
                       ▼
       ┌────────── #dice-module (position:fixed; inset:0; z-index:3000; 100dvh) ──┐
@@ -148,17 +149,17 @@ dcc-sheet/
   (y compris `@media (pointer: coarse)` avec `::after { inset:-4px }`),
   `.dice-toggle svg { width:19px; height:19px }`.
 - `@media (max-width: 600px)` : `.dice-toggle { width:32px; height:32px }` (avec `.theme-toggle`).
-- `@media (max-width: 600px)` + `html[data-auth="logged"]` : `display:none` sur
-  `.theme-toggle` et `.ref-toggle`.
+- `@media (max-width: 600px)` : `display:none` sur `.theme-toggle` et `.ref-toggle`,
+  **inconditionnellement** (tous statuts d'authentification, validé V3).
 - `::before` des deux nouvelles entrées du menu utilisateur (livre / disque jour-nuit),
   dans le style du `::before` existant de `[data-action="change-theme"]`.
 
 ### 4.3 `script.js`
 
-- `renderAuthUI()` : poser/retirer `data-auth="logged"` sur `document.documentElement`.
 - Dispatch du menu utilisateur : `class-ref` → `DCCClassHelp.openFull()` ;
   `toggle-theme` → `toggleTheme()` + rafraîchissement du libellé (☾/☀).
 - `init()` : branchement `#btn-des` → `window.DCCDiceTray.open()` (garde `if (…)`).
+- `renderAuthUI()` **inchangé** (le masquage mobile est un pur CSS, validé V3).
 
 ### 4.4 `dice-tray.js` (nouveau, IIFE classique)
 
@@ -252,19 +253,19 @@ Créée depuis `main` : `git checkout -b evol-dice-tray`.
 | **1** | Branche + copie brute de `dice/` (fichiers source + `lib/`, imports three adaptés) | `node --check` sur les fichiers copiés |
 | **2** | `dice/dice.css` scopé + préfixage `dice-` des ids (`app.js`, `tray.js`) | Aucun sélecteur global ; aucun id non préfixé |
 | **3** | `dice-tray.js` (overlay, croix, `Échap`, lazy-import, pause/resume) + `#btn-des` + `style.css` | Test `23` vert ; tapis vide à l'ouverture |
-| **4** | Parti 1 : entrées menu + media queries mobile + `data-auth` | Test `22-themes` + `23` verts ; vérif. manuelle 360 px |
+| **4** | Parti 1 : entrées menu + media queries mobile (masquage inconditionnel) | Test `22-themes` + `23` verts ; vérif. manuelle 360 px |
 | **5** | Vérifications croisées : `npm test` complet, builds Android/Windows, test manuel PC + mobile (lancer, drag, élan, appui long, redimensionnement, fermeture/réouverture = état identique) | Aucune régression |
 | **6** | Docs (`MANUAL`, `README`, `JOURNAL`, `TODO`) + captures | Cohérence docs/code |
 | **7** | Merge `evol-dice-tray` → `main` + push | — |
 
 ---
 
-## 7. Points à valider par l'utilisateur
+## 7. Décisions validées le 13/10/2026
 
-| # | Point | Proposition |
-|---|-------|-------------|
-| **V1** | Libellé de l'entrée menu qui remplace le bouton topbar « Changer de theme » | « **Mode clair / sombre** » (l'entrée existante « Changer de thème » = sélecteur de couple, inchangée) |
-| **V2** | Bouton « Dés » visible pour les **invités** (pas de session requise) ? | Oui, visible pour tous — à confirmer |
-| **V3** | Sur mobile, les invités **conservent** les boutons « thème » et « référence » dans la topbar (pas de menu utilisateur pour eux) | Oui — à confirmer |
-| **V4** | Identité visuelle du tapis | Feutrine sombre d'origine conservée (portage à l'identique) ; seul le chrome (header, croix, barre d'actions) suit le thème clair/sombre de l'app |
-| **V5** | Éventuelles **évolutions différées** (hors périmètre, comme dans le projet source) : historique de lancers, notation `2d6+3`, sons | Exclues du présent plan |
+| # | Point | Décision retenue |
+|---|-------|------------------|
+| **V1** | Libellé de l'entrée menu qui remplace le bouton topbar « Changer de theme » | **« Mode clair / sombre »** (l'entrée existante « Changer de thème » = sélecteur de couple, inchangée) |
+| **V2** | Bouton « Dés » visible pour les invités ? | **Oui, visible pour tous** (le dice tray ne requiert aucune session) |
+| **V3** | Sur mobile, les invités conservent-ils les boutons « thème » et « référence » dans la topbar ? | **Non : masqués aussi** — masquage inconditionnel à ≤ 600 px, aucun `data-auth` nécessaire ; les invités perdent ces deux fonctions sur mobile |
+| **V4** | Identité visuelle du tapis | **Feutrine sombre d'origine conservée** ; seul le chrome (header, croix, barre d'actions) suit le thème clair/sombre de l'app |
+| **V5** | Évolutions différées (hors périmètre, comme dans le projet source) : historique de lancers, notation `2d6+3`, sons | **Exclues** du présent plan |

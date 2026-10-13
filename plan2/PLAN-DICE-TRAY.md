@@ -5,6 +5,10 @@
 > (`INTEGRATION.md` = guide d'intégration de l'auteur, `NOTICE.md` = licences).
 > Maquette UI de l'auteur (référence IHM, non livrée) : `dice-box-dcc/maquette.html`.
 > Arbitrages V1–V5 **validés par l'utilisateur le 13/10/2026** (§ 7).
+> **MAJ 13/10/2026 (rev. son)** : le projet source a ajouté après la v1 du plan
+> un module sonore (`js/sound.js`, bouton `#soundBtn`, commits `2625309`/`c03c3a2`,
+> build `20261013d`). Le présent plan intègre ce delta (§§ R7, C4, C6, 4.5, 5, V6) :
+> son **porté à l'identique, persistance `localStorage['dicebox.sound']` conservée** (validé le 13/10/2026 — même régime que `dcc-theme`, OK Windows WebView2 et APK WebView).
 > **Aucune ligne applicative n'est écrite à ce stade** — la maquette HTML de la
 > nouvelle interface sera créée après validation du présent plan.
 
@@ -20,7 +24,7 @@
 | **R4** | Le dice tray est un **portage à l'identique** de `D:\VS Code\dice-box-dcc` : **aucune dépendance** avec ce projet (pas de sous-module git, pas de lien), **tous les fichiers nécessaires sont intégrés** dans dcc-sheet. |
 | **R5** | Le tapis est **vide par défaut** à l'ouverture (aucun dé, contrairement à la démo de démarrage du projet source). |
 | **R6** | À la **fermeture**, le module est simplement **masqué** : en le rouvrant, on retrouve **exactement l'état avant fermeture** (dés sur le tapis, positions, valeurs affichées). |
-| **R7** | **Aucune persistance** : rien en base, rien dans les exports JSON, rien dans le `localStorage`. L'état vit **en mémoire** tant que la page reste ouverte. |
+| **R7** | **Aucune persistance** : rien en base, rien dans les exports JSON, rien dans le `localStorage` — **y compris la préférence son** (seule persistance locale autorisée : la préférence muet du `SoundBank` (`localStorage['dicebox.sound']`, régime identique à `dcc-theme`). L'état du tapis vit **en mémoire** tant que la page reste ouverte. |
 | **R8** | Fonctionne sur **PC et mobile** (souris, tactile, glisser-déposer, lancer à l'élan, redimensionnement). |
 
 ---
@@ -53,14 +57,14 @@
 | **C1** | Mode d'intégration | **Intégration directe** (conteneur `#dice-module` injecté), **et non `<iframe>`**. Motifs : R3 exige le *même principe que les autres fenêtres plein écran* (croix dans le style de l'app, pile `z-index`, `Échap`, thème `data-theme`) ; l'iframe isolerait le CSS mais empêcherait ce chrome unifié. Le risque CSS est maîtrisé par C4. |
 | **C2** | Emplacement des fichiers | Dossier **`dice/`** à la racine de dcc-sheet. ⚠ Le dossier source `vendor/` est **interdit par le build Android** (`installeur/android/_sync-assets.mjs` exclut tout segment `vendor`) : les 3 fichiers three.js partent dans **`dice/lib/`** et les imports `../vendor/...` des 3 modules sont adaptés. |
 | **C3** | Préfixe d'ids | Tous les ids du dice tray sont **préfixés `dice-`** (`dice-tray`, `dice-picker`, `dice-stage`, `dice-total`, `dice-rollBtn`, …), sur le modèle du préfixe `md-` du module Carte (précédent D10, recommandé par `INTEGRATION.md`). Le `id="blayer"` de `tray.js` devient `dice-blayer`. |
-| **C4** | CSS | Porté dans **`dice/dice.css`**, chargé par `<link>` dans `index.html` (le test `02-css` ne contrôle que `style.css` — pas de lien direct). **Tous les sélecteurs sont scopés sous `#dice-module`** ; les règles globales du source (`html,body{}`, `body{overflow:hidden; 100dvh; user-select:none}`, `[hidden]{display:none!important}`) sont **supprimées ou scopées** ; la classe `.row` du modal d'aide (conflit avec `.row` de `style.css:1181`) est renommée `.dice-row`. Le tapis conserve la palette sombre d'origine (feutrine) : le module **n'hérite pas** des variables du thème, seul le chrome oui (voir C9). |
+| **C4** | CSS | Porté dans **`dice/dice.css`**, chargé par `<link>` dans `index.html` (le test `02-css` ne contrôle que `style.css` — pas de lien direct). **Tous les sélecteurs sont scopés sous `#dice-module`** ; les règles globales du source (`html,body{}`, `body{overflow:hidden; 100dvh; user-select:none}`, `[hidden]{display:none!important}`) sont **supprimées ou scopées** ; la classe `.row` du modal d'aide (conflit avec `.row` de `style.css:1181`) est renommée `.dice-row`. Les règles `#helpBtn,#soundBtn` sont scopées (`#dice-module …`) et leurs ids préfixés (`dice-helpBtn`, `dice-soundBtn`, positions gauche/droite conservées) ; `#toast` → `dice-toast`. Le tapis conserve la palette sombre d'origine (feutrine) : le module **n'hérite pas** des variables du thème, seul le chrome oui (voir C9). |
 | **C5** | Chargement du moteur | **Lazy-loading** : le moteur 3D (three.js = 1,85 Mo) n'est chargé qu'**à la première ouverture** du dice tray, via `import('./dice/app.js')` (dynamic import, modules ES déjà servis en `text/javascript` par tous les serveurs de l'app). Aucun coût au démarrage de la webapp. |
-| **C6** | Fermeture / état (R6, R7) | **Masquage seul** (`moduleEl.hidden = true`) + **pause de la boucle de rendu** (`renderer.setAnimationLoop(null)`) pour ne pas consommer CPU/batterie. Les dés, positions et valeurs restent **en mémoire JS**. Réouverture : `hidden = false` + reprise de la boucle + `resize()`. **Zéro persistance** : pas de `localStorage`, pas d'appel `api/*`, pas d'écriture dans les JSON d'export/import. |
+| **C6** | Fermeture / état (R6, R7) | **Masquage seul** (`moduleEl.hidden = true`) + **pause de la boucle de rendu** (`renderer.setAnimationLoop(null)`) pour ne pas consommer CPU/batterie **+ suspension de l'`AudioContext` du `SoundBank`** (`ctx.suspend()`, reprise au `resume()`). Les dés, positions et valeurs restent **en mémoire JS**. Réouverture : `hidden = false` + reprise de la boucle + `resize()`. **Zéro persistance** : pas de `localStorage` hors préférence son `dicebox.sound` (voir R7), pas d'appel `api/*`, pas d'écriture dans les JSON d'export/import. |
 | **C7** | Tapis vide (R5) | Suppression des 3 lignes de **démo de démarrage** de `app.js` (`addDie(D20/D6/D8)`) et du **bandeau `#fileHint`** (inutile : dcc-sheet est toujours servi en http(s)). |
 | **C8** | Fallback | Si le `import()` échoue ou si WebGL est indisponible : **`showToast` d'erreur** (« Dés 3D indisponibles sur ce navigateur ») + fermeture propre du module. L'échec n'est pas mémorisé (l'utilisateur peut réessayer). |
 | **C9** | Thème | Le chrome du module (header, croix, barre d'actions) réutilise les **variables CSS de l'app** (`--header-bg`, `--bg`, `--line`, …) comme `#map-module` : le dice tray suit donc le thème clair/sombre. La **feutrine et les dés gardent leur identité visuelle d'origine** (portage à l'identique). *(Validé V4.)* |
 | **C10** | `Échap` | Comportement source conservé : `Échap` ferme d'abord la **modale d'aide des gestes**, puis le module (comme `#map-module` gère ses raccourcis). |
-| **C11** | Licences (obligatoire) | Copiés dans `dice/lib/` : `THREE-LICENSE.txt` (MIT, three.js r186) ; en-tête de crédit **dicebox (SOND LecT, MIT)** conservé dans `dice/solids.js` ; mention des licences ajoutée à `README.md` et `MANUAL.md`. `LICENSE` du projet source (MIT, © 2026 Bruno) recopié en `dice/LICENSE`. |
+| **C11** | Licences (obligatoire) | Copiés dans `dice/lib/` : `THREE-LICENSE.txt` (MIT, three.js r186) ; en-tête de crédit **dicebox (SOND LecT, MIT)** conservé dans `dice/solids.js` ; mention des licences ajoutée à `README.md` et `MANUAL.md`. `LICENSE` du projet source (MIT, © 2026 Bruno) recopié en `dice/LICENSE`. `dice/sound.js` (synthèse Web Audio maison, zéro asset) est couvert par le même MIT applicatif, sans crédit tiers supplémentaire. |
 | **C12** | Guides source | `INTEGRATION.md`, `PLAN.md`, `TODO.md`, `maquette.html`, `deploy/` du projet source **ne sont pas copiés**. |
 
 ---
@@ -82,6 +86,7 @@ dcc-sheet/
 │   ├── config.js       ← inchangé (table DICE, constantes)
 │   ├── rng.js          ← inchangé (tirage crypto équitable)
 │   ├── total.js        ← inchangé (total + règle percentile)
+│   ├── sound.js        ← porté, persistance localStorage conservée (R7)
 │   ├── solids.js       ← inchangé (géométrie des 14 dés) + crédit dicebox
 │   ├── textures.js     ← inchangé (atlas canvas)
 │   ├── dice3d.js       ← ~ import three : ../lib/ …
@@ -179,9 +184,10 @@ dcc-sheet/
 | Fichier | Adaptations |
 |---|---|
 | `config.js`, `rng.js`, `total.js`, `solids.js`, `textures.js` | Copie **strictement à l'identique** (modules purs, sans DOM). |
+| `sound.js` | Copié puis adapté : lecture/écriture `localStorage['dicebox.sound']` **conservées à l'identique** (voir R7) ; API `SoundBank` inchangée (`unlock/clack/bounce/settle/state/setEnabled`). |
 | `dice3d.js`, `thumbs.js` | Uniquement l'import three : `../vendor/…` → `../lib/…`. |
-| `tray.js` | Import three ; `blayer.id` → `dice-blayer` ; **`pause()` / `resume()`** (`setAnimationLoop(null)` / rappel) ; `resize()` : ignorer une taille nulle (module masqué). |
-| `app.js` | **Pas de boot auto** : `export function initDiceTray(root, opts)` recevant le conteneur ; tous les `getElementById` deviennent des requêtes scopées `root.querySelector('#dice-…')` ; ids préfixés `dice-` ; démo de démarrage **supprimée** (C7) ; toasts redirigés vers `opts.toast` (`window.showToast` de l'app) ; handler `Échap` global **supprimé** (pris en charge par `dice-tray.js`, C10). |
+| `tray.js` | Import three ; `blayer.id` → `dice-blayer` ; **`pause()` / `resume()`** (`setAnimationLoop(null)` / rappel **+ `sound.ctx.suspend()/resume()` si présent**) ; `resize()` : ignorer une taille nulle (module masqué). `hooks.sound` reste **optionnel** (`|| null`, comme la source). |
+| `app.js` | **Pas de boot auto** : `export function initDiceTray(root, opts)` recevant le conteneur ; tous les `getElementById` deviennent des requêtes scopées `root.querySelector('#dice-…')` ; ids préfixés `dice-` (**y compris `dice-soundBtn`, `dice-helpBtn`, `dice-toast`**) ; son câblé comme la source (`new SoundBank()`, `unlock()` sur gestes **scopés au module**, bouton muet + toast diagnostic via `opts.toast`) ; démo de démarrage **supprimée** (C7) ; toasts redirigés vers `opts.toast` (`window.showToast` de l'app) ; handler `Échap` global **supprimé** (pris en charge par `dice-tray.js`, C10). |
 | `css/style.css` → `dice/dice.css` | Scopage sous `#dice-module` ; suppression de `html,body{}` / `body{}` globales ; `[hidden]` scopé ; `.row` → `.dice-row` ; `z-index` du modal d'aide relevé dans l'échelle dcc-sheet ; `100dvh` + `env(safe-area-inset-*)` conservés. |
 
 ### 4.6 Tests — `tests/23-dice-tray.test.js` (nouveau)
@@ -194,7 +200,8 @@ jsdom ne dispose ni de WebGL ni d'`import()` dynamique : les tests portent sur l
 3. `dice-tray.js` et `dice/dice.css` référencés dans `index.html`.
 4. `DCCDiceTray.open()` crée `#dice-module` avec `#dt-close` ; `close()` → `hidden === true`.
 5. Réouverture : le module **n'est pas reconstruit** (même nœud DOM, état conservé — R6).
-6. Aucune écriture `localStorage` / aucun appel `api/` lors d'ouverture/fermeture (R7).
+6. Aucune écriture `localStorage` / aucun appel `api/` lors d'ouverture/fermeture, **hors bascule muet** (`dicebox.sound`, seule écriture autorisée par R7).
+7. `#dice-soundBtn` présent dans la coquille (bascule 🔊/🔇 avec persistance `dicebox.sound`).
 7. `node --check` passe sur `dice-tray.js` (les `dice/*.js` ESM ne sont pas scannés par
    `01-syntax` — ils sont dans un sous-dossier).
 
@@ -218,16 +225,17 @@ jsdom ne dispose ni de WebGL ni d'`import()` dynamique : les tests portent sur l
 | `js/total.js` | `dice/total.js` | identique |
 | `js/solids.js` | `dice/solids.js` | identique (+ crédit dicebox conservé) |
 | `js/textures.js` | `dice/textures.js` | identique |
+| `js/sound.js` | `dice/sound.js` | identique (localStorage conservé, R7) |
 | `js/dice3d.js` | `dice/dice3d.js` | import three adapté |
 | `js/thumbs.js` | `dice/thumbs.js` | import three adapté |
-| `js/tray.js` | `dice/tray.js` | import + `pause()/resume()` + id + garde resize |
-| `js/app.js` | `dice/app.js` | export `initDiceTray`, ids `dice-`, sans démo |
-| `css/style.css` | `dice/dice.css` | scopé `#dice-module` |
+| `js/tray.js` | `dice/tray.js` | import + `pause()/resume()` (+ suspension audio) + id + garde resize |
+| `js/app.js` | `dice/app.js` | export `initDiceTray`, ids `dice-` (dont `dice-soundBtn`), son câblé, sans démo |
+| `css/style.css` | `dice/dice.css` | scopé `#dice-module` (dont `#dice-helpBtn/#dice-soundBtn/#dice-toast`) |
 | `vendor/three.module.min.js` | `dice/lib/three.module.min.js` | identique (renommé dossier, C2) |
 | `vendor/three.core.js` | `dice/lib/three.core.js` | identique |
 | `vendor/THREE-LICENSE.txt` | `dice/lib/THREE-LICENSE.txt` | identique |
 | `LICENSE` | `dice/LICENSE` | identique |
-| `index.html` (markup) | intégré dans `#dice-module` par `dice-tray.js` | découpé, ids `dice-` |
+| `index.html` (markup) | intégré dans `#dice-module` par `dice-tray.js` | découpé, ids `dice-` (**y compris `#dice-soundBtn` 🔊/🔇 à gauche, `#dice-helpBtn` ? à droite**) |
 | `index.html` (démo, `#fileHint`) | — | **supprimés** (C7, R5) |
 | `INTEGRATION.md`, `PLAN.md`, `TODO.md`, `maquette.html`, `deploy/`, `.git/` | — | **non copiés** (C12) |
 
@@ -268,4 +276,5 @@ Créée depuis `main` : `git checkout -b evol-dice-tray`.
 | **V2** | Bouton « Dés » visible pour les invités ? | **Oui, visible pour tous** (le dice tray ne requiert aucune session) |
 | **V3** | Sur mobile, les invités conservent-ils les boutons « thème » et « référence » dans la topbar ? | **Non : masqués aussi** — masquage inconditionnel à ≤ 600 px, aucun `data-auth` nécessaire ; les invités perdent ces deux fonctions sur mobile |
 | **V4** | Identité visuelle du tapis | **Feutrine sombre d'origine conservée** ; seul le chrome (header, croix, barre d'actions) suit le thème clair/sombre de l'app |
-| **V5** | Évolutions différées (hors périmètre, comme dans le projet source) : historique de lancers, notation `2d6+3`, sons | **Exclues** du présent plan |
+| **V5** | Évolutions différées (hors périmètre, comme dans le projet source) : historique de lancers, notation `2d6+3` | **Exclues** du présent plan (le son, autrefois différé, est désormais **inclus** via V6) |
+| **V6** | Son 3D ajouté par la source après la v1 du plan (`sound.js`, `#soundBtn`) : persistance `localStorage` | **Son porté à l'identique** (clacs/rebonds/tick, synthèse Web Audio, zéro asset, respect `prefers-reduced-motion` de la source), **persistance `dicebox.sound` conservée** ; `pause()` suspend l'audio, bouton muet conservé dans le tapis |

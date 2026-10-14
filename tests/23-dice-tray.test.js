@@ -112,6 +112,10 @@ module.exports = function suite() {
      14/10 : le tray restait affiche apres echec du moteur. */
   r.ok(/#dice-module\[hidden\]\s*\{[^}]*display\s*:\s*none\s*!important/.test(diceCss),
     'dice/dice.css : #dice-module[hidden] masque reellement la coquille');
+  /* Les commentaires sont exclus : les notes de portage mentionnent la
+     syntaxe retiree sans l'utiliser. */
+  r.ok(!/env\(safe-area/.test(diceCss.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'dice/dice.css : aucun env(safe-area) — insets fantomes sous l APK (MAJ 14/10)');
 
   const styleCss = read('style.css');
   r.ok(/\.dice-toggle\s*\{/.test(styleCss), 'style.css : regle .dice-toggle (topbar)');

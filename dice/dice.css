@@ -64,7 +64,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px;
+  /* MAJ 14/10 : env(safe-area-inset-top) retire (conserve dans le PWA
+     source) — sous l'APK, le WebView (viewport-fit=cover) signale un inset
+     alors que la fenetre est deja posee sous la barre de statut : ~44 px
+     de bande morte au-dessus du titre. */
+  padding: 8px 12px;
   background: var(--header-bg);
   color: var(--header-text);
 }
@@ -327,7 +331,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 12px max(12px, env(safe-area-inset-bottom));
+  /* MAJ 14/10 : env(safe-area-inset-bottom) retire (inset fantome, cf. #dt-top) */
+  padding: 10px 12px 12px;
   background: #0d1512;
   border-top: 1px solid #000;
 }
@@ -462,7 +467,7 @@
 @media (max-width: 480px) {
   #dice-module #dice-actionbar {
     gap: 8px;
-    padding: 10px 8px max(10px, env(safe-area-inset-bottom));
+    padding: 10px 8px;
   }
 
   #dice-module .act {

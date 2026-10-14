@@ -36,7 +36,7 @@ export class Tray {
     trayEl.appendChild(this.renderer.domElement);
 
     this.blayer = document.createElement('div');
-    this.blayer.id = 'blayer';
+    this.blayer.id = 'dice-blayer';
     trayEl.appendChild(this.blayer);
 
     this.scene = new THREE.Scene();
@@ -71,6 +71,7 @@ export class Tray {
   // --- dimensions ---
   resize() {
     const r = this.el.getBoundingClientRect();
+    if (!r.width || !r.height) return; // module masqué : rien à recalculer (C6)
     this.pxW = Math.max(1, r.width); this.pxH = Math.max(1, r.height);
     // Monde adaptatif : mobile inchangé (<=720px => 8), PC agrandi pour
     // garder une taille pixel de dé constante (~121px de diamètre).
@@ -93,6 +94,21 @@ export class Tray {
       sc.top = this.bz + 2; sc.bottom = -this.bz - 2;
       sc.updateProjectionMatrix();
     }
+  }
+  // --- pause / reprise (fermeture du module = masquage seul, C6) ---
+  pause() {
+    this.renderer.setAnimationLoop(null); // pas de CPU/batterie en arrière-plan
+    if (this.sound && this.sound.ctx && this.sound.ctx.suspend) {
+      try { this.sound.ctx.suspend(); } catch (_) { /* noop */ }
+    }
+  }
+  resume() {
+    this.resize();  // le conteneur peut avoir changé de taille pendant la pause
+    this.last = -1; // premier dt nul plutôt qu'un saut à la reprise
+    if (this.sound && this.sound.ctx && this.sound.ctx.resume) {
+      try { this.sound.ctx.resume(); } catch (_) { /* noop */ }
+    }
+    this.renderer.setAnimationLoop((t) => this.frame(t));
   }
   camDir() {
     return this.camera.position.clone().normalize();

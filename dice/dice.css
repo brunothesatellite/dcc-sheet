@@ -1,0 +1,485 @@
+/* =========================================================================
+   Dice Tray — coque plein ecran du portage dice-box-dcc (R3/R4).
+
+   Portage de `dice-box-dcc/css/style.css` + chrome de la maquette
+   `plan2/maquettes/03-dice-tray-plein-ecran.html` (validée le 14/10).
+
+   Arbitrage C4 : TOUS les selecteurs sont scopes sous #dice-module —
+   - les regles globales du source (html,body / body / [hidden]) sont
+     supprimees ou scopees ;
+   - la classe .row du modal d'aide est renommee .dice-row (conflit avec
+     .row de style.css:1181) ;
+   - les ids source sont prefixes dice- (C3) : #tray -> #dice-tray, etc.
+   Seul le chrome (#dt-top, .dt-title, #dt-close) suit le theme de l'app
+   via les variables (V4) ; feutrine, cadre bois, badges et barre d'actions
+   gardent la palette sombre d'origine (portage a l'identique).
+
+   Licences : dice-box-dcc (MIT, dice/LICENSE) ; three.js MIT
+   (dice/lib/THREE-LICENSE.txt) ; geometries d'apres dicebox de SOND LecT
+   (MIT, credit dans dice/solids.js).
+   ========================================================================= */
+
+/* --- coque (le source stylait html/body) --- */
+#dice-module,
+#dice-module *,
+#dice-module *::before,
+#dice-module *::after {
+  box-sizing: border-box;
+}
+
+#dice-module [hidden] {
+  display: none !important;
+}
+
+#dice-module {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+  color: #f3efe4;
+  font-family: inherit;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* --- chrome haut : barre dans le theme de l'app (maquette 03, V4) --- */
+#dice-module #dt-top {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px;
+  background: var(--header-bg);
+  color: var(--header-text);
+}
+
+#dice-module .dt-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#dice-module .dt-title svg {
+  width: 19px;
+  height: 19px;
+}
+
+/* Croix de fermeture : meme langage que #md-close (38 px, hover accent) */
+#dice-module #dt-close {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+#dice-module #dt-close:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+#dice-module #dt-close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+#dice-module #dt-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* --- barre de choix des des (source : #pickerBar / #picker) ---
+   Le safe-area top du source est deja pris en charge par #dt-top. */
+#dice-module #dice-pickerBar {
+  flex: none;
+  background: #0d1512;
+  border-bottom: 1px solid #000;
+  padding: 8px;
+}
+
+#dice-module #dice-picker {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  padding: 2px 4px 6px;
+  scrollbar-width: thin;
+  touch-action: manipulation;
+}
+
+#dice-module .pick {
+  width: auto;
+  min-width: 0;
+  border: 1px solid #ffffff22;
+  background: #16211c;
+  border-radius: 12px;
+  padding: 6px 2px 4px;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font: inherit;
+  touch-action: manipulation;
+}
+
+#dice-module .pick:active {
+  transform: scale(.93);
+}
+
+#dice-module .pick img {
+  width: 52px;
+  height: 52px;
+  pointer-events: none;
+  border-radius: 8px;
+}
+
+#dice-module .pick span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  pointer-events: none;
+}
+
+/* --- scene : cadre bois + tapis de feutrine (copie fidele du source) --- */
+#dice-module #dice-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  padding: 10px;
+}
+
+#dice-module #dice-frame {
+  flex: 1;
+  min-height: 0;
+  border-radius: 20px;
+  padding: 12px;
+  border: 1px solid #3d2712;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, .14), rgba(0, 0, 0, .28)),
+    repeating-linear-gradient(93deg, #7a4e2c 0 26px, #6f4526 26px 28px, #82562f 28px 54px),
+    #6f4526;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .6);
+}
+
+#dice-module #dice-tray {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  overflow: visible;
+  background: radial-gradient(120% 100% at 50% 20%, #127a44 0%, #0c5c31 45%, #073a20 100%);
+  box-shadow: inset 0 0 70px rgba(0, 0, 0, .6), inset 0 2px 10px rgba(0, 0, 0, .65);
+  touch-action: none;
+}
+
+#dice-module #dice-tray::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .55;
+  border-radius: 12px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+#dice-module #dice-tray canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+#dice-module #dice-blayer {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 3;
+}
+
+#dice-module .bdg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 7px;
+  border-radius: 14px;
+  background: rgba(8, 12, 10, .88);
+  border: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 15px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .7);
+  pointer-events: none;
+}
+
+#dice-module .bdg.pop {
+  animation: badgepop .3s ease-out;
+}
+
+@keyframes badgepop {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* boutons du tapis : "?" a droite, muet a gauche (source) */
+#dice-module #dice-helpBtn,
+#dice-module #dice-soundBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(8, 12, 10, .7);
+  color: #f3efe4;
+  border: 1px solid #ffffff44;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 6;
+  touch-action: manipulation;
+}
+
+#dice-module #dice-soundBtn {
+  left: 10px;
+  right: auto;
+}
+
+#dice-module #dice-toast {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  background: rgba(8, 12, 10, .85);
+  border: 1px solid #ffffff33;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity .25s;
+  pointer-events: none;
+  max-width: 92%;
+}
+
+#dice-module #dice-toast.show {
+  opacity: 1;
+}
+
+/* « tapis vide » : un seul etat par session, le temps du premier dé (R5) */
+#dice-module #dice-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  color: rgba(243, 239, 228, .55);
+  font-size: 13px;
+  white-space: nowrap;
+  max-width: 92%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+/* --- barre d'actions (portage fidele : le chrome sombre reste d'origine) --- */
+#dice-module #dice-actionbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px max(12px, env(safe-area-inset-bottom));
+  background: #0d1512;
+  border-top: 1px solid #000;
+}
+
+#dice-module .act {
+  border-radius: 999px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 800;
+  border: 1px solid #00000055;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .5);
+  cursor: pointer;
+  font: inherit;
+  touch-action: manipulation;
+  min-height: 48px;
+  white-space: nowrap;
+}
+
+#dice-module .act:active {
+  transform: scale(.95);
+}
+
+#dice-module .act.primary {
+  background: linear-gradient(#ffd76a, #e8a81c);
+  color: #3a2503;
+}
+
+#dice-module .act.ghost {
+  background: rgba(16, 29, 23, .85);
+  color: #f3efe4;
+  border-color: #ffffff33;
+}
+
+/* Icône D20 du bouton « Lancer » : SVG en flux inline a la place de
+   l'emoji du source (C13, demande du 14/10). */
+#dice-module .act svg {
+  display: inline-block;
+  width: 19px;
+  height: 19px;
+  vertical-align: -4px;
+}
+
+#dice-module #dice-total {
+  background: linear-gradient(#ffd76a, #e8a81c);
+  color: #3a2503;
+  border: 1px solid #00000055;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .5);
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* --- modale d'aide des gestes (portage, .row -> .dice-row, C4) --- */
+#dice-module .modal {
+  position: absolute;
+  inset: 0;
+  /* echelle dcc-sheet : au-dessus du contenu du module (3000) */
+  z-index: 3010;
+  background: rgba(0, 0, 0, .62);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+#dice-module .card {
+  background: #14201a;
+  border: 1px solid #ffffff2a;
+  border-radius: 16px;
+  padding: 22px;
+  width: min(360px, 100%);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, .6);
+}
+
+#dice-module .card h2 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+#dice-module .card ul {
+  margin: 0 0 6px;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.9;
+  color: #d8d2c2;
+}
+
+#dice-module .dice-row {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+#dice-module .btn {
+  border-radius: 10px;
+  padding: 11px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font: inherit;
+  border: 1px solid #ffffff33;
+  background: #24352c;
+  color: #f3efe4;
+  min-height: 46px;
+}
+
+/* --- large ecrans : picker 14 colonnes comme le source --- */
+@media (min-width: 900px) {
+  #dice-module #dice-stage {
+    justify-content: center;
+  }
+
+  #dice-module #dice-frame {
+    width: min(1060px, 100%);
+  }
+
+  #dice-module #dice-picker {
+    grid-template-columns: repeat(14, 1fr);
+  }
+
+  #dice-module .act {
+    padding: 13px 30px;
+    font-size: 17px;
+  }
+}
+
+/* --- petits ecrans : barre d'actions compacte --- */
+@media (max-width: 480px) {
+  #dice-module #dice-actionbar {
+    gap: 8px;
+    padding: 10px 8px max(10px, env(safe-area-inset-bottom));
+  }
+
+  #dice-module .act {
+    padding: 11px 14px;
+    font-size: 15px;
+  }
+
+  #dice-module .act.ghost span {
+    display: none;
+  }
+
+  #dice-module #dice-total {
+    font-size: 15px;
+    padding: 8px 12px;
+  }
+
+  #dice-module .pick img {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #dice-module .bdg.pop {
+    animation: none;
+  }
+}

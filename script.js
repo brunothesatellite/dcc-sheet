@@ -249,10 +249,11 @@
   }
 
   function updateThemeIcon() {
-    var btn = $('.theme-toggle');
-    if (!btn) return;
     var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    btn.textContent = isDark ? '\u2600' : '\u263E';
+    /* Seule la pastille topbar suit le theme : l'entree du menu a un
+       libelle statique avec icones en ligne (MAJ 14/10). */
+    var btn = $('.theme-toggle');
+    if (btn) btn.textContent = isDark ? '\u2600' : '\u263E';
   }
 
   /* =========================================================================
@@ -2479,6 +2480,15 @@
       });
     }
 
+    /* Tapis de des (evolution Dice Tray) : overlay plein ecran, le moteur
+       3D est charge en lazy a la premiere ouverture (dice-tray.js). */
+    var diceBtn = $('#btn-des');
+    if (diceBtn) {
+      diceBtn.addEventListener('click', function () {
+        if (window.DCCDiceTray) window.DCCDiceTray.open();
+      });
+    }
+
     /* Aide des classes (cas 2, global) : document integral + sommaire.
        Module optionnel, comme le lecteur de sorts : sans lui, rien. */
     var helpBtn = $('#btn-aide');
@@ -2535,6 +2545,15 @@
           avatarBtn.setAttribute('aria-expanded', 'false');
           var action = btn.getAttribute('data-action');
           if (action === 'logout') logout();
+          else if (action === 'class-ref') {
+            /* Meme ecran que le bouton topbar qu'elle remplace (R1). */
+            if (window.DCCClassHelp) window.DCCClassHelp.openFull();
+          }
+          else if (action === 'toggle-theme') {
+            /* Bascule clair/sombre : libelle statique (icones ☀/☾ en
+               ligne), seule la pastille topbar suit le theme. */
+            toggleTheme();
+          }
           else if (action === 'change-theme') {
             if (window.DCCThemes) window.DCCThemes.openPicker();
           }

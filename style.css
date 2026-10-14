@@ -201,6 +201,46 @@ ul, ol {
   }
 }
 
+/* --- Icone « Des » : meme cercle que carte/theme (evolution Dice Tray),
+       placee entre la reference et la carte. Ouvre le dice tray plein
+       ecran (#dice-module), visible pour tous, invitus compris (V2). --- */
+.dice-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--header-text);
+  cursor: pointer;
+  transition: background 0.2s;
+  flex: none;
+}
+
+.dice-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dice-toggle svg {
+  width: 19px;
+  height: 19px;
+}
+
+@media (pointer: coarse) {
+  .dice-toggle {
+    position: relative;
+  }
+
+  .dice-toggle::after {
+    content: "";
+    position: absolute;
+    inset: -4px;
+  }
+}
+
 /* --- Icone « reference » : meme cercle que carte/theme, placee a gauche
    de la carte (aide des classes : resume de classe ou document integral).
    32 px en mobile comme le bouton de theme (mesure 360 px : le logo
@@ -2757,6 +2797,25 @@ tr.team-stats-detail.open .team-detail-wrap {
     font-size: 15px;
   }
 
+  /* Evolution Dice Tray : le bouton Des reste (pastille 32 px, cible
+     tactile +4 px conservee) ; theme et reference quittent la topbar
+     (R1) — masquage INCONDITIONNEL, invitus compris (V3) : le menu
+     utilisateur devient l'acces unique sur mobile. */
+  .dice-toggle {
+    width: 32px;
+    height: 32px;
+  }
+
+  .dice-toggle svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .theme-toggle,
+  .ref-toggle {
+    display: none;
+  }
+
   #auth-guest .auth-btn {
     padding: 4px 10px;
     font-size: 11px;
@@ -4060,6 +4119,29 @@ html:not(.has-spell-reader) .spell-lookup,
   color: var(--muted);
   font-weight: 600;
   font-style: italic;
+}
+
+/* --- Entrees ajoutees au menu (evolution Dice Tray) : meme technique que
+       l'entree « Changer de theme » — petit livre (trace de #btn-aide)
+       pour la reference des classes, disque jour/nuit pour la bascule. --- */
+#user-menu button[data-action="class-ref"]::before {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5.5C10 4 7.5 3.5 4 3.5v13.5c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2V3.5c-3.5 0-6 .5-8 2z'/%3E%3Cpath d='M12 5.5V19'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5.5C10 4 7.5 3.5 4 3.5v13.5c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2V3.5c-3.5 0-6 .5-8 2z'/%3E%3Cpath d='M12 5.5V19'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+#user-menu button[data-action="toggle-theme"]::before {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--input-border);
+  background: linear-gradient(90deg, var(--ink) 0 50%, transparent 50% 100%);
 }
 
 /* --- Choix du theme (themes.js) : rubrique du menu utilisateur --- */

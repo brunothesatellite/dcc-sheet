@@ -51,6 +51,12 @@ module.exports = function suite() {
       function (b) { return b.getAttribute('data-action'); });
     r.eq(actions.slice(0, 3).join(', '), 'class-ref, toggle-theme, change-theme',
       'menu : reference + bascule au-dessus du selecteur de couples (R1, V1)');
+    const refBtn = menu.querySelector('button[data-action="class-ref"]');
+    const togBtn = menu.querySelector('button[data-action="toggle-theme"]');
+    r.ok(!!refBtn && refBtn.textContent === 'Référence',
+      'libelle court « Référence » (tenue sur une ligne, mobile)');
+    r.ok(!!togBtn && togBtn.textContent === '\u2600 Clair/\u263E Sombre',
+      'libelle « ☀ Clair/☾ Sombre » : icone sombre juste avant « Sombre »');
     const changeBtn = menu.querySelector('button[data-action="change-theme"]');
     const after = changeBtn && changeBtn.nextElementSibling;
     r.ok(!!after && after.tagName === 'HR', 'separateur <hr> apres « Changer de theme » (A3)');
@@ -157,8 +163,14 @@ module.exports = function suite() {
   r.ok(!!moduleEl.querySelector('#dice-soundBtn'), 'coquille : #dice-soundBtn (bascule muet, § 5)');
   r.ok(!!moduleEl.querySelector('#dice-helpBtn'), 'coquille : #dice-helpBtn');
   r.ok(!!moduleEl.querySelector('#dice-rollBtn'), 'coquille : #dice-rollBtn');
-  r.ok(!!moduleEl.querySelector('#dice-rollBtn svg'), 'coquille : icone SVG D20 sur « Lancer » (C13)');
-  r.ok(!!moduleEl.querySelector('#dice-clearBtn'), 'coquille : #dice-clearBtn');
+  r.ok(!!moduleEl.querySelector('#dice-rollBtn svg circle'),
+    'coquille : icone d6 a pips sur « Lancer » (C13, MAJ 14/10)');
+  const clearBtn = moduleEl.querySelector('#dice-clearBtn');
+  r.ok(!!clearBtn, 'coquille : #dice-clearBtn');
+  /* Le libelle est masque en mobile compact (maquette 03, note 6) :
+     l'aria-label garantit le nom quel que soit l'etat visuel. */
+  r.ok(!!clearBtn && clearBtn.getAttribute('aria-label') === 'Vider',
+    'bouton Vider : aria-label stable (icone seule en <=480px)');
   r.ok(!!moduleEl.querySelector('#dice-total'), 'coquille : #dice-total');
   r.ok(!!moduleEl.querySelector('#dice-hint'), 'coquille : etat « tapis vide » (maquette 03)');
   r.ok(!!moduleEl.querySelector('#dice-helpModal'), "coquille : modale d'aide des gestes");

@@ -37,9 +37,9 @@
 |---|-------|----------|
 | **A1** | Mécanisme de masquage mobile | **CSS pur**, conformément à la convention de la webapp (aucune détection JS de mobile n'existe) : `@media (max-width: 600px)` masque `.theme-toggle` et `.ref-toggle`. |
 | **A2** | Cas des invités | Le masquage mobile est **inconditionnel** : les deux boutons topbar sont retirés à ≤ 600 px **y compris pour les invités**, qui n'ont donc plus accès à la référence des classes ni à la bascule de thème sur mobile (choix validé V3). **Conséquence technique : aucun attribut `data-auth` n'est nécessaire — `renderAuthUI()` reste inchangé.** |
-| **A3** | Nouvelles entrées du menu | Deux `<button data-action>` insérées **au-dessus** de l'entrée « Changer de thème » : **« Référence »** (`data-action="class-ref"` → `DCCClassHelp.openFull()`) et **« ☀ Clair/☾ Sombre »** (`data-action="toggle-theme"` → `toggleTheme()`, libellé **statique** — MAJ 14/10 : libellés courts pour tenir sur une ligne en mobile, initialement « Référence des classes » / « Mode clair / sombre » avec libellé dynamique ☾/☀). Un `<hr>` est ajoute entre « Changer de thème » et « Exporter tout » — **double barre** identique a celle de « Importer tout » / « Changer le mot de passe » (le `border-bottom` de chaque bouton + le `hr` dessinent deux traits), demande du 14/10. |
-| **A4** | Icônes des entrées | Même technique que l'entrée existante : `::before` en CSS. « Référence » = petit livre en SVG data-URI (reprise du tracé de `#btn-aide`) ; « Clair/Sombre » = disque jour/nuit (moitié pleine, même esprit que le conic-gradient de l'entrée « Changer de thème »). |
-| **A5** | Libellé de l'entrée bascule | Le bouton topbar déplacé s'appelait **« Mode clair / sombre »** pour ne pas le confondre avec l'entrée existante « Changer de thème » (sélecteur de couple), qui conserve son libellé. *(Validé V1 ; renommé **« ☀ Clair/☾ Sombre »** le 14/10 — libellé court, icônes ☀/☾ conservées en ligne, l'icône sombre précédant le mot « Sombre ».)* |
+| **A3** | Nouvelles entrées du menu | Deux `<button data-action>` insérées **au-dessus** de l'entrée « Changer de thème » : **« Référence »** (`data-action="class-ref"` → `DCCClassHelp.openFull()`) et **« Mode Sombre » / « Mode Clair »** (`data-action="toggle-theme"` → `toggleTheme()`, libellé **dynamique** affichant toujours le **mode cible**, précédé d'une icône ☾/☀ en `::before` qui remplace le disque jour/nuit — MAJ 14/10 rev. 4 ; initialement « Référence des classes » / « Mode clair / sombre »). Un `<hr>` est ajoute entre « Changer de thème » et « Exporter tout » — **double barre** identique a celle de « Importer tout » / « Changer le mot de passe » (le `border-bottom` de chaque bouton + le `hr` dessinent deux traits), demande du 14/10. |
+| **A4** | Icônes des entrées | Même technique que l'entrée existante : `::before` en CSS. « Référence » = petit livre en SVG data-URI (reprise du tracé de `#btn-aide`) ; pour la bascule, le disque jour/nuit (moitié pleine) est **remplacé** le 14/10 (rev. 4) par une **icône ☾/☀ en `::before`** (mode cible via `html[data-theme="dark"]` en CSS), le libellé « Mode Sombre » / « Mode Clair » étant posé dynamiquement par `updateThemeIcon()`. |
+| **A5** | Libellé de l'entrée bascule | Le bouton topbar déplacé s'appelait **« Mode clair / sombre »** pour ne pas le confondre avec l'entrée existante « Changer de thème » (sélecteur de couple), qui conserve son libellé. *(Validé V1 ; MAJ 14/10 rev. 4 : **libellé dynamique** — **« Mode Sombre »** en thème clair, **« Mode Clair »** en thème sombre — toujours le mode cible de la bascule, précédé de l'icône ☾/☀ en `::before` (en place du disque noir/blanc), `aria-label`/`title` « Passer en mode … », mis à jour par `updateThemeIcon()`.)* |
 
 ### 2.2 Parti 2 — Bouton « Dés » (R2)
 
@@ -144,7 +144,8 @@ dcc-sheet/
 2. Dans `#user-menu`, **au-dessus** de `<button data-action="change-theme">` :
    ```html
    <button data-action="class-ref">Référence</button>
-   <button data-action="toggle-theme">&#9728; Clair/&#9790; Sombre</button>
+   <button data-action="toggle-theme" title="Passer en mode sombre"
+           aria-label="Passer en mode sombre">Mode Sombre</button>
    ```
    et un `<hr>` apres « Changer de thème » (avant « Exporter tout ») : chaque bouton du menu
    porte deja un `border-bottom`, l'`hr` produit donc une **double barre**, exactement comme
@@ -166,7 +167,9 @@ dcc-sheet/
 ### 4.3 `script.js`
 
 - Dispatch du menu utilisateur : `class-ref` → `DCCClassHelp.openFull()` ;
-  `toggle-theme` → `toggleTheme()` (libellé statique ☀ Clair/☾ Sombre).
+  `toggle-theme` → `toggleTheme()` (libellé dynamique « Mode Sombre » /
+  « Mode Clair » — le mode cible, rafraîchi par `updateThemeIcon()` ;
+  icône ☾/☀ en `::before` pilotée par `[data-theme]`).
 - `init()` : branchement `#btn-des` → `window.DCCDiceTray.open()` (garde `if (…)`).
 - `renderAuthUI()` **inchangé** (le masquage mobile est un pur CSS, validé V3).
 
@@ -276,7 +279,7 @@ Créée depuis `main` : `git checkout -b evol-dice-tray`.
 
 | # | Point | Décision retenue |
 |---|-------|------------------|
-| **V1** | Libellé de l'entrée menu qui remplace le bouton topbar « Changer de theme » | **« ☀ Clair/☾ Sombre »** (MAJ 14/10 : libellé court, icônes en ligne ; l'entrée existante « Changer de thème » = sélecteur de couple, inchangée) |
+| **V1** | Libellé de l'entrée menu qui remplace le bouton topbar « Changer de theme » | **« Mode Sombre »** en thème clair / **« Mode Clair »** en thème sombre (MAJ 14/10 rev. 4 : mode cible, précédé de l'icône ☾/☀ en `::before` remplaçant le disque noir/blanc ; l'entrée existante « Changer de thème » = sélecteur de couple, inchangée) |
 | **V2** | Bouton « Dés » visible pour les invités ? | **Oui, visible pour tous** (le dice tray ne requiert aucune session) |
 | **V3** | Sur mobile, les invités conservent-ils les boutons « thème » et « référence » dans la topbar ? | **Non : masqués aussi** — masquage inconditionnel à ≤ 600 px, aucun `data-auth` nécessaire ; les invités perdent ces deux fonctions sur mobile |
 | **V4** | Identité visuelle du tapis | **Feutrine sombre d'origine conservée** ; seul le chrome (header, croix, barre d'actions) suit le thème clair/sombre de l'app |

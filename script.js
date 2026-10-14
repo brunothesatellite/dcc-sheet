@@ -250,10 +250,18 @@
 
   function updateThemeIcon() {
     var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    /* Seule la pastille topbar suit le theme : l'entree du menu a un
-       libelle statique avec icones en ligne (MAJ 14/10). */
     var btn = $('.theme-toggle');
     if (btn) btn.textContent = isDark ? '\u2600' : '\u263E';
+    /* Entree du menu : libelle dynamique = mode cible (theme clair ->
+       « Mode Sombre », inversement) ; l'icone ☾/☀ est en ::before dans
+       style.css, pilotee par [data-theme] — MAJ 14/10 rev. 4. */
+    var menuBtn = document.querySelector('#user-menu button[data-action="toggle-theme"]');
+    if (menuBtn) {
+      var aria = isDark ? 'Passer en mode clair' : 'Passer en mode sombre';
+      menuBtn.textContent = isDark ? 'Mode Clair' : 'Mode Sombre';
+      menuBtn.setAttribute('aria-label', aria);
+      menuBtn.title = aria;
+    }
   }
 
   /* =========================================================================
@@ -2550,8 +2558,8 @@
             if (window.DCCClassHelp) window.DCCClassHelp.openFull();
           }
           else if (action === 'toggle-theme') {
-            /* Bascule clair/sombre : libelle statique (icones ☀/☾ en
-               ligne), seule la pastille topbar suit le theme. */
+            /* Bascule clair/sombre : l'icone seule affiche le mode cible,
+               rafraichi par updateThemeIcon(). */
             toggleTheme();
           }
           else if (action === 'change-theme') {

@@ -55,8 +55,9 @@ module.exports = function suite() {
     const togBtn = menu.querySelector('button[data-action="toggle-theme"]');
     r.ok(!!refBtn && refBtn.textContent === 'Référence',
       'libelle court « Référence » (tenue sur une ligne, mobile)');
-    r.ok(!!togBtn && togBtn.textContent === '\u2600 Clair/\u263E Sombre',
-      'libelle « ☀ Clair/☾ Sombre » : icone sombre juste avant « Sombre »');
+    r.ok(!!togBtn && togBtn.textContent === 'Mode Sombre' &&
+      togBtn.getAttribute('aria-label') === 'Passer en mode sombre',
+      'entree bascule : libelle « Mode Sombre » (theme clair) + aria-label');
     const changeBtn = menu.querySelector('button[data-action="change-theme"]');
     const after = changeBtn && changeBtn.nextElementSibling;
     r.ok(!!after && after.tagName === 'HR', 'separateur <hr> apres « Changer de theme » (A3)');
@@ -116,9 +117,14 @@ module.exports = function suite() {
   r.ok(/\.dice-toggle\s*\{/.test(styleCss), 'style.css : regle .dice-toggle (topbar)');
   r.ok(/\.theme-toggle,\s*\.ref-toggle\s*\{\s*display:\s*none;/.test(styleCss),
     'style.css : .theme-toggle + .ref-toggle masques en <=600px (V3)');
-  r.ok(styleCss.indexOf('button[data-action="class-ref"]::before') !== -1 &&
-    styleCss.indexOf('button[data-action="toggle-theme"]::before') !== -1,
-    'style.css : icones ::before des deux entrees de menu');
+  r.ok(styleCss.indexOf('button[data-action="class-ref"]::before') !== -1,
+    'style.css : icone livre ::before sur « Référence »');
+  r.ok(styleCss.indexOf('#user-menu button[data-action="toggle-theme"]::before') !== -1 &&
+    styleCss.indexOf('content: "☾"') !== -1,
+    'style.css : icone ☾ en ::before sur la bascule (replaces le disque, rev. 4)');
+  r.ok(styleCss.indexOf('html[data-theme="dark"] #user-menu button[data-action="toggle-theme"]::before') !== -1 &&
+    styleCss.indexOf('content: "☀"') !== -1,
+    'style.css : ::before de la bascule passe a ☀ en theme sombre');
 
   /* --- 6. Cycle de vie de la coquille (R6, C8) ----------------------- */
   const env = createEnv();
@@ -198,6 +204,33 @@ module.exports = function suite() {
   const odd = lsWrites.filter(function (k) { return k !== 'dicebox.sound'; });
   r.ok(odd.length === 0, 'aucune ecriture localStorage hors dicebox.sound (restees : ' +
     (odd.join(', ') || 'aucune') + ')');
+
+  /* --- 8. Entree Clair/Sombre dynamique : libelle « Mode Sombre » /
+         « Mode Clair » (toujours le mode cible) + icone ☾/☀ en ::before
+         pilotee par [data-theme] (script.js reel + toggleTheme) -------- */
+  const env2 = createEnv();
+  env2.document.body.innerHTML =
+    '<button class="theme-toggle"></button>' +
+    '<div id="user-menu"><button data-action="toggle-theme" title="Passer en mode sombre"' +
+    ' aria-label="Passer en mode sombre">Mode Sombre</button></div>';
+  /* Stub reseau minimal : init() ne se declenche qu'apres le corps
+     synchrone (DOMContentLoaded) ; on pilote via toggleTheme direct. */
+  env2.window.fetch = function () {
+    return Promise.resolve({ ok: true, json: async function () { return {}; } });
+  };
+  env2.load('script.js');
+  const togBtn2 = env2.document.querySelector('#user-menu button[data-action="toggle-theme"]');
+  const topBtn2 = env2.document.querySelector('.theme-toggle');
+  env2.window.toggleTheme(); /* -> sombre */
+  r.ok(togBtn2.textContent === 'Mode Clair' &&
+    togBtn2.getAttribute('aria-label') === 'Passer en mode clair' &&
+    topBtn2.textContent === '\u2600',
+    'theme sombre : libelle « Mode Clair » (cible) + icone ☀ / pastille ☀');
+  env2.window.toggleTheme(); /* -> clair */
+  r.ok(togBtn2.textContent === 'Mode Sombre' &&
+    togBtn2.getAttribute('aria-label') === 'Passer en mode sombre' &&
+    topBtn2.textContent === '\u263E',
+    'retour theme clair : libelle « Mode Sombre » (cible) + icone ☾ / pastille ☾');
 
   return r;
 };

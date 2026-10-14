@@ -4134,14 +4134,20 @@ html:not(.has-spell-reader) .spell-lookup,
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5.5C10 4 7.5 3.5 4 3.5v13.5c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2V3.5c-3.5 0-6 .5-8 2z'/%3E%3Cpath d='M12 5.5V19'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
+/* Entree bascule : icone ☾/☀ en ::before (remplace le disque jour/nuit),
+   toujours le mode cible, pilotee par [data-theme] sur <html> (MAJ 14/10
+   rev. 4) ; le libelle « Mode Sombre » / « Mode Clair » est pose par
+   updateThemeIcon() dans script.js. */
 #user-menu button[data-action="toggle-theme"]::before {
-  content: "";
+  content: "☾";
   flex: none;
   width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 1px solid var(--input-border);
-  background: linear-gradient(90deg, var(--ink) 0 50%, transparent 50% 100%);
+  text-align: center;
+  font-size: 15px;
+  line-height: 16px;
+}
+html[data-theme="dark"] #user-menu button[data-action="toggle-theme"]::before {
+  content: "☀";
 }
 
 /* --- Choix du theme (themes.js) : rubrique du menu utilisateur --- */

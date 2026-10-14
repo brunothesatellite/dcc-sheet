@@ -99,6 +99,10 @@ Une fois connecté, votre **avatar** (la première lettre de votre pseudo) rempl
 
 Le menu se referme en cliquant ailleurs ou en appuyant sur **Échap**.
 
+<img src="captures/menu-mobile-dice.png" alt="Menu utilisateur sur mobile : Bienvenue Bruno, Référence, Mode Sombre (icône lune), Changer de thème, puis Exporter / Importer tout" width="320">
+
+*Sur mobile (≤ 600 px), le menu regroupe aussi les entrées **Référence** et **Mode Sombre** (icône ☾ / ☀, toujours au mode à atteindre), qui remplacent les boutons masqués de la topbar.*
+
 ### 2.4 Changer son mot de passe
 
 1. Ouvrez le **menu utilisateur** (clic sur l'avatar).
@@ -744,6 +748,10 @@ sur le serveur, et les calques au-delà de 10 sont signalés par un toast.
 
 Un **tapis de dés 3D** (moteur three.js **embarqué** — fonctionne hors-ligne) ouvert par le **bouton 🎲 « Dés »** de la topbar, juste avant l'icône 🗺 Carte. Le bouton est visible pour **tous** (compte ou non), y compris sur mobile.
 
+<img src="captures/dice-tray-vide.png" alt="Tapis de dés ouvert sur mobile : barre des 14 dés en haut, tapis vert vide avec l'invite « Tapis vide par défaut », boutons son et aide, barre Vider / Lancer en bas" width="380">
+
+*Le tapis plein écran, vide au démarrage : la barre du haut propose les 14 dés, celle du bas les actions **Vider** et **Lancer**.*
+
 ### Ouvrir et fermer le module
 
 - **Ouvrir** : bouton **🎲** de la topbar — le tapis occupe **tout l'écran**.
@@ -757,6 +765,10 @@ Un **tapis de dés 3D** (moteur three.js **embarqué** — fonctionne hors-ligne
 - **🎲 Lancer** : lance tous les dés du tapis et affiche le **total** (cliquez dessus pour le masquer).
 - **🗑 Vider** : retire tous les dés, sans confirmation.
 
+<img src="captures/dice-tray-des.png" alt="Tapis de dés après un lancer : cinq dés 3D (deux D20, un D12, un D8, un D6) avec leurs valeurs en pastilles colorées et « Total : 28 » dans la barre du bas" width="380">
+
+*Après **Lancer** : chaque dé affiche sa valeur dans une pastille à sa couleur, et la barre du bas affiche le **total**.*
+
 ### Gestes (bouton **?** du tapis)
 
 | Geste | Effet |
@@ -767,6 +779,10 @@ Un **tapis de dés 3D** (moteur three.js **embarqué** — fonctionne hors-ligne
 | **Glisser-déposer** | Déplacer un dé |
 | **Lâcher avec élan** | Lancer manuel (direction et force du geste) |
 | **D%** | Dizaines (00–90) ; avec un D10 posé à côté, 00 + 0 = 100 |
+
+<img src="captures/dice-tray-aide.png" alt="Modale « Gestes » du tapis de dés : toucher pour ajouter ou lancer, appui long pour retirer, glisser-déposer, lancer avec élan, note D%, bouton Fermer" width="380">
+
+*La mémo des gestes, ouverte par le bouton **?** du tapis (Échap la ferme, avant le module).*
 
 ### Le son
 

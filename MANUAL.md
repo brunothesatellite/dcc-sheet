@@ -15,6 +15,7 @@ Manuel d'utilisation de l'application web **DCC Fiches de Personnage** : créez 
 7. [Le portrait (8 sources)](#7-le-portrait-8-sources)
 8. [Onglet Équipe (suivi de partie)](#8-onglet-équipe-suivi-de-partie)
 9. [Dessiner une carte](#9-dessiner-une-carte)
+9b. [Tapis de dés (Dice Tray)](#9b-tapis-de-dés-dice-tray)
 10. [Personnalisation & responsive](#10-personnalisation--responsive)
 11. [Astuces & dépannage](#11-astuces--dépannage)
 12. [Application Android (APK)](#12-application-android-apk)
@@ -88,6 +89,8 @@ Une fois connecté, votre **avatar** (la première lettre de votre pseudo) rempl
 | Action | Effet |
 |---|---|
 | **Bienvenue {pseudo}** | En-tête du menu |
+| **Référence** | Ouvre le document de référence des classes (fiches + Table 1-1) |
+| **☾ / ☀** | Bascule le thème sombre/clair : l'icône indique toujours le **mode à atteindre** (§ 10) |
 | **Exporter tout (JSON)** | Télécharge tous vos personnages, vos **notes d'équipe** et votre **ordre de marche** dans un fichier |
 | **Importer tout (JSON)** | Remplace **tous** vos personnages (et vos notes / ordre de marche, si le fichier en contient) par ceux d'un fichier |
 | **Changer le mot de passe** | Ouvre le formulaire de changement (§ 2.4) |
@@ -132,7 +135,8 @@ Tous vos personnages sont supprimés avec le compte : vous êtes redirigé vers 
 
 - **Bouton ⚔** : ouvre l'onglet **Equipe** — affiché uniquement en basse résolution (≤ 600 px), où l'onglet lui-même est masqué.
 - **Texte « Dungeon Crawl Classics »**
-- **Bouton ☾ / ☀** : bascule le thème sombre/clair (§ 10).
+- **Bouton 🎲 (Dés)** : ouvre le tapis de dés 3D (§ 9b).
+- **Bouton ☾ / ☀** : bascule le thème sombre/clair (§ 10) — masqué en mobile ≤ 600 px, l'entrée se trouve alors dans le menu utilisateur (§ 2.3).
 - **Avatar** : menu utilisateur (une fois connecté) — ou boutons **Connexion / Inscription** sinon.
 
 
@@ -736,11 +740,47 @@ sur le serveur, et les calques au-delà de 10 sont signalés par un toast.
 
 ---
 
+## 9b. Tapis de dés (Dice Tray)
+
+Un **tapis de dés 3D** (moteur three.js **embarqué** — fonctionne hors-ligne) ouvert par le **bouton 🎲 « Dés »** de la topbar, juste avant l'icône 🗺 Carte. Le bouton est visible pour **tous** (compte ou non), y compris sur mobile.
+
+### Ouvrir et fermer le module
+
+- **Ouvrir** : bouton **🎲** de la topbar — le tapis occupe **tout l'écran**.
+- **Fermer** : la **croix ✕** (haut droite) ou **Échap** — si la modale d'aide des gestes est ouverte, **Échap la ferme d'abord**, puis le module.
+- Fermer **n'efface rien** : l'état du tapis est **conservé tant que la page reste ouverte**. Le tapis n'est en revanche **pas sauvegardé** : au rechargement, il repart vide.
+
+### Le tapis et les dés
+
+- Au démarrage, le tapis est **vide** (invite au centre : « Tapis vide par défaut »).
+- La **barre du haut** propose 14 dés : **D3, D4, D5, D6, D7, D8, D10, D%, D12, D14, D16, D20, D24, D30**.
+- **🎲 Lancer** : lance tous les dés du tapis et affiche le **total** (cliquez dessus pour le masquer).
+- **🗑 Vider** : retire tous les dés, sans confirmation.
+
+### Gestes (bouton **?** du tapis)
+
+| Geste | Effet |
+|---|---|
+| Toucher un dé **en haut** (barre) | L'ajouter au tapis |
+| Toucher un dé **sur le tapis** | Le lancer |
+| **Appui long** sur un dé | Le retirer |
+| **Glisser-déposer** | Déplacer un dé |
+| **Lâcher avec élan** | Lancer manuel (direction et force du geste) |
+| **D%** | Dizaines (00–90) ; avec un D10 posé à côté, 00 + 0 = 100 |
+
+### Le son
+
+Le bouton **🔊 / 🔇** (coin du tapis) coupe ou rétablit les bruits de dés, **synthétisés** par le navigateur (aucun fichier audio). C'est la **seule préférence mémorisée** du module (`dicebox.sound` dans le navigateur).
+
+> **WebGL requis** : sur un navigateur ancien ou sans accélération 3D, le tapis affiche « Dés 3D indisponibles sur ce navigateur » et se referme proprement (rien n'est chargé).
+
+---
+
 ## 10. Personnalisation & responsive
 
 ### Thème clair / sombre
 
-1. Cliquez sur le bouton **☾** (thème sombre) / **☀** (thème clair) dans la topbar.
+1. Cliquez sur le bouton **☾** (thème sombre) / **☀** (thème clair) dans la topbar — ou, en mobile (≤ 600 px) où ce bouton est masqué, sur l'icône **☾ / ☀** du menu utilisateur (§ 2.3), qui affiche toujours le **mode à atteindre**.
 2. Le thème s'applique aussitôt **à toute l'application** et est **mémorisé** dans le navigateur (y compris sur les pages de connexion).
 
 <img src="captures/theme-sombre.png" alt="Thème sombre appliqué à la fiche d'un guerrier" width="380">
@@ -787,6 +827,7 @@ Le couple choisi voyage avec **Exporter / Importer tout** (comme les notes d'éq
 | Thème (mode clair / sombre) | localStorage | Non (préférence d'affichage locale) |
 | Thème (couple choisi) | **Base de données serveur** | Oui (export JSON, champ `theme_pair`) |
 | Onglet actif | localStorage | Non |
+| Son du tapis de dés (🔊 / 🔇) | localStorage (`dicebox.sound`) | Non (préférence locale) |
 | Fiches de personnages | **Base de données serveur** | Oui (export JSON) |
 | Notes d'équipe | **Base de données serveur** | Oui (export JSON) |
 | Ordre de marche | **Base de données serveur** | Oui (export JSON) |
@@ -799,6 +840,7 @@ Le couple choisi voyage avec **Exporter / Importer tout** (comme les notes d'éq
 - Fiches : mise en page compacte sur 2 colonnes maintenues, cercles de jets réduits, textes redimensionnables.
 - Tableaux de l'onglet Équipe : lignes et portraits réduits pour tenir en largeur d'écran.
 - **Onglet Équipe masqué** : remplacé par l'**icône ⚔** (haut gauche) ; les **8 autres onglets prennent toute la largeur** (part égale chacun, `flex: 1`, police 11 px, libellé **« Niv 0 »**) — **sans défilement horizontal**.
+- **Topbar allégée** : les boutons **☾ / ☀** (thème) et **📖** (référence des classes) sont masqués ; leurs entrées se retrouvent dans le **menu utilisateur** (§ 2.3). Le bouton **🎲 (Dés)**, lui, reste visible.
 - **Règle générale** : l'application se pilote aussi au doigt (clics → taps, clic droit → appui long).
 
 ---

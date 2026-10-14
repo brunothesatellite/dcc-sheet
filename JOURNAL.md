@@ -1870,3 +1870,25 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
 
 - Docs : README (themes, aide), MANUAL (§4.6 progression, §6.3c aide, §10 couples + 34 captures, §12 migration), JOURNAL.
 - Tests 3228/3228 OK -> commit evol-themes -> fast-forward main -> push -> build differentiel depuis v3.1 -> artefacts rebuildés post-push.
+
+---
+
+## Date : 14 octobre 2026 - Évolution Dice Tray (tapis de dés 3D)
+
+### Port intégral de `dice-box-dcc` (branche `evol-dice-tray`)
+
+- **Module plein écran** ouvert par le bouton 🎲 `#btn-des` de la topbar (avant 🗺 Carte, visible pour tous — V2) : coquille `dice-*` dans `dice-tray.js` (lazy `import('./dice/app.js')` après contrôle `hasWebGL()`), moteur porté **sans dépendance** dans `dice/` (app, tray, solids, textures, son Web Audio synthétisé, total, thumbs, config, rng).
+- **three.js r186** dans `dice/lib/` (arbitrage C2 : `vendor/` est banni côté Android par `BLOCK_DIRS`) ; correctif d'étape `5b494ca` : imports `../lib/` → `./lib/` (404) + règle `#dice-module[hidden]{display:none!important}` (le `display:flex` de l'auteur l'emportait sur la règle UA `[hidden]`).
+- **WebGL** : `hasWebGL()` (getContext webgl2/webgl) échoue proprement avant tout `import()` — toast « Dés 3D indisponibles sur ce navigateur » + fermeture (C8), échec non mémorisé ; `failEngine` log compact.
+- **Fermeture = masquage seul** (hidden + pause rendu/audio via `pause()`/`resume()` : `setAnimationLoop(null)` + `ctx.suspend()`), réouverture = état en mémoire (R6) ; **zéro persistance**, seule exception la préférence muette `dicebox.sound` (R7).
+- **Mobile ≤ 600 px** (V3) : boutons thème ☾/☀ et référence 📖 masqués de la topbar, remplacés par des entrées du menu utilisateur — « Référence » (`DCCClassHelp.openFull()`) et icône ☾/☀ **dynamique** (rev. 4 : libellé « Mode Sombre »/« Mode Clair » toujours au mode cible, icône en `::before` pilotée par `[data-theme]`, libellé porté aussi par l'`aria-label`) ; bouton « Lancer » à l'icône d6 à pips, « Vider » icône seule + `aria-label`.
+- **Suite `23-dice-tray`** (79 contrôles) : coquille (boutons, croix, Échap modale puis module), imports three résolus sur disque, pips SVG, libellés exacts, `[hidden]`, zéro écriture localStorage hors `dicebox.sound` ; jsdom n'a ni WebGL ni `import()` dynamique → le moteur n'est pas chargé en test, verrous statiques + `toggleTheme` réel pour la bascule du menu.
+- **Tests 3264/3264 OK** (14 skip) ; `node --check` vert ; `node tests/run.js` ≈ 37 s.
+- **Docs** : MANUAL (nouveau § 9b + topbar + menu utilisateur + § 10 mobile + tableau localStorage avec `dicebox.sound`), README (fonctionnalités, structure, dépendances, licences), TODO (2 évolutions cochées : dice tray + regroupement du menu).
+- **Licences** (C11) : `dice/lib/THREE-LICENSE.txt` (MIT, three.js r186), crédit dicebox (SOND LecT, MIT) conservé dans `dice/solids.js`, `dice/LICENSE` (MIT © 2026 Bruno) ; `INTEGRATION.md`/`PLAN.md`/`TODO.md`/`maquette.html`/`deploy/` du projet source non copiés (C12).
+
+### Artefacts de test « 3.4-test » (pas une release)
+
+- `deploy/dcc-sheet-webapp-3.4-test.zip` (25,3 Mo, 196 fichiers, racine `dcc-sheet/`, assertion tokens bannis OK) + `installeur/android/dist/dcc-sheet-3.4-test-android.apk` (24,7 Mo, `assembleRelease` + `apksigner`, manifest embarqué `a48717f-mv7xqiw3`, sync 291 assets / 38,6 Mo OK).
+- **Keystore inchangé** (`keystore/dcc-sheet.keystore`, alias `dcc-store`, créé le 11/10) : empreinte cert SHA-256 `8073edf5…` **identique** à celle de l'app du Pixel 7a → `adb install -r` possible sans désinstallation. Note de dépannage : `keytool -list -v` plante en français (`MissingFormatArgumentException '%2$s'`) — comparer les empreintes via `keytool -exportcert` + hash SHA-256 du DER.
+- Commits : `9a84862` (étape 1), `0e509ce` (étape 2), `5b494ca` (fix imports/`[hidden]`), `980efc1` (étape 3 + retouches UI), `a48717f` (rev. 4 menu dynamique) ; branche **poussée** sur `origin/evol-dice-tray` ; **merge `main` non fait** (étape 7, en attente du feu vert).

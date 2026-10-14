@@ -109,6 +109,13 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - Suppression d'une carte = suppression de son image de fond (si plus referencee)
 - Suites `15-map-draw` (127 assertions), `16-map-persist` (34), `17-map-export` (38), `18-maps-import` (15), `20-import-limits` (36)
 
+### Tapis de des 3D (Dice Tray)
+- Bouton `des` dans la topbar (avant l'icone carte, visible pour tous y compris sans compte) : overlay plein ecran ferme par croix ou Echap (d'abord la modale d'aide des gestes, puis le module)
+- **three.js r186 embarque** (`dice/lib/`, MIT) + solides de des d'apres **dice-box-dcc** (dicebox de SOND LecT, MIT) : 14 des (D3 a D30 + D%), lancer physique, total affichable, son Web Audio **synthetise** (aucun fichier audio)
+- Gestes : toucher (ajouter / lancer), appui long (retirer), glisser-deposer + lacher avec elan ; WebGL requis (sinon « Des 3D indisponibles sur ce navigateur » + fermeture propre, sans chargement)
+- **Zero persistance** : tapis vide au depart, etat conserve tant que la page reste ouverte (fermeture = simple masquage avec pause rendu/audio) ; seule ecriture localStorage : la preference muette `dicebox.sound`
+- Suite `23-dice-tray` (79 controles) : coquille (boutons, croix, Echap modale puis module), regle `#dice-module[hidden]`, imports three resolus sur disque, libelles du menu, zero ecriture locale
+
 ### Sauvegarde automatique
 - Debounce 600ms sur tous les champs modifiables
 - Toast de confirmation (icone disquette) a chaque sauvegarde
@@ -157,6 +164,9 @@ dcc-sheet/
 ├── dead-overlay.js             # Overlay "tete de mort" sur les portraits (PV courants <= 0)
 ├── portrait-guard.js           # Placeholder « aucune image disponible » si un dossier de portraits est absent (optionnel)
 ├── map-draw.js                 # Module Carte : dessin de carte plein ecran (port de draw-on-map, persistance BDD)
+├── dice-tray.js                # Tapis de des 3D : overlay plein ecran, lazy-load du moteur, Echap (aide puis module)
+├── dice/                       # Moteur de des porte de dice-box-dcc (app, tray, solids, textures, son, total, rng)
+│   └── lib/                    # three.js r186 embarque (MIT, THREE-LICENSE.txt)
 ├── api/
 │   ├── db.php                  # SQLite3 + helpers (users, characters, session)
 │   ├── auth.php                # Authentification (login, register, logout, change_password, delete_account)
@@ -397,6 +407,7 @@ Chaque build re-synchronise les assets (assertions de redistribution bloquantes)
 
 - **Backend** : PHP 7.4+ avec SQLite3
 - **Frontend** : Aucune dependance externe (vanilla JS)
+- **Des 3D** : three.js r186 embarque localement (`dice/lib/`, MIT) — aucune dependance reseau, aucun package manager
 - **Tests** : Node.js + jsdom (devDependency uniquement)
 - **Fonts** : Google Fonts (Barlow Condensed + Inter)
 - **Base de donnees** : SQLite3 (auto-creee dans `data/dcc.db`)
@@ -442,3 +453,7 @@ Le theme est sauvegarde dans le localStorage du navigateur. Essayez :
 ## Licence
 
 MIT
+
+Les des 3D embarquent **three.js r186** (`dice/lib/THREE-LICENSE.txt`, licence MIT) et des
+solides de des d'apres **dice-box-dcc** de **SOND LecT** (MIT, credit conserve dans
+`dice/solids.js`). Le moteur porte est distribue sous le meme MIT applicatif (`dice/LICENSE`).

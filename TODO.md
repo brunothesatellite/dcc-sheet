@@ -21,4 +21,4 @@
 
 **EVOLUTIONS**
 * ~~regrouper dans le menu utilisateur les icones : bascule mode sombre-clair, résumé global~~ — **fait le 14/10** (`evol-dice-tray`) : entrées « Référence » + icône ☾/☀ dynamique (mode à atteindre) au-dessus de « Changer de thème » ; en mobile ≤ 600 px, elles remplacent les boutons topbar masqués
-* ~~Ajoute un dice tray inspiré de dice-box-dcc, avec un bouton pour l'ouvrir à côté de l'icone carte~~ — **fait le 14/10** (`evol-dice-tray`) : bouton 🎲 `#btn-des` avant l'icône carte, overlay plein écran (`dice-tray.js` + `dice/`, moteur three.js embarqué, WebGL requis, zéro persistance sauf `dicebox.sound`) ; suite `23-dice-tray` (79 contrôles)
+* ~~Ajoute un dice tray inspiré de dice-box-dcc, avec un bouton pour l'ouvrir à côté de l'icone carte~~ — **fait le 14/10** (`evol-dice-tray`) : bouton 🎲 `#btn-des` avant l'icône carte, overlay plein écran (`dice-tray.js` + `dice/`, moteur three.js embarqué, WebGL requis, zéro persistance sauf `dicebox.sound`) ; suite `23-dice-tray` (80 contrôles)

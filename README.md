@@ -15,6 +15,10 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 |:---------------------:|:------------------:|
 | <img src="captures/carte-module-mobile.png" alt="Module carte sur mobile : carte de fond webp annotée de traits, barre d'état en haut et barre d'outils en bas" width="420"> | <img src="captures/carte-liste-calques.png" alt="Tiroir des cartes : liste des calques avec leur nom, nombre d'opérations, nom de l'image de fond et son identifiant" width="420"> |
 
+| Tapis de dés (vide) | Tapis après lancer |
+|:-------------------:|:------------------:|
+| <img src="captures/dice-tray-vide.png" alt="Tapis de dés plein écran sur mobile : barre des 14 dés en haut, tapis vert vide avec l'invite « Tapis vide par défaut », boutons son et aide, barre Vider / Lancer en bas" width="420"> | <img src="captures/dice-tray-des.png" alt="Tapis de dés après un lancer : cinq dés 3D (deux D20, un D12, un D8, un D6) avec leurs valeurs en pastilles colorées et le total 28 dans la barre du bas" width="420"> |
+
 ## Fonctionnalites
 
 ### Authentification
@@ -114,7 +118,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - **three.js r186 embarque** (`dice/lib/`, MIT) + solides de des d'apres **dice-box-dcc** (dicebox de SOND LecT, MIT) : 14 des (D3 a D30 + D%), lancer physique, total affichable, son Web Audio **synthetise** (aucun fichier audio)
 - Gestes : toucher (ajouter / lancer), appui long (retirer), glisser-deposer + lacher avec elan ; WebGL requis (sinon « Des 3D indisponibles sur ce navigateur » + fermeture propre, sans chargement)
 - **Zero persistance** : tapis vide au depart, etat conserve tant que la page reste ouverte (fermeture = simple masquage avec pause rendu/audio) ; seule ecriture localStorage : la preference muette `dicebox.sound`
-- Suite `23-dice-tray` (79 controles) : coquille (boutons, croix, Echap modale puis module), regle `#dice-module[hidden]`, imports three resolus sur disque, libelles du menu, zero ecriture locale
+- Suite `23-dice-tray` (80 controles) : coquille (boutons, croix, Echap modale puis module), regle `#dice-module[hidden]`, imports three resolus sur disque, libelles du menu, zero ecriture locale
 
 ### Sauvegarde automatique
 - Debounce 600ms sur tous les champs modifiables

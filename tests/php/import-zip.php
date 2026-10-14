@@ -224,6 +224,10 @@ if ($ready) {
         ['Content-Type: application/json'], $cookie);
     $j = json_decode($resp, true);
     ok($st === 200 && !empty($j['image_deleted']), 'delete sans drapeau : image supprimee (R12)');
+    // Le serveur (autre processus) vient de supprimer le fichier, mais CE
+    // processus a mis is_file($f) en cache a l'entree du test (cache de
+    // statuts PHP) : clearstatcache force la re-verification reelle.
+    clearstatcache(true, $f);
     ok(!is_file($f), 'delete sans drapeau : fichier parti');
 }
 

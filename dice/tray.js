@@ -1,6 +1,6 @@
 // Tapis 3D : scène Three.js transparente sur la feutrine CSS, physique scriptée
 // (résultat tiré avant l'animation), collisions disques, gestes, badges.
-import * as THREE from '../lib/three.module.min.js';
+import * as THREE from './lib/three.module.min.js';
 import { buildDie, normalForValue } from './dice3d.js';
 import { rollDie } from './rng.js';
 import { countTotal } from './total.js';

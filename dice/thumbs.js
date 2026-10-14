@@ -1,5 +1,5 @@
 // Miniatures 3D du picker : chaque type rendu une fois, en data-URL.
-import * as THREE from '../lib/three.module.min.js';
+import * as THREE from './lib/three.module.min.js';
 import { buildDie, normalForValue } from './dice3d.js';
 import { valuesFor } from './config.js';
 import { solidFor } from './solids.js';

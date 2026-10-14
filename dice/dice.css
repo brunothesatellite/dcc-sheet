@@ -31,6 +31,13 @@
   display: none !important;
 }
 
+/* La coquille elle-meme : #dice-module declare display:flex, qui l'emporterait
+   sur la regle UA [hidden]{display:none} (l'auteur bat l'agent utilisateur) —
+   sans ce rappel, hidden=true laisserait le tray affiche a la fermeture. */
+#dice-module[hidden] {
+  display: none !important;
+}
+
 #dice-module {
   position: fixed;
   inset: 0;

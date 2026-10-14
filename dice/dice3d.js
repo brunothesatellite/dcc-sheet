@@ -1,5 +1,5 @@
 // Fabrique de dés 3D : géométrie + texture de chiffres + orientation résultat.
-import * as THREE from '../lib/three.module.min.js';
+import * as THREE from './lib/three.module.min.js';
 import { solidFor, newellNormal } from './solids.js';
 import { atlasFor, CELL } from './textures.js';
 import { valuesFor, luminance, shade } from './config.js';

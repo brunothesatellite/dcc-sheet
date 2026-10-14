@@ -17,7 +17,7 @@
     statiques</strong>, aucune logique applicative. Elles se servent du <code>style.css</code>
     reel de l'application pour etre au plus pres du rendu final. Plan detaille :
     <code>plan2/PLAN-DICE-TRAY.md</code> — application de reference a porter :
-    <code>D:\VS Code\dice-box-dcc</code> (arbitrages V1–V5 valides le 13/10/2026).
+    <code>D:\VS Code\dice-box-dcc</code> (arbitrages V1–V6 valides, 13–14/10/2026).
   </p>
 
   <div class="section-bar">Les 3 maquettes</div>
@@ -55,10 +55,12 @@
         <div class="char-card-top" style="display:block;">
           <div class="char-card-name">3. Dice tray plein écran</div>
           <div class="char-card-meta" style="margin-top:8px;">
-            Chrome theme app + croix de fermeture &middot; picker de 14 des, feutrine et
-            badges fideles au source (V4) &middot; tapis vide par defaut &middot; etat
-            conserve a la fermeture, zero persistance &middot; modale d'aide &middot;
-            mobile + cycle de vie
+            Chrome theme app + croix de fermeture &middot; picker de 14 des en
+            <b>miniatures 3D</b> (aplats = rendu basse fidelite de la maquette), feutrine et
+            badges fideles au source (V4) &middot; bouton muet &#128266; + icône D20 sur
+            « Lancer » &middot; tapis vide par defaut &middot; etat conserve a la fermeture,
+            zero persistance hors preference son (V6) &middot; modale d'aide &middot; mobile
+            + cycle de vie
           </div>
         </div>
       </div>
@@ -74,7 +76,9 @@
     sont masques <b>inconditionnellement</b> (les invites les perdent, aucun
     <code>data-auth</code>) &middot; <b>V4</b> feutrine sombre conservee, seul le chrome suit
     le theme de l'app &middot; <b>V5</b> historique, notation <code>2d6+3</code> et sons
-    exclus du perimetre.
+    <b>originellement</b> exclus du perimetre &rarr; <b>V6</b> : le <b>son</b> ajoute par
+    la source apres la v1 du plan est porte tel quel (synthese Web Audio, bouton muet,
+    persistance <code>dicebox.sound</code>).
   </div>
 
 </div>

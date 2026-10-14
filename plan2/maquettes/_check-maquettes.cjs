@@ -34,6 +34,12 @@ function check(file, name, ok) {
           btns.findIndex(b => b.getAttribute('data-action') === 'change-theme'));
     check('02', 'class-ref avant toggle-theme', btns.findIndex(b => b.getAttribute('data-action') === 'class-ref') <
           btns.findIndex(b => b.getAttribute('data-action') === 'toggle-theme'));
+    /* double barre : hr entre change-theme et export-all, en plus de hr import/password */
+    const seq = Array.from(menu.children).map(el => el.tagName === 'HR' ? 'hr' :
+      (el.getAttribute && el.getAttribute('data-action')) || '');
+    const iCt = seq.indexOf('change-theme');
+    check('02', 'double barre hr apres change-theme', seq.indexOf('hr', iCt + 1) > iCt &&
+          seq.indexOf('hr', iCt + 1) < seq.indexOf('export-all'));
   }
 }
 
@@ -49,6 +55,18 @@ function check(file, name, ok) {
   check('03', 'tapis vide dans la 1re vue', d.querySelectorAll('.dt-tray')[0].querySelectorAll('.dt-die').length === 0);
   check('03', '3 des dans la vue « partie »', d.querySelectorAll('.dt-tray')[1].querySelectorAll('.dt-die').length === 3);
   check('03', 'modale d aide presente', d.querySelectorAll('.dt-modal').length === 1);
+  /* icone D20 sur les 3 boutons Lancer (emoji 🎲 retire) */
+  const lanc = Array.from(d.querySelectorAll('.dt-act.primary'));
+  check('03', '3 boutons Lancer', lanc.length === 3);
+  check('03', 'icone D20 (svg) sur chaque Lancer', lanc.every(b => b.querySelector('svg')));
+  check('03', 'emoji retire des boutons Lancer', lanc.every(b => !b.textContent.includes('🎲')));
+  check('03', '3 boutons muets (source)', d.querySelectorAll('.dt-soundbtn').length === 3);
+  check('03', 'encarts numerotes 1 sans doublon', (() => {
+    const n = Array.from(d.querySelectorAll('.mq-note')).map(x => {
+      const m = x.querySelector('.mq-num'); return m ? m.textContent : null;
+    }).filter(Boolean);
+    return new Set(n).size === n.length && n.includes('1') && n.includes('9');
+  })());
 }
 
 /* Sommaire */

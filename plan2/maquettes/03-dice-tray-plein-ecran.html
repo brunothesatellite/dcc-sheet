@@ -19,7 +19,8 @@
     haut a droite</strong> + <code>Échap</code>. Le chrome (barre, croix) suit le theme de
     l'app ; <strong>la feutrine, le cadre bois, les des et les badges gardent leur identité
     d'origine</strong> (validé V4). Tapis <strong>vide au demarrage</strong> (R5) — contrairement
-    au projet source qui ajoute 3 des de demo.
+    au projet source qui ajoute 3 des de demo. Le module sonore de la source (clacs / rebonds
+    synthetises, bouton muet) est porte tel quel (V6).
   </p>
   <p class="mq-lead">
     <button class="md-btn" type="button" id="mq-theme">Basculer clair / sombre</button>
@@ -73,7 +74,8 @@
           <main class="dt-stage">
             <div class="dt-frame">
               <div class="dt-tray">
-                <button class="dt-helpbtn" type="button" aria-label="Aide et gestes">?</button>
+                <button class="dt-soundbtn" type="button" aria-label="Couper le son">&#128266;</button>
+              <button class="dt-helpbtn" type="button" aria-label="Aide et gestes">?</button>
                 <div class="dt-empty-hint">Tapis vide par defaut &mdash; choisis un dé en haut, ou clique « Lancer » apres en avoir ajoute</div>
               </div>
             </div>
@@ -82,7 +84,7 @@
           <footer class="dt-actionbar">
             <button class="dt-act ghost" type="button">🗑 <span>Vider</span></button>
             <div></div>
-            <button class="dt-act primary" type="button">🎲 <span>Lancer</span></button>
+            <button class="dt-act primary" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.2 20.6 7.1v9.8L12 21.8 3.4 16.9V7.1z"/><path d="M12 7.4 7.7 14.9h8.6z"/><path d="M12 2.2v5.2M7.7 14.9l-4.3 2M16.3 14.9l4.3 2"/></svg> <span>Lancer</span></button>
           </footer>
 
         </div>
@@ -92,11 +94,20 @@
         <span class="mq-num">1</span><b>Chrome</b> : barre haute dans le theme de l'app
         (langage <code>.help-header</code> / <code>#md-close</code> : croix ronde 38 px,
         hover accent) + <code>Échap</code>. Sous la barre, la coquille du portage reprend
-        fidelement le source : picker de 14 des (miniatures 3D), cadre bois, tapis de
-        feutrine, barre d'actions « Vider / Total / Lancer ».
+        fidelement le source : picker de 14 des, cadre bois, tapis de feutrine, barre
+        d'actions « Vider / Total / Lancer », bouton muet &#128266; a gauche du tapis et
+        « ? » a droite (source).
       </div>
       <div class="mq-note">
-        <span class="mq-num">2</span><b>Vide par defaut (R5)</b> : contrairement au projet
+        <span class="mq-num">2</span><b>Vignettes du picker (C13)</b> : dans l'implementation,
+        chaque vignette est une <strong>miniature 3D reellement rendue</strong> (WebGL via
+        <code>thumbs.js</code>, convertie en image) — les aplats colores de cette maquette sont
+        un rendu <b>basse fidelite</b>, qui sert aussi de repli si WebGL tombe en panne.
+        <b>Icône « Lancer »</b> : un <b>D20 en SVG trait</b> remplace l'emoji 🎲 du source
+        (demande du 14/10).
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">3</span><b>Vide par defaut (R5)</b> : contrairement au projet
         source (demo D20 + D6 + D8 au demarrage), le tapis demarre <strong>strictement
         vide</strong>. Le bandeau « ouvre via un serveur » du source est ecarte : dcc-sheet
         est toujours servi en http(s).
@@ -151,7 +162,8 @@
           <main class="dt-stage">
             <div class="dt-frame">
               <div class="dt-tray">
-                <button class="dt-helpbtn" type="button" aria-label="Aide et gestes">?</button>
+                <button class="dt-soundbtn" type="button" aria-label="Couper le son">&#128266;</button>
+              <button class="dt-helpbtn" type="button" aria-label="Aide et gestes">?</button>
 
                 <!-- D20 (17) -->
                 <svg class="dt-die" viewBox="0 0 64 64" style="left:26%;top:34%;transform:rotate(-7deg);">
@@ -192,14 +204,14 @@
           <footer class="dt-actionbar">
             <button class="dt-act ghost" type="button">🗑 <span>Vider</span></button>
             <div class="dt-total">Total : 31</div>
-            <button class="dt-act primary" type="button">🎲 <span>Lancer</span></button>
+            <button class="dt-act primary" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.2 20.6 7.1v9.8L12 21.8 3.4 16.9V7.1z"/><path d="M12 7.4 7.7 14.9h8.6z"/><path d="M12 2.2v5.2M7.7 14.9l-4.3 2M16.3 14.9l4.3 2"/></svg> <span>Lancer</span></button>
           </footer>
 
         </div>
       </div>
 
       <div class="mq-note" style="margin-top:14px;">
-        <span class="mq-num">3</span><b>Gestes (inchangees du source)</b> : toucher un dé du
+        <span class="mq-num">4</span><b>Gestes (inchangees du source)</b> : toucher un dé du
         picker l'ajoute au tapis (max 10) &middot; toucher un dé du tapis le relance &middot;
         appui long 500 ms le retire &middot; glisser-deplacer &middot; lacher avec elan = lancer
         manuel &middot; « Lancer » lance tout (+ total pendant 8 s, cliquable pour masquer).
@@ -207,7 +219,7 @@
         puis l'animation.
       </div>
       <div class="mq-note">
-        <span class="mq-num">4</span><b>Resultats</b> : chaque dé stabilise sur sa face
+        <span class="mq-num">5</span><b>Resultats</b> : chaque dé stabilise sur sa face
         resultat, un badge(colore au bordure du dé) s'affiche aupres de lui ; le total
         (regle percentile : D% + D10 lisent 00+0 = 100) apparait en pastille dans la barre
         d'actions et dans le toast interne.
@@ -254,6 +266,7 @@
         <main class="dt-stage">
           <div class="dt-frame">
             <div class="dt-tray">
+              <button class="dt-soundbtn" type="button" aria-label="Couper le son">&#128266;</button>
               <button class="dt-helpbtn" type="button" aria-label="Aide et gestes">?</button>
               <svg class="dt-die" viewBox="0 0 64 64" style="width:54px;height:54px;left:24%;top:30%;transform:rotate(6deg);">
                 <rect x="5" y="5" width="54" height="54" rx="12" fill="#12a0a8" stroke="#0a6e73" stroke-width="1.5"/>
@@ -271,7 +284,7 @@
         <footer class="dt-actionbar">
           <button class="dt-act ghost" type="button" style="padding:11px 14px;font-size:15px;">🗑</button>
           <div></div>
-          <button class="dt-act primary" type="button" style="padding:11px 16px;font-size:15px;">🎲 <span>Lancer</span></button>
+          <button class="dt-act primary" type="button" style="padding:11px 16px;font-size:15px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.2 20.6 7.1v9.8L12 21.8 3.4 16.9V7.1z"/><path d="M12 7.4 7.7 14.9h8.6z"/><path d="M12 2.2v5.2M7.7 14.9l-4.3 2M16.3 14.9l4.3 2"/></svg> <span>Lancer</span></button>
         </footer>
       </div>
     </div>
@@ -313,25 +326,28 @@
 
     <div class="mq-col" style="max-width:360px;">
       <div class="mq-note">
-        <span class="mq-num">5</span><b>Mobile</b> : picker sur 7 colonnes, barre d'actions
+        <span class="mq-num">6</span><b>Mobile</b> : picker sur 7 colonnes, barre d'actions
         compacte (Vider reduit a l'icone), <code>100dvh</code> + safe-areas. Le canvas WebGL
         repond au tactile (glisser, pincer n'est pas necessaire : le tapis recadre la camera
         a tout redimensionnement).
       </div>
       <div class="mq-note">
-        <span class="mq-num">6</span><b>Fermeture = masquage (R6, R7)</b> : la croix et
+        <span class="mq-num">7</span><b>Fermeture = masquage (R6, R7)</b> : la croix et
         <code>Échap</code> ne font que <code>hidden = true</code> + pause de la boucle de
-        rendu (CPU/batterie) — <strong>aucune destruction, aucune persistance</strong>. En
-        rouvrant, le tapis est exactement celui de la veille (des, positions, valeurs).
-        Seul un rechargement de la page remet le tapis a zero.
+        rendu (CPU/batterie), la <code>AudioContext</code> du son est suspendue avec —
+        <strong>aucune destruction, aucune persistance</strong>. En rouvrant, le tapis est
+        exactement celui de la veille (des, positions, valeurs). Seul un rechargement de la
+        page remet le tapis a zero. <b>Exception</b> : la preference muet
+        <code>dicebox.sound</code>, seule ecriture locale autorisee (regime
+        <code>dcc-theme</code>, V6).
       </div>
       <div class="mq-note">
-        <span class="mq-num">7</span><b>Modale d'aide</b> : le « ? » du coin ouvre la
+        <span class="mq-num">8</span><b>Modale d'aide</b> : le « ? » du coin ouvre la
         visionneuse des gestes (portee telle quelle) ; <code>Échap</code> la ferme d'abord,
         puis le module — comportement source conserve.
       </div>
       <div class="mq-note mq-note--q">
-        <span class="mq-num">8</span><b>Sans WebGL</b> : si le moteur 3D ne peut pas demarrer
+        <span class="mq-num">9</span><b>Sans WebGL</b> : si le moteur 3D ne peut pas demarrer
         (navigateur ancien), un toast d'erreur s'affiche et le module se ferme — pas d'ecran
         casse. Le module reste re-testable a chaque ouverture.
       </div>
@@ -345,7 +361,7 @@
     <div class="mq-arrow">&rarr;</div>
     <div class="mq-step"><b>Partie en cours</b> Des ajoutes, lances, deplaces — tout vit en memoire JS.</div>
     <div class="mq-arrow">&rarr;</div>
-    <div class="mq-step"><b>Fermeture</b> Croix ou Échap : masquage + pause du rendu. Rien en base, rien en JSON, rien au localStorage (R7).</div>
+    <div class="mq-step"><b>Fermeture</b> Croix ou Échap : masquage + pause du rendu. Rien en base, rien en JSON, rien au localStorage — sauf la preference muet <code>dicebox.sound</code>, seule exception de R7.</div>
     <div class="mq-arrow">&rarr;</div>
     <div class="mq-step"><b>Reouverture</b> Meme noeud DOM, meme memoire : le tapis est identique a avant (R6).</div>
     <div class="mq-arrow">&rarr;</div>

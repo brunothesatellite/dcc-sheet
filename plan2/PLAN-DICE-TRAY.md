@@ -37,7 +37,7 @@
 |---|-------|----------|
 | **A1** | Mécanisme de masquage mobile | **CSS pur**, conformément à la convention de la webapp (aucune détection JS de mobile n'existe) : `@media (max-width: 600px)` masque `.theme-toggle` et `.ref-toggle`. |
 | **A2** | Cas des invités | Le masquage mobile est **inconditionnel** : les deux boutons topbar sont retirés à ≤ 600 px **y compris pour les invités**, qui n'ont donc plus accès à la référence des classes ni à la bascule de thème sur mobile (choix validé V3). **Conséquence technique : aucun attribut `data-auth` n'est nécessaire — `renderAuthUI()` reste inchangé.** |
-| **A3** | Nouvelles entrées du menu | Deux `<button data-action>` insérées **au-dessus** de l'entrée « Changer de thème » : **« Référence des classes »** (`data-action="class-ref"` → `DCCClassHelp.openFull()`) et **« Mode clair / sombre »** (`data-action="toggle-theme"` → `toggleTheme()`, libellé mis à jour dynamiquement ☾/☀ comme la pastille topbar). |
+| **A3** | Nouvelles entrées du menu | Deux `<button data-action>` insérées **au-dessus** de l'entrée « Changer de thème » : **« Référence des classes »** (`data-action="class-ref"` → `DCCClassHelp.openFull()`) et **« Mode clair / sombre »** (`data-action="toggle-theme"` → `toggleTheme()`, libellé mis à jour dynamiquement ☾/☀ comme la pastille topbar). Un `<hr>` est ajoute entre « Changer de thème » et « Exporter tout » — **double barre** identique a celle de « Importer tout » / « Changer le mot de passe » (le `border-bottom` de chaque bouton + le `hr` dessinent deux traits), demande du 14/10. |
 | **A4** | Icônes des entrées | Même technique que l'entrée existante : `::before` en CSS. « Référence des classes » = petit livre en SVG data-URI (reprise du tracé de `#btn-aide`) ; « Mode clair / sombre » = disque jour/nuit (moitié pleine, même esprit que le conic-gradient de l'entrée « Changer de thème »). |
 | **A5** | Libellé de l'entrée bascule | Le bouton topbar déplacé s'appelle **« Mode clair / sombre »** pour ne pas le confondre avec l'entrée existante « Changer de thème » (sélecteur de couple), qui conserve son libellé. *(Validé V1.)* |
 
@@ -66,6 +66,7 @@
 | **C10** | `Échap` | Comportement source conservé : `Échap` ferme d'abord la **modale d'aide des gestes**, puis le module (comme `#map-module` gère ses raccourcis). |
 | **C11** | Licences (obligatoire) | Copiés dans `dice/lib/` : `THREE-LICENSE.txt` (MIT, three.js r186) ; en-tête de crédit **dicebox (SOND LecT, MIT)** conservé dans `dice/solids.js` ; mention des licences ajoutée à `README.md` et `MANUAL.md`. `LICENSE` du projet source (MIT, © 2026 Bruno) recopié en `dice/LICENSE`. `dice/sound.js` (synthèse Web Audio maison, zéro asset) est couvert par le même MIT applicatif, sans crédit tiers supplémentaire. |
 | **C12** | Guides source | `INTEGRATION.md`, `PLAN.md`, `TODO.md`, `maquette.html`, `deploy/` du projet source **ne sont pas copiés**. |
+| **C13** | Icônes d'entrée en matière de portage | **Picker** : les vignettes des 14 dés sont les **miniatures 3D réellement rendues** par `thumbs.js` (rendu WebGL puis `toDataURL()`) — les aplats colorés ne sont qu'un **repli** si WebGL échoue (demande de clarification le 14/10). **Bouton « Lancer »** : l'emoji `🎲` du source est remplacé par une **icône SVG de D20** (style trait de la webapp, `currentColor`), sur demande du 14/10 — dérogation mineure au « à l'identique ». |
 
 ---
 
@@ -145,6 +146,9 @@ dcc-sheet/
    <button data-action="class-ref">Référence des classes</button>
    <button data-action="toggle-theme">Mode clair / sombre</button>
    ```
+   et un `<hr>` apres « Changer de thème » (avant « Exporter tout ») : chaque bouton du menu
+   porte deja un `border-bottom`, l'`hr` produit donc une **double barre**, exactement comme
+   entre « Importer tout (JSON) » et « Changer le mot de passe » (demande du 14/10).
 3. `<head>` : `<link rel="stylesheet" href="dice/dice.css">` après `themes.css`.
 4. Avant `<script src="script.js">` : `<script src="dice-tray.js"></script>` (après `map-draw.js`).
 
@@ -187,7 +191,7 @@ dcc-sheet/
 | `sound.js` | Copié puis adapté : lecture/écriture `localStorage['dicebox.sound']` **conservées à l'identique** (voir R7) ; API `SoundBank` inchangée (`unlock/clack/bounce/settle/state/setEnabled`). |
 | `dice3d.js`, `thumbs.js` | Uniquement l'import three : `../vendor/…` → `../lib/…`. |
 | `tray.js` | Import three ; `blayer.id` → `dice-blayer` ; **`pause()` / `resume()`** (`setAnimationLoop(null)` / rappel **+ `sound.ctx.suspend()/resume()` si présent**) ; `resize()` : ignorer une taille nulle (module masqué). `hooks.sound` reste **optionnel** (`|| null`, comme la source). |
-| `app.js` | **Pas de boot auto** : `export function initDiceTray(root, opts)` recevant le conteneur ; tous les `getElementById` deviennent des requêtes scopées `root.querySelector('#dice-…')` ; ids préfixés `dice-` (**y compris `dice-soundBtn`, `dice-helpBtn`, `dice-toast`**) ; son câblé comme la source (`new SoundBank()`, `unlock()` sur gestes **scopés au module**, bouton muet + toast diagnostic via `opts.toast`) ; démo de démarrage **supprimée** (C7) ; toasts redirigés vers `opts.toast` (`window.showToast` de l'app) ; handler `Échap` global **supprimé** (pris en charge par `dice-tray.js`, C10). |
+| `app.js` | **Pas de boot auto** : `export function initDiceTray(root, opts)` recevant le conteneur ; tous les `getElementById` deviennent des requêtes scopées `root.querySelector('#dice-…')` ; ids préfixés `dice-` (**y compris `dice-soundBtn`, `dice-helpBtn`, `dice-toast`**) ; son câblé comme la source (`new SoundBank()`, `unlock()` sur gestes **scopés au module**, bouton muet + toast diagnostic via `opts.toast`) ; démo de démarrage **supprimée** (C7) ; icône du bouton « Lancer » : emoji `🎲` → **SVG D20** (C13) ; toasts redirigés vers `opts.toast` (`window.showToast` de l'app) ; handler `Échap` global **supprimé** (pris en charge par `dice-tray.js`, C10). |
 | `css/style.css` → `dice/dice.css` | Scopage sous `#dice-module` ; suppression de `html,body{}` / `body{}` globales ; `[hidden]` scopé ; `.row` → `.dice-row` ; `z-index` du modal d'aide relevé dans l'échelle dcc-sheet ; `100dvh` + `env(safe-area-inset-*)` conservés. |
 
 ### 4.6 Tests — `tests/23-dice-tray.test.js` (nouveau)

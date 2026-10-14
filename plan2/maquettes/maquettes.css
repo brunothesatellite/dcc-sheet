@@ -417,11 +417,11 @@
   pointer-events: none;
 }
 
-/* bouton aide du tapis */
-.dt-helpbtn {
+/* bouton aide + bouton muet du tapis (source : meme pastille, ? a droite, 🔊 a gauche) */
+.dt-helpbtn,
+.dt-soundbtn {
   position: absolute;
   top: 10px;
-  right: 10px;
   width: 36px;
   height: 36px;
   border-radius: 50%;
@@ -432,6 +432,14 @@
   font-weight: 800;
   cursor: pointer;
   z-index: 6;
+}
+
+.dt-helpbtn {
+  right: 10px;
+}
+
+.dt-soundbtn {
+  left: 10px;
 }
 
 /* --- barre d'actions (portage fidele) --- */
@@ -468,6 +476,13 @@
   background: rgba(16, 29, 23, 0.85);
   color: #f3efe4;
   border-color: #ffffff33;
+}
+
+/* Icône D20 du bouton « Lancer » (remplace l'emoji 🎲 du source — C13) */
+.dt-act svg {
+  width: 19px;
+  height: 19px;
+  vertical-align: -4px;
 }
 
 .dt-total {
@@ -574,7 +589,86 @@
 }
 
 /* -------------------------------------------------------------------------
-   5. Ajustements responsive des maquettes elles-memes
+   5. Simulation du breakpoint mobile DANS les boitiers .mq-phone
+      Les media queries (@media max-width:600px) repondent au viewport de la
+      fenetre, pas au boitier de 390 px : sans ces reregles, le ⚔ reste a
+      display:none et le logo desktop ecrase les pastilles (svg flex children
+      compresses). Ici on rejoue les regles reelles de style.css (<=600px et
+      <=380px) scopees aux cadres telephone des maquettes.
+   ---------------------------------------------------------------------- */
+.mq-phone .topbar {
+  padding: 0 10px;
+  gap: 6px;
+}
+
+.mq-phone .logo {
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mq-phone .btn-equipe-mobile {
+  display: flex;
+}
+
+.mq-phone .tab-equipe {
+  display: none;
+}
+
+.mq-phone .tab-bar {
+  padding: 4px 4px;
+  gap: 1px;
+  overflow-x: hidden;
+}
+
+.mq-phone .tab {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 9px 2px;
+  font-size: 11px;
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mq-phone .tab-lbl-full {
+  display: none;
+}
+
+.mq-phone .tab-lbl-short {
+  display: inline;
+}
+
+.mq-phone .dice-toggle,
+.mq-phone .map-toggle {
+  width: 32px;
+  height: 32px;
+  flex: none;
+}
+
+.mq-phone .dice-toggle svg,
+.mq-phone .map-toggle svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.mq-phone .auth-avatar {
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
+}
+
+.mq-phone #auth-guest .auth-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+
+/* -------------------------------------------------------------------------
+   6. Ajustements responsive des maquettes elles-memes
    ---------------------------------------------------------------------- */
 @media (max-width: 460px) {
   .mq-phone {

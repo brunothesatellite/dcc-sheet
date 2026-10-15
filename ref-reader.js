@@ -237,6 +237,17 @@
     }
   }
 
+  /* Page vide ou tronquée (fichier en cours d'écriture côté contenu,
+     script vide mais valide) : ni tableau, ni intertitre, presque pas de
+     texte. On la saute au lieu d'insérer une page blanche. */
+  function isTruncated(html) {
+    if (!html || typeof html !== 'string') return true;
+    if (/<table[\s>]/i.test(html)) return false;
+    if (/<h[1-4][\s>]/i.test(html)) return false;
+    var txt = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    return txt.length < 30;
+  }
+
   function openReference(page) {
     if (!isAvailable()) return;
     if (!window.DCCClassHelp || typeof window.DCCClassHelp.openViewer !== 'function') return;
@@ -347,6 +358,7 @@
         loadingDown = false;
         setStatus('');
         if (closed || !html) return false;
+        if (isTruncated(html)) return true; // page vide : on la saute, on continue
         return !!insert(n, html);
       });
     }
@@ -361,6 +373,7 @@
         loadingUp = false;
         setStatus('');
         if (closed || !html) return false;
+        if (isTruncated(html)) return true; // page vide : on la saute, on continue
         return !!insert(n, html);
       });
     }
@@ -397,7 +410,7 @@
         if (p === pageNum || !inRange(p)) continue;
         (function (n) {
           loadPage(n).then(function (html) {
-            if (closed || !html) return;
+            if (closed || !html || isTruncated(html)) return;
             insert(n, html);
           });
         })(p);
@@ -408,6 +421,10 @@
        deux clics rapprochés se disputent le scroll (le premier promesse
        résolue en dernier gagne) et l'on atterrit sur une mauvaise page. */
     var lastRequest = 0;
+    /* Élément visé par le dernier clic (intertitre ou page) : le recalage
+       re-scrolle vers LUI (miroir des sorts), jamais vers un nombre mémorisé
+       que swap de polices et raccords de tableaux auraient périmé. */
+    var anchorEl = null;
 
     /* Défilement vers une cible (miroir du scrollToAnchor des sorts) :
        repli géométrique si scrollIntoView manque. */
@@ -428,12 +445,13 @@
       var req = ++lastRequest;
       loadPage(p).then(function (html) {
         if (closed || req !== lastRequest) return; // clic plus récent pris en charge
+        if (!html || isTruncated(html)) { setStatus('Page indisponible.'); return; }
         /* insert() retourne null si la page est déjà dans le DOM (cas
            fréquent : page préchargée p-2..p+5) — on cible alors la page
            existante, sans quoi « il ne se passe rien ». */
         var node = insert(p, html) ||
           pages.querySelector('[data-loaded-page="' + p + '"]');
-        if (!node) return;
+        if (!node) { setStatus('Page indisponible.'); return; }
         /* Vise l'intertitre, pas le haut de page : sinon une entrée au
            milieu de page (ex. « Équivalences monétaires » p.16) atterrit
            sur le premier tableau de la page (Table 3-2). Ordre : ancre du
@@ -444,6 +462,7 @@
         }
         if (!target && entry && entry.title) target = textTarget(node, entry.title);
         scrollToTarget(target || node);
+        anchorEl = target || node;
         anchorScroll = body.scrollTop;
         preloadAround(p);
         maybeLoadMore();
@@ -456,15 +475,17 @@
     function reAnchor() {
       if (closed || !started || anchorScroll === null) return;
       if (Math.abs(body.scrollTop - anchorScroll) > 2) return;
-      body.scrollTop = anchorScroll;
+      if (anchorEl && body.contains(anchorEl)) scrollToTarget(anchorEl);
+      anchorScroll = body.scrollTop;
     }
 
     body.addEventListener('scroll', maybeLoadMore);
 
     loadPage(start).then(function (html) {
       if (closed) return;
-      if (!html) {
+      if (!html || isTruncated(html)) {
         setStatus('Page indisponible.');
+        preloadAround(start); // les voisines valides restent accessibles
         return;
       }
       insert(start, html);

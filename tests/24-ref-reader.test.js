@@ -177,6 +177,8 @@ module.exports = async function suite() {
     7: '<section class="page" data-page="7"><h3 id="s7-crit">Table critique I : longue</h3></section>',
     8: '<section class="page" data-page="8"><h3>Autre sujet</h3></section>',
     9: '<section class="page" data-page="9"><h3>Neuvieme titre</h3></section>',
+    /* Page 10 : section vide (fichier tronque) — jamais inseree. */
+    10: '<section class="page" data-page="10"></section>',
   };
   /* setAnchors remplace window.DCC_REF_ANCHORS : on lui passe le jeu
      complet (il redeclenche ensureReady, chemin synchrone via les stubs). */
@@ -277,6 +279,21 @@ module.exports = async function suite() {
   r.eq(scrolls.join(','), 's6-t32',
     'viewer : deux clics rapproches => seul le dernier fait defiler (pas de page parasite)');
 
+  /* Recalage vers l'ELEMENT (miroir des sorts) : apres un clic vers la
+     page 9, l'arrivee tardive de la page 6 (inseree au-dessus) rescrolle
+     vers l'intertitre vise, pas vers un nombre perime (swap de polices,
+     raccords de tableaux). */
+  scrolls.length = 0;
+  gotos[7].click(); // Neuvieme, page 9
+  await tick(5);
+  r.eq(scrolls.join(','), 'Neuvieme titre', 'viewer : clic page 9 => intertitre vise');
+  overlay.querySelector('[data-loaded-page="6"]').remove(); // la page 6 arrive en retard
+  scrolls.length = 0;
+  gotos[1].click(); // Table 3-2, page 6
+  await tick(5);
+  r.eq(scrolls.join(','), 'Neuvieme titre,s6-t32',
+    'viewer : insertion au-dessus => recalage vers l element vise puis scroll vers la cible');
+
   r.ok(!!overlay.querySelector('.sv-pages'), 'viewer : conteneur .sv-pages (parchemin)');
   r.ok(doc.body.style.overflow === 'hidden', 'viewer : scroll du body verrouille');
 
@@ -289,7 +306,7 @@ module.exports = async function suite() {
     'tables : petit tableau => .keep-table (12 px)');
   r.ok(!!tScroll && tScroll.classList.contains('scroll-table') &&
     !tScroll.classList.contains('keep-table'),
-    'tables : matrice 6 col. => .scroll-table');
+    'tables : matrice 12 col. => .scroll-table');
   r.ok(!!tProse && !tProse.classList.contains('keep-table') &&
     !tProse.classList.contains('scroll-table'),
     'tables : paragraphe long => eclate (aucune classe)');
@@ -349,6 +366,25 @@ module.exports = async function suite() {
   r.ok(!!doc.querySelector('.help-overlay'), 'viewer : reouverture possible');
   doc.querySelector('.help-overlay .help-close').click();
   r.ok(!doc.querySelector('.help-overlay'), 'viewer : seconde fermeture');
+
+  /* --- 10b. Page vide/tronquee : jamais inseree, batch continue --------- */
+  r.ok(!overlay.querySelector('[data-loaded-page="10"]'),
+    'viewer : page 10 vide (stub tronque) jamais inseree par le preload');
+  win.DCCRefReader.openReference(10);
+  await tick(5);
+  const overlay2 = doc.querySelector('.help-overlay');
+  if (!r.ok(!!overlay2, 'viewer : ouverture sur page tronquee possible')) return r;
+  r.ok(!overlay2.querySelector('[data-loaded-page="10"]'),
+    'viewer : page tronquee non inseree a l ouverture');
+  const status2 = overlay2.querySelector('.sv-status');
+  r.ok(!!status2 && status2.hidden === false &&
+    status2.textContent === 'Page indisponible.',
+    'viewer : statut « Page indisponible. » sur page tronquee');
+  r.ok(!!overlay2.querySelector('[data-loaded-page="8"]'),
+    'viewer : pages voisines valides chargees malgre le trou');
+  overlay2.querySelector('.help-close').click();
+  r.ok(!doc.querySelector('.help-overlay'), 'viewer : fermeture apres page tronquee');
+
   r.ok(errors.length === 0, 'cycle complet : aucune erreur console');
   r.ok(toasts.length === 0, 'cycle complet : aucun toast');
 

@@ -806,7 +806,8 @@ La **Référence complète** ouvre les pages du manuel (pages **5 à 61**) dans 
 - **Mobile (≤ 600 px)** : entrée **Référence** du menu utilisateur, juste au-dessus de **Classes**.
 
 - Fermeture : bouton **✕**, touche **Échap** ou clic hors de la colonne (identique au résumé des classes).
-- Le sommaire liste les **sections** (en-têtes) puis chaque **table** avec son numéro de page (celui affiché dans l'en-tête de chaque page) ; un clic saute **directement à la table** (même au milieu d'une page), avec préchargement des pages voisines.
+- Bouton **☰ (Sommaire)** : à gauche de la ✕, il ramène directement en tête du sommaire, même après avoir descendu au milieu d'une page — présent aussi dans le lecteur de sorts.
+- Le sommaire liste les **sections** (en-têtes) puis chaque **table** avec son numéro de page (celui affiché dans l'en-tête de chaque page) ; un clic saute **directement à la table** (même au milieu d'une page), avec préchargement des pages voisines. Après le saut, le défilement se recale automatiquement si la page est encore en cours de chargement.
 - Sur mobile, les **tableaux de valeurs restent en tableau** (petite fonte) et les grandes matrices se font **glisser horizontalement** ; seuls les tableaux à longs paragraphes s'affichent en cartes (une carte par ligne).
 
 ### Contenu optionnel : « contentref »

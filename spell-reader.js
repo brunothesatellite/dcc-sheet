@@ -356,7 +356,12 @@
   function loadPage(n) {
     if (!pagePromises[n]) {
       pagePromises[n] = loadScript(BASE + '/content/' + n + '.js').then(function (ok) {
-        return (ok && window.DCC_PAGES && window.DCC_PAGES[n]) || null;
+        var html = (ok && window.DCC_PAGES && window.DCC_PAGES[n]) || null;
+        /* Un échec (serveur froid APK, réseau) n'est PAS mémorisé : la
+           tentative suivante recharge au lieu de rester bloquée jusqu'au
+           refresh (miroir ref-reader.js). */
+        if (!html) delete pagePromises[n];
+        return html;
       });
     }
     return pagePromises[n];
@@ -404,6 +409,8 @@
     var loadingDown = false, loadingUp = false;
     var prevOverflow = document.body.style.overflow;
     var anchorScroll = null; // position attendue tant que l'utilisateur n'a pas defile
+    var resizeObs = null;    // observateur de taille (1.2), detruit a la fermeture
+    var onFontsDone = null;  // handler 'loadingdone', detruit a la fermeture
 
     function setStatus(txt) {
       status.textContent = txt || '';
@@ -452,24 +459,37 @@
         if (pn > n) { refNode = children[i]; break; }
       }
       if (refNode) {
+        /* Position du point d'insertion AVANT insertion : la compensation
+           n'a de sens que si l'insertion décale le contenu VISIBLE. Un
+           « retardataire » qui arrive SOUS le viewport ne bouge pas la vue —
+           le compenser faisait sauter la lecture (bug « page au hasard »,
+           surtout au premier chargement où l'ordre réseau est aléatoire).
+           En jsdom, les rects sont à 0 : la condition reste vraie. */
+        var refTop = refNode.getBoundingClientRect().top;
+        var scBottom = body.getBoundingClientRect().bottom;
         var before = body.scrollHeight;
         pages.insertBefore(node, refNode);
         /* Raccord AVANT la mesure du delta : le correctif modifie les
            hauteurs (ligne "(suite)" ou fusion), y compris dans la page
            precedente situee au-dessus, donc la compensation doit l'inclure. */
         fixTableContinuationsFor(node);
+        /* Idem tableaux responsives (table-fit.js) : keep/scroll changent
+           la hauteur du noeud — a inclure dans le delta. */
+        if (window.DCCTableFit) window.DCCTableFit.fitAll(node);
         var delta = body.scrollHeight - before;
-        body.scrollTop += delta;
-        if (anchorScroll !== null) anchorScroll += delta;
+        if (refTop <= scBottom) {
+          body.scrollTop += delta;
+          if (anchorScroll !== null) anchorScroll += delta;
+        }
       } else {
         pages.appendChild(node);
         fixTableContinuationsFor(node);
+        /* Tableaux responsives (table-fit.js) : keep/scroll posés à
+           l'insertion — sous garde pour ne jamais casser sans lui. */
+        if (window.DCCTableFit) window.DCCTableFit.fitAll(node);
       }
       if (pages.firstElementChild) first = parseInt(pages.firstElementChild.getAttribute('data-loaded-page'), 10);
       if (pages.lastElementChild) last = parseInt(pages.lastElementChild.getAttribute('data-loaded-page'), 10);
-      /* Tableaux responsives (table-fit.js) : keep/scroll posés à
-         l'insertion — sous garde pour ne jamais casser sans lui. */
-      if (window.DCCTableFit) window.DCCTableFit.fitAll(node);
       reAnchor();
       return node;
     }
@@ -558,7 +578,11 @@
     function scrollToAnchor() {
       var target = anchorTarget();
       if (!target) return false;
-      if (typeof target.scrollIntoView === 'function') {
+      /* Géométrie d'abord (déterministe, miroir de scrollToTarget de la
+         Référence) : scrollIntoView ne sert qu'en repli si elle manque. */
+      if (target.getBoundingClientRect && body.getBoundingClientRect) {
+        body.scrollTop += target.getBoundingClientRect().top - body.getBoundingClientRect().top;
+      } else if (typeof target.scrollIntoView === 'function') {
         target.scrollIntoView({ block: 'start' });
       } else {
         var gap = anchorGap();
@@ -582,6 +606,10 @@
       closed = true;
       body.removeEventListener('scroll', maybeLoadMore);
       document.removeEventListener('keydown', onKey);
+      if (resizeObs && typeof resizeObs.disconnect === 'function') resizeObs.disconnect();
+      if (onFontsDone && document.fonts && typeof document.fonts.removeEventListener === 'function') {
+        document.fonts.removeEventListener('loadingdone', onFontsDone);
+      }
       overlay.remove();
       document.body.style.overflow = prevOverflow;
     }
@@ -613,8 +641,24 @@
 
     // Google Fonts (display=swap) : si la substitution de la police a lieu apres
     // le scroll, le debut du sort a bouge - on recale tant qu'on n'a pas defile.
-    if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
-      document.fonts.ready.then(function () { reAnchor(); });
+    // 'loadingdone' se declenche a CHAQUE fin de chargement de polices ;
+    // fonts.ready (one-shot, souvent deja resolue) reste en repli.
+    if (document.fonts) {
+      if (typeof document.fonts.addEventListener === 'function') {
+        onFontsDone = function () { reAnchor(); };
+        document.fonts.addEventListener('loadingdone', onFontsDone);
+      }
+      if (document.fonts.ready && typeof document.fonts.ready.then === 'function') {
+        document.fonts.ready.then(function () { reAnchor(); });
+      }
+    }
+    /* Toute variation de hauteur au-dessus de l'ancre (tableaux qui
+       changent de presentation, swap de polices) est reperee ici. */
+    if (typeof ResizeObserver === 'function') {
+      try {
+        resizeObs = new ResizeObserver(function () { reAnchor(); });
+        resizeObs.observe(overlay.querySelector('.spell-viewer-column'));
+      } catch (_) { /* jamais de crash pour un observateur (jsdom, vieux webviews) */ }
     }
   }
 

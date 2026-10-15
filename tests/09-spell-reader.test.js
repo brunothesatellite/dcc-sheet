@@ -98,24 +98,28 @@ function pageTables206() {
     '</section>';
 }
 
-/* jsdom ne telecharge pas les <script src> : on repond avec les fixtures */
+/* jsdom ne telecharge pas les <script src> : on repond avec les fixtures.
+   opts.delays = { n: ms } retarde la reponse de la page n (ordre reseau
+   aleatoire simule : un "retardataire" peut arriver apres ses voisines). */
 function patchHead(env, opts) {
   const head = env.document.head;
   const orig = head.appendChild;
   head.appendChild = function (node) {
     const res = orig.call(head, node);
     if (node && node.tagName === 'SCRIPT' && node.getAttribute('src')) {
+      const src = node.getAttribute('src');
+      const m = /\/content\/(\d+)\.js$/.exec(src);
+      const nPage = m ? parseInt(m[1], 10) : null;
+      const wait = (opts.delays && nPage && opts.delays[nPage]) || 0;
       setTimeout(function () {
         if (opts.reader === false) {
           if (typeof node.onerror === 'function') node.onerror();
           return;
         }
-        const src = node.getAttribute('src');
         if (/\/content\/anchors\.js$/.test(src)) {
           if (env.window.DCC_ANCHORS === undefined) env.window.DCC_ANCHORS = ANCHORS;
         } else {
-          const m = /\/content\/(\d+)\.js$/.exec(src);
-          const n = m ? parseInt(m[1], 10) : null;
+          const n = nPage;
           if (n && PAGES[n]) {
             env.window.DCC_PAGES = env.window.DCC_PAGES || {};
             env.window.DCC_PAGES[n] = PAGES[n];
@@ -124,7 +128,7 @@ function patchHead(env, opts) {
           }
         }
         if (typeof node.onload === 'function') node.onload();
-      }, 0);
+      }, wait);
     }
     return res;
   };
@@ -924,6 +928,31 @@ async function testTableFit(r) {
     'sort : paragraphe long => eclate (defaut inchange)');
 }
 
+async function testLateInsertBelowViewport(r) {
+  // Un « retardataire » qui arrive SOUS le viewport ne doit pas faire sauter
+  // la lecture : la compensation du scroll est conditionnelle (PLAN-ANCHORS 1.1).
+  // La page 204 est servie avec 80 ms de retard : 205 s'insere avant elle,
+  // puis 204 se glisse entre 203 et 205 (branche refNode) alors que ces
+  // pages sont nettement sous le port de scroll.
+  const h = createHarness({ delays: { 204: 80 } });
+  h.env.load('spell-reader.js');
+  await h.env.window.DCCSpellReader.ensureReady();
+  const layout = fakeLayout(h.env);
+
+  const body = await openMageSpell(h, 'Boule de feu 203');
+  if (!r.ok(!!body, 'popup ouverte')) return;
+  const got = await waitFor(function () {
+    return loadedPages(h.env.document).indexOf('204') !== -1;
+  }, 1500);
+  if (!r.ok(got, 'page 204 (retardataire) finit par arriver')) return;
+  await delay(60);
+  r.eq(loadedPages(h.env.document).join(','), '202,203,204,205,206',
+    'ordre des pages preserve malgre l arrivee aleatoire');
+  const expected = layout.pageHeight + layout.anchorOffset;
+  r.eq(body.scrollTop, expected,
+    'insertion sous le viewport => scrollTop INCHANGE (got ' + body.scrollTop + ', attendu ' + expected + ')');
+}
+
 async function run() {
   const r = createReporter('09-spell-reader');
   await testResolution(r);
@@ -940,6 +969,7 @@ async function run() {
   await testAnchorAlignment(r);
   await testAnchorAfterFonts(r);
   await testNoReanchorAfterUserScroll(r);
+  await testLateInsertBelowViewport(r);
   await testTableFit(r);
   return r;
 }

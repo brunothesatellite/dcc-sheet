@@ -23,6 +23,8 @@
   var readyPromise = null;
   var available = false;
   var toc = null;            // window.DCC_REF_TOC une fois chargé (peut rester null)
+  var tocPromise = null;     // promesse de chargement du sommaire (mémoïsée)
+  var tocWaiters = [];       // fn() à appeler dès que toc est connu
   var pagePromises = {};     // n -> Promise<html|null> (1 seul <script> par page)
 
   /* Chargement de script silencieux (la réussite = contenu présent).
@@ -52,15 +54,30 @@
   }
 
   function loadToc() {
+    if (tocPromise) return tocPromise;
     if (Array.isArray(window.DCC_REF_TOC) && window.DCC_REF_TOC.length) {
       toc = window.DCC_REF_TOC;
-      return Promise.resolve(true);
+      tocPromise = Promise.resolve(true);
+      return tocPromise;
     }
-    return loadScript(BASE + '/contentref/toc.js').then(function (ok) {
+    tocPromise = loadScript(BASE + '/contentref/toc.js').then(function (ok) {
       toc = (ok && Array.isArray(window.DCC_REF_TOC) && window.DCC_REF_TOC.length)
         ? window.DCC_REF_TOC : null;
+      var waiters = tocWaiters;
+      tocWaiters = [];
+      waiters.forEach(function (fn) {
+        try { fn(); } catch (_) { /* un rendu ne casse jamais le chargement */ }
+      });
       return true; // le sommaire est optionnel (repli) : ne bloque jamais
     });
+    return tocPromise;
+  }
+
+  /* fn() appelée dès que toc est connu (immédiat si déjà là). */
+  function onTocReady(fn) {
+    if (toc) { fn(); return; }
+    tocWaiters.push(fn);
+    loadToc();
   }
 
   function ensureReady() {
@@ -98,7 +115,12 @@
         pagePromises[n] = Promise.resolve(window.DCC_REF_PAGES[n]);
       } else {
         pagePromises[n] = loadScript(BASE + '/contentref/' + n + '.js').then(function (ok) {
-          return (ok && window.DCC_REF_PAGES && window.DCC_REF_PAGES[n]) || null;
+          var html = (ok && window.DCC_REF_PAGES && window.DCC_REF_PAGES[n]) || null;
+          /* Un échec (serveur froid APK, réseau) n'est PAS mémorisé : la
+             tentative suivante (re-clic, scroll) recharge au lieu de rester
+             bloquée sur « Page indisponible » jusqu'au refresh. */
+          if (!html) delete pagePromises[n];
+          return html;
         });
       }
     }
@@ -259,8 +281,16 @@
     var closed = false, started = false;
     var loadingDown = false, loadingUp = false;
     var anchorScroll = null;
+    var resizeObs = null;      // observateur de taille du sommaire (1.2)
+    var onFontsDone = null;    // handler 'loadingdone' détaché à la fermeture
 
-    function onClose() { closed = true; }
+    function onClose() {
+      closed = true;
+      if (resizeObs && typeof resizeObs.disconnect === 'function') resizeObs.disconnect();
+      if (onFontsDone && document.fonts && typeof document.fonts.removeEventListener === 'function') {
+        document.fonts.removeEventListener('loadingdone', onFontsDone);
+      }
+    }
 
     viewer = window.DCCClassHelp.openViewer(
       'Référence complète', 'Document intégral — sommaire cliquable', '', null, onClose);
@@ -285,29 +315,46 @@
       status.hidden = !txt;
     }
 
-    /* Sommaire cliquable en premier (sections R6 + entrées). */
-    tocEl.hidden = false;
-    tocEntries().forEach(function (e) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      if (e.section !== undefined) {
-        b.className = 'help-toc-sec';
-        b.textContent = e.section;
-        if (e.page === null) { b.disabled = true; }
-        else { b.setAttribute('data-goto', e.page); }
-      } else {
-        /* Libellé = numéro de page SCAN (e.page), celui affiché dans
-           l'en-tête de chaque page (« Page 16 ») — le numéro imprimé
-           du livre (d) décale d'unité par endroits et ferait croire
-           à un saut sur la mauvaise page. */
-        b.textContent = e.title + ' (p. ' + e.page + ')';
-        b.setAttribute('data-goto', e.page);
-      }
-      b.addEventListener('click', function () {
-        scrollToPage(parseInt(b.getAttribute('data-goto'), 10), e);
+    /* Sommaire cliquable en premier (sections R6 + entrées) : (re)construit à
+       l'ouverture, puis reconstruit si toc.js arrive APRÈS l'ouverture — la
+       fenêtre silencieuse du premier chargement servait un sommaire de repli
+       « Page 5 … Page 61 » jusqu'au refresh. */
+    function renderToc() {
+      tocEl.innerHTML = '';
+      tocEl.hidden = false;
+      tocEntries().forEach(function (e) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        if (e.section !== undefined) {
+          b.className = 'help-toc-sec';
+          b.textContent = e.section;
+          if (e.page === null) { b.disabled = true; }
+          else { b.setAttribute('data-goto', e.page); }
+        } else {
+          /* Libellé = numéro de page SCAN (e.page), celui affiché dans
+             l'en-tête de chaque page (« Page 16 ») — le numéro imprimé
+             du livre (d) décale d'unité par endroits et ferait croire
+             à un saut sur la mauvaise page. */
+          b.textContent = e.title + ' (p. ' + e.page + ')';
+          b.setAttribute('data-goto', e.page);
+        }
+        b.addEventListener('click', function () {
+          scrollToPage(parseInt(b.getAttribute('data-goto'), 10), e);
+        });
+        tocEl.appendChild(b);
       });
-      tocEl.appendChild(b);
-    });
+    }
+    renderToc();
+    if (!toc) {
+      /* Sommaire de repli affiché : on le remplace dès que toc.js résout
+         (l'observateur de taille 1.2 + reAnchor absorbent le changement de
+         hauteur du sommaire). */
+      onTocReady(function () {
+        if (closed) return;
+        renderToc();
+        reAnchor();
+      });
+    }
 
     /* Bouton « Sommaire » à GAUCHE de la croix (qui ferme) : remonte au
        sommaire cliquable du début. La croix garde son rôle de fermeture. */
@@ -325,10 +372,8 @@
            dernière page cliquée. */
         anchorEl = null;
         anchorScroll = null;
-        if (tocEl && typeof tocEl.scrollIntoView === 'function') {
-          tocEl.scrollIntoView({ block: 'start' });
-        } else if (body) {
-          body.scrollTop = 0; // repli géométrique
+        if (!scrollToTarget(tocEl) && body) {
+          body.scrollTop = 0; // repli ultime
         }
       });
     }
@@ -349,15 +394,35 @@
         if (pn > n) { refNode = children[i]; break; }
       }
       if (refNode) {
+        /* Position du point d'insertion AVANT insertion : la compensation
+           n'a de sens que si l'insertion décale le contenu VISIBLE. Un
+           « retardataire » qui arrive SOUS le viewport ne bouge pas la vue —
+           le compenser faisait sauter la lecture d'environ une page
+           (bug « page au hasard », surtout au premier chargement où l'ordre
+           réseau est aléatoire). En jsdom, les rects sont à 0 : la condition
+           reste vraie, les tests existants sont inchangés. */
+        var refTop = refNode.getBoundingClientRect().top;
+        var scBottom = body.getBoundingClientRect().bottom;
         var before = body.scrollHeight;
         pages.insertBefore(node, refNode);
+        /* Raccord AVANT la mesure du delta : le correctif modifie les
+           hauteurs (ligne "(suite)" ou fusion), y compris dans la page
+           precedente situee au-dessus, donc la compensation doit l'inclure. */
         fixTableContinuationsFor(node);
+        /* Idem pour les tableaux responsives (table-fit.js) : keep/scroll
+           changent la hauteur du nœud — à inclure dans le delta. */
+        if (window.DCCTableFit) window.DCCTableFit.fitAll(node);
         var delta = body.scrollHeight - before;
-        body.scrollTop += delta;
-        if (anchorScroll !== null) anchorScroll += delta;
+        if (refTop <= scBottom) {
+          body.scrollTop += delta;
+          if (anchorScroll !== null) anchorScroll += delta;
+        }
       } else {
         pages.appendChild(node);
         fixTableContinuationsFor(node);
+        /* Tableaux responsives (table-fit.js) : keep/scroll posés à
+           l'insertion — sous garde pour ne jamais casser sans lui. */
+        if (window.DCCTableFit) window.DCCTableFit.fitAll(node);
       }
       if (pages.firstElementChild) {
         first = parseInt(pages.firstElementChild.getAttribute('data-loaded-page'), 10);
@@ -365,9 +430,6 @@
       if (pages.lastElementChild) {
         last = parseInt(pages.lastElementChild.getAttribute('data-loaded-page'), 10);
       }
-      /* Tableaux responsives (table-fit.js) : keep/scroll posés à
-         l'insertion — sous garde pour ne jamais casser sans lui. */
-      if (window.DCCTableFit) window.DCCTableFit.fitAll(node);
       reAnchor();
       return node;
     }
@@ -451,17 +513,20 @@
     var anchorEl = null;
 
     /* Défilement vers une cible (miroir du scrollToAnchor des sorts) :
-       repli géométrique si scrollIntoView manque. */
+       géométrie d'abord — déterministe, mesurable, aucun effet de bord sur
+       les conteneurs ancêtres ni dépendance à scrollIntoView ; celui-ci
+       ne sert qu'en repli si la géométrie manque. */
     function scrollToTarget(el) {
       if (!el) return false;
+      if (el.getBoundingClientRect && body.getBoundingClientRect) {
+        body.scrollTop += el.getBoundingClientRect().top - body.getBoundingClientRect().top;
+        return true;
+      }
       if (typeof el.scrollIntoView === 'function') {
         el.scrollIntoView({ block: 'start' });
-      } else if (el.getBoundingClientRect && body.getBoundingClientRect) {
-        body.scrollTop += el.getBoundingClientRect().top - body.getBoundingClientRect().top;
-      } else {
-        return false;
+        return true;
       }
-      return true;
+      return false;
     }
 
     function scrollToPage(p, entry) {
@@ -519,8 +584,28 @@
       maybeLoadMore();
     });
 
-    if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
-      document.fonts.ready.then(function () { reAnchor(); });
+    /* Recalage polices : document.fonts.ready est une promesse ONE-SHOT,
+       le plus souvent déjà résolue à l'ouverture (l'UI principale utilise
+       les mêmes familles) → le .then partait en microtâche immédiate (no-op)
+       et ne se rejouait jamais quand les polices du viewer arrivaient.
+       'loadingdone' se déclenche à CHAQUE fin de chargement de polices. */
+    if (document.fonts) {
+      if (typeof document.fonts.addEventListener === 'function') {
+        onFontsDone = function () { reAnchor(); };
+        document.fonts.addEventListener('loadingdone', onFontsDone);
+      }
+      if (document.fonts.ready && typeof document.fonts.ready.then === 'function') {
+        document.fonts.ready.then(function () { reAnchor(); });
+      }
+    }
+    /* Le sommaire (Barlow Condensed, majuscules, flex-wrap) se ré-enroule au
+       swap de polices : toute variation de hauteur au-dessus de l'ancre est
+       reperée par l'observateur de taille → reAnchor(). */
+    if (typeof ResizeObserver === 'function') {
+      try {
+        resizeObs = new ResizeObserver(function () { reAnchor(); });
+        resizeObs.observe(tocEl);
+      } catch (_) { /* jamais de crash pour un observateur (jsdom, vieux webviews) */ }
     }
   }
 
@@ -536,6 +621,7 @@
     setAnchors: function (anchors) {
       window.DCC_REF_ANCHORS = anchors;
       toc = null;
+      tocPromise = null;
       available = false;
       readyPromise = null;
       if (document.documentElement && document.documentElement.classList) {

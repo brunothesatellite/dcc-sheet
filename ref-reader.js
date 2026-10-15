@@ -105,8 +105,92 @@
     return pagePromises[n];
   }
 
+  /* Normalisation pour rapprocher un titre du sommaire d'une ancre ou
+     d'un intertitre (titres courts du sommaire vs titres longs des pages,
+     accents, casse, ponctuation). */
+  function slugify(s) {
+    return String(s || '').toLowerCase().normalize('NFD')
+      .replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '');
+  }
+
+  function deplural(s) {
+    return String(s || '').split(' ').map(function (w) {
+      return (w.length > 3 && w.charAt(w.length - 1) === 's') ? w.slice(0, -1) : w;
+    }).join(' ');
+  }
+
+  function anchorsOf(page) {
+    var a = window.DCC_REF_ANCHORS;
+    var list = [];
+    if (!a || typeof a !== 'object') return list;
+    Object.keys(a).forEach(function (key) {
+      var e = a[key];
+      if (e && e.page === page && e.id) {
+        var i = key.lastIndexOf('|');
+        list.push({ slug: i === -1 ? key : key.slice(0, i), id: e.id });
+      }
+    });
+    return list;
+  }
+
+  /* id d'ancre pour (titre, page) : slug exact, puis préfixe (titres courts
+     du sommaire : « Table critique I » vs « ...ipersonnages... »), puis
+     meilleur préfixe commun (seuil 6). null = repli texte au clic. */
+  function anchorIdFor(title, page) {
+    var s = slugify(title);
+    if (!s) return null;
+    var cands = anchorsOf(page);
+    var i, best, n, cs;
+    for (i = 0; i < cands.length; i++) {
+      if (cands[i].slug === s) return cands[i].id;
+    }
+    best = null;
+    for (i = 0; i < cands.length; i++) {
+      cs = cands[i].slug;
+      if (cs.indexOf(s) === 0 || s.indexOf(cs) === 0) {
+        if (!best || cs.length > best.slug.length) best = cands[i];
+      }
+    }
+    if (best) return best.id;
+    best = null;
+    var bestN = 0;
+    for (i = 0; i < cands.length; i++) {
+      cs = cands[i].slug;
+      n = 0;
+      while (n < s.length && n < cs.length && s[n] === cs[n]) n++;
+      if (n > bestN) { bestN = n; best = cands[i]; }
+    }
+    return (best && bestN >= 6) ? best.id : null;
+  }
+
+  /* Repli quand l'ancre est absente (contenu en cours d'écriture : certains
+     intertitres n'ont pas encore d'id) : on vise l'intertitre lui-même
+     (texte rapproché, pluriels tolérés), ou le sigle final (« Table
+     critique DR » → intertitre parlant de critiques + « dr »). */
+  function textTarget(pageNode, title) {
+    var nt = deplural(slugify(title));
+    if (!nt || !pageNode || !pageNode.querySelectorAll) return null;
+    var heads = pageNode.querySelectorAll('h1, h2, h3, h4');
+    var i, nh;
+    for (i = 0; i < heads.length; i++) {
+      nh = deplural(slugify(heads[i].textContent));
+      if (nh && (nh.indexOf(nt) !== -1 || nt.indexOf(nh) !== -1)) return heads[i];
+    }
+    var words = nt.split(' ');
+    var last = words[words.length - 1];
+    if (last && last.length <= 3) {
+      for (i = 0; i < heads.length; i++) {
+        nh = ' ' + deplural(slugify(heads[i].textContent)) + ' ';
+        if (nh.indexOf('critique') !== -1 && nh.indexOf(' ' + last + ' ') !== -1) {
+          return heads[i];
+        }
+      }
+    }
+    return null;
+  }
+
   /* Modèle de sommaire depuis DCC_REF_TOC [{s} | {t, d, p}].
-     Repli : boutons « Page 4 … Page 61 » quand le sommaire manque. */
+     Repli : boutons « Page 5 … Page 61 » quand le sommaire manque. */
   function tocEntries() {
     var list = Array.isArray(toc) ? toc : [];
     var entries = [];
@@ -117,9 +201,14 @@
         current = { section: item.s, page: null };
         entries.push(current);
       } else if (typeof item.t === 'string' && item.t && item.p >= REF_FIRST && item.p <= REF_LAST) {
-        var e = { title: item.t, disp: item.d, page: item.p };
+        var e = { title: item.t, disp: item.d, page: item.p,
+          anchor: anchorIdFor(item.t, item.p) };
         entries.push(e);
-        if (current && current.page === null) current.page = item.p;
+        if (current && current.page === null) {
+          current.page = item.p;
+          current.anchor = e.anchor;
+          current.title = item.t;
+        }
       }
     });
     if (!entries.length) {
@@ -204,7 +293,7 @@
         b.setAttribute('data-goto', e.page);
       }
       b.addEventListener('click', function () {
-        scrollToPage(parseInt(b.getAttribute('data-goto'), 10));
+        scrollToPage(parseInt(b.getAttribute('data-goto'), 10), e);
       });
       tocEl.appendChild(b);
     });
@@ -317,7 +406,21 @@
        résolue en dernier gagne) et l'on atterrit sur une mauvaise page. */
     var lastRequest = 0;
 
-    function scrollToPage(p) {
+    /* Défilement vers une cible (miroir du scrollToAnchor des sorts) :
+       repli géométrique si scrollIntoView manque. */
+    function scrollToTarget(el) {
+      if (!el) return false;
+      if (typeof el.scrollIntoView === 'function') {
+        el.scrollIntoView({ block: 'start' });
+      } else if (el.getBoundingClientRect && body.getBoundingClientRect) {
+        body.scrollTop += el.getBoundingClientRect().top - body.getBoundingClientRect().top;
+      } else {
+        return false;
+      }
+      return true;
+    }
+
+    function scrollToPage(p, entry) {
       if (!inRange(p)) return false;
       var req = ++lastRequest;
       loadPage(p).then(function (html) {
@@ -327,9 +430,17 @@
            existante, sans quoi « il ne se passe rien ». */
         var node = insert(p, html) ||
           pages.querySelector('[data-loaded-page="' + p + '"]');
-        if (node && typeof node.scrollIntoView === 'function') {
-          node.scrollIntoView({ block: 'start' });
+        if (!node) return;
+        /* Vise l'intertitre, pas le haut de page : sinon une entrée au
+           milieu de page (ex. « Équivalences monétaires » p.16) atterrit
+           sur le premier tableau de la page (Table 3-2). Ordre : ancre du
+           fichier, intertitre au texte rapproché, haut de page. */
+        var target = null;
+        if (entry && entry.anchor) {
+          try { target = node.querySelector('#' + entry.anchor); } catch (_) { target = null; }
         }
+        if (!target && entry && entry.title) target = textTarget(node, entry.title);
+        scrollToTarget(target || node);
         anchorScroll = body.scrollTop;
         preloadAround(p);
         maybeLoadMore();

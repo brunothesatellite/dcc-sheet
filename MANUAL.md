@@ -806,7 +806,7 @@ La **Référence complète** ouvre les pages du manuel (pages **5 à 61**) dans 
 - **Mobile (≤ 600 px)** : entrée **Référence** du menu utilisateur, juste au-dessus de **Classes**.
 
 - Fermeture : bouton **✕**, touche **Échap** ou clic hors de la colonne (identique au résumé des classes).
-- Le sommaire liste les **sections** (en-têtes) puis chaque **table** avec son numéro de page (celui affiché dans l'en-tête de chaque page) ; un clic y saute directement, avec préchargement des pages voisines.
+- Le sommaire liste les **sections** (en-têtes) puis chaque **table** avec son numéro de page (celui affiché dans l'en-tête de chaque page) ; un clic saute **directement à la table** (même au milieu d'une page), avec préchargement des pages voisines.
 
 ### Contenu optionnel : « contentref »
 

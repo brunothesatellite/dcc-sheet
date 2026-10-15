@@ -131,21 +131,45 @@ module.exports = async function suite() {
   r.ok(dumpLS(win) === lsBefore, 'detection : zero ecriture localStorage');
 
   /* --- 7. Détection positive (stubs, chemin synchrone) ---------------- */
+  /* Page 6 stubee facon vraie p.16 : 3 intertitres a ids, 3 entrees TOC
+     sur la meme page (cas du bug « Équivalences monétaires »). */
   win.DCC_REF_TOC = [
     { s: 'Personnages' },
     { t: 'Table 1-1 : Modificateurs', d: '4', p: 5 },
-    { t: 'Table 1-2 : Augure', d: '5', p: 6 },
-    { s: 'Fin' },
+    { t: 'Table 3-2 : Munitions', d: '15', p: 6 },
+    { t: 'Table 3-3 : Armures', d: '15', p: 6 },
+    { t: 'Equivalences monetaires', d: '15', p: 6 },
+    { t: 'Table critique', d: '20', p: 7 },
+    { t: 'Sans Ancre Ni Titre', d: '21', p: 8 },
+    { t: 'Autre', d: '21', p: 8 },
+    { t: 'Neuvieme', d: '22', p: 9 },
   ];
+  win.DCC_REF_ANCHORS = {
+    'table11modificateurs|5': { page: 5, id: 's5-t11', title: 'Table 1-1' },
+    'table32munitions|6': { page: 6, id: 's6-t32', title: 'Table 3-2' },
+    'table33armures|6': { page: 6, id: 's6-t33', title: 'Table 3-3' },
+    'equivalencesmonetaires|6': { page: 6, id: 's6-equi', title: 'Equivalences' },
+    /* Slug long vs titre court : resolution par prefixe. */
+    'tablecritiqueipersonnages|7': { page: 7, id: 's7-crit', title: 'Table critique I longue' },
+    /* Ancre fichier dont l'id N'EXISTE PAS dans la page : repli texte. */
+    'neuviemetitrecomplet|9': { page: 9, id: 's9-noid', title: 'Neuvieme complet' },
+  };
   win.DCC_REF_PAGES = {
     /* Page 4 = sommaire imprime du livre : presente dans le contenu mais
        jamais affichee (plage 5..61). */
     4: '<section class="page" data-page="4"><h2>TABLE DES MATIERES</h2></section>',
-    5: '<section class="page" data-page="5"><h3>Table 1-1</h3></section>',
-    6: '<section class="page" data-page="6"><h3>Table 1-2</h3></section>',
-    7: '<section class="page" data-page="7"><h3>Hors sommaire</h3></section>',
+    5: '<section class="page" data-page="5"><h3 id="s5-t11">Table 1-1</h3></section>',
+    6: '<section class="page" data-page="6"><h3 id="s6-t32">Table 3-2</h3>' +
+      '<h3 id="s6-t33">Table 3-3</h3><h3 id="s6-equi">Equivalences</h3></section>',
+    /* Page 7 : ancre fichier au slug long + id present (resolution par
+       prefixe). Page 8 : ni ancre ni intertitre proche sauf « Autre ». */
+    7: '<section class="page" data-page="7"><h3 id="s7-crit">Table critique I : longue</h3></section>',
+    8: '<section class="page" data-page="8"><h3>Autre sujet</h3></section>',
+    9: '<section class="page" data-page="9"><h3>Neuvieme titre</h3></section>',
   };
-  await win.DCCRefReader.setAnchors({ 'x|5': { page: 5, id: 'a', title: 'X' } });
+  /* setAnchors remplace window.DCC_REF_ANCHORS : on lui passe le jeu
+     complet (il redeclenche ensureReady, chemin synchrone via les stubs). */
+  await win.DCCRefReader.setAnchors(win.DCC_REF_ANCHORS);
   r.ok(win.DCCRefReader.isAvailable() === true, 'ancres presentes : disponible');
   r.ok(doc.documentElement.classList.contains('has-ref-reader'),
     'ancres presentes : classe has-ref-reader posee');
@@ -163,12 +187,11 @@ module.exports = async function suite() {
   const tocEl = overlay.querySelector('.help-toc');
   r.ok(!!tocEl && tocEl.hidden === false, 'viewer : sommaire visible en premier');
   const secs = tocEl.querySelectorAll('.help-toc-sec');
-  r.eq(secs.length, 2, 'viewer : 2 en-tetes de section');
+  r.eq(secs.length, 1, 'viewer : 1 en-tete de section');
   r.ok(secs[0].tagName === 'BUTTON' && secs[0].getAttribute('data-goto') === '5',
     'viewer : section « Personnages » cliquable vers sa 1re entree (R6)');
-  r.ok(secs[1].disabled === true, 'viewer : section sans entree suivante desactivee');
   const gotos = tocEl.querySelectorAll('button[data-goto]:not(.help-toc-sec)');
-  r.eq(gotos.length, 2, 'viewer : 2 entrees data-goto');
+  r.eq(gotos.length, 8, 'viewer : 8 entrees data-goto');
   /* Libelle = page SCAN (p), pas la page imprimee (d) : chaque page
      affiche « Page N » avec N = p ; libeller avec d (« p. 4 » vs
      « Page 5 ») faisait croire a un saut sur la mauvaise page. */
@@ -176,11 +199,15 @@ module.exports = async function suite() {
     gotos[0].textContent.indexOf('(p. 4)') === -1,
     'viewer : entree libellee avec le numero de page scan « titre (p. p) »');
 
-  /* --- 9. Parchemin infini (pages stubées, async) --------------------- */
-  /* jsdom n'implemente pas scrollIntoView : on enregistre les appels. */
+  /* --- 9. Parchemin infini + ancres milieu de page (async) ------------ */
+  /* jsdom n'implemente pas scrollIntoView : on enregistre les appels
+     (id, texte de l'intertitre, ou n° de page pour un haut de page). */
   const scrolls = [];
   win.Element.prototype.scrollIntoView = function () {
-    scrolls.push(this.getAttribute('data-loaded-page'));
+    scrolls.push(this.tagName === 'SECTION'
+      ? 'page:' + this.getAttribute('data-loaded-page')
+      : (this.getAttribute('id') || (this.textContent || '').trim().slice(0, 20) ||
+        this.getAttribute('data-loaded-page')));
   };
   await tick(5);
   const p5 = overlay.querySelector('[data-loaded-page="5"]');
@@ -190,20 +217,53 @@ module.exports = async function suite() {
   r.ok(!!overlay.querySelector('[data-loaded-page="6"]'),
     'viewer : pages voisines prechargees (p+1)');
 
+  /* Bug rapporte : « Équivalences » (3e entree de la page 6) atterrissait
+     en haut de page, sur la Table 3-2. Le clic doit viser l'intertitre. */
+  scrolls.length = 0;
+  gotos[3].click(); // Equivalences, page 6 deja prechargee
+  await tick(5);
+  r.eq(scrolls.join(','), 's6-equi',
+    'viewer : clic milieu de page => scroll vers l intertitre (pas le haut de page)');
+  scrolls.length = 0;
+  gotos[1].click(); // Table 3-2, meme page
+  await tick(5);
+  r.eq(scrolls.join(','), 's6-t32',
+    'viewer : chaque entree vise sa propre ancre sur la meme page');
+
+  /* Titre court vs slug long (« Table critique ») : resolution par prefixe. */
+  scrolls.length = 0;
+  gotos[4].click(); // page 7, deja prechargee
+  await tick(5);
+  r.eq(scrolls.join(','), 's7-crit',
+    'viewer : titre court => ancre resolue par prefixe');
+
+  /* Ancre fichier absente du DOM (id non genere) : repli texte vers
+     l'intertitre. Ni ancre ni texte : repli haut de page (avant). */
+  scrolls.length = 0;
+  gotos[7].click(); // Neuvieme, page 9 deja prechargee
+  await tick(5);
+  r.eq(scrolls.join(','), 'Neuvieme titre',
+    'viewer : id absent du DOM => repli vers l intertitre au texte rapproche');
+  scrolls.length = 0;
+  gotos[5].click(); // Sans Ancre Ni Titre, page 8
+  await tick(5);
+  r.eq(scrolls.join(','), 'page:8',
+    'viewer : sans ancre ni texte => repli haut de page');
+
   /* Clic sur une page DEJA inseree (preload) : doit quand meme defiler
      (insert() retourne null sur doublon — recherche du noeud existant). */
   scrolls.length = 0;
-  gotos[1].click(); // page 6 : deja prechargee
+  gotos[6].click(); // Autre, page 8 deja prechargee, sans ancre fichier
   await tick(5);
-  r.eq(scrolls.join(','), '6',
+  r.eq(scrolls.join(','), 'Autre sujet',
     'viewer : clic sur page deja chargee => scroll vers le noeud existant');
 
   /* Course entre clics : seul le DERNIER clic fait defiler. */
   scrolls.length = 0;
-  gotos[0].click(); // page 5
+  gotos[0].click(); // page 5 (ancre s5-t11)
   gotos[1].click(); // page 6 juste apres
   await tick(5);
-  r.eq(scrolls.join(','), '6',
+  r.eq(scrolls.join(','), 's6-t32',
     'viewer : deux clics rapproches => seul le dernier fait defiler (pas de page parasite)');
 
   r.ok(!!overlay.querySelector('.sv-pages'), 'viewer : conteneur .sv-pages (parchemin)');

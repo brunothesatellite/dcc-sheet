@@ -38,6 +38,14 @@ if (location.pathname.endsWith('/dcc-sheet')) location.replace(location.pathname
   <button class="btn-equipe-mobile" id="btn-equipe-mobile" title="Equipe">&#9876;</button>
   <a href="index.html" class="logo">Dungeon Crawl Classics</a>
   <div class="topbar-spacer"></div>
+  <button class="ref-full-toggle" id="btn-ref-full" type="button" title="Référence complète"
+          aria-label="Ouvrir la référence complète">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 5.5C10 4 7.5 3.5 4 3.5v13.5c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2V3.5c-3.5 0-6 .5-8 2z"/><path d="M12 5.5V19"/>
+      <path d="M7 8.5h3M14 8.5h3M7 11.5h3M14 11.5h3"/>
+    </svg>
+  </button>
   <button class="ref-toggle" id="btn-aide" type="button" title="Référence des classes"
           aria-label="Ouvrir la référence des classes">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -72,7 +80,9 @@ if (location.pathname.endsWith('/dcc-sheet')) location.replace(location.pathname
             aria-label="Menu utilisateur" aria-expanded="false"></button>
     <div class="user-menu" id="user-menu" hidden>
       <div class="menu-welcome" id="user-welcome"></div>
+      <button data-action="full-ref">Référence</button>
       <button data-action="class-ref">Classes</button>
+      <hr>
       <button data-action="toggle-theme" title="Passer en mode sombre"
               aria-label="Passer en mode sombre">Mode Sombre</button>
       <button data-action="change-theme">Changer de thème</button>
@@ -127,6 +137,7 @@ if (location.pathname.endsWith('/dcc-sheet')) location.replace(location.pathname
 <script src="script.js"></script>
 <script src="table-continuation.js"></script>
 <script src="spell-reader.js"></script>
+<script src="ref-reader.js"></script>
 <script src="classes/equipe.js"></script>
 </body>
 </html>

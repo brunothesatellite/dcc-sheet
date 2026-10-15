@@ -2506,6 +2506,15 @@
       });
     }
 
+    /* Référence complète (contenu optionnel contentref) : même pattern,
+       module optionnel — sans lui, rien (le bouton est invisible). */
+    var refFullBtn = $('#btn-ref-full');
+    if (refFullBtn) {
+      refFullBtn.addEventListener('click', function () {
+        if (window.DCCRefReader) window.DCCRefReader.openReference();
+      });
+    }
+
     $$('.tab').forEach(function (btn) {
       btn.addEventListener('click', function () {
         var cls = btn.getAttribute('data-class');
@@ -2553,6 +2562,10 @@
           avatarBtn.setAttribute('aria-expanded', 'false');
           var action = btn.getAttribute('data-action');
           if (action === 'logout') logout();
+          else if (action === 'full-ref') {
+            /* Référence complète (contenu optionnel) : invisible sans contentref. */
+            if (window.DCCRefReader) window.DCCRefReader.openReference();
+          }
           else if (action === 'class-ref') {
             /* Meme ecran que le bouton topbar qu'elle remplace (R1). */
             if (window.DCCClassHelp) window.DCCClassHelp.openFull();

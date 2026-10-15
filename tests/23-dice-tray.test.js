@@ -49,8 +49,8 @@ module.exports = function suite() {
     const actions = Array.prototype.map.call(
       menu.querySelectorAll('button[data-action]'),
       function (b) { return b.getAttribute('data-action'); });
-    r.eq(actions.slice(0, 3).join(', '), 'class-ref, toggle-theme, change-theme',
-      'menu : reference + bascule au-dessus du selecteur de couples (R1, V1)');
+    r.eq(actions.slice(0, 4).join(', '), 'full-ref, class-ref, toggle-theme, change-theme',
+      'menu : reference + classes + bascule au-dessus du selecteur de couples (R1, V1)');
     const refBtn = menu.querySelector('button[data-action="class-ref"]');
     const togBtn = menu.querySelector('button[data-action="toggle-theme"]');
     r.ok(!!refBtn && refBtn.textContent === 'Classes',
@@ -58,6 +58,9 @@ module.exports = function suite() {
     r.ok(!!togBtn && togBtn.textContent === 'Mode Sombre' &&
       togBtn.getAttribute('aria-label') === 'Passer en mode sombre',
       'entree bascule : libelle « Mode Sombre » (theme clair) + aria-label');
+    const refAfter = refBtn && refBtn.nextElementSibling;
+    r.ok(!!refAfter && refAfter.tagName === 'HR',
+      'double barre : separateur <hr> entre « Classes » et « Mode Sombre »');
     const changeBtn = menu.querySelector('button[data-action="change-theme"]');
     const after = changeBtn && changeBtn.nextElementSibling;
     r.ok(!!after && after.tagName === 'HR', 'separateur <hr> apres « Changer de theme » (A3)');
@@ -119,8 +122,8 @@ module.exports = function suite() {
 
   const styleCss = read('style.css');
   r.ok(/\.dice-toggle\s*\{/.test(styleCss), 'style.css : regle .dice-toggle (topbar)');
-  r.ok(/\.theme-toggle,\s*\.ref-toggle\s*\{\s*display:\s*none;/.test(styleCss),
-    'style.css : .theme-toggle + .ref-toggle masques en <=600px (V3)');
+  r.ok(/\.theme-toggle,\s*\.ref-toggle,\s*\.ref-full-toggle\s*\{\s*display:\s*none;/.test(styleCss),
+    'style.css : .theme-toggle + .ref-toggle + .ref-full-toggle masques en <=600px (V3)');
   r.ok(styleCss.indexOf('button[data-action="class-ref"]::before') !== -1,
     'style.css : icone livre ::before sur « Classes »');
   r.ok(styleCss.indexOf('#user-menu button[data-action="toggle-theme"]::before') !== -1 &&
@@ -215,6 +218,7 @@ module.exports = function suite() {
   const env2 = createEnv();
   env2.document.body.innerHTML =
     '<button class="theme-toggle"></button>' +
+    '<div id="main-content"></div>' +
     '<div id="user-menu"><button data-action="toggle-theme" title="Passer en mode sombre"' +
     ' aria-label="Passer en mode sombre">Mode Sombre</button></div>';
   /* Stub reseau minimal : init() ne se declenche qu'apres le corps

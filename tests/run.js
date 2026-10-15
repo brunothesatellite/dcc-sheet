@@ -27,6 +27,7 @@ const suites = [
   require('./21-aide-classes.test'),
   require('./22-themes.test'),
   require('./23-dice-tray.test'),
+  require('./24-ref-reader.test'),
 ];
 
 function pad(s, n) {

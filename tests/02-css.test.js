@@ -49,6 +49,10 @@ module.exports = function suite() {
     '.portrait-holder',
     '.dead-overlay',
     '.marching-slot .portrait-holder',
+    '.ref-full-toggle',
+    'html:not(.has-ref-reader) .ref-full-toggle',
+    '#user-menu button[data-action="full-ref"]::before',
+    '.help-toc .help-toc-sec',
   ];
   critical.forEach(function (sel) {
     r.ok(css.indexOf(sel) !== -1, 'CSS selector present: ' + sel);

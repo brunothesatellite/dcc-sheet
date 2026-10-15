@@ -16,6 +16,7 @@ Manuel d'utilisation de l'application web **DCC Fiches de Personnage** : créez 
 8. [Onglet Équipe (suivi de partie)](#8-onglet-équipe-suivi-de-partie)
 9. [Dessiner une carte](#9-dessiner-une-carte)
 9b. [Tapis de dés (Dice Tray)](#9b-tapis-de-dés-dice-tray)
+9c. [Référence complète (contentref)](#9c-référence-complète-contentref)
 10. [Personnalisation & responsive](#10-personnalisation--responsive)
 11. [Astuces & dépannage](#11-astuces--dépannage)
 12. [Application Android (APK)](#12-application-android-apk)
@@ -89,6 +90,7 @@ Une fois connecté, votre **avatar** (la première lettre de votre pseudo) rempl
 | Action | Effet |
 |---|---|
 | **Bienvenue {pseudo}** | En-tête du menu |
+| **Référence** | Ouvre la **référence complète** du manuel (pages 4 à 61, sommaire cliquable) — *uniquement si le contenu « contentref » est déployé ; sinon l'entrée est absente* (§ 9c) |
 | **Classes** | Ouvre le document de référence des classes (fiches + Table 1-1) |
 | **☾ / ☀** | Bascule le thème sombre/clair : l'icône indique toujours le **mode à atteindre** (§ 10) |
 | **Exporter tout (JSON)** | Télécharge tous vos personnages, vos **notes d'équipe** et votre **ordre de marche** dans un fichier |
@@ -140,6 +142,8 @@ Tous vos personnages sont supprimés avec le compte : vous êtes redirigé vers 
 - **Bouton ⚔** : ouvre l'onglet **Equipe** — affiché uniquement en basse résolution (≤ 600 px), où l'onglet lui-même est masqué.
 - **Texte « Dungeon Crawl Classics »**
 - **Bouton 🎲 (Dés)** : ouvre le tapis de dés 3D (§ 9b).
+- **Bouton 📖 (Référence complète)** : ouvre la référence du manuel (pages 4 à 61) — *uniquement si le contenu « contentref » est déployé, sinon absent* (§ 9c) — placé à gauche du bouton **Référence des classes**, masqué en mobile ≤ 600 px (entrée **Référence** du menu utilisateur à la place, § 2.3). Les deux boutons partagent l'icône de livre : la **Référence complète** la montre avec des lignes de texte, la Référence des classes sans.
+- **Bouton 📖 (Référence des classes)** : ouvre le document de référence des classes (§ 6.3c) — masqué en mobile ≤ 600 px (entrée **Classes** du menu, § 2.3).
 - **Bouton ☾ / ☀** : bascule le thème sombre/clair (§ 10) — masqué en mobile ≤ 600 px, l'entrée se trouve alors dans le menu utilisateur (§ 2.3).
 - **Avatar** : menu utilisateur (une fois connecté) — ou boutons **Connexion / Inscription** sinon.
 
@@ -789,6 +793,29 @@ Un **tapis de dés 3D** (moteur three.js **embarqué** — fonctionne hors-ligne
 Le bouton **🔊 / 🔇** (coin du tapis) coupe ou rétablit les bruits de dés, **synthétisés** par le navigateur (aucun fichier audio). C'est la **seule préférence mémorisée** du module (`dicebox.sound` dans le navigateur).
 
 > **WebGL requis** : sur un navigateur ancien ou sans accélération 3D, le tapis affiche « Dés 3D indisponibles sur ce navigateur » et se referme proprement (rien n'est chargé).
+
+---
+
+## 9c. Référence complète (contentref)
+
+La **Référence complète** ouvre les pages du manuel (pages **4 à 61**) dans une visionneuse plein écran, sur le même modèle que le résumé des classes : **sommaire cliquable** en tête, puis défilement **infini** sur les pages voisines (seules les pages visitées sont chargées).
+
+### Où la trouver
+
+- **PC** : bouton **livre avec lignes** de la topbar, à gauche du bouton **Référence des classes**.
+- **Mobile (≤ 600 px)** : entrée **Référence** du menu utilisateur, juste au-dessus de **Classes**.
+
+- Fermeture : bouton **✕**, touche **Échap** ou clic hors de la colonne (identique au résumé des classes).
+- Le sommaire liste les **sections** (en-têtes) puis chaque **table** avec sa page d'affichage ; un clic y saute directement, avec préchargement des pages voisines.
+
+### Contenu optionnel : « contentref »
+
+Cette visionneuse dépend d'un dossier **`contentref/`** du voisin `../dcc-spells-reader` (contenu en cours de développement de mon côté) — **indépendant** du contenu des sorts :
+
+- **Présent** : le bouton et l'entrée de menu apparaissent (détection silencieuse au démarrage, sans configuration ni PHP).
+- **Absent** (ancien déploiement, contenu qui n'a pas encore `contentref/`) : bouton et entrée **restent invisibles** — aucune erreur, aucun avertissement — et **tout le reste continue de fonctionner normalement**, y compris la recherche et la consultation des sorts.
+
+> Sur l'**application Android**, la Référence complète nécessite l'**APK de contenu** (§ 12) : c'est lui qui embarque `contentref/`. Sans lui, la visionneuse est simplement absente, comme sur un déploiement sans contenu.
 
 ---
 

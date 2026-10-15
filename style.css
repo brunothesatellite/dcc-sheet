@@ -272,6 +272,36 @@ ul, ol {
   height: 19px;
 }
 
+/* --- Bouton « Référence complète » (évolution contentref) : même pastille
+   que .ref-toggle, à gauche de celui-ci ; visible uniquement quand le
+   contenu contentref est détecté (html.has-ref-reader), jamais sur mobile. --- */
+.ref-full-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--header-text);
+  cursor: pointer;
+  font-size: 17px;
+  line-height: 1;
+  transition: background 0.2s;
+  flex: none;
+}
+
+.ref-full-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.ref-full-toggle svg {
+  width: 19px;
+  height: 19px;
+}
+
 .auth-user {
   display: flex;
   align-items: center;
@@ -2812,7 +2842,8 @@ tr.team-stats-detail.open .team-detail-wrap {
   }
 
   .theme-toggle,
-  .ref-toggle {
+  .ref-toggle,
+  .ref-full-toggle {
     display: none;
   }
 
@@ -4132,6 +4163,44 @@ html:not(.has-spell-reader) .spell-lookup,
   background: currentColor;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5.5C10 4 7.5 3.5 4 3.5v13.5c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2V3.5c-3.5 0-6 .5-8 2z'/%3E%3Cpath d='M12 5.5V19'/%3E%3C/svg%3E") center / contain no-repeat;
   mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5.5C10 4 7.5 3.5 4 3.5v13.5c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2V3.5c-3.5 0-6 .5-8 2z'/%3E%3Cpath d='M12 5.5V19'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* --- Evolution contentref : entree « Référence » (livre + lignes de texte,
+   icone A validee — meme livre que class-ref, en plus complet) et visibilite
+   conditionnelle du bouton topbar + de l'entree (classe html.has-ref-reader
+   posee par ref-reader.js quand contentref est detecte ; sans contenu :
+   bouton et entree invisibles, sans trou). --- */
+html:not(.has-ref-reader) .ref-full-toggle,
+html:not(.has-ref-reader) #user-menu button[data-action="full-ref"] {
+  display: none;
+}
+
+#user-menu button[data-action="full-ref"]::before {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5.5C10 4 7.5 3.5 4 3.5v13.5c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2V3.5c-3.5 0-6 .5-8 2z'/%3E%3Cpath d='M12 5.5V19'/%3E%3Cpath d='M7 8.5h3M14 8.5h3M7 11.5h3M14 11.5h3'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5.5C10 4 7.5 3.5 4 3.5v13.5c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2V3.5c-3.5 0-6 .5-8 2z'/%3E%3Cpath d='M12 5.5V19'/%3E%3Cpath d='M7 8.5h3M14 8.5h3M7 11.5h3M14 11.5h3'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* --- Evolution contentref : en-tetes de section du sommaire (toc {s}),
+   cliquables (saut a la 1re entree de la section, R6). --- */
+.help-toc .help-toc-sec {
+  flex: 1 1 100%;
+  font-weight: bold;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--header-bg);
+  color: var(--header-text);
+  text-align: left;
+  cursor: pointer;
+}
+.help-toc .help-toc-sec:disabled {
+  cursor: default;
+  opacity: 0.7;
 }
 
 /* Entree bascule : icone ☾/☀ en ::before (remplace le disque jour/nuit),

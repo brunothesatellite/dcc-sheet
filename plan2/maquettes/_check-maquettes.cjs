@@ -69,11 +69,51 @@ function check(file, name, ok) {
   })());
 }
 
+/* 04 — bouton topbar reference complete */
+{
+  const d = new JSDOM(fs.readFileSync(dir + '04-topbar-bouton-ref.html', 'utf8')).window.document;
+  check('04', '2 boutons ref-full-toggle (candidats A + B)', d.querySelectorAll('.ref-full-toggle').length === 2);
+  check('04', 'icone svg dans chaque ref-full-toggle', d.querySelectorAll('.ref-full-toggle svg').length === 2);
+  const btns = Array.from(d.querySelectorAll('.topbar button'));
+  check('04', 'ref-full avant ref-toggle (candidat A)',
+    btns.findIndex(b => b.classList.contains('ref-full-toggle')) <
+    btns.findIndex(b => b.classList.contains('ref-toggle')));
+  check('04', 'apercu .ref-full-toggle documente', d.querySelector('style').textContent.includes('.ref-full-toggle'));
+}
+
+/* 05 — entree menu reference */
+{
+  const d = new JSDOM(fs.readFileSync(dir + '05-menu-reference.html', 'utf8')).window.document;
+  check('05', 'entree full-ref x2 (desktop + mobile)', d.querySelectorAll('[data-action="full-ref"]').length === 2);
+  for (const menu of d.querySelectorAll('.user-menu')) {
+    const btns = Array.from(menu.querySelectorAll('button'));
+    check('05', 'full-ref avant class-ref (R2 propose)', btns.findIndex(b => b.getAttribute('data-action') === 'full-ref') <
+          btns.findIndex(b => b.getAttribute('data-action') === 'class-ref'));
+    /* double barre entre Classes et Mode Sombre : hr apres class-ref */
+    const seq = Array.from(menu.children).map(el => el.tagName === 'HR' ? 'hr' :
+      (el.getAttribute && el.getAttribute('data-action')) || '');
+    const iCr = seq.indexOf('class-ref');
+    check('05', 'double barre hr apres class-ref', seq.indexOf('hr', iCr + 1) > iCr &&
+          seq.indexOf('hr', iCr + 1) < seq.indexOf('toggle-theme'));
+  }
+}
+
+/* 06 — visionneuse reference complete */
+{
+  const d = new JSDOM(fs.readFileSync(dir + '06-viewer-reference.html', 'utf8')).window.document;
+  check('06', 'chrome help-overlay + help-viewer + help-header', d.querySelectorAll('.help-overlay,.help-viewer,.help-header').length === 3);
+  check('06', 'titre Référence complète', (d.querySelector('.help-title') || {}).textContent === 'Référence complète');
+  check('06', 'sommaire : 5 sections + 8 entrees data-goto',
+    d.querySelectorAll('.help-toc-sec').length === 5 && d.querySelectorAll('.help-toc [data-goto]').length === 8);
+  check('06', '2 pages d exemple .page dans .spell-viewer',
+    d.querySelectorAll('.spell-viewer .page').length === 2);
+}
+
 /* Sommaire */
 {
   const d = new JSDOM(fs.readFileSync(dir + 'index.html', 'utf8')).window.document;
   const links = Array.from(d.querySelectorAll('a[href]')).map(a => a.getAttribute('href'));
-  for (const href of ['01-topbar-bouton-des.html', '02-menu-utilisateur.html', '03-dice-tray-plein-ecran.html']) {
+  for (const href of ['01-topbar-bouton-des.html', '02-menu-utilisateur.html', '03-dice-tray-plein-ecran.html', '04-topbar-bouton-ref.html', '05-menu-reference.html', '06-viewer-reference.html']) {
     check('index', 'lien ' + href, links.includes(href) && fs.existsSync(dir + href));
   }
 }

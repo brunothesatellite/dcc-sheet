@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette 06 — visionneuse « Référence complète »</title>
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="maquettes.css">
+<style>
+/* APERCU du futur .help-toc-sec (en-tetes de section du sommaire, R6).
+   En production cette regle vivra dans style.css. */
+.help-toc-sec {
+  flex: 1 1 100%;
+  font-weight: bold;
+  margin-top: 4px;
+  color: var(--header-text);
+  background: var(--header-bg);
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+button.help-toc-sec { cursor: pointer; text-align: left; }
+</style>
+</head>
+<body>
+
+<div class="mq-wrap">
+
+  <div class="section-title" style="font-size:26px;">6. Visionneuse « Référence complète » (plein écran)</div>
+  <p class="mq-lead">
+    Même chrome que le résumé des classes (<code>.help-overlay</code> : titre, sous-titre, croix, Échap,
+    clic fond), mais avec le <strong>sommaire visible en premier</strong> et les pages
+    <code>contentref/4…61.js</code> en <strong>parchemin infini</strong> (même seuils 800 px / batch 3 /
+    précharge p-2…p+5 et mêmes caches que les sorts). Les pages portent la classe
+    <code>spell-viewer</code> pour réutiliser le CSS <code>.page</code> existant.
+    Libellés et comportement des en-têtes de section : <strong>à valider (R3, R4, R6)</strong>.
+  </p>
+  <p class="mq-lead">
+    <button class="md-btn" type="button" id="mq-theme">Basculer clair / sombre</button>
+  </p>
+
+  <div class="section-bar">Visionneuse — sommaire puis parchemin (rendu réel des classes CSS)</div>
+  <div class="mq-row">
+    <div class="mq-col" style="width:100%;">
+
+      <!-- ===== chrome aide-classes, fige en statique pour la maquette ===== -->
+      <div class="help-overlay" style="position:static;height:640px;">
+        <div class="help-viewer">
+          <div class="help-header">
+            <div class="help-names">
+              <div class="help-title">Référence complète</div>
+              <div class="help-sub">Document intégral — sommaire cliquable</div>
+            </div>
+            <button class="help-close" type="button" aria-label="Fermer">✕</button>
+          </div>
+          <div class="help-body">
+            <div class="help-column">
+              <div class="help-toc">
+                <span class="help-toc-sec">Personnages</span>
+                <button type="button" data-goto="5">Table 1-1 : Modificateurs (p. 4)</button>
+                <button type="button" data-goto="6">Table 1-2 : Augure (p. 5)</button>
+                <button type="button" data-goto="9">Table 1-5 : Clerc (p. 8)</button>
+                <span class="help-toc-sec">Équipement</span>
+                <button type="button" data-goto="15">Table 3-1 : Armes (p. 14)</button>
+                <span class="help-toc-sec">Combat</span>
+                <button type="button" data-goto="19">Table 4-1 : Modificateurs (p. 18)</button>
+                <button type="button" data-goto="21">Table critique I (p. 20)</button>
+                <span class="help-toc-sec">Magie</span>
+                <button type="button" data-goto="47">Table 5-8 : Sorts de mage (p. 46-47)</button>
+                <span class="help-toc-sec">Monstres</span>
+                <button type="button" data-goto="52">Table 9-10 : Critiques (p. 51)</button>
+              </div>
+              <div class="spell-viewer">
+                <section class="page" data-page="4">
+                  <div class="page-head"><span class="page-num">Page 4</span></div>
+                  <h2 class="section">TABLE DES MATIÈRES (extrait basse fidélité)</h2>
+                  <p>Ceci est la page 4 réelle du contenu (<code>contentref/4.js</code>) : la visionneuse
+                  l'affiche telle quelle, sans retraitement.</p>
+                </section>
+                <section class="page" data-page="5">
+                  <div class="page-head"><span class="page-num">Page 5</span></div>
+                  <h3 class="spell-title">Table 1-1 : Modificateurs de caractéristiques</h3>
+                  <p>Les pages défilent en parchemin infini : le clic sur un bouton du sommaire fait défiler
+                  jusqu'à la page (<code>scrollToPage</code>), qui est préchargée avec ses voisines
+                  (p-2…p+5), comme l'affichage de la totalité des sorts.</p>
+                </section>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mq-note" style="margin-top:14px;">
+        <span class="mq-num">1</span><b>Sommaire en premier (R4/R6)</b> : la barre <code>.help-toc</code> reprend
+        les sections (<code>{s}</code> : Personnages, Équipement, Combat, Magie, Monstres) et les entrées
+        (<code>{t}</code> + page « p. d »). Clic sur une entrée = saut à la page ; clic sur une section (R6) =
+        saut à sa 1re entrée. Repli sans <code>toc.js</code> : boutons « Page 4 … Page 61 ».
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">2</span><b>Parchemin infini</b> : pages insérées dans l'ordre (<code>data-page</code>),
+        3 par 3 aux seuils 800 px haut/bas, raccord des tableaux coupés
+        (<code>DCC_TABLE_CONT.tryFixPair</code>), recalage après chargement des polices — identique aux sorts.
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">3</span><b>Contenu non figé</b> : la visionneuse consomme
+        <code>DCC_REF_PAGES / DCC_REF_ANCHORS / DCC_REF_TOC</code> tels quels (y compris leurs coquilles
+        d'encodage actuelles) — aucune correction côté dcc-sheet, aucun HTML recopié.
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">4</span><b>Fermetures</b> : croix, Échap, clic sur le fond — héritées du chrome
+        (même ordre que « Classes » : la modale d'aide n'existe pas ici, Échap ferme direct).
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+document.getElementById('mq-theme').addEventListener('click', function () {
+  var root = document.documentElement;
+  root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+</script>
+</body>
+</html>

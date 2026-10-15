@@ -71,7 +71,13 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - **Nom ignore le numero de page** (`Boule de feu 203`), accents/casse/spaces sans importance, singulier/pluriel et petites fautes de frappe toleres ; echec → modale **« Sort introuvable »** (verifier le nom du sort)
 - **Noms en anglais** : `../dcc-spells-reader/spell-translation.js` (module ES lu en texte, 130 paires FR/EN) traduit la saisie avant resolution — la popup ouvre le **titre francais** du livre et affiche le **nom anglais saisi en sous-titre** ; fichier absent ou erreur reseau → comportement precedent, inchange (1 seule requete `fetch`, memorisee)
 - Fermeture : bouton X ou touche Echap ; suite `09-spell-reader` (143 assertions) + `19-table-continuation` (109 : cas 132→133, 30 cas A, 4 cas B, balayage anti-regression du corpus, negatifs, insertion dans les 2 sens) + smoke sur les donnees reelles (144/144 noms resolus, 130/130 traductions FR et EN sans divergence de page)
-- **Aide de classe** : bouton « Résumé » dans l'en-tete de chaque fiche (fiche de la classe + Table 1-1) + bouton « Référence » dans la topbar (document integral Niveau 0 & 7 classes + sommaire) ; donnees generees depuis le HTML source (`aide-classes-data.js`), 100 % hors-ligne, suite `21-aide-classes` (125 assertions)
+- **Aide de classe** : bouton « Résumé » dans l'en-tete de chaque fiche (fiche de la classe + Table 1-1) + bouton « Référence des classes » dans la topbar / entree « Classes » du menu (document integral Niveau 0 & 7 classes + sommaire) ; donnees generees depuis le HTML source (`aide-classes-data.js`), 100 % hors-ligne, suite `21-aide-classes` (125 assertions)
+
+### Reference complete (contenu optionnel contentref, evolution 15/10/2026)
+- **Visionneuse des pages 4 a 61 du manuel** (`ref-reader.js`) : chrome du resume des classes (titre « Reference complete », sommaire cliquable en premier) + corps en parchemin infini reutilisant les mecanismes et caches de `spell-reader.js` (seuil 800 px, batch de 3, prechargement p-2..p+5) ; `aide-classes.js` expose `openViewer` (R5)
+- **Detection independante des sorts** : au demarrage, 1 requete sur `../dcc-spells-reader/contentref/anchors-ref.js` ; present → classe `html.has-ref-reader` (bouton topbar a gauche de « Reference des classes » + entree « Reference » du menu, au-dessus de « Classes ») ; **absent** (ancien contenu avec seulement `content/`) → bouton et entree invisibles, **ni erreur console ni toast**, les sorts continuent seuls
+- **Sommaire** : `contentref/toc.js` (`DCC_REF_TOC`) — sections `{s}` cliquables (saut a leur premiere entree) puis entrees `{t,d,p}` ; sommaire absent → repli « Page 4 … Page 61 » ; contenu en cours de developpement : rien n'est fige ni copie
+- **Compatibilite** : zero dependance ajoutee, aucun changement Java (prefixe `/dcc-spells-reader/` deja dans l'allowlist du ContentProvider), le zip minimal et le script de sync APK embarquent `contentref/` (60 fichiers : anchors-ref.js + toc.js + 58 pages 4..61) ; suite `24-ref-reader` (51 assertions)
 
 ### Portrait
 - 8 sources d'images : **DCC** (tokens officiels, 20 images), **D&D Red Box 1983** (7 illustrations), **Leremy Gan** (7 silhouettes), **Shadowdark** (12 images), **Jeff Stevens** (8 planches), **Gonzo** (30 images), **Old School** (17 images) et **Funnel - niveau 0** (75 tokens `icons/funnel-tokens/`, catalogue `funnel-icons.js`)
@@ -149,6 +155,7 @@ dcc-sheet/
 ├── test.bat                    # Lanceur Windows des tests de non-regression
 ├── script.js                   # Gestionnaire central (tabs, auth, CRUD, auto-save, nav, portraits)
 ├── spell-reader.js             # Definition des sorts (detection dcc-spells-reader, resolution, popup plein ecran)
+├── ref-reader.js               # Reference complete (contentref optionnel, sommaire + parchemin infini 4..61)
 ├── style.css                   # Styles principaux (themes, layout, responsive, portraits)
 ├── style-auth.css              # Styles des pages d'authentification
 ├── favicon.svg                 # Favicon SVG
@@ -367,7 +374,7 @@ cd deploy
 gen-spell-content.bat
 ```
 
-Genere `deploy/dcc-spells-reader-minimal.zip` a partir du dossier frere `../dcc-spells-reader` : uniquement `spell-translation.js`, `content/anchors.js` et les pages `content/127..303` + `322..356` utilisees par `spell-reader.js` (le trou 304-321 est saute). Le zip contient un dossier `dcc-spells-reader/` a sa racine : en le decompressant **a cote** de `dcc-sheet`, on recree le voisinage attendu. Sortie ignoree par git (`.gitignore`).
+Genere `deploy/dcc-spells-reader-minimal.zip` a partir du dossier frere `../dcc-spells-reader` : uniquement `spell-translation.js`, `content/anchors.js`, les pages `content/127..303` + `322..356` utilisees par `spell-reader.js` (le trou 304-321 est saute) et le contenu optionnel de la Reference complete `contentref/` (`anchors-ref.js`, `toc.js`, pages `4..61` — 60 fichiers, vus par `ref-reader.js`). Le zip contient un dossier `dcc-spells-reader/` a sa racine : en le decompressant **a cote** de `dcc-sheet`, on recree le voisinage attendu. Sortie ignoree par git (`.gitignore`).
 
 ### Application Windows (installeur / portable)
 

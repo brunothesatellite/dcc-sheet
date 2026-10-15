@@ -9,7 +9,9 @@
      3. dcc-spells-reader    (dossier frere du repo) — liste
         EXPLICITE stricte (deploy/_gen-spell-content.ps1) :
         spell-translation.js, content/anchors.js + les pages
-        content/127..303 + 322..356 (trou 304-321 saute). Le
+        content/127..303 + 322..356 (trou 304-321 saute), puis
+        contentref/anchors-ref.js + toc.js + les pages
+        contentref/4..61 (Reference complete, evolution 15/10/2026). Le
         reste du dossier frere (images pages/*.webp du lecteur
         autonome, dcc.html, dcc-pages.js — ~84 Mo) n'est JAMAIS
         charge par dcc-sheet et reste hors APK.
@@ -112,14 +114,20 @@ if (fn < 75) fail('funnel-tokens : ' + fn + ' fichiers (75 attendus)');
 
 /* --- 3. lecteur de sorts (dossier frere) -------------------------- */
 /* Liste EXPLICITE — l'exacte de deploy/_gen-spell-content.ps1 : ce que
-   spell-reader.js charge reellement (BASE + 3 chemins). Le reste du
-   dossier frere (images pages/*.webp du lecteur autonome, dcc.html,
-   dcc-pages.js — ~84 Mo) n'est jamais demande par dcc-sheet et ne
-   doit PAS entrer dans l'APK. */
+   spell-reader.js charge reellement (BASE + 3 chemins) et ce que
+   ref-reader.js charge pour la Reference complete (contentref, evolution
+   15/10/2026). Le reste du dossier frere (images pages/*.webp du lecteur
+   autonome, dcc.html, dcc-pages.js — ~84 Mo) n'est jamais demande par
+   dcc-sheet et ne doit PAS entrer dans l'APK. */
 const SPELL_RANGES = [[127, 303], [322, 356]];   /* trou 304-321 saute */
-const spellList = ['spell-translation.js', 'content/anchors.js'];
+const REF_RANGE = [4, 61];                      /* pages contigues */
+const spellList = ['spell-translation.js', 'content/anchors.js',
+    'contentref/anchors-ref.js', 'contentref/toc.js'];
 for (const r of SPELL_RANGES) {
   for (let n = r[0]; n <= r[1]; n++) spellList.push('content/' + n + '.js');
+}
+for (let n = REF_RANGE[0]; n <= REF_RANGE[1]; n++) {
+  spellList.push('contentref/' + n + '.js');
 }
 const spellDest = path.join(ASSETS, 'dcc-spells-reader');
 const spellMissing = spellList.filter(
@@ -139,6 +147,20 @@ if (spJs !== 213) {
   fail('dcc-spells-reader/content : ' + spJs
       + ' .js (213 attendus : anchors.js + 212 pages)');
 }
+/* Reference complete (contentref) : 60 fichiers — anchors-ref.js + toc.js +
+   58 pages contigues (4..61). L'ensemble doit etre complet : une visionneuse
+   sans sommaire ni ancres serait inutilisable (cf. assertions bloquantes). */
+const refJs = countFiles(path.join(spellDest, 'contentref'), '.js');
+if (refJs !== 60) {
+  fail('dcc-spells-reader/contentref : ' + refJs
+      + ' .js (60 attendus : anchors-ref.js + toc.js + 58 pages 4..61)');
+}
+if (!fs.existsSync(path.join(spellDest, 'contentref', 'anchors-ref.js'))) {
+  fail('contentref/anchors-ref.js absent du conteneur (detection du contenu par ref-reader.js)');
+}
+if (!fs.existsSync(path.join(spellDest, 'contentref', 'toc.js'))) {
+  fail('contentref/toc.js absent du conteneur (sommaire de la visionneuse)');
+}
 if (fs.existsSync(path.join(spellDest, 'pages'))) {
   fail('dcc-spells-reader/pages ne doit pas etre copie'
       + ' (lecteur autonome, ~81 Mo, jamais charge par dcc-sheet)');
@@ -150,7 +172,7 @@ if (fs.existsSync(path.join(spellDest, 'dcc.html'))) {
 /* --- rapport ------------------------------------------------------- */
 const total = sizeMo(ASSETS);
 console.log('contenu : dcc-pc-tokens=' + pc + 'f, funnel-tokens=' + fn
-    + 'f, spells=' + sp + 'f strict (content=' + spJs + ' js, sans pages/)'
-    + ' -> ' + total + ' Mo');
+    + 'f, spells=' + sp + 'f strict (content=' + spJs + ' js, contentref='
+    + refJs + ' js, sans pages/) -> ' + total + ' Mo');
 console.log('ATTENTION : APK STRICTEMENT PERSONNEL — ne jamais partager'
     + ' ni publier (regle de redistribution du projet).');

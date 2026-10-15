@@ -22,7 +22,10 @@
       d.sections[id] + '</section>';
   }
 
-  function openViewer(title, sub, html, toc) {
+  /* openViewer est aussi réutilisé par ref-reader.js (Référence complète) :
+     il retourne l'overlay (undefined si déjà ouvert ou sans données) et
+     accepte un onClose optionnel (ex. détacher un scroll infini). */
+  function openViewer(title, sub, html, toc, onClose) {
     if (document.querySelector('.help-overlay')) return;
     var d = data();
     if (!d) return;
@@ -83,6 +86,7 @@
       document.body.style.overflow = prevOverflow;
       document.removeEventListener('keydown', onKey);
       if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      if (typeof onClose === 'function') onClose();
     }
 
     function onKey(e) {
@@ -96,6 +100,7 @@
     document.addEventListener('keydown', onKey);
     document.body.appendChild(overlay);
     document.body.style.overflow = 'hidden';
+    return overlay;
   }
 
   /* Cas 1 : fiche de la classe suivie de la Table 1-1 (commune). */
@@ -125,5 +130,6 @@
   window.DCCClassHelp = {
     openClass: openClass,
     openFull: openFull,
+    openViewer: openViewer,
   };
 })();

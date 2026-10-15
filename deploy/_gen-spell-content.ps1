@@ -1,5 +1,9 @@
 # Genere le zip du package minimal de dcc-spells-reader utilise par dcc-sheet
-# (spell-reader.js : content/anchors.js, content/127..303 + 322..356, spell-translation.js).
+# (spell-reader.js : content/anchors.js, content/127..303 + 322..356, spell-translation.js ;
+#  ref-reader.js : contentref/anchors-ref.js, toc.js, contentref/4..61 — evolution
+#  Reference complete, contenu optionnel : il fait partie du package minimal pour
+#  que la visionneuse fonctionne hors-ligne, mais reste absent des deploiements web
+#  qui ne l'ont pas adopte — ref-reader.js l'ignore alors silencieusement).
 # Sortie : deploy\dcc-spells-reader-minimal.zip (ignore par git, voir .gitignore).
 # Le zip contient un dossier dcc-spells-reader/ a sa racine : le decompresser a cote
 # de dcc-sheet recree le voisinage ../dcc-spells-reader attendu par spell-reader.js.
@@ -18,21 +22,29 @@ if (-not (Test-Path -LiteralPath $src)) {
 }
 
 # --- Liste explicite (aucun glob) : le trou 304-321 est saute, comme dans
-# --- les RANGES de dcc-sheet/spell-reader.js.
+# --- les RANGES de dcc-sheet/spell-reader.js. Les pages de la Reference
+# --- complete sont contigues 4..61 (pas de trou), telles quelles.
 $pages = @(127..303) + @(322..356)
+$refPages = @(4..61)
 $files = New-Object System.Collections.Generic.List[string]
 $files.Add((Join-Path $src 'spell-translation.js'))
 $files.Add((Join-Path $src 'content\anchors.js'))
+$files.Add((Join-Path $src 'contentref\anchors-ref.js'))
+$files.Add((Join-Path $src 'contentref\toc.js'))
 
 $missing = @()
 foreach ($n in $pages) {
   $p = Join-Path $src ('content\{0}.js' -f $n)
   if (Test-Path -LiteralPath $p) { $files.Add($p) } else { $missing += $n }
 }
+foreach ($n in $refPages) {
+  $p = Join-Path $src ('contentref\{0}.js' -f $n)
+  if (Test-Path -LiteralPath $p) { $files.Add($p) } else { $missing += ('ref:' + $n) }
+}
 
-$expected = 2 + $pages.Count
+$expected = 4 + $pages.Count + $refPages.Count
 if ($missing.Count) {
-  Write-Host ('ATTENTION : {0} page(s) absente(s) dans content/ :' -f $missing.Count) -ForegroundColor Yellow
+  Write-Host ('ATTENTION : {0} page(s) absente(s) (content/ ou contentref/) :' -f $missing.Count) -ForegroundColor Yellow
   Write-Host ('  ' + ($missing -join ', '))
 }
 if ($files.Count -ne $expected) {
@@ -59,6 +71,6 @@ try {
 $size = (Get-Item -LiteralPath $out).Length
 Write-Host ''
 Write-Host ('Zip cree : ' + $out)
-Write-Host ('Fichiers : ' + $files.Count + ' (' + $pages.Count + ' pages + anchors.js + spell-translation.js)')
+Write-Host ('Fichiers : ' + $files.Count + ' (' + $pages.Count + ' pages + ' + $refPages.Count + ' pages contentref + anchors.js + contentref/{anchors-ref.js, toc.js} + spell-translation.js)')
 Write-Host ('Poids    : {0:N2} Mo' -f ($size / 1MB))
 exit 0

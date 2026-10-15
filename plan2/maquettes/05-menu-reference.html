@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette 05 — entrée menu « Référence »</title>
+<link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="maquettes.css">
+</head>
+<body>
+
+<div class="mq-wrap">
+
+  <div class="section-title" style="font-size:26px;">5. Entrée menu « Référence »</div>
+  <p class="mq-lead">
+    Nouvelle entrée <strong>« Référence »</strong> (<code>data-action="full-ref"</code>), placée
+    <strong>au-dessus de « Classes »</strong> — la complète d'abord (<strong>ordre à valider, R2</strong>).
+    Visible sur <strong>tous les écrans</strong> dès que <code>contentref</code> est détecté ; invisible sinon
+    (même condition <code>html.has-ref-reader</code> que le bouton topbar). Icône livre + lignes en
+    <code>::before</code> (même technique que « Classes ») — tracé retenu selon <strong>R1</strong>.
+  </p>
+  <p class="mq-lead">
+    <button class="md-btn" type="button" id="mq-theme">Basculer clair / sombre</button>
+  </p>
+
+  <div class="section-bar">Rendu desktop — menu ouvert sous l'avatar</div>
+  <div class="mq-row">
+    <div class="mq-col" style="width:100%;">
+
+      <div class="sticky-header" style="position:static;">
+        <header class="topbar">
+          <button class="btn-equipe-mobile" title="Equipe">&#9876;</button>
+          <a href="#" class="logo">Dungeon Crawl Classics</a>
+          <div class="topbar-spacer"></div>
+          <div class="user-avatar-container">
+            <button class="auth-avatar" type="button" aria-label="Menu utilisateur" aria-expanded="true">BM</button>
+            <div class="user-menu">
+              <div class="menu-welcome">Bienvenue Bruno</div>
+
+              <!-- ===== NOUVEAU (R2 : au-dessus de Classes) ===== -->
+              <button data-action="full-ref">Référence</button>
+              <!-- ===== fin nouveau ===== -->
+
+              <button data-action="class-ref">Classes</button>
+              <hr>
+              <button data-action="toggle-theme">Mode Sombre</button>
+              <button data-action="change-theme">Changer de thème</button>
+              <hr>
+              <button data-action="export-all">Exporter tout (JSON)</button>
+              <button data-action="import-all">Importer tout (JSON)</button>
+              <hr>
+              <button data-action="change-password">Changer le mot de passe</button>
+              <button data-action="delete-account" class="danger">Supprimer le compte</button>
+              <hr>
+              <button data-action="logout">Deconnexion</button>
+            </div>
+          </div>
+        </header>
+      </div>
+
+      <div class="mq-note" style="margin-top:14px;">
+        <span class="mq-num">1</span><b>Ordre (R2)</b> : bienvenue · <b>Référence (nouveau)</b> ·
+        Classes · Mode Sombre · Changer de thème · … Le clic ouvre la même visionneuse que le bouton
+        topbar (<code>DCCRefReader.openReference()</code>) et referme le menu, comme les autres entrées.
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">2</span><b>Icône</b> : <code>::before</code> 16 px en CSS — livre + lignes (A) ou
+        bibliothèque (B) selon <strong>R1</strong> ; l'icône ☾/☀ de la bascule et la pastille du sélecteur
+        restent inchangées.
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section-bar">Rendu mobile (&le; 600 px) — menu ouvert</div>
+  <div class="mq-row">
+
+    <div class="mq-phone">
+      <div class="sticky-header" style="position:absolute;top:0;left:0;right:0;">
+        <header class="topbar">
+          <button class="btn-equipe-mobile" title="Equipe">&#9876;</button>
+          <a href="#" class="logo">Dungeon Crawl Classics</a>
+          <div class="topbar-spacer"></div>
+          <!-- bouton Référence complète absent sur mobile (PC uniquement) -->
+          <button class="dice-toggle" type="button" title="Dés" aria-label="Ouvrir le tapis de dés">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3.5" y="3.5" width="17" height="17" rx="4"/>
+              <circle cx="8.5" cy="8.5" r="1.3" fill="currentColor" stroke="none"/>
+              <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/>
+              <circle cx="15.5" cy="15.5" r="1.3" fill="currentColor" stroke="none"/>
+            </svg>
+          </button>
+          <div class="user-avatar-container">
+            <button class="auth-avatar" type="button" aria-label="Menu utilisateur" aria-expanded="true">BM</button>
+            <div class="user-menu" style="max-width:340px;">
+              <div class="menu-welcome">Bienvenue Bruno</div>
+              <button data-action="full-ref">Référence</button>
+              <button data-action="class-ref">Classes</button>
+              <hr>
+              <button data-action="toggle-theme">Mode Sombre</button>
+              <button data-action="change-theme">Changer de thème</button>
+              <hr>
+              <button data-action="export-all">Exporter tout (JSON)</button>
+              <button data-action="import-all">Importer tout (JSON)</button>
+              <hr>
+              <button data-action="logout">Deconnexion</button>
+            </div>
+          </div>
+        </header>
+      </div>
+
+      <div style="padding:430px 14px 14px;">
+        <div class="mq-note">
+          <span class="mq-num">3</span><b>Mobile</b> : « Référence » est l'accès <b>unique</b> à la complète
+          (bouton topbar masqué) — même pattern que « Classes » hier. Tient sur une ligne comme les autres
+          entrées (libellé court, pas de retour ligne).
+        </div>
+      </div>
+    </div>
+
+    <div class="mq-col" style="max-width:380px;">
+      <div class="mq-note">
+        <span class="mq-num">4</span><b>Contenu absent ou ancien</b> : sans <code>contentref</code> (absent
+        <b>ou</b> ancien déploiement avec seulement <code>content/</code>), l'entrée disparaît du menu
+        (<code>html:not(.has-ref-reader)</code>) <b>sans erreur ni toast</b> — le menu retrouve exactement
+        sa forme actuelle, sans trou ni séparateur orphelin. Les sorts, eux, continuent de fonctionner.
+      </div>
+      <div class="mq-note">
+        <span class="mq-num">5</span><b>Zéro persistance</b> : la visionneuse est volatile (comme « Classes »),
+        rien en base ni en localStorage.
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+document.getElementById('mq-theme').addEventListener('click', function () {
+  var root = document.documentElement;
+  root.setAttribute('data-theme', root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+</script>
+</body>
+</html>

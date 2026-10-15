@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Maquettes — Evolution « Dice Tray »</title>
+<title>Maquettes — Evolutions « Dice Tray » et « Référence complète »</title>
 <link rel="stylesheet" href="../../style.css">
 <link rel="stylesheet" href="maquettes.css">
 </head>
@@ -11,16 +11,19 @@
 
 <div class="mq-wrap">
 
-  <div class="section-title" style="font-size:26px;">Evolution « Dice Tray » — maquettes</div>
+  <div class="section-title" style="font-size:26px;">Evolutions « Dice Tray » et « Référence complète » — maquettes</div>
   <p class="mq-lead">
-    Documents de travail pour la branche <code>evol-dice-tray</code> — <strong>maquettes HTML
+    Documents de travail pour les branches <code>evol-dice-tray</code> (maquettes 1–3, réalisées) et
+    <code>evol-reference</code> (maquettes 4–6, à valider) — <strong>maquettes HTML
     statiques</strong>, aucune logique applicative. Elles se servent du <code>style.css</code>
     reel de l'application pour etre au plus pres du rendu final. Plan detaille :
     <code>plan2/PLAN-DICE-TRAY.md</code> — application de reference a porter :
     <code>D:\VS Code\dice-box-dcc</code> (arbitrages V1–V6 valides, 13–14/10/2026).
+    Plan « Référence complète » : <code>plan2/PLAN-REFERENCE.md</code> — contenu optionnel
+    <code>D:\VS Code\dcc-spells-reader\contentref</code> (points R1–R6 à valider).
   </p>
 
-  <div class="section-bar">Les 3 maquettes</div>
+  <div class="section-bar">Les 3 maquettes « Dice Tray » (+ 3 maquettes « Référence complète »)</div>
   <div class="mq-grid">
 
     <a href="01-topbar-bouton-des.html" style="text-decoration:none;">
@@ -61,6 +64,45 @@
             « Lancer » &middot; tapis vide par defaut &middot; etat conserve a la fermeture,
             zero persistance hors preference son (V6) &middot; modale d'aide &middot; mobile
             + cycle de vie
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="04-topbar-bouton-ref.html" style="text-decoration:none;">
+      <div class="char-card" style="height:100%;">
+        <div class="char-card-top" style="display:block;">
+          <div class="char-card-name">4. Bouton topbar « Référence complète » (PC)</div>
+          <div class="char-card-meta" style="margin-top:8px;">
+            A gauche de « Référence des classes » &middot; condition
+            <code>has-ref-reader</code>, jamais sur mobile &middot; 2 icônes candidates :
+            <b>A</b> livre + lignes (recommandée), <b>B</b> bibliothèque &middot; <b>R1 à valider</b>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="05-menu-reference.html" style="text-decoration:none;">
+      <div class="char-card" style="height:100%;">
+        <div class="char-card-top" style="display:block;">
+          <div class="char-card-name">5. Entrée menu « Référence »</div>
+          <div class="char-card-meta" style="margin-top:8px;">
+            <code>data-action="full-ref"</code> au-dessus de « Classes » &middot; visible tous
+            écrans si contenu détecté, accès unique sur mobile &middot; icône
+            <code>::before</code> &middot; <b>R2 à valider</b>
+          </div>
+        </div>
+      </div>
+    </a>
+
+    <a href="06-viewer-reference.html" style="text-decoration:none;">
+      <div class="char-card" style="height:100%;">
+        <div class="char-card-top" style="display:block;">
+          <div class="char-card-name">6. Visionneuse « Référence complète »</div>
+          <div class="char-card-meta" style="margin-top:8px;">
+            Chrome <code>.help-*</code> + sommaire cliquable en premier + parchemin infini des
+            pages 4…61 (conteneur <code>.spell-viewer</code>) &middot; libellés et sections
+            cliquables &middot; <b>R3, R4, R6 à valider</b>
           </div>
         </div>
       </div>

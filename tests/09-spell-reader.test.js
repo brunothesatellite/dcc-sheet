@@ -43,6 +43,7 @@ const ANCHORS = {
   'invoquerunpatron|141': { page: 141, id: 's141-invoquerunpatron', title: 'Invoquer un Patron' },
   'lierunpatron|143': { page: 143, id: 's143-lierunpatron', title: 'Lier un Patron' },
   'bouledefeu|203': { page: 203, id: 's203-bouledefeu', title: 'Boule de feu' },
+  'testtableaux|206': { page: 206, id: 's206-testtableaux', title: 'Test Tableaux' },
   'benediction|255': { page: 255, id: 's255-benediction', title: 'Bénédiction' },
   'charmeserpents|270': { page: 270, id: 's270-charmeserpents', title: 'Charme-serpents' },
   'bobugbubilz|322': { page: 322, id: 's322-bobugbubilz', title: 'BOBUGBUBILZ' },
@@ -73,11 +74,29 @@ const PAGES = {
   203: page(203, 'Boule de feu'),
   204: page(204, 'Sort voisin 204'),
   205: page(205, 'Sort voisin 205'),
+  206: pageTables206(),
   255: page(255, 'Bénédiction'),
   270: page(270, 'Charme-serpents'),
   322: page(322, 'BOBUGBUBILZ', 'h2'),
   330: page(330, 'AZI DAHAKA', 'h2'),
 };
+
+/* Page de test des tableaux responsives (table-fit.js) : un petit tableau
+   (=> keep-table), une matrice 12 colonnes (=> scroll-table) et un tableau
+   a paragraphe long (=> eclate, inchange). */
+function pageTables206() {
+  return '<section class="page" data-page="206" id="page-206">' +
+    '<div class="page-head"><span class="page-num">Page 206</span></div>' +
+    '<h3 class="spell-title" id="s206-testtableaux">Test Tableaux</h3>' +
+    '<div class="table-wrap"><table class="data stackable" id="st-keep"><thead><tr><th>Niveau</th><th>PX</th></tr></thead>' +
+    '<tbody><tr><td class="range">1</td><td>0</td></tr>' +
+    '<tr><td class="range">2</td><td>10</td></tr></tbody></table></div>' +
+    '<div class="table-wrap"><table class="data stackable" id="st-scroll"><thead><tr><th>Niveau</th><th>Bonus jet attaque</th><th>De/Table critique</th><th>De action</th><th>Ref</th><th>Vig</th><th>Vol</th><th>Sorts 1</th><th>Sorts 2</th><th>Sorts 3</th><th>Sorts 4</th><th>Sorts 5</th></tr></thead>' +
+    '<tbody><tr><td class="range">1</td><td>+1</td><td>1d10/I</td><td>1d20</td><td>+0</td><td>+1</td><td>+0</td><td>1</td><td>—</td><td>—</td><td>—</td><td>—</td></tr></tbody></table></div>' +
+    '<div class="table-wrap"><table class="data stackable" id="st-prose"><thead><tr><th>Jet</th><th>Effet</th></tr></thead>' +
+    '<tbody><tr><td class="range">1</td><td>' + 'Paragraphe d’effet tres long. '.repeat(25) + '</td></tr></tbody></table></div>' +
+    '</section>';
+}
 
 /* jsdom ne telecharge pas les <script src> : on repond avec les fixtures */
 function patchHead(env, opts) {
@@ -877,6 +896,34 @@ async function testNoReanchorAfterUserScroll(r) {
     'aucun recalage force apres un scroll utilisateur (got ' + body.scrollTop + ')');
 }
 
+async function testTableFit(r) {
+  // Tableaux responsives (table-fit.js) dans le viewer des sorts : un petit
+  // tableau reste en tableau, une matrice passe en scroll horizontal, un
+  // tableau a paragraphe long reste eclate (defaut inchange).
+  const h = createHarness();
+  h.env.load('table-fit.js');
+  h.env.load('spell-reader.js');
+  if (!r.ok(!!h.env.window.DCCTableFit, 'DCCTableFit expose dans le viewer des sorts')) return;
+  await h.env.window.DCCSpellReader.ensureReady();
+  const body = await openMageSpell(h, 'Test Tableaux');
+  if (!r.ok(!!body, 'popup du sort de test ouverte')) return;
+  const opened = await waitFor(function () {
+    return !!h.env.document.querySelector('.spell-viewer-overlay .sv-pages [data-loaded-page="206"]');
+  });
+  if (!r.ok(opened, 'page 206 rendue')) return;
+  const q = function (sel) {
+    return h.env.document.querySelector('.spell-viewer-overlay ' + sel);
+  };
+  r.ok(!!q('#st-keep') && q('#st-keep').classList.contains('keep-table'),
+    'sort : petit tableau => keep-table');
+  r.ok(!!q('#st-scroll') && q('#st-scroll').classList.contains('scroll-table'),
+    'sort : matrice 12 col. => scroll-table');
+  const prose = q('#st-prose');
+  r.ok(!!prose && !prose.classList.contains('keep-table') &&
+    !prose.classList.contains('scroll-table'),
+    'sort : paragraphe long => eclate (defaut inchange)');
+}
+
 async function run() {
   const r = createReporter('09-spell-reader');
   await testResolution(r);
@@ -893,6 +940,7 @@ async function run() {
   await testAnchorAlignment(r);
   await testAnchorAfterFonts(r);
   await testNoReanchorAfterUserScroll(r);
+  await testTableFit(r);
   return r;
 }
 

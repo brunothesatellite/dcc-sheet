@@ -4648,8 +4648,8 @@ html[data-theme="dark"] .theme-overlay {
   }
 
   .spell-viewer table.stackable tr {
-    margin-bottom: 8px;
-    padding: 5px 6px;
+    margin-bottom: 6px;
+    padding: 4px 5px;
     background: var(--field-bg);
     border: 1px solid var(--line);
     border-radius: 4px;
@@ -4678,6 +4678,89 @@ html[data-theme="dark"] .theme-overlay {
     content: attr(data-label) " : ";
     color: var(--tab-active);
     font-weight: 600;
+  }
+
+  /* --- Tableaux conservés (OPTIM-VIEWER-REF, table-fit.js) : les tableaux
+     de valeurs qui tiennent en largeur restent en tableau (12 px, 11 px en
+     .fit-narrow) ; les matrices larges gardent leur structure + scroll
+     horizontal via .table-wrap (overflow-x:auto déjà en place). Ne s'applique
+     qu'en présence des classes posées à l'insertion : le défaut « tuiles »
+     (sorts à paragraphes compris) est inchangé sans elles. --- */
+  .spell-viewer table.stackable.keep-table,
+  .spell-viewer table.stackable.scroll-table {
+    display: table;
+    width: 100%;
+    font-size: 12px;
+  }
+
+  .spell-viewer table.stackable.keep-table.fit-narrow,
+  .spell-viewer table.stackable.scroll-table {
+    font-size: 11px;
+  }
+
+  .spell-viewer table.stackable.scroll-table {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .spell-viewer table.stackable.keep-table thead,
+  .spell-viewer table.stackable.scroll-table thead {
+    display: table-header-group;
+  }
+
+  .spell-viewer table.stackable.keep-table tbody,
+  .spell-viewer table.stackable.scroll-table tbody {
+    display: table-row-group;
+  }
+
+  .spell-viewer table.stackable.keep-table tr,
+  .spell-viewer table.stackable.scroll-table tr {
+    display: table-row;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+  }
+
+  .spell-viewer table.stackable.keep-table th,
+  .spell-viewer table.stackable.scroll-table th,
+  .spell-viewer table.stackable.keep-table td,
+  .spell-viewer table.stackable.scroll-table td {
+    display: table-cell;
+    border: 1px solid var(--line);
+    padding: 4px 6px;
+    white-space: normal;
+    vertical-align: top;
+    text-align: left;
+  }
+
+  .spell-viewer table.stackable.keep-table thead th,
+  .spell-viewer table.stackable.scroll-table thead th {
+    background: var(--field-bg);
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .spell-viewer table.stackable.keep-table td[data-label]::before,
+  .spell-viewer table.stackable.scroll-table td[data-label]::before {
+    content: none;
+  }
+
+  .spell-viewer table.stackable.keep-table td[data-label]:empty,
+  .spell-viewer table.stackable.scroll-table td[data-label]:empty {
+    display: table-cell;
+  }
+
+  .spell-viewer table.stackable.keep-table td.range,
+  .spell-viewer table.stackable.scroll-table td.range {
+    width: 1%;
+    white-space: nowrap;
+    background: var(--field-bg);
+    color: var(--ink);
+    font-weight: 700;
+    border-bottom: 1px solid var(--line);
+    margin: 0;
   }
 
   .spell-viewer table.data.results-tbl td.range {

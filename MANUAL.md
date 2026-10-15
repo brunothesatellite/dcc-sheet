@@ -807,6 +807,7 @@ La **Référence complète** ouvre les pages du manuel (pages **5 à 61**) dans 
 
 - Fermeture : bouton **✕**, touche **Échap** ou clic hors de la colonne (identique au résumé des classes).
 - Le sommaire liste les **sections** (en-têtes) puis chaque **table** avec son numéro de page (celui affiché dans l'en-tête de chaque page) ; un clic saute **directement à la table** (même au milieu d'une page), avec préchargement des pages voisines.
+- Sur mobile, les **tableaux de valeurs restent en tableau** (petite fonte) et les grandes matrices se font **glisser horizontalement** ; seuls les tableaux à longs paragraphes s'affichent en cartes (une carte par ligne).
 
 ### Contenu optionnel : « contentref »
 

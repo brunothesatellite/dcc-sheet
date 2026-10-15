@@ -98,7 +98,11 @@ module.exports = async function suite() {
   win.showToast = function (msg, type) { toasts.push(String(msg) + '|' + (type || '')); };
   env.load('aide-classes-data.js');
   env.load('aide-classes.js');
+  env.load('table-fit.js');
   env.load('ref-reader.js');
+  r.ok(!!win.DCCTableFit && typeof win.DCCTableFit.classify === 'function' &&
+    typeof win.DCCTableFit.fitAll === 'function',
+    'window.DCCTableFit expose (classify/fitAll, tableaux responsives)');
   r.ok(!!win.DCCRefReader && typeof win.DCCRefReader.openReference === 'function' &&
     typeof win.DCCRefReader.ensureReady === 'function' &&
     typeof win.DCCRefReader.isAvailable === 'function',
@@ -160,7 +164,14 @@ module.exports = async function suite() {
     4: '<section class="page" data-page="4"><h2>TABLE DES MATIERES</h2></section>',
     5: '<section class="page" data-page="5"><h3 id="s5-t11">Table 1-1</h3></section>',
     6: '<section class="page" data-page="6"><h3 id="s6-t32">Table 3-2</h3>' +
-      '<h3 id="s6-t33">Table 3-3</h3><h3 id="s6-equi">Equivalences</h3></section>',
+      '<h3 id="s6-t33">Table 3-3</h3><h3 id="s6-equi">Equivalences</h3>' +
+      '<div class="table-wrap"><table class="data stackable" id="t6-keep"><thead><tr><th>Niveau</th><th>PX</th></tr></thead>' +
+      '<tbody><tr><td class="range">1</td><td>0</td></tr></tbody></table></div>' +
+      '<div class="table-wrap"><table class="data stackable" id="t6-scroll"><thead><tr><th>Niveau</th><th>Bonus jet attaque</th><th>De/Table critique</th><th>De action</th><th>Ref</th><th>Vig</th><th>Vol</th><th>Sorts 1</th><th>Sorts 2</th><th>Sorts 3</th><th>Sorts 4</th><th>Sorts 5</th></tr></thead>' +
+      '<tbody><tr><td class="range">1</td><td>+1</td><td>1d10/I</td><td>1d20</td><td>+0</td><td>+1</td><td>+0</td><td>1</td><td>—</td><td>—</td><td>—</td><td>—</td></tr></tbody></table></div>' +
+      '<div class="table-wrap"><table class="data stackable" id="t6-prose"><thead><tr><th>Jet</th><th>Effet</th></tr></thead>' +
+      '<tbody><tr><td class="range">1</td><td>' + 'Paragraphe long. '.repeat(20) + '</td></tr></tbody></table></div>' +
+      '</section>',
     /* Page 7 : ancre fichier au slug long + id present (resolution par
        prefixe). Page 8 : ni ancre ni intertitre proche sauf « Autre ». */
     7: '<section class="page" data-page="7"><h3 id="s7-crit">Table critique I : longue</h3></section>',
@@ -268,6 +279,66 @@ module.exports = async function suite() {
 
   r.ok(!!overlay.querySelector('.sv-pages'), 'viewer : conteneur .sv-pages (parchemin)');
   r.ok(doc.body.style.overflow === 'hidden', 'viewer : scroll du body verrouille');
+
+  /* --- 9b. Tableaux responsives (OPTIM-VIEWER-REF, poses a l'insertion) */
+  const tKeep = overlay.querySelector('#t6-keep');
+  const tScroll = overlay.querySelector('#t6-scroll');
+  const tProse = overlay.querySelector('#t6-prose');
+  r.ok(!!tKeep && tKeep.classList.contains('keep-table') &&
+    !tKeep.classList.contains('fit-narrow') && !tKeep.classList.contains('scroll-table'),
+    'tables : petit tableau => .keep-table (12 px)');
+  r.ok(!!tScroll && tScroll.classList.contains('scroll-table') &&
+    !tScroll.classList.contains('keep-table'),
+    'tables : matrice 6 col. => .scroll-table');
+  r.ok(!!tProse && !tProse.classList.contains('keep-table') &&
+    !tProse.classList.contains('scroll-table'),
+    'tables : paragraphe long => eclate (aucune classe)');
+  /* classify direct sur snippets representatifs des vraies pages. */
+  const F = win.DCCTableFit;
+  function mkTbl(heads, rows, span) {
+    let h = '<table class="data stackable"><thead><tr>';
+    heads.forEach(function (x) { h += '<th>' + x + '</th>'; });
+    h += '</tr></thead><tbody>';
+    rows.forEach(function (rr) {
+      h += '<tr>';
+      rr.forEach(function (c, i) {
+        h += (span && i === 0 && rr === rows[0] ? '<td colspan="2">' : '<td>') + c + '</td>';
+      });
+      h += '</tr>';
+    });
+    const wrap = doc.createElement('div');
+    wrap.innerHTML = h + '</tbody></table>';
+    return wrap.firstElementChild;
+  }
+  r.eq(F.classify(mkTbl(['Arme', 'Degats', 'Portee (m)', 'Cout (po)'],
+    [['Epee longue', '1d8', '—', '15']])), 'keep',
+    'fit : Table 3-1 Armes => keep');
+  r.eq(F.classify(mkTbl(['Caracteristique', 'Modificateur', 'Sorts de mage connus', 'Niveau de sort max'],
+    [['3', '-3', 'Impossible de lancer des sorts', '']])), 'narrow',
+    'fit : Table 1-1 => narrow');
+  /* Longueurs = bodyMax reels de la vraie Table 9-10 (10/7/7/6/5/6/5). */
+  r.eq(F.classify(mkTbl(['DV du monstre', 'Humanoides armes*', 'Dragons', 'Demons', 'Geants', 'Morts-vivants', 'Autres'],
+    [['Jusqu a 1', 'II-III?', 'II-III?', 'I-II-1', 'I-II-', 'I-II-1', 'I-II-']])), 'narrow',
+    'fit : Table 9-10 => narrow');
+  const h18 = [''];
+  for (let d = 12; d <= 28; d++) h18.push(String(d));
+  h18.push('28+');
+  const row18 = ['3'];
+  for (let d = 13; d <= 28; d++) row18.push(d % 2 ? '12' : 'Echec');
+  row18.push('Crit');
+  r.eq(F.classify(mkTbl(h18, [row18])), 'scroll',
+    'fit : matrice 18 col. => scroll');
+  r.eq(F.classify(mkTbl(['Agilite', 'De main principale', 'De main secondaire', 'Coups critiques*'],
+    [['13', '1d16', '1d14', 'Coups critiques main principale si jet de de max (16 sur 1d16) passant aussi la CA de la cible (pas de reussite automatique)']])), 'scroll',
+    'fit : Deux armes (note 124) => scroll');
+  r.eq(F.classify(mkTbl(['d100', 'Metier', 'Arme maitrisee', 'Possession'],
+    [['23', 'Fabricant de chandelles', 'Masse (1d4)', 'Huile de lampe, silex']])), null,
+    'fit : Metiers (4 col. verbeuses) => tuiles');
+  r.eq(F.classify(mkTbl(['Resultat', 'Effet'],
+    [['1', 'Paragraphe de maladresse. '.repeat(30)]])), null,
+    'fit : texte long => tuiles');
+  r.eq(F.classify(mkTbl(['A', 'B'], [['x', 'y']], true)), 'scroll',
+    'fit : colspan => scroll (structure preservee)');
 
   /* --- 10. Fermetures héritées du chrome ------------------------------ */
   overlay.querySelector('.help-close').click();

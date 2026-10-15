@@ -1,6 +1,8 @@
 # Optimisation affichage des tableaux — Référence complète (mobile)
 
-> Statut : **plan validé en attente de codage** (15/10/2026). Ne pas coder sans ordre.
+> Statut : **implémenté le 16/10/2026** (commit en attente) — `table-fit.js`
+> + câblage `insert()` sorts/référence + CSS + tests (86/86 rejoués sur le
+> contenu réel, suites 09 +6 et 24 +12 → 3381/3381).
 > Contexte : en mobile (≤ 599 px), TOUS les `table.stackable` sont éclatés en
 > tuiles (1 ligne = 1 carte « label : valeur »). Trop lourd pour les tableaux
 > de valeurs qui tiendraient en largeur.

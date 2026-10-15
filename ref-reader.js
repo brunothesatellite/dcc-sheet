@@ -330,6 +330,9 @@
       if (pages.lastElementChild) {
         last = parseInt(pages.lastElementChild.getAttribute('data-loaded-page'), 10);
       }
+      /* Tableaux responsives (table-fit.js) : keep/scroll posés à
+         l'insertion — sous garde pour ne jamais casser sans lui. */
+      if (window.DCCTableFit) window.DCCTableFit.fitAll(node);
       reAnchor();
       return node;
     }

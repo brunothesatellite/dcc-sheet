@@ -53,6 +53,9 @@ module.exports = function suite() {
     'html:not(.has-ref-reader) .ref-full-toggle',
     '#user-menu button[data-action="full-ref"]::before',
     '.help-toc .help-toc-sec',
+    '.spell-viewer table.stackable.keep-table',
+    '.spell-viewer table.stackable.keep-table.fit-narrow',
+    '.spell-viewer table.stackable.scroll-table',
   ];
   critical.forEach(function (sel) {
     r.ok(css.indexOf(sel) !== -1, 'CSS selector present: ' + sel);

@@ -1,10 +1,12 @@
 /* ============================================================
    DCC Sheet - Référence complète (contenu optionnel contentref)
    ------------------------------------------------------------
-   Affiche les pages de ../dcc-spells-reader/contentref (4..61) en
+   Affiche les pages de ../dcc-spells-reader/contentref (5..61) en
    plein écran : chrome aide-classes.js (titre + sommaire + croix),
    corps en parchemin infini (même mécanisme et caches que
    spell-reader.js : seuils 800 px, batch 3, précharge p-2..p+5).
+   La page 4 (TABLE DES MATIÈRES imprimée du livre) n'est PAS
+   affichée : redondante avec le sommaire cliquable.
    Contenu optionnel : sans contentref déployé (ou ancien contenu
    avec seulement content/), bouton et entrée restent invisibles,
    sans erreur console ni toast (détection indépendante des sorts).
@@ -13,7 +15,9 @@
   'use strict';
 
   var BASE = '../dcc-spells-reader';
-  var REF_FIRST = 4;
+  /* La page 4 scan (sommaire imprimé du livre) est exclue : notre
+     sommaire cliquable la remplace. Plage affichée : 5..61. */
+  var REF_FIRST = 5;
   var REF_LAST = 61;
 
   var readyPromise = null;
@@ -192,7 +196,11 @@
         if (e.page === null) { b.disabled = true; }
         else { b.setAttribute('data-goto', e.page); }
       } else {
-        b.textContent = e.disp ? e.title + ' (p. ' + e.disp + ')' : e.title;
+        /* Libellé = numéro de page SCAN (e.page), celui affiché dans
+           l'en-tête de chaque page (« Page 16 ») — le numéro imprimé
+           du livre (d) décale d'unité par endroits et ferait croire
+           à un saut sur la mauvaise page. */
+        b.textContent = e.title + ' (p. ' + e.page + ')';
         b.setAttribute('data-goto', e.page);
       }
       b.addEventListener('click', function () {
@@ -304,11 +312,21 @@
       }
     }
 
+    /* Compteur monotone : seul le DERNIER clic fait défiler. Sans lui,
+       deux clics rapprochés se disputent le scroll (le premier promesse
+       résolue en dernier gagne) et l'on atterrit sur une mauvaise page. */
+    var lastRequest = 0;
+
     function scrollToPage(p) {
       if (!inRange(p)) return false;
+      var req = ++lastRequest;
       loadPage(p).then(function (html) {
-        if (closed || !html) return;
-        var node = insert(p, html);
+        if (closed || req !== lastRequest) return; // clic plus récent pris en charge
+        /* insert() retourne null si la page est déjà dans le DOM (cas
+           fréquent : page préchargée p-2..p+5) — on cible alors la page
+           existante, sans quoi « il ne se passe rien ». */
+        var node = insert(p, html) ||
+          pages.querySelector('[data-loaded-page="' + p + '"]');
         if (node && typeof node.scrollIntoView === 'function') {
           node.scrollIntoView({ block: 'start' });
         }

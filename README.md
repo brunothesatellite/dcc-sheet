@@ -74,10 +74,10 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - **Aide de classe** : bouton « Résumé » dans l'en-tete de chaque fiche (fiche de la classe + Table 1-1) + bouton « Référence des classes » dans la topbar / entree « Classes » du menu (document integral Niveau 0 & 7 classes + sommaire) ; donnees generees depuis le HTML source (`aide-classes-data.js`), 100 % hors-ligne, suite `21-aide-classes` (125 assertions)
 
 ### Reference complete (contenu optionnel contentref, evolution 15/10/2026)
-- **Visionneuse des pages 4 a 61 du manuel** (`ref-reader.js`) : chrome du resume des classes (titre « Reference complete », sommaire cliquable en premier) + corps en parchemin infini reutilisant les mecanismes et caches de `spell-reader.js` (seuil 800 px, batch de 3, prechargement p-2..p+5) ; `aide-classes.js` expose `openViewer` (R5)
+- **Visionneuse des pages 5 a 61 du manuel** (`ref-reader.js`) : chrome du resume des classes (titre « Reference complete », sommaire cliquable en premier) + corps en parchemin infini reutilisant les mecanismes et caches de `spell-reader.js` (seuil 800 px, batch de 3, prechargement p-2..p+5) ; la page 4 (sommaire imprime du livre) n'est pas affichee, redondante avec le sommaire ; `aide-classes.js` expose `openViewer` (R5)
 - **Detection independante des sorts** : au demarrage, 1 requete sur `../dcc-spells-reader/contentref/anchors-ref.js` ; present → classe `html.has-ref-reader` (bouton topbar a gauche de « Reference des classes » + entree « Reference » du menu, au-dessus de « Classes ») ; **absent** (ancien contenu avec seulement `content/`) → bouton et entree invisibles, **ni erreur console ni toast**, les sorts continuent seuls
-- **Sommaire** : `contentref/toc.js` (`DCC_REF_TOC`) — sections `{s}` cliquables (saut a leur premiere entree) puis entrees `{t,d,p}` ; sommaire absent → repli « Page 4 … Page 61 » ; contenu en cours de developpement : rien n'est fige ni copie
-- **Compatibilite** : zero dependance ajoutee, aucun changement Java (prefixe `/dcc-spells-reader/` deja dans l'allowlist du ContentProvider), le zip minimal et le script de sync APK embarquent `contentref/` (60 fichiers : anchors-ref.js + toc.js + 58 pages 4..61) ; suite `24-ref-reader` (51 assertions)
+- **Sommaire** : `contentref/toc.js` (`DCC_REF_TOC`) — sections `{s}` cliquables (saut a leur premiere entree) puis entrees `{t,d,p}` libellees avec le **numero de page scan** (`p`, celui de l'en-tete « Page N » de chaque page — le numero imprime `d` peut diverger d'une unite et ferait croire a un saut sur la mauvaise page) ; clic sur une page deja chargee : defilement vers le noeud existant (pas de « rien ne se passe ») ; garde anti-course : seul le dernier clic fait defiler ; sommaire absent → repli « Page 5 … Page 61 » ; contenu en cours de developpement : rien n'est fige ni copie
+- **Compatibilite** : zero dependance ajoutee, aucun changement Java (prefixe `/dcc-spells-reader/` deja dans l'allowlist du ContentProvider), le zip minimal et le script de sync APK embarquent `contentref/` (60 fichiers : anchors-ref.js + toc.js + 58 pages 4..61) ; suite `24-ref-reader` (55 assertions)
 
 ### Portrait
 - 8 sources d'images : **DCC** (tokens officiels, 20 images), **D&D Red Box 1983** (7 illustrations), **Leremy Gan** (7 silhouettes), **Shadowdark** (12 images), **Jeff Stevens** (8 planches), **Gonzo** (30 images), **Old School** (17 images) et **Funnel - niveau 0** (75 tokens `icons/funnel-tokens/`, catalogue `funnel-icons.js`)
@@ -155,7 +155,7 @@ dcc-sheet/
 ├── test.bat                    # Lanceur Windows des tests de non-regression
 ├── script.js                   # Gestionnaire central (tabs, auth, CRUD, auto-save, nav, portraits)
 ├── spell-reader.js             # Definition des sorts (detection dcc-spells-reader, resolution, popup plein ecran)
-├── ref-reader.js               # Reference complete (contentref optionnel, sommaire + parchemin infini 4..61)
+├── ref-reader.js               # Reference complete (contentref optionnel, sommaire + parchemin infini 5..61)
 ├── style.css                   # Styles principaux (themes, layout, responsive, portraits)
 ├── style-auth.css              # Styles des pages d'authentification
 ├── favicon.svg                 # Favicon SVG

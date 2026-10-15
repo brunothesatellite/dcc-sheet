@@ -90,7 +90,7 @@ Une fois connecté, votre **avatar** (la première lettre de votre pseudo) rempl
 | Action | Effet |
 |---|---|
 | **Bienvenue {pseudo}** | En-tête du menu |
-| **Référence** | Ouvre la **référence complète** du manuel (pages 4 à 61, sommaire cliquable) — *uniquement si le contenu « contentref » est déployé ; sinon l'entrée est absente* (§ 9c) |
+| **Référence** | Ouvre la **référence complète** du manuel (pages 5 à 61, sommaire cliquable) — *uniquement si le contenu « contentref » est déployé ; sinon l'entrée est absente* (§ 9c) |
 | **Classes** | Ouvre le document de référence des classes (fiches + Table 1-1) |
 | **☾ / ☀** | Bascule le thème sombre/clair : l'icône indique toujours le **mode à atteindre** (§ 10) |
 | **Exporter tout (JSON)** | Télécharge tous vos personnages, vos **notes d'équipe** et votre **ordre de marche** dans un fichier |
@@ -142,7 +142,7 @@ Tous vos personnages sont supprimés avec le compte : vous êtes redirigé vers 
 - **Bouton ⚔** : ouvre l'onglet **Equipe** — affiché uniquement en basse résolution (≤ 600 px), où l'onglet lui-même est masqué.
 - **Texte « Dungeon Crawl Classics »**
 - **Bouton 🎲 (Dés)** : ouvre le tapis de dés 3D (§ 9b).
-- **Bouton 📖 (Référence complète)** : ouvre la référence du manuel (pages 4 à 61) — *uniquement si le contenu « contentref » est déployé, sinon absent* (§ 9c) — placé à gauche du bouton **Référence des classes**, masqué en mobile ≤ 600 px (entrée **Référence** du menu utilisateur à la place, § 2.3). Les deux boutons partagent l'icône de livre : la **Référence complète** la montre avec des lignes de texte, la Référence des classes sans.
+- **Bouton 📖 (Référence complète)** : ouvre la référence du manuel (pages 5 à 61) — *uniquement si le contenu « contentref » est déployé, sinon absent* (§ 9c) — placé à gauche du bouton **Référence des classes**, masqué en mobile ≤ 600 px (entrée **Référence** du menu utilisateur à la place, § 2.3). Les deux boutons partagent l'icône de livre : la **Référence complète** la montre avec des lignes de texte, la Référence des classes sans.
 - **Bouton 📖 (Référence des classes)** : ouvre le document de référence des classes (§ 6.3c) — masqué en mobile ≤ 600 px (entrée **Classes** du menu, § 2.3).
 - **Bouton ☾ / ☀** : bascule le thème sombre/clair (§ 10) — masqué en mobile ≤ 600 px, l'entrée se trouve alors dans le menu utilisateur (§ 2.3).
 - **Avatar** : menu utilisateur (une fois connecté) — ou boutons **Connexion / Inscription** sinon.
@@ -798,7 +798,7 @@ Le bouton **🔊 / 🔇** (coin du tapis) coupe ou rétablit les bruits de dés,
 
 ## 9c. Référence complète (contentref)
 
-La **Référence complète** ouvre les pages du manuel (pages **4 à 61**) dans une visionneuse plein écran, sur le même modèle que le résumé des classes : **sommaire cliquable** en tête, puis défilement **infini** sur les pages voisines (seules les pages visitées sont chargées).
+La **Référence complète** ouvre les pages du manuel (pages **5 à 61**) dans une visionneuse plein écran, sur le même modèle que le résumé des classes : **sommaire cliquable** en tête, puis défilement **infini** sur les pages voisines (seules les pages visitées sont chargées). La page 4 (la table des matières **imprimée** du livre) n'est pas affichée : le sommaire cliquable la remplace.
 
 ### Où la trouver
 
@@ -806,7 +806,7 @@ La **Référence complète** ouvre les pages du manuel (pages **4 à 61**) dans 
 - **Mobile (≤ 600 px)** : entrée **Référence** du menu utilisateur, juste au-dessus de **Classes**.
 
 - Fermeture : bouton **✕**, touche **Échap** ou clic hors de la colonne (identique au résumé des classes).
-- Le sommaire liste les **sections** (en-têtes) puis chaque **table** avec sa page d'affichage ; un clic y saute directement, avec préchargement des pages voisines.
+- Le sommaire liste les **sections** (en-têtes) puis chaque **table** avec son numéro de page (celui affiché dans l'en-tête de chaque page) ; un clic y saute directement, avec préchargement des pages voisines.
 
 ### Contenu optionnel : « contentref »
 

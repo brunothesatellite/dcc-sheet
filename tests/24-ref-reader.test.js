@@ -138,14 +138,19 @@ module.exports = async function suite() {
     { s: 'Fin' },
   ];
   win.DCC_REF_PAGES = {
-    4: '<section class="page" data-page="4"><h2>TABLE</h2></section>',
+    /* Page 4 = sommaire imprime du livre : presente dans le contenu mais
+       jamais affichee (plage 5..61). */
+    4: '<section class="page" data-page="4"><h2>TABLE DES MATIERES</h2></section>',
     5: '<section class="page" data-page="5"><h3>Table 1-1</h3></section>',
     6: '<section class="page" data-page="6"><h3>Table 1-2</h3></section>',
+    7: '<section class="page" data-page="7"><h3>Hors sommaire</h3></section>',
   };
-  await win.DCCRefReader.setAnchors({ 'x|4': { page: 4, id: 'a', title: 'X' } });
+  await win.DCCRefReader.setAnchors({ 'x|5': { page: 5, id: 'a', title: 'X' } });
   r.ok(win.DCCRefReader.isAvailable() === true, 'ancres presentes : disponible');
   r.ok(doc.documentElement.classList.contains('has-ref-reader'),
     'ancres presentes : classe has-ref-reader posee');
+  r.eq(win.DCCRefReader.FIRST, 5,
+    'plage affichee 5..61 : page 4 (sommaire imprime) exclue');
 
   /* --- 8. Visionneuse : chrome + sommaire en premier (R4, R6) --------- */
   win.DCCRefReader.openReference();
@@ -164,16 +169,43 @@ module.exports = async function suite() {
   r.ok(secs[1].disabled === true, 'viewer : section sans entree suivante desactivee');
   const gotos = tocEl.querySelectorAll('button[data-goto]:not(.help-toc-sec)');
   r.eq(gotos.length, 2, 'viewer : 2 entrees data-goto');
-  r.ok(gotos[0].textContent.indexOf('(p. 4)') !== -1, 'viewer : entree libellee « titre (p. d) »');
+  /* Libelle = page SCAN (p), pas la page imprimee (d) : chaque page
+     affiche « Page N » avec N = p ; libeller avec d (« p. 4 » vs
+     « Page 5 ») faisait croire a un saut sur la mauvaise page. */
+  r.ok(gotos[0].textContent.indexOf('(p. 5)') !== -1 &&
+    gotos[0].textContent.indexOf('(p. 4)') === -1,
+    'viewer : entree libellee avec le numero de page scan « titre (p. p) »');
 
   /* --- 9. Parchemin infini (pages stubées, async) --------------------- */
+  /* jsdom n'implemente pas scrollIntoView : on enregistre les appels. */
+  const scrolls = [];
+  win.Element.prototype.scrollIntoView = function () {
+    scrolls.push(this.getAttribute('data-loaded-page'));
+  };
   await tick(5);
-  const p4 = overlay.querySelector('[data-loaded-page="4"]');
-  r.ok(!!p4 && !!p4.querySelector('h2'), 'viewer : page 4 inseree au demarrage');
-  gotos[0].click();
+  const p5 = overlay.querySelector('[data-loaded-page="5"]');
+  r.ok(!!p5 && !!p5.querySelector('h3'), 'viewer : page 5 inseree au demarrage');
+  r.ok(!overlay.querySelector('[data-loaded-page="4"]'),
+    'viewer : page 4 (sommaire imprime) jamais inseree');
+  r.ok(!!overlay.querySelector('[data-loaded-page="6"]'),
+    'viewer : pages voisines prechargees (p+1)');
+
+  /* Clic sur une page DEJA inseree (preload) : doit quand meme defiler
+     (insert() retourne null sur doublon — recherche du noeud existant). */
+  scrolls.length = 0;
+  gotos[1].click(); // page 6 : deja prechargee
   await tick(5);
-  r.ok(!!overlay.querySelector('[data-loaded-page="5"]'),
-    'viewer : clic sommaire charge la page cible (scrollToPage)');
+  r.eq(scrolls.join(','), '6',
+    'viewer : clic sur page deja chargee => scroll vers le noeud existant');
+
+  /* Course entre clics : seul le DERNIER clic fait defiler. */
+  scrolls.length = 0;
+  gotos[0].click(); // page 5
+  gotos[1].click(); // page 6 juste apres
+  await tick(5);
+  r.eq(scrolls.join(','), '6',
+    'viewer : deux clics rapproches => seul le dernier fait defiler (pas de page parasite)');
+
   r.ok(!!overlay.querySelector('.sv-pages'), 'viewer : conteneur .sv-pages (parchemin)');
   r.ok(doc.body.style.overflow === 'hidden', 'viewer : scroll du body verrouille');
 

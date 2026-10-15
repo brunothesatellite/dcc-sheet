@@ -56,32 +56,32 @@ button.help-toc-sec { cursor: pointer; text-align: left; }
             <div class="help-column">
               <div class="help-toc">
                 <span class="help-toc-sec">Personnages</span>
-                <button type="button" data-goto="5">Table 1-1 : Modificateurs (p. 4)</button>
-                <button type="button" data-goto="6">Table 1-2 : Augure (p. 5)</button>
-                <button type="button" data-goto="9">Table 1-5 : Clerc (p. 8)</button>
+                <button type="button" data-goto="5">Table 1-1 : Modificateurs (p. 5)</button>
+                <button type="button" data-goto="6">Table 1-2 : Augure (p. 6)</button>
+                <button type="button" data-goto="9">Table 1-5 : Clerc (p. 9)</button>
                 <span class="help-toc-sec">Équipement</span>
-                <button type="button" data-goto="15">Table 3-1 : Armes (p. 14)</button>
+                <button type="button" data-goto="15">Table 3-1 : Armes (p. 15)</button>
                 <span class="help-toc-sec">Combat</span>
-                <button type="button" data-goto="19">Table 4-1 : Modificateurs (p. 18)</button>
-                <button type="button" data-goto="21">Table critique I (p. 20)</button>
+                <button type="button" data-goto="19">Table 4-1 : Modificateurs (p. 19)</button>
+                <button type="button" data-goto="21">Table critique I (p. 21)</button>
                 <span class="help-toc-sec">Magie</span>
-                <button type="button" data-goto="47">Table 5-8 : Sorts de mage (p. 46-47)</button>
+                <button type="button" data-goto="49">Table 5-8 : Sorts de mage (p. 49)</button>
                 <span class="help-toc-sec">Monstres</span>
-                <button type="button" data-goto="52">Table 9-10 : Critiques (p. 51)</button>
+                <button type="button" data-goto="54">Table 9-10 : Critiques (p. 54)</button>
               </div>
               <div class="spell-viewer">
-                <section class="page" data-page="4">
-                  <div class="page-head"><span class="page-num">Page 4</span></div>
-                  <h2 class="section">TABLE DES MATIÈRES (extrait basse fidélité)</h2>
-                  <p>Ceci est la page 4 réelle du contenu (<code>contentref/4.js</code>) : la visionneuse
-                  l'affiche telle quelle, sans retraitement.</p>
-                </section>
                 <section class="page" data-page="5">
                   <div class="page-head"><span class="page-num">Page 5</span></div>
                   <h3 class="spell-title">Table 1-1 : Modificateurs de caractéristiques</h3>
+                  <p>La visionneuse s'ouvre sur la <b>page 5</b> : la page 4 (TABLE DES MATIÈRES imprimée
+                  du livre) n'est jamais affichée, redondante avec ce sommaire cliquable.</p>
+                </section>
+                <section class="page" data-page="6">
+                  <div class="page-head"><span class="page-num">Page 6</span></div>
+                  <h3 class="spell-title">Table 1-2 : Augure de naissance</h3>
                   <p>Les pages défilent en parchemin infini : le clic sur un bouton du sommaire fait défiler
-                  jusqu'à la page (<code>scrollToPage</code>), qui est préchargée avec ses voisines
-                  (p-2…p+5), comme l'affichage de la totalité des sorts.</p>
+                  jusqu'à la page (<code>scrollToPage</code>), y compris si elle est déjà chargée, qui est
+                  préchargée avec ses voisines (p-2…p+5), comme l'affichage de la totalité des sorts.</p>
                 </section>
               </div>
             </div>
@@ -92,8 +92,10 @@ button.help-toc-sec { cursor: pointer; text-align: left; }
       <div class="mq-note" style="margin-top:14px;">
         <span class="mq-num">1</span><b>Sommaire en premier (R4/R6)</b> : la barre <code>.help-toc</code> reprend
         les sections (<code>{s}</code> : Personnages, Équipement, Combat, Magie, Monstres) et les entrées
-        (<code>{t}</code> + page « p. d »). Clic sur une entrée = saut à la page ; clic sur une section (R6) =
-        saut à sa 1re entrée. Repli sans <code>toc.js</code> : boutons « Page 4 … Page 61 ».
+        (<code>{t}</code> + numéro de page <b>scan</b>, identique à l'en-tête « Page N » de chaque page).
+        Clic sur une entrée = saut à la page (même si elle est déjà chargée) ; clic sur une section (R6) =
+        saut à sa 1re entrée. Repli sans <code>toc.js</code> : boutons « Page 5 … Page 61 » (la page 4,
+        sommaire imprimé du livre, est exclue).
       </div>
       <div class="mq-note">
         <span class="mq-num">2</span><b>Parchemin infini</b> : pages insérées dans l'ordre (<code>data-page</code>),

@@ -618,6 +618,11 @@
     ensureReady: ensureReady,
     isAvailable: isAvailable,
     openReference: openReference,
+    /* Hooks d'audit (tests/26-anchors-audit) : rejouent la résolution RÉELLE
+       du sommaire (anchorIdFor + textTarget) contre le contenu déployé —
+       jamais de copie de l'algorithme dans les tests. */
+    _anchorIdFor: anchorIdFor,
+    _textTarget: textTarget,
     setAnchors: function (anchors) {
       window.DCC_REF_ANCHORS = anchors;
       toc = null;

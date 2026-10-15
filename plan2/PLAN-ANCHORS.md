@@ -1,6 +1,6 @@
 # PLAN-ANCHORS — Visionneuse « Référence complète » : pages au hasard & ancres incorrectes
 
-> Statut : **analyse terminée, corrections à implémenter**
+> Statut : **Lot 1 + 2.1 + 2.2 implémentés le 15/10/2026, validés terrain — 3.1 ARCHIVÉ** (voir § 6)
 > Source : bug terrain rapporté le 15/10 (Pixel APK 3.4-test + webapp) :
 > « clic sur l'entrée menu → page au hasard, **quasi uniquement au premier
 > chargement / refresh** » + « ancres incorrectes aléatoirement » (ex. clic
@@ -127,7 +127,7 @@ scroller documentaire de l'app. Le repli géométrique existant
 
 | # | Action | Détail |
 |---|---|---|
-| **3.1** | **Trace debug** | Drapeau `?debug=anchors` (ou `localStorage`), strippé en release : chaque étape de `scrollToPage`/`insert` logue `{page, branche insert, refRect.top vs scRect.bottom, delta, scrollTop avant/après, anchorEl, fonts state}` dans un tampon consultable en console/panneau masqué. |
+| **3.1** | ~~Trace debug~~ **ARCHIVÉ** | ~~Drapeau `?debug=anchors` ...~~ **Abandonné le 15/10 après validation terrain** : instrument de diagnostic conçu pour confirmer RC1/RC2 sur device quand les sauts étaient aléatoires ; les correctifs étant validés par les tests (suite 24 rejouée en fausse géométrie) ET par l'essai sur Pixel, sa valeur diagnostique est nulle — il ne reviendrait qu'en cas de récidive, auquel cas le réactiver depuis cette ligne d'historique. |
 | **3.2** | **Protocole Pixel** | (a) force-stop → ouverture Référence **immédiatement** + clics rapides × 10 ; (b) session chaude (polices en cache) × 10 ; (c) clics sur les 6 entrées à ancres manquantes. Comparer les traces avant/après correctifs. |
 | **3.3** | **Non-régression sorts/résumés** | 1.1/1.3 touchent `spell-reader.js` : suites 09 (149) + 19 (109) + 21 (103) doivent rester au vert ; résumés (`aide-classes`) non impactés (pas d'`insert`). |
 
@@ -147,3 +147,21 @@ scroller documentaire de l'app. Le repli géométrique existant
   atterrissage exact sur l'intertitre visé ; traces à l'appui.
 - Les 6 entrées actuellement en haut-de-page atterrissent sur leur table.
 - 3 389+ tests au vert ; sorts et résumés inchangés à l'œil.
+
+---
+
+## 6. Statut d'implémentation (15/10/2026)
+
+| Lot | Statut | Où |
+|---|---|---|
+| 1.1 / 1.1 bis | ✅ fait | `ref-reader.js` + miroir `spell-reader.js` : compensation conditionnée à `refTop <= scBottom` (mesurée AVANT insertion), `DCCTableFit.fitAll` inclus dans la mesure du delta |
+| 1.2 | ✅ fait | handler `fonts.loadingdone` (detaché à la fermeture) + `fonts.ready` en repli + `ResizeObserver` sur `.help-toc` / `.spell-viewer-column` (sous garde jsdom) |
+| 1.3 | ✅ fait | `scrollToTarget` / `scrollToAnchor` : géométrie primaire, `scrollIntoView` en repli. **Nuance RC6** : `scroll-behavior` n'est pas hérité — le « smooth » de `html` n'atteignait pas les scroll-box des viewers (durcissement, pas correctif de bug) |
+| 1.4 | ✅ fait | `renderToc()` + reconstruction à l'arrivée tardive de `toc.js` (`onTocReady`), `reAnchor()` après re-rendu |
+| 1.5 | ✅ fait | `delete pagePromises[n]` sur échec dans les deux lecteurs |
+| 2.1 | ✅ fait | **corrigé le tir** : les `id` existaient déjà dans les pages — il manquait des *alias* pour les titres courts du sommaire (« Table critique DR » vs « Table de coups critiques DR : Dragons ») et pour le décalage œ→oe du slugify client (« Coups précis » → `coupsprecis` vs `coupprecis`). `dcc-spells-reader/tools/anchor-aliases.json` (8 alias) + fusion par `tools/extract.py` (survit aux régénérations). Audit : **57/57 en ancres directes** (46 exactes + 11 préfixe, 0 repli) |
+| 2.2 | ✅ fait | suite `tests/26-anchors-audit` : rejoue `anchorIdFor`/`textTarget` **réels** (exposés par `ref-reader.js`) contre le contenu déployé ; échec sur tout repli texte / haut-de-page ; skip propre si le contenu est absent |
+| 3.1 | ❌ **archivé** | abandonné après validation terrain (voir § 3) |
+| 3.2 / 3.3 | ✅ fait | essai terrain Pixel OK (plus de saut ni d'ancre au hasard) ; non-régression vérifiée : 3 417 tests au vert, suites 09/19/21 inchangées |
+
+**Tests ajoutés** : `24-ref-reader` rejouée en fausse géométrie (assertions sur `scrollTop` exacts, indépendantes de `scrollIntoView`) + scénarios RC1 (retardataire sous le viewport inoffensif / insertion au-dessus compensée), RC2 (recalage sur `loadingdone`), RC3 (sommaire de repli remplacé), RC4 (échec non mis en cache) ; `09-spell-reader` +1 scénario RC1 miroir (délais réseau simulés dans `patchHead`) ; `26-anchors-audit` (nouvelle).

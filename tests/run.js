@@ -28,6 +28,7 @@ const suites = [
   require('./22-themes.test'),
   require('./23-dice-tray.test'),
   require('./24-ref-reader.test'),
+  require('./26-anchors-audit.test'),
 ];
 
 function pad(s, n) {

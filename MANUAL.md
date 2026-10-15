@@ -89,7 +89,7 @@ Une fois connecté, votre **avatar** (la première lettre de votre pseudo) rempl
 | Action | Effet |
 |---|---|
 | **Bienvenue {pseudo}** | En-tête du menu |
-| **Référence** | Ouvre le document de référence des classes (fiches + Table 1-1) |
+| **Classes** | Ouvre le document de référence des classes (fiches + Table 1-1) |
 | **☾ / ☀** | Bascule le thème sombre/clair : l'icône indique toujours le **mode à atteindre** (§ 10) |
 | **Exporter tout (JSON)** | Télécharge tous vos personnages, vos **notes d'équipe** et votre **ordre de marche** dans un fichier |
 | **Importer tout (JSON)** | Remplace **tous** vos personnages (et vos notes / ordre de marche, si le fichier en contient) par ceux d'un fichier |
@@ -99,9 +99,9 @@ Une fois connecté, votre **avatar** (la première lettre de votre pseudo) rempl
 
 Le menu se referme en cliquant ailleurs ou en appuyant sur **Échap**.
 
-<img src="captures/menu-mobile-dice.png" alt="Menu utilisateur sur mobile : Bienvenue Bruno, Référence, Mode Sombre (icône lune), Changer de thème, puis Exporter / Importer tout" width="320">
+<img src="captures/menu-mobile-dice.png" alt="Menu utilisateur sur mobile : Bienvenue Bruno, Classes (icône livre), Mode Sombre (icône lune), Changer de thème, puis Exporter / Importer tout" width="320">
 
-*Sur mobile (≤ 600 px), le menu regroupe aussi les entrées **Référence** et **Mode Sombre** (icône ☾ / ☀, toujours au mode à atteindre), qui remplacent les boutons masqués de la topbar.*
+*Sur mobile (≤ 600 px), le menu regroupe aussi les entrées **Classes** et **Mode Sombre** (icône ☾ / ☀, toujours au mode à atteindre), qui remplacent les boutons masqués de la topbar.*
 
 ### 2.4 Changer son mot de passe
 

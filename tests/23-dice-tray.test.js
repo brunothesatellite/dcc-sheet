@@ -53,8 +53,8 @@ module.exports = function suite() {
       'menu : reference + bascule au-dessus du selecteur de couples (R1, V1)');
     const refBtn = menu.querySelector('button[data-action="class-ref"]');
     const togBtn = menu.querySelector('button[data-action="toggle-theme"]');
-    r.ok(!!refBtn && refBtn.textContent === 'Référence',
-      'libelle court « Référence » (tenue sur une ligne, mobile)');
+    r.ok(!!refBtn && refBtn.textContent === 'Classes',
+      'libelle court « Classes » (tenue sur une ligne, mobile)');
     r.ok(!!togBtn && togBtn.textContent === 'Mode Sombre' &&
       togBtn.getAttribute('aria-label') === 'Passer en mode sombre',
       'entree bascule : libelle « Mode Sombre » (theme clair) + aria-label');
@@ -122,7 +122,7 @@ module.exports = function suite() {
   r.ok(/\.theme-toggle,\s*\.ref-toggle\s*\{\s*display:\s*none;/.test(styleCss),
     'style.css : .theme-toggle + .ref-toggle masques en <=600px (V3)');
   r.ok(styleCss.indexOf('button[data-action="class-ref"]::before') !== -1,
-    'style.css : icone livre ::before sur « Référence »');
+    'style.css : icone livre ::before sur « Classes »');
   r.ok(styleCss.indexOf('#user-menu button[data-action="toggle-theme"]::before') !== -1 &&
     styleCss.indexOf('content: "☾"') !== -1,
     'style.css : icone ☾ en ::before sur la bascule (replaces le disque, rev. 4)');

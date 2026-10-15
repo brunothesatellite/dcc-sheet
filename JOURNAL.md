@@ -1905,3 +1905,12 @@ Module de **dessin de carte plein écran** ouvert par une icône « carte » de 
 - **Build différentiel (étape 4)** : `deploy/dcc-sheet-diff/` depuis v3.3 — **11 modifiés / 28 ajoutés / 0 supprimé** (+ 18 copies hors exclusions).
 - **Artefacts v3.4 (étape 6)** : setup **93 535 174 o** + portable **104 054 239 o** (`build.ps1 -Version 3.4`, verifications bloquantes internes OK), webapp **26 499 004 o** (196 fichiers, assertion 0 token), APK DCC Sheet **25 937 317 o** (`assembleRelease` + `apksigner`, keystore inchange) ; APK conteneur **1.2** reconstruit (26 Mo : 95 tokens = 20 PC + 75 funnel + `dcc-spells-reader`, **jamais joint** a la release). Purge avant rebuild : artefacts `3.4-test`, reliquat `3.1` et `.idsig` orphelins de `android/dist`. **Recette 10/10** sur le package de release (aucun 404, port libere).
 - **Tag + release GitHub (étape 7)** : tag **`v3.4`** pose sur `d138192` et pousse ; release creee avec **4 assets** aux tailles identiques aux fichiers locaux (APK 25 937 317 / portable 104 054 239 / setup 93 535 174 / webapp 26 499 004 octets) ; corps des notes relu via API : **accents propres** (0 U+FFFD, 0 U+251C — ecriture par .NET UTF-8 sans BOM, jamais de redirection `>`) — https://github.com/brunothesatellite/dcc-sheet/releases/tag/v3.4
+
+---
+
+## Date : 15 octobre 2026 — Retouche menu : « Référence » → « Classes »
+
+- L'entrée du menu utilisateur `class-ref` est renommée **« Classes »** (`index.html`) ; le bouton topbar desktop `#btn-aide` (titre « Référence des classes ») et le titre du lecteur (`aide-classes.js`) sont inchangés. Suite `23-dice-tray` mise à jour (libellé exact + messages de contrôles, 80 contrôles) ; MANUAL § 2.3 (tableau, légende) et alt de la capture à jour.
+- **Capture retake** sur le Pixel 7a : APK `3.4-test` reconstruit avec le renommage et réinstallé (`adb install -r`, keystore inchangé) — `captures/menu-mobile-dice.png` affiche désormais « Classes ». Le renommage est **post-release** : il n'est pas dans l'APK officiel v3.4 publié la veille.
+- Tests : **3292/3292 OK** (PHP activé).
+- Note de build : `_build-android.ps1` s'arrête à `exit 0` après signature — la ligne « Installation device » n'est qu'un affichage, l'installation se fait par `adb install -r` manuel. Sous ce PC, le daemon Gradle d'Android Studio (JBR) peut hériter du handle de sortie et prolonger le shell appelant (timeout-artefact du 15/10, l'APK lui-même est bien construit).

@@ -212,9 +212,9 @@ module.exports = async function suite() {
     gotos[0].textContent.indexOf('(p. 4)') === -1,
     'viewer : entree libellee avec le numero de page scan « titre (p. p) »');
 
-  /* --- 9. Parchemin infini + ancres milieu de page (async) ------------ */
+  /* --- 8b. Bouton « Sommaire » a gauche de la croix (retour au debut) -- */
   /* jsdom n'implemente pas scrollIntoView : on enregistre les appels
-     (id, texte de l'intertitre, ou n° de page pour un haut de page). */
+      (id, texte de l'intertitre, ou n° de page pour un haut de page). */
   const scrolls = [];
   win.Element.prototype.scrollIntoView = function () {
     scrolls.push(this.tagName === 'SECTION'
@@ -222,6 +222,23 @@ module.exports = async function suite() {
       : (this.getAttribute('id') || (this.textContent || '').trim().slice(0, 20) ||
         this.getAttribute('data-loaded-page')));
   };
+  const closeBtn8 = overlay.querySelector('.help-close');
+  const homeBtn = closeBtn8.previousElementSibling;
+  if (r.ok(!!homeBtn && homeBtn.classList.contains('help-home'),
+    'viewer : bouton .help-home immediatement a gauche de la croix')) {
+    r.eq(homeBtn.getAttribute('type'), 'button', 'help-home : type=button');
+    r.eq(homeBtn.getAttribute('aria-label'), 'Revenir au sommaire',
+      'help-home : aria-label « Revenir au sommaire »');
+    scrolls.length = 0;
+    homeBtn.click();
+    r.eq(scrolls.join(','), 'PersonnagesTable 1-1',
+      'help-home : clic => scroll vers le sommaire (help-toc) en haut');
+    r.ok(!!doc.querySelector('.help-overlay'),
+      'help-home : le lecteur reste ouvert (pas une fermeture)');
+  }
+
+  /* --- 9. Parchemin infini + ancres milieu de page (async) ------------ */
+  /* (le stub scrollIntoView et la capture `scrolls` sont poses en 8b). */
   await tick(5);
   const p5 = overlay.querySelector('[data-loaded-page="5"]');
   r.ok(!!p5 && !!p5.querySelector('h3'), 'viewer : page 5 inseree au demarrage');

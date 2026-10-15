@@ -3847,6 +3847,26 @@ html:not(.has-spell-reader) .spell-lookup,
   background: rgba(255, 255, 255, 0.15);
 }
 
+/* Bouton « Sommaire » (Référence plein écran) : même gabarit rond que
+   la croix, juste à sa gauche — remonte au sommaire cliquable du début. */
+.help-home {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  margin-right: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.help-home:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
 .help-body {
   flex: 1;
   overflow-y: auto;

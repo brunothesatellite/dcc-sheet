@@ -309,6 +309,30 @@
       tocEl.appendChild(b);
     });
 
+    /* Bouton « Sommaire » à GAUCHE de la croix (qui ferme) : remonte au
+       sommaire cliquable du début. La croix garde son rôle de fermeture. */
+    var closeBtn = viewer.querySelector('.help-close');
+    if (closeBtn && closeBtn.parentNode) {
+      var homeBtn = document.createElement('button');
+      homeBtn.type = 'button';
+      homeBtn.className = 'help-home';
+      homeBtn.textContent = '\u2630'; // ☰ sommaire
+      homeBtn.title = 'Revenir au sommaire';
+      homeBtn.setAttribute('aria-label', 'Revenir au sommaire');
+      closeBtn.parentNode.insertBefore(homeBtn, closeBtn);
+      homeBtn.addEventListener('click', function () {
+        /* Le recalage du scroll infini doit viser le sommaire, pas la
+           dernière page cliquée. */
+        anchorEl = null;
+        anchorScroll = null;
+        if (tocEl && typeof tocEl.scrollIntoView === 'function') {
+          tocEl.scrollIntoView({ block: 'start' });
+        } else if (body) {
+          body.scrollTop = 0; // repli géométrique
+        }
+      });
+    }
+
     /* Insertion ordonnée par numéro de page + compensation du scroll
        quand la page est ajoutée au-dessus (miroir spell-reader.js). */
     function insert(n, html) {

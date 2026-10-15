@@ -20,9 +20,6 @@
 
 
 **EVOLUTIONS**
-* ~~regrouper dans le menu utilisateur les icones : bascule mode sombre-clair, résumé global~~ — **fait le 14/10** (`evol-dice-tray`) : entrées « Référence » + icône ☾/☀ dynamique (mode à atteindre) au-dessus de « Changer de thème » ; en mobile ≤ 600 px, elles remplacent les boutons topbar masqués
-* ~~Ajoute un dice tray inspiré de dice-box-dcc, avec un bouton pour l'ouvrir à côté de l'icone carte~~ — **fait le 14/10** (`evol-dice-tray`) : bouton 🎲 `#btn-des` avant l'icône carte, overlay plein écran (`dice-tray.js` + `dice/`, moteur three.js embarqué, WebGL requis, zéro persistance sauf `dicebox.sound`) ; suite `23-dice-tray` (80 contrôles)
-
 * évolution pour afficher du contenu optionnel :
 - ~~si le dossier dcc-spells-reader\contentref est disponible à côté de l'application déployée (webapp, windows) ou inclus dans dcc-content.apk, alors :~~ — **codé le 15/10** (`evol-reference`, **non committé** en attente de validation) :
 * ~~ajouter une nouvelle entrée "Référence" dans le menu utilisateur et un bouton "Référence complète" avec icone dédiée uniquement en mode PC (non mobile) à gauche du bouton "Référence des classes".~~ Fait : entrée « Référence » (icône livre + lignes) au-dessus de « Classes », bouton `#btn-ref-full` (icône A validée) avant `#btn-aide`, masqué ≤ 600 px
@@ -31,3 +28,4 @@
 - **Compatibilité ajoutée** : `contentref` absent (ancien contenu avec seulement `content/`) → bouton + entrée invisibles, **aucune erreur console ni toast**, les sorts continuent seuls (détection indépendante, classe `html.has-ref-reader`)
 - Tests : suite `24-ref-reader` (55 contrôles) ; **3354/3354, 1 skip**
 - **Correctifs post-essai terrain (15/10)** : page 4 (sommaire imprimé du livre) **plus jamais affichée** — redondante avec le sommaire cliquable (plage 5…61) ; clic sur une entrée du sommaire **déjà chargée** : défilement vers le noeud existant (avant : rien ne se passait, aléatoire selon le préchargement) ; libellés du sommaire en **numéro de page scan** (celui de l'en-tête « Page N ») au lieu du numéro imprimé du livre (décalage d'unité par endroits → fausse impression de « mauvaise page ») ; garde anti-course : deux clics rapprochés → seul le dernier fait défiler
+- Bruno : bug des anchors encore présent parfois et random behavior sur ouverture de la référence, ça affiche une page au hasard.

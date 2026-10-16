@@ -26,6 +26,8 @@
   var tocPromise = null;     // promesse de chargement du sommaire (mémoïsée)
   var tocWaiters = [];       // fn() à appeler dès que toc est connu
   var pagePromises = {};     // n -> Promise<html|null> (1 seul <script> par page)
+  var resumePage = null;     // page visible à la fermeture (réouverture au même endroit)
+  var resumeOffset = 0;      // décalage dans resumePage (px depuis le haut de page)
 
   /* Chargement de script silencieux (la réussite = contenu présent).
      Aucun console.error, aucun toast : l'échec est un cas normal
@@ -273,7 +275,13 @@
   function openReference(page) {
     if (!isAvailable()) return;
     if (!window.DCCClassHelp || typeof window.DCCClassHelp.openViewer !== 'function') return;
-    var start = (page >= REF_FIRST && page <= REF_LAST) ? page : REF_FIRST;
+    /* Sans page explicite, on reprend où l'utilisateur avait fermé (pas de
+       remise à zéro). Un appel explicite (sommaire, test) garde la priorité
+       et repart du haut de la page demandée. */
+    var explicit = (page >= REF_FIRST && page <= REF_LAST);
+    var start = explicit ? page
+      : (resumePage !== null && inRange(resumePage) ? resumePage : REF_FIRST);
+    var restoreOffset = explicit ? 0 : resumeOffset;
     // Corps monté après ouverture (le chrome aide-classes fournit toc + contenu).
     var viewer = null; // overlay retourné par openViewer
     var body = null, pages = null, status = null;
@@ -286,6 +294,7 @@
 
     function onClose() {
       closed = true;
+      try { savePosition(); } catch (_) { /* la sauvegarde ne casse jamais la fermeture */ }
       if (resizeObs && typeof resizeObs.disconnect === 'function') resizeObs.disconnect();
       if (onFontsDone && document.fonts && typeof document.fonts.removeEventListener === 'function') {
         document.fonts.removeEventListener('loadingdone', onFontsDone);
@@ -512,6 +521,54 @@
        que swap de polices et raccords de tableaux auraient périmé. */
     var anchorEl = null;
 
+    /* Mémorisation à la fermeture : première page visible + décalage dans
+       cette page. Repli : page de l'ancre cliquée, sinon page de départ. */
+    function savePosition() {
+      if (!body || !pages || !pages.children || !pages.children.length) return;
+      if (!body.getBoundingClientRect) return;
+      var bodyRect = body.getBoundingClientRect();
+      var i, child, r, pn;
+      for (i = 0; i < pages.children.length; i++) {
+        child = pages.children[i];
+        if (!child.getBoundingClientRect) continue;
+        r = child.getBoundingClientRect();
+        if (r.bottom > bodyRect.top + 1) {
+          pn = parseInt(child.getAttribute('data-loaded-page') || '0', 10);
+          if (inRange(pn)) {
+            resumePage = pn;
+            resumeOffset = bodyRect.top - r.top;
+            if (!(resumeOffset > 0)) resumeOffset = 0;
+          }
+          return;
+        }
+      }
+      if (anchorEl && body.contains(anchorEl)) {
+        var holder = null;
+        if (anchorEl.getAttribute && anchorEl.getAttribute('data-loaded-page')) {
+          holder = anchorEl;
+        } else if (anchorEl.closest) {
+          holder = anchorEl.closest('[data-loaded-page]');
+        }
+        if (holder) {
+          pn = parseInt(holder.getAttribute('data-loaded-page') || '0', 10);
+          if (inRange(pn)) { resumePage = pn; resumeOffset = 0; return; }
+        }
+      }
+      resumePage = start;
+      resumeOffset = 0;
+    }
+
+    /* Restauration à la réouverture : cale la page mémorisée à son décalage
+       (0 = haut de page en haut du port). Les préchargements au-dessus
+       compensent ensuite via insert(), la vue reste stable. */
+    function restorePosition(node) {
+      if (!node || !body.getBoundingClientRect || !node.getBoundingClientRect) return;
+      body.scrollTop +=
+        node.getBoundingClientRect().top - body.getBoundingClientRect().top + restoreOffset;
+      anchorEl = node;
+      anchorScroll = body.scrollTop;
+    }
+
     /* Défilement vers une cible (miroir du scrollToAnchor des sorts) :
        géométrie d'abord — déterministe, mesurable, aucun effet de bord sur
        les conteneurs ancêtres ni dépendance à scrollIntoView ; celui-ci
@@ -580,6 +637,10 @@
       insert(start, html);
       first = last = start;
       started = true;
+      if (!explicit && resumePage !== null && inRange(resumePage)) {
+        var startNode = pages.querySelector('[data-loaded-page="' + start + '"]');
+        restorePosition(startNode);
+      }
       preloadAround(start);
       maybeLoadMore();
     });
@@ -629,6 +690,8 @@
       tocPromise = null;
       available = false;
       readyPromise = null;
+      resumePage = null;
+      resumeOffset = 0;
       if (document.documentElement && document.documentElement.classList) {
         document.documentElement.classList.remove('has-ref-reader');
       }

@@ -83,10 +83,12 @@
     var prevOverflow = document.body.style.overflow;
 
     function close() {
+      /* onClose d'abord : le lecteur (référence complète) y mémorise la
+         position — géométrie encore attachée au DOM, sinon rects à zéro. */
+      if (typeof onClose === 'function') onClose();
       document.body.style.overflow = prevOverflow;
       document.removeEventListener('keydown', onKey);
       if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-      if (typeof onClose === 'function') onClose();
     }
 
     function onKey(e) {

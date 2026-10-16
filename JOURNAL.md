@@ -7,6 +7,7 @@
 - **Tests (etape 2.5, PHP active)** : `PHP_BIN=D:\VS_Code_Workspaces\php\php.exe` → **3429/3429 OK** (1 skip : WebGL indisponible en jsdom, 45 s), dont `24-ref-reader` 107, `26-anchors-audit` 8 (contenu `contentref` corrige p20-21/p57-58, `dcc-spells-reader` V1.9).
 - **Build differentiel (etape 4)** : `deploy/dcc-sheet-diff/` depuis v3.5 — **5 modifies / 0 ajoute / 0 supprime** (`aide-classes.js`, `ref-reader.js`, README, MANUAL, JOURNAL).
 - **Artefacts v3.6 (etape 6)** : setup **93 542 884 o** + portable **104 068 121 o** (`build.ps1 -Version 3.6`, verifications bloquantes internes OK), webapp **26 512 779 o** (198 fichiers, assertion 0 token), APK DCC Sheet **25 953 840 o** (`assembleRelease` + `apksigner`, rebuild post-push, keystore inchange) ; APK conteneur **1.4** (**27 396 848 o**, contenu `dcc-spells-reader` V1.9/`8389a83` avec en-tetes restaures, **jamais joint** a la release). Scan anti-tokens des 2 zips + APK : **0 token interdit**.
+- **Tag + release GitHub (etape 7)** : tag annote **`v3.6`** pose sur `8f78e22` (release `357323b` + JOURNAL) et pousse ; release creee avec **4 assets** aux tailles identiques aux fichiers locaux (APK 25 953 840 / portable 104 068 121 / setup 93 542 884 / webapp 26 512 779 octets) ; notes relues via API : **accents propres** (0 U+FFFD, 0 U+251C, ecriture via fichier) — https://github.com/brunothesatellite/dcc-sheet/releases/tag/v3.6
 
 ## Date : 19 septembre 2026
 

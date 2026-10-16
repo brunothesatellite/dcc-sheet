@@ -28,6 +28,7 @@
   var pagePromises = {};     // n -> Promise<html|null> (1 seul <script> par page)
   var resumePage = null;     // page visible à la fermeture (réouverture au même endroit)
   var resumeOffset = 0;      // décalage dans resumePage (px depuis le haut de page)
+  var resumeAtTop = false;   // vrai si le sommaire était visible (page pas encore atteinte)
 
   /* Chargement de script silencieux (la réussite = contenu présent).
      Aucun console.error, aucun toast : l'échec est un cas normal
@@ -381,6 +382,7 @@
            dernière page cliquée. */
         anchorEl = null;
         anchorScroll = null;
+        anchorOffset = 0;
         if (!scrollToTarget(tocEl) && body) {
           body.scrollTop = 0; // repli ultime
         }
@@ -520,9 +522,17 @@
        re-scrolle vers LUI (miroir des sorts), jamais vers un nombre mémorisé
        que swap de polices et raccords de tableaux auraient périmé. */
     var anchorEl = null;
+    /* Décalage de l'ancre sous le haut du port : 0 après un clic sommaire
+       (intertitre calé en haut), = décalage mémorisé après une restauration
+       (scroll manuel) — sans lui, reAnchor() écrasait le décalage restauré
+       en recalant le haut de page, d'où retour « sur l'ancre » au lieu de
+       l'endroit où le scroll s'était arrêté. */
+    var anchorOffset = 0;
 
     /* Mémorisation à la fermeture : première page visible + décalage dans
-       cette page. Repli : page de l'ancre cliquée, sinon page de départ. */
+       cette page. Page pas encore atteinte (sommaire visible) : on rouvrira
+       en haut (resumeAtTop) au lieu de sauter en haut de page. Repli : page
+       de l'ancre cliquée, sinon page de départ. */
     function savePosition() {
       if (!body || !pages || !pages.children || !pages.children.length) return;
       if (!body.getBoundingClientRect) return;
@@ -536,8 +546,13 @@
           pn = parseInt(child.getAttribute('data-loaded-page') || '0', 10);
           if (inRange(pn)) {
             resumePage = pn;
-            resumeOffset = bodyRect.top - r.top;
-            if (!(resumeOffset > 0)) resumeOffset = 0;
+            if (r.top > bodyRect.top) {
+              resumeAtTop = true;
+              resumeOffset = 0;
+            } else {
+              resumeAtTop = false;
+              resumeOffset = bodyRect.top - r.top;
+            }
           }
           return;
         }
@@ -551,22 +566,27 @@
         }
         if (holder) {
           pn = parseInt(holder.getAttribute('data-loaded-page') || '0', 10);
-          if (inRange(pn)) { resumePage = pn; resumeOffset = 0; return; }
+          if (inRange(pn)) {
+            resumePage = pn; resumeOffset = 0; resumeAtTop = false; return;
+          }
         }
       }
       resumePage = start;
       resumeOffset = 0;
+      resumeAtTop = false;
     }
 
     /* Restauration à la réouverture : cale la page mémorisée à son décalage
        (0 = haut de page en haut du port). Les préchargements au-dessus
-       compensent ensuite via insert(), la vue reste stable. */
+       compensent ensuite via insert(), et reAnchor() garde le décalage
+       (anchorOffset) au lieu de recaler le haut de page. */
     function restorePosition(node) {
       if (!node || !body.getBoundingClientRect || !node.getBoundingClientRect) return;
       body.scrollTop +=
         node.getBoundingClientRect().top - body.getBoundingClientRect().top + restoreOffset;
       anchorEl = node;
       anchorScroll = body.scrollTop;
+      anchorOffset = restoreOffset;
     }
 
     /* Défilement vers une cible (miroir du scrollToAnchor des sorts) :
@@ -610,6 +630,7 @@
         scrollToTarget(target || node);
         anchorEl = target || node;
         anchorScroll = body.scrollTop;
+        anchorOffset = 0; // clic : l'intertitre est calé en haut, sans décalage
         preloadAround(p);
         maybeLoadMore();
       });
@@ -617,11 +638,16 @@
     }
 
     /* Recalage après insertion au-dessus ou swap de polices,
-       uniquement si l'utilisateur n'a pas défilé entre temps. */
+       uniquement si l'utilisateur n'a pas défilé entre temps.
+       Garde le décalage de l'ancre (scroll manuel restauré) au lieu de
+       recaler le haut de page. */
     function reAnchor() {
       if (closed || !started || anchorScroll === null) return;
       if (Math.abs(body.scrollTop - anchorScroll) > 2) return;
-      if (anchorEl && body.contains(anchorEl)) scrollToTarget(anchorEl);
+      if (anchorEl && body.contains(anchorEl)) {
+        scrollToTarget(anchorEl);
+        if (anchorOffset) body.scrollTop += anchorOffset;
+      }
       anchorScroll = body.scrollTop;
     }
 
@@ -637,7 +663,7 @@
       insert(start, html);
       first = last = start;
       started = true;
-      if (!explicit && resumePage !== null && inRange(resumePage)) {
+      if (!explicit && !resumeAtTop && resumePage !== null && inRange(resumePage)) {
         var startNode = pages.querySelector('[data-loaded-page="' + start + '"]');
         restorePosition(startNode);
       }
@@ -692,6 +718,7 @@
       readyPromise = null;
       resumePage = null;
       resumeOffset = 0;
+      resumeAtTop = false;
       if (document.documentElement && document.documentElement.classList) {
         document.documentElement.classList.remove('has-ref-reader');
       }

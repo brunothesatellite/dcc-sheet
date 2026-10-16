@@ -5,6 +5,8 @@
 - **Docs release** : README — section « Reference complete » : **reprise a la fermeture** documentee (reouverture page + decalage exacts, clic sommaire = haut de page) ; MANUAL § 9c — meme comportement cote utilisateur ; pas de TODO ouvert sur ce perimetre.
 - **Contenu fonctionnel depuis v3.5** (2 commits) : `6bd0baa` reouverture de la Reference a la position de fermeture + `de7bdc4` conservation du decalage du scroll manuel (plus `onClose` avant le demontage du DOM dans `aide-classes.js`).
 - **Tests (etape 2.5, PHP active)** : `PHP_BIN=D:\VS_Code_Workspaces\php\php.exe` → **3429/3429 OK** (1 skip : WebGL indisponible en jsdom, 45 s), dont `24-ref-reader` 107, `26-anchors-audit` 8 (contenu `contentref` corrige p20-21/p57-58, `dcc-spells-reader` V1.9).
+- **Build differentiel (etape 4)** : `deploy/dcc-sheet-diff/` depuis v3.5 — **5 modifies / 0 ajoute / 0 supprime** (`aide-classes.js`, `ref-reader.js`, README, MANUAL, JOURNAL).
+- **Artefacts v3.6 (etape 6)** : setup **93 541 135 o** + portable **104 068 118 o** (`build.ps1 -Version 3.6`, verifications bloquantes internes OK), webapp **26 512 779 o** (198 fichiers, assertion 0 token), APK DCC Sheet **25 953 840 o** (`assembleRelease` + `apksigner`, rebuild post-push `357323b`, keystore inchange) ; APK conteneur **1.4** (**27 396 848 o**, contenu `dcc-spells-reader` V1.9/`8389a83` avec en-tetes restaures, **jamais joint** a la release). Scan anti-tokens des 2 zips + APK : **0 token interdit**.
 
 ## Date : 19 septembre 2026
 

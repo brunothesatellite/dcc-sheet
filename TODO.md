@@ -23,3 +23,4 @@
 * dans l'onglet équipe,. lorsqu'un ennemis tombe à 0, lui afficher le crâne rouge de mort en overlay 
 * dans l'onglet équipe ajouter les bonus pour chaque stat en petit +/-x sous la valeur de caractéristiques 
 * dans la table de dés, un appui long lance le dé, affiche sa valeur et le fait disparaitre ?
+* dans équipe afficher les PV max ? ou une barre sous les PV qui indique où on en est avec changement de couleur vert - orange rouge - noir (75-50-25%)

@@ -2361,8 +2361,8 @@ button.section-bar.collapse-toggle[aria-expanded="true"] .chev {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 6px 4px 4px;
+  gap: 3px;
+  padding: 5px 4px 4px;
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
@@ -2374,7 +2374,7 @@ button.section-bar.collapse-toggle[aria-expanded="true"] .chev {
 body.marching-active .marching-slot.occupied { cursor: grabbing; }
 
 .marching-portrait {
-  width: 58%;
+  width: 74%;
   aspect-ratio: 1;
   border-radius: 50%;
   object-fit: cover;
@@ -2390,13 +2390,13 @@ body.marching-active .marching-slot.occupied { cursor: grabbing; }
   color: #fff;
   font-family: var(--font-heading);
   font-weight: 700;
-  font-size: clamp(14px, 4.5vw, 20px);
+  font-size: clamp(18px, 5.5vw, 26px);
 }
 /* Le holder reprend la taille du portrait (le portrait n'est plus un item flex
    direct de la case) : l'overlay "tete de mort" s'y aligne donc exactement. */
 .marching-slot .portrait-holder,
 .marching-ghost .portrait-holder {
-  width: 58%;
+  width: 74%;
   aspect-ratio: 1;
 }
 .marching-slot .portrait-holder .marching-portrait,
@@ -2449,8 +2449,8 @@ body.marching-active .marching-slot.occupied { cursor: grabbing; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 6px 4px 4px;
+  gap: 3px;
+  padding: 5px 4px 4px;
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--radius);

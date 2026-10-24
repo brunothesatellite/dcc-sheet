@@ -4,10 +4,33 @@
 // au conteneur #dice-module, ids préfixés dice- (C3).
 // R7 : aucune persistance — hors préférence muet du SoundBank
 // (localStorage['dicebox.sound'], seule écriture autorisée), rien n'est écrit.
-import { DICE } from './config.js';
+import { DICE, LONGPRESS_MS, TAP_SLOP, valuesFor, formatValue } from './config.js';
 import { Tray } from './tray.js';
 import { renderThumbs } from './thumbs.js';
 import { SoundBank } from './sound.js';
+
+/* Évol. 3 — appui long sur un dé de la barre : lance le dé, affiche sa
+   valeur au-dessus puis la fait disparaître (pastille jetable, aucune
+   écriture, aucun ajout au tapis : le tapis garde le geste court = clic). */
+function rollPreview(def, btn, sound) {
+  const values = valuesFor(def);
+  const raw = values[Math.floor(Math.random() * values.length)];
+  const text = formatValue(def, raw);
+
+  const previous = btn.querySelector('.dice-roll-badge');
+  if (previous) previous.remove();
+
+  const badge = document.createElement('span');
+  badge.className = 'dice-roll-badge';
+  badge.textContent = text;
+  badge.setAttribute('role', 'status');
+  badge.setAttribute('aria-label', def.label + ' : ' + text);
+  btn.appendChild(badge);
+  if (sound) sound.throwClack();
+
+  setTimeout(() => badge.classList.add('out'), 1400);
+  setTimeout(() => { if (badge.parentNode) badge.remove(); }, 1800);
+}
 
 export function initDiceTray(root, opts) {
   opts = opts || {};
@@ -50,12 +73,59 @@ export function initDiceTray(root, opts) {
     const b = document.createElement('button');
     b.className = 'pick';
     b.type = 'button';
-    b.setAttribute('aria-label', `Ajouter un ${def.label}`);
+    b.setAttribute('aria-label', `Ajouter un ${def.label} · appui long : le lancer`);
+    b.title = `${def.label} — appuyer : ajouter au tapis · appui long : lancer`;
     const img = document.createElement('img');
     img.alt = '';
     img.style.background = def.color;
     b.append(img, Object.assign(document.createElement('span'), { textContent: def.label }));
-    b.addEventListener('click', () => tray.addDie(def));
+
+    /* --- Évol. 3 : appui long 500 ms = lancer le dé (valeur affichée puis
+       effacée) ; geste court = comportement actuel (ajouter au tapis).
+       Pointer Events : souris + tactile, donc utilisable en portrait. --- */
+    let pressTimer = null;
+    let startX = 0;
+    let startY = 0;
+    let suppressClickUntil = 0;
+
+    const stopPress = () => {
+      if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+      b.classList.remove('charging');
+    };
+    const startPress = (x, y) => {
+      startX = x;
+      startY = y;
+      b.classList.add('charging');
+      pressTimer = setTimeout(() => {
+        pressTimer = null;
+        b.classList.remove('charging');
+        b.classList.add('rolling');
+        setTimeout(() => b.classList.remove('rolling'), 260);
+        suppressClickUntil = Date.now() + 500; /* le clic qui suit l'appui long */
+        rollPreview(def, b, sound);
+      }, LONGPRESS_MS);
+    };
+
+    b.addEventListener('pointerdown', (e) => {
+      if (e.button && e.button !== 0) return;
+      try { b.setPointerCapture(e.pointerId); } catch (_) { /* capture facultative */ }
+      startPress(e.clientX, e.clientY);
+    });
+    b.addEventListener('pointermove', (e) => {
+      /* le doigt glisse → annulation : le défilement reste possible */
+      if (!pressTimer) return;
+      if (Math.abs(e.clientX - startX) > TAP_SLOP + 2 ||
+          Math.abs(e.clientY - startY) > TAP_SLOP + 2) stopPress();
+    });
+    b.addEventListener('pointerup', stopPress);
+    b.addEventListener('pointercancel', stopPress);
+    /* La pression longue (Android / macOS) ne doit pas voler le geste */
+    b.addEventListener('contextmenu', (e) => { e.preventDefault(); });
+
+    b.addEventListener('click', () => {
+      if (Date.now() < suppressClickUntil) return;
+      tray.addDie(def);
+    });
     picker.appendChild(b);
   });
   // Vignettes : miniatures 3D réellement rendues (WebGL) ; les aplats

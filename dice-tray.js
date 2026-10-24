@@ -63,8 +63,9 @@
         '<h2>Gestes</h2>' +
         '<ul>' +
           '<li>Toucher un dé <b>en haut</b> : l’ajouter au tapis</li>' +
+          '<li><b>Appui long</b> sur un dé <b>en haut</b> : le lancer (la valeur s’affiche puis disparaît)</li>' +
           '<li>Toucher un dé <b>sur le tapis</b> : le lancer</li>' +
-          '<li><b>Appui long</b> sur un dé : le retirer</li>' +
+          '<li><b>Appui long</b> sur un dé <b>sur le tapis</b> : le retirer</li>' +
           '<li><b>Glisser-déposer</b> : déplacer · <b>lâcher avec élan</b> : lancer manuel</li>' +
           '<li><b>D%</b> : dizaines (00–90) · avec un D10 : 00 + 0 = 100</li>' +
           '<li>🎲 <b>Lancer</b> : lance tous les dés (+ total, clic dessus = masquer)</li>' +

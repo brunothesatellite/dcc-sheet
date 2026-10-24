@@ -5313,3 +5313,104 @@ html[data-pair="g-guerre"][data-theme="light"] .tab:hover {
 #map-module .maprow__main[aria-current="true"] .mname{font-weight:700;}
 #map-module .file{display:flex;align-items:center;gap:10px;padding:8px 8px 0;font:.86rem var(--font);}
 #map-module .file input[type="file"]{font-size:.78rem;max-width:100%;}
+
+/* =========================================================================
+   Évolutions onglet Équipe (TODO 2026-10) :
+   · Évol. 1 — crâne rouge sur une ligne d'ennemie à 0 PV (même design que
+     les PJ : .portrait-holder + .dead-overlay posés par dead-overlay.js) ;
+   · Évol. 2 — modificateur DCC « +1 / 0 / -2 » sous chaque caractéristique ;
+   · Évol. 4 — barre de PV sous le champ PV (valeur courante = le champ,
+     PV max seul affiché à droite de la barre).
+   Portée : onglet Équipe uniquement ; media query mobile conservée.
+   ========================================================================= */
+
+/* --- Évol. 2 : bonus sous la valeur (Table Statistiques) --- */
+.team-table-stats .stat-bonus {
+  display: block;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  margin-top: 2px;
+  letter-spacing: .2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.team-table-stats .stat-bonus.mod-pos { color: var(--green); }
+.team-table-stats .stat-bonus.mod-neg { color: var(--red); }
+.team-table-stats .stat-bonus.mod-zero { color: var(--muted); font-weight: 600; }
+.team-table-stats .stat-group .stat-bonus { font-size: 9px; }
+
+/* --- Évol. 4 : [champ PV] puis [barre flexible] [PV max] --- */
+.mk-pv-cell { position: relative; }
+
+.mk-pv-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.mk-pv-max {
+  flex: none;
+  font-size: 9px;
+  line-height: 1;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.mk-pv-bar {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 7px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--ink) 14%, transparent);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .25);
+}
+
+.mk-pv-bar > i {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 4px;
+  transition: width .35s ease;
+}
+
+.mk-pv-bar.lvl-high > i { background: linear-gradient(180deg, #58d68d, #22a45d); } /* >= 75 % */
+.mk-pv-bar.lvl-mid  > i { background: linear-gradient(180deg, #f5b041, #dc7633); } /* >= 50 % */
+.mk-pv-bar.lvl-low  > i { background: linear-gradient(180deg, #ec7063, #c0392b); } /* >= 25 % */
+.mk-pv-bar.lvl-crit > i { background: linear-gradient(180deg, #5d6d7e, #1b2631); } /* <  25 % */
+
+.mk-pv-cell[data-empty="1"] .mk-pv-row { opacity: .35; }
+
+/* --- Évol. 1 : carré d'ancrage du crâne sur la cellule « Ennemi » ---
+   Même géométrie que le portrait PJ (50 px, 40 px en mobile). Le holder
+   reprend la classe .portrait-holder (position: relative du bloc plus
+   haut) ; position:absolute ici le centre sur la cellule. Le calque ne
+   reçoit aucun clic : la saisie du nom reste utilisable dessous. */
+.mk-dead-cell { position: relative; }
+
+.enemy-dead-holder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  display: block;
+  line-height: 0;
+  pointer-events: none;
+  z-index: 4;
+}
+
+.enemy-dead-anchor { display: block; width: 100%; height: 100%; }
+
+/* --- Évolutions en mobile portrait --- */
+@media (max-width: 600px) {
+  .team-table-stats .stat-bonus { font-size: 9px; }
+  .mk-pv-max { font-size: 8px; }
+  .mk-pv-bar { height: 5px; }
+  .enemy-dead-holder { width: 40px; height: 40px; }
+}

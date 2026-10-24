@@ -233,6 +233,88 @@ window.DCCModules.equipe = {
       });
     }
 
+    /* ------------------------------------------------------------------
+       Évolutions de l'onglet Équipe :
+       · bonus DCC sous chaque caractéristique (Table Statistiques) ;
+       · barre de PV sous le champ PV — le champ éditable porte la valeur
+         courante, seul le PV max est affiché, à droite de la barre.
+    ------------------------------------------------------------------ */
+
+    /* Table de modifs DCC : 3 → -3 | 4-5 → -2 | 6-8 → -1 | 9-12 → 0 |
+       13-15 → +1 | 16-17 → +2 | 18 → +3 (zéro sans signe). */
+    function dccModifier(score) {
+      const n = Number(score);
+      if (!isFinite(n)) return null;
+      if (n >= 18) return 3;
+      if (n >= 16) return 2;
+      if (n >= 13) return 1;
+      if (n >= 9) return 0;
+      if (n >= 6) return -1;
+      if (n >= 4) return -2;
+      return -3;
+    }
+
+    /* <b class="stat-bonus"> sous la valeur, ou null si pas de score */
+    function bonusEl(raw) {
+      const n = parseStatNum(raw);
+      if (n === null) return null;
+      const m = dccModifier(n);
+      if (m === null) return null;
+      const b = document.createElement('b');
+      b.className = 'stat-bonus ' + (m === 0 ? 'mod-zero' : (m > 0 ? 'mod-pos' : 'mod-neg'));
+      b.textContent = m === 0 ? '0' : (m > 0 ? '+' + m : String(m));
+      b.title = 'Modificateur DCC pour un score de ' + n;
+      return b;
+    }
+
+    /* Niveau de la barre : >= 75 % vert, >= 50 % orange, >= 25 % rouge,
+       < 25 % noir ; max inconnu ou nul → pas de barre exploitable. */
+    function pvInfo(cur, max) {
+      if (!isFinite(cur) || cur < 0) cur = 0;
+      if (!isFinite(max) || max <= 0) return null;
+      const pct = Math.min(100, Math.round((cur / max) * 100));
+      const lvl = pct >= 75 ? 'lvl-high' : pct >= 50 ? 'lvl-mid' : pct >= 25 ? 'lvl-low' : 'lvl-crit';
+      const nom = lvl === 'lvl-high' ? 'vert' : lvl === 'lvl-mid' ? 'orange' : lvl === 'lvl-low' ? 'rouge' : 'noir';
+      return { pct: pct, lvl: lvl, nom: nom };
+    }
+
+    /* Construit [barre] [PV max] sous le champ PV et renvoie la fonction
+       de mise à jour ; maxOf(cur) rend le PV max connu (0 = inconnu). */
+    function attachPvMeter(td, maxOf) {
+      const row = document.createElement('div');
+      row.className = 'mk-pv-row';
+      const bar = document.createElement('div');
+      bar.className = 'mk-pv-bar';
+      bar.setAttribute('role', 'img');
+      const fill = document.createElement('i');
+      const maxEl = document.createElement('span');
+      maxEl.className = 'mk-pv-max';
+      bar.appendChild(fill);
+      row.appendChild(bar);
+      row.appendChild(maxEl);
+      td.appendChild(row);
+
+      function update(rawCur) {
+        let cur = Number(String(rawCur == null ? '' : rawCur).trim());
+        if (!isFinite(cur)) cur = 0;
+        const max = maxOf(cur);
+        const info = pvInfo(cur, max);
+        maxEl.textContent = max > 0 ? String(max) : '–';
+        maxEl.title = max > 0 ? 'PV max : ' + max : 'PV max inconnu';
+        bar.classList.remove('lvl-high', 'lvl-mid', 'lvl-low', 'lvl-crit');
+        td.dataset.empty = max > 0 ? '0' : '1';
+        if (!info) {
+          fill.style.width = '0%';
+          bar.setAttribute('aria-label', 'PV max inconnu');
+          return;
+        }
+        bar.classList.add(info.lvl);
+        fill.style.width = Math.max(info.pct, cur > 0 ? 4 : 2) + '%';
+        bar.setAttribute('aria-label', cur + ' PV sur ' + max + ' (' + info.pct + ' %, ' + info.nom + ')');
+      }
+      return update;
+    }
+
     function buildDetailRow(charData, data) {
       const trD = document.createElement('tr');
       trD.className = 'team-detail';
@@ -479,6 +561,10 @@ window.DCCModules.equipe = {
             val.textContent = statDisplay(data[col.key]);
             td.appendChild(val);
 
+            /* Évol. 2 : modificateur DCC en petit sous la valeur */
+            const bonusGroup = bonusEl(data[col.key]);
+            if (bonusGroup) td.appendChild(bonusGroup);
+
             if (col.chevron) {
               td.classList.add('stat-chevron-cell');
               const chevron = document.createElement('span');
@@ -499,6 +585,9 @@ window.DCCModules.equipe = {
             });
           } else {
             td.textContent = statDisplay(data[col.key]);
+            /* Évol. 2 : modificateur DCC en petit sous la valeur */
+            const bonus = bonusEl(data[col.key]);
+            if (bonus) td.appendChild(bonus);
           }
           tr.appendChild(td);
         });
@@ -524,6 +613,7 @@ window.DCCModules.equipe = {
     /* rowState = ligne sauvegardée ({nom, ac, att, pv, init, tour}) ou null */
     function createEnemyRow(rowState) {
       const tr = document.createElement('tr');
+      const inputs = {};
 
       const fields = [
         { key: 'nom', tag: 'input', type: 'text', placeholder: 'Nom', label: 'Nom de l\'ennemi' },
@@ -545,9 +635,50 @@ window.DCCModules.equipe = {
         }
         input.addEventListener('input', scheduleTeamStateSave);
         input.addEventListener('change', scheduleTeamStateSave);
+        inputs[f.key] = input;
         td.appendChild(input);
+        if (f.key === 'pv') td.classList.add('mk-pv-cell');
         tr.appendChild(td);
       });
+
+      /* Évol. 4 : barre de PV sous la saisie. Un ennemi n'a pas de case
+         PV max : le plus grand PV saisi sur la ligne fait foi (mémorisé
+         tant que la ligne existe) ; max inconnu → barre en retrait, « – ». */
+      let enemyMax = 0;
+      const pvTd = inputs.pv.parentNode;
+      const updateEnemyPv = attachPvMeter(pvTd, function (cur) {
+        if (cur > enemyMax) enemyMax = cur;
+        return enemyMax;
+      });
+      updateEnemyPv(inputs.pv.value);
+
+      /* Évol. 1 : crâne rouge sur la ligne ennemie à 0 PV — MÊME design
+         que les PJ : ancre .portrait-holder carrée centrée sur la cellule
+         « Ennemi », overlay .dead-overlay posé par dead-overlay.js. Sans
+         ce fichier : aucun holder, aucun overlay (module optionnel). */
+      const D = deadOverlay();
+      let deadAnchor = null;
+      if (D) {
+        const tdNom = inputs.nom.parentNode;
+        tdNom.classList.add('mk-dead-cell');
+        const holder = document.createElement('span');
+        holder.className = 'portrait-holder enemy-dead-holder';
+        holder.setAttribute('aria-hidden', 'true');
+        deadAnchor = document.createElement('span');
+        deadAnchor.className = 'enemy-dead-anchor';
+        holder.appendChild(deadAnchor);
+        tdNom.appendChild(holder);
+      }
+
+      /* Une seule synchro à la saisie des PV : barre (évolution 4) +
+         crâne (évolution 1). */
+      const syncEnemyPv = function () {
+        updateEnemyPv(inputs.pv.value);
+        if (deadAnchor) D.apply(deadAnchor, D.isDead(inputs.pv.value));
+      };
+      inputs.pv.addEventListener('input', syncEnemyPv);
+      inputs.pv.addEventListener('change', syncEnemyPv);
+      syncEnemyPv();
 
       const tdCounter = document.createElement('td');
       const counter = createTurnCounter();
@@ -1023,6 +1154,7 @@ window.DCCModules.equipe = {
 
           // PV (editable, synced)
           const tdPV = document.createElement('td');
+          tdPV.className = 'mk-pv-cell';
           const inputPV = document.createElement('input');
           inputPV.type = 'number';
           inputPV.value = data.points_de_vie || '';
@@ -1030,6 +1162,7 @@ window.DCCModules.equipe = {
           const syncDeadFromInput = function () {
             setModelPV(charData.id, inputPV.value);
             refreshDeadOverlay(charData.id, inputPV.value);
+            updatePvMeter(inputPV.value);
           };
           inputPV.addEventListener('input', syncDeadFromInput);
           inputPV.addEventListener('change', function () {
@@ -1039,6 +1172,16 @@ window.DCCModules.equipe = {
             }
           });
           tdPV.appendChild(inputPV);
+
+          /* Évol. 4 : barre de PV + PV max (max_pv lu sur la fiche, relu
+             à chaque mise à jour pour suivre une saisie faite ailleurs). */
+          const updatePvMeter = attachPvMeter(tdPV, function () {
+            const d = parsedDataOf(charData);
+            const m = Number(String(d.max_pv == null ? '' : d.max_pv).trim());
+            return isFinite(m) && m > 0 ? Math.floor(m) : 0;
+          });
+          updatePvMeter(inputPV.value);
+
           tr.appendChild(tdPV);
 
           // Init. combat (sauvegardé en base, pré-rempli depuis team-state)

@@ -35,3 +35,8 @@ installeur/android-content/app/build/
 installeur/android-content/app/src/main/assets/
 installeur/android-content/local.properties
 Travok2.json
+
+# --- lanceur local : demarre PHP sur localhost:8183 et ouvre le navigateur ---
+# (C:\vscode\dcc-sheet\lancer-projet.bat ; jamais versionne)
+lancer-projet.bat
+

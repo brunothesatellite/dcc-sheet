@@ -528,11 +528,13 @@ Colonnes :
 | **Classe** | Portrait + nom de classe (+ chevron) | Clic = **déplier le détail combat** (§ 8.1b) |
 | **Init.** | Initiative lue dans la fiche | Non (éditez-la dans la fiche) |
 | **AC** | Classe d'armure lue dans la fiche | Non (éditez-la dans la fiche) |
-| **PV** | Points de vie | **Oui** : sauvegarde immédiate en base + **synchronisation vers la fiche** du PJ, même déjà ouverte (toast disquette) |
+| **PV** | Points de vie, avec sous le champ une **barre de PV** et le **PV max** à droite | **Oui** : sauvegarde immédiate en base + **synchronisation vers la fiche** du PJ, même déjà ouverte (toast disquette) |
 | **Init. combat** | Initiative d'ordre de combat | **Oui** : sauvegarde **automatique en base** (pause ~0,6 s, toast disquette), restaurée au prochain affichage et **incluse dans l'export JSON** |
 | **Tour** | Compteur de tour visuel (§ 8.2) | **Oui** (§ 8.2) : sauvegarde automatique en base comme l'Init. combat |
 
 > **PV à 0 ou moins** : un **crâne rouge** recouvre alors le portrait du personnage dans ce tableau **et** dans la grille d'ordre de marche (§ 8.1c), ainsi que dans sa propre fiche (§ 7.2). Dès que ses PV repassent au-dessus de 0, l'overlay disparaît partout.
+
+> **Barre de PV** : sous chaque champ PV (PJ **et** ennemis, § 8.3), une jauge donne le niveau de vie d'un coup d'œil — **vert ≥ 75 %**, **orange ≥ 50 %**, **rouge ≥ 25 %**, **noir < 25 %**. À droite, le **PV max** : pour un PJ il est lu dans le champ « PV max » de sa fiche ; pour un ennemi (qui n'a pas de PV max) c'est **le plus grand PV saisi depuis l'ouverture de l'onglet** — tant qu'aucun maximum n'est connu, la barre est en retrait et affiche **« – »**.
 
 > Seuls les PJ **en expédition** apparaissent. Pour en retirer un, passez-le à l'auberge depuis sa classe (§ 5) : à votre retour sur l'onglet Équipe, la page est **rechargée automatiquement** (votre état combat est alors relu en base, comme en F5).
 
@@ -556,7 +558,7 @@ Cliquez sur la **colonne Classe** (portrait + libellé, chevron ▼) d'un person
 
 ### 8.1c Ordre de marche (grille 3×3)
 
-Tout en haut de l'onglet, une section repliable **Ordre de marche** place vos PJ en expédition dans une **grille 3×3** (portrait + nom, **9 maximum** ; au-delà, le pied de section indique « X hors grille »). La **flèche ⬆** au-dessus de la grille donne la direction du groupe.
+Tout en haut de l'onglet, une section repliable **Ordre de marche** place vos PJ en expédition dans une **grille 3×3** (portrait + nom, **9 maximum** ; au-delà, le pied de section indique « X hors grille »). La **flèche ⬆** au-dessus de la grille donne la direction du groupe. Les **portraits occupent l'essentiel de la case** (~74 % de sa largeur), le nom restant affiché sur une seule ligne en dessous.
 
 <img src="captures/equipe-nomarching.png" alt="Onglet Équipe complet avec la section Ordre de marche repliée en haut" width="420">
 
@@ -599,11 +601,14 @@ Sous la section **Ennemis** : un tableau de **3 lignes vides par défaut**, colo
 
 > Les ennemis sont **sauvegardés en base** et **inclus dans l'export global JSON** : ils sont restaurés au prochain affichage de l'onglet. Seules les **lignes renseignées** sont conservées (les lignes entièrement vides sont ignorées) : après un rechargement, vous retrouvez vos ennemis déclarés, complétés s'il en manque pour retomber à 3 lignes. Les compteurs de tour fonctionnent comme pour les PJ (§ 8.2).
 
+> **Crâne rouge et barre de PV** : à **0 PV ou moins**, le **même crâne** que pour les PJ recouvre la cellule **Ennemi** de la ligne (et disparaît dès que les PV repassent au-dessus de 0). Sous le champ PV, une **barre de PV** suit le niveau de vie (§ 8.1) ; n'ayant pas de PV max, un ennemi prend pour référence **le plus grand PV saisi sur sa ligne** (« – » tant qu'il est inconnu).
+
 ### 8.3b Section Statistiques
 
 Entre **Ennemis** et **Notes** : un tableau des PJ **en expédition** avec les 6 caractéristiques (**FOR, AGI, END, PRE, CHA, INT**).
 
 - **Vert** = maximum de la colonne · **Rouge** = minimum (ex æquo compris) — couleur sur le **texte** uniquement (pas de fond).
+- Sous chaque caractéristique, le **modificateur DCC** du score est affiché en petit : **3 → -3**, **4-5 → -2**, **6-8 → -1**, **9-12 → 0** (sans signe), **13-15 → +1**, **16-17 → +2**, **18 → +3** — coloré **vert** (positif), **rouge** (négatif) ou **gris** (nul).
 - La colonne **Nom** est **cliquable** : clic = ouvre la fiche du PJ (onglet de sa classe), exactement comme dans le tableau des PJ en expédition (§ 8.1) ; un nom trop long est **tronqué « … »** avec infobulle.
 - Une valeur vide ou non numérique affiche **`-`** et n'entre pas dans le min/max.
 - Les colonnes **AGI / END / PRE** forment une zone groupée. Un **chevron ▼ centré sous END** : cliquez n'importe où sur ce groupe (ou Entrée/Espace au clavier) pour **déplier sous la ligne** les jets de sauvegarde du PJ :
@@ -778,8 +783,9 @@ Un **tapis de dés 3D** (moteur three.js **embarqué** — fonctionne hors-ligne
 | Geste | Effet |
 |---|---|
 | Toucher un dé **en haut** (barre) | L'ajouter au tapis |
+| **Appui long** (~0,5 s) sur un dé **en haut** | **Le lancer directement** : sa valeur s'affiche dans une pastille au-dessus du dé, puis s'efface |
 | Toucher un dé **sur le tapis** | Le lancer |
-| **Appui long** sur un dé | Le retirer |
+| **Appui long** sur un dé **sur le tapis** | Le retirer |
 | **Glisser-déposer** | Déplacer un dé |
 | **Lâcher avec élan** | Lancer manuel (direction et force du geste) |
 | **D%** | Dizaines (00–90) ; avec un D10 posé à côté, 00 + 0 = 100 |
@@ -905,7 +911,7 @@ Le couple choisi voyage avec **Exporter / Importer tout** (comme les notes d'éq
 | Toast **« Import reussi (N persos) »** | Import terminé | Vérifiez les onglets |
 | Spinner prolongé | Serveur lent | Patientez ; en cas de blocage, rechargez |
 | Placeholder **« Aucune image disponible »** (silhouette grise en pointillé) | Dossier de portraits absent du serveur (droits d'image) — fiche, cartes, Équipe, ordre de marche | Installer le dossier d'images concerné ; le choix de portrait est conservé et réapparaîtra |
-| **Crâne rouge** par-dessus un portrait | PV du personnage à **0 ou moins** (liste des cartes, fiche, Équipe, ordre de marche) | Soignez le PJ : l'overlay disparaît dès que ses PV repassent au-dessus de 0 |
+| **Crâne rouge** par-dessus un portrait | PV du personnage **ou d'un ennemi** à **0 ou moins** (liste des cartes, fiche, Équipe, ordre de marche, ligne Ennemi) | Soignez le PJ ou corrigez les PV : l'overlay disparaît dès que les PV repassent au-dessus de 0 |
 | Message **« Erreur de chargement. »** dans un onglet | Session expirée ou serveur injoignable | Reconnectez-vous (§ 2.2) puis rechargez |
 
 ### Sessions et connexion

@@ -95,20 +95,22 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - Fermeture : bouton X, bouton Fermer, clic en dehors, ou touche Echap
 - Choix sauvegarde avec le personnage en base, propage dans les imports/exports JSON individuels et globaux
 - Affiche aussi dans les **cartes de la liste** (a gauche du nom) et dans l'**onglet Equipe** (colonne Classe)
-- **Crane rouge (PV <= 0)** : overlay "tete de mort" pose au dessus du portrait quand les PV courants sont <= 0 — fiche, cartes de la liste (expedition **et** auberge), onglet Equipe (colonne Classe **et** grille d'ordre de marche) ; il disparait des que les PV repassent au dessus de 0
+- **Crane rouge (PV <= 0)** : overlay "tete de mort" pose au dessus du portrait quand les PV courants sont <= 0 — fiche, cartes de la liste (expedition **et** auberge), onglet Equipe (colonne Classe, grille d'ordre de marche **et ligne d'ennemi**) ; il disparait des que les PV repassent au dessus de 0
 
 ### Onglet Equipe
-- **Ordre de marche** (section repliable en haut) : grille 3x3 (portraits + noms, 9 persos max) ; drag & drop unifie souris (clic maintenu) / tactile (appui long ~0,4 s) ; case vide = deplacement, case occupee = echange instantane ; sauvegarde immediate en base + auto-reparation (doublon / id perdu → reconstruction gauche→droite) ; inclus dans l'export/import JSON (`marching_order`)
+- **Ordre de marche** (section repliable en haut) : grille 3x3 (portraits + noms, 9 persos max) ; les **portraits occupent ~74 % de la case**, nom sur une ligne en dessous ; drag & drop unifie souris (clic maintenu) / tactile (appui long ~0,4 s) ; case vide = deplacement, case occupee = echange instantane ; sauvegarde immediate en base + auto-reparation (doublon / id perdu → reconstruction gauche→droite) ; inclus dans l'export/import JSON (`marching_order`)
 - Tableau des personnages en expedition avec **icone de portrait** dans la colonne Classe (100% hauteur de ligne)
 - Nom cliquable (**ouvre la fiche**), nom trop long **tronque avec ...** (infobulle = nom complet), Init, AC, PV editables, Init combat et **Compteur de tour visuel** (remplissage circulaire par 20%) — **etat combat sauvegarde en base** (debounce 600 ms)
+- **Barre de PV** sous chaque champ PV (PJ **et** ennemis) : remplissage colore (vert >= 75 %, orange >= 50 %, rouge >= 25 %, noir < 25 %) et **PV max** a droite (PJ : `max_pv` de la fiche ; ennemis : plus grand PV saisi, `-` tant qu'il est inconnu)
 - **Detail combat depliable** : clic sur la colonne Classe (chevron sous le libelle) → ligne de stats sous le personnage (Att/Degats Cac + Att/Degats distance) ; un seul perso ouvert a la fois ; valeur vide = tiret
 - **Bouton RAZ** sous les colonnes Init. combat + Tour (avec confirmation) : efface les init. combat, remet les compteurs a zero et **propage la remise a zero en base**
 - Synchronisation des PV vers la fiche du personnage
 - Tableau des **Statistiques** (entre Ennemis et Notes) : FOR AGI END PRE CHA INT, **vert = max / rouge = min** de colonne (texte seul, ex æquo inclus)
+  - **Modificateur DCC sous chaque caracteristique** : 3 → -3, 4-5 → -2, 6-8 → -1, 9-12 → 0 (sans signe), 13-15 → +1, 16-17 → +2, 18 → +3 — colore vert / rouge / gris
   - **Nom cliquable** = ouvre la fiche du personnage (comme le tableau des PJ en expédition)
   - Zone **AGI–END–PRE** groupée + **chevron sous END** → detail des jets de sauvegarde (REF / VIG / VOL) juste sous la ligne
   - Un seul detail JdS ouvert ; collapse independant du detail combat
-- Tableau des ennemis : colonnes **Ennemi, AC, ATT, PV, Init., Tour** (ajout/suppression/RAZ avec confirmation) — **sauvegarde en base, seules les lignes renseignees sont conservees**
+- Tableau des ennemis : colonnes **Ennemi, AC, ATT, PV, Init., Tour** (ajout/suppression/RAZ avec confirmation) — **sauvegarde en base, seules les lignes renseignees sont conservees** ; **crane rouge a 0 PV** sur la cellule Ennemi et **barre de PV** sous le champ PV (max = plus grand PV saisi sur la ligne)
 - Compteurs de tour (clic = +1, clic droit / appui long = reset, cycle modulo 5) — **sauvegardes en base**
 - **Etat combat en base** : Init. combat, tours et ennemis sont ecrits dans `users.team_state` (debounce 600 ms + toast), restaurs au prochain affichage et **inclus dans l'export/import global JSON** (`team_state`, remap des index vers les nouveaux ids ; fichier ancien sans le champ = remise a zero)
 - Notes d'equipe (sauvegardees en base via l'API, inclues dans l'export/import global JSON)
@@ -130,9 +132,9 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 ### Tapis de des 3D (Dice Tray)
 - Bouton `des` dans la topbar (avant l'icone carte, visible pour tous y compris sans compte) : overlay plein ecran ferme par croix ou Echap (d'abord la modale d'aide des gestes, puis le module)
 - **three.js r186 embarque** (`dice/lib/`, MIT) + solides de des d'apres **dice-box-dcc** (dicebox de SOND LecT, MIT) : 14 des (D3 a D30 + D%), lancer physique, total affichable, son Web Audio **synthetise** (aucun fichier audio)
-- Gestes : toucher (ajouter / lancer), appui long (retirer), glisser-deposer + lacher avec elan ; WebGL requis (sinon « Des 3D indisponibles sur ce navigateur » + fermeture propre, sans chargement)
+- Gestes : toucher (ajouter / lancer), **appui long 500 ms sur un de de la barre = lancer direct** (pastille de valeur ephemere au-dessus du bouton), appui long sur le tapis (retirer), glisser-deposer + lacher avec elan ; WebGL requis (sinon « Des 3D indisponibles sur ce navigateur » + fermeture propre, sans chargement)
 - **Zero persistance** : tapis vide au depart, etat conserve tant que la page reste ouverte (fermeture = simple masquage avec pause rendu/audio) ; seule ecriture localStorage : la preference muette `dicebox.sound`
-- Suite `23-dice-tray` (80 controles) : coquille (boutons, croix, Echap modale puis module), regle `#dice-module[hidden]`, imports three resolus sur disque, libelles du menu, zero ecriture locale
+- Suite `23-dice-tray` (81 controles) : coquille (boutons, croix, Echap modale puis module), regle `#dice-module[hidden]`, imports three resolus sur disque, libelles du menu, zero ecriture locale
 
 ### Sauvegarde automatique
 - Debounce 600ms sur tous les champs modifiables

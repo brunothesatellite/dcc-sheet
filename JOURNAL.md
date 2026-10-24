@@ -1,5 +1,11 @@
 # Journal de developpement - DCC Fiches de Personnage
 
+## Date : 24 octobre 2026 — Release v3.7 (skill RELEASE)
+
+- **Contenu fonctionnel depuis v3.6** (2 commits) : `ba8281e` « Evolutions onglet Equipe + tapis de des » — crâne rouge sur les **ennemis** à 0 PV (même overlay que les PJ, ancré sur la cellule « Ennemi »), **modificateurs DCC** sous chaque caractéristique du tableau Statistiques (3 → -3, 4-5 → -2, 6-8 → -1, 9-12 → 0, 13-15 → +1, 16-17 → +2, 18 → +3), **barre de PV + PV max** sous les champs PV (PJ : `max_pv` de la fiche ; ennemis : plus grand PV saisi, max inconnu → « – »), **appui long 500 ms** sur un dé de la barre du tapis = lancer direct avec pastille de valeur éphémère ; `f92801d` portraits de l'ordre de marche **58 % → 74 %** de la case (gap 4 → 3 px, padding haut 6 → 5 px, ghost de drag et lettre de repli alignés).
+- **Docs release** : README (crâne sur les ennemis, barre de PV, modificateurs DCC, appui long du tapis, taille des portraits, suite `23-dice-tray` 81 contrôles) ; MANUAL § 8.1 (barre de PV), 8.1c (portraits ~74 %), 8.3 (crâne + barre des ennemis), 8.3b (modificateurs DCC), 9b (gestes du tapis), 11 (signes visuels).
+- **Tests (étape 2.5, PHP activé)** : `PHP_BIN=C:\vscode\php\php.exe node tests/run.js` → **3429/3429 OK, 1 skip** (102 s), dont `01-syntax` 79, `18-maps-import` 15, `20-import-limits` 36.
+
 ## Date : 16 octobre 2026 — Release v3.6 (skill RELEASE)
 
 - **Docs release** : README — section « Reference complete » : **reprise a la fermeture** documentee (reouverture page + decalage exacts, clic sommaire = haut de page) ; MANUAL § 9c — meme comportement cote utilisateur ; pas de TODO ouvert sur ce perimetre.

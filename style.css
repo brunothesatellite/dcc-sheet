@@ -2196,6 +2196,39 @@ button.section-bar.collapse-toggle[aria-expanded="true"] .chev {
   cursor: pointer;
 }
 
+/* Modale « combien de personnages tirer ? » (evolution #3, Niveau 0) :
+   champ numerique CENTRE, gros chiffre — saisie de 1 a 20, defaut 1. */
+.lvl0-count-row {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0 4px;
+}
+
+.lvl0-count-input {
+  width: 92px;
+  padding: 8px 10px;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--field-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+}
+
+.lvl0-count-input:focus {
+  outline: 2px solid var(--tab-active);
+  outline-offset: 1px;
+}
+
+.lvl0-count-hint {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
 /* Etat inactif d'un bouton de modale (ex. « Promouvoir » sans classe choisie) */
 .modal-btn-ok:disabled {
   opacity: 0.5;

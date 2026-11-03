@@ -106,12 +106,12 @@
   var importProgressFill = null;
   var importProgressStep = null;
 
-  function showImportProgress() {
+  function showImportProgress(title) {
     hideImportProgress();
     var overlay = document.createElement('div');
     overlay.className = 'import-progress-overlay';
     overlay.innerHTML = '<div class="import-progress-box">'
-      + '<div class="import-progress-title">Import en cours…</div>'
+      + '<div class="import-progress-title">' + (title || 'Import en cours…') + '</div>'
       + '<div class="import-progress-track"><div class="import-progress-fill"></div></div>'
       + '<div class="import-progress-step"></div>'
       + '</div>';
@@ -1344,7 +1344,9 @@
       el('button', {
         className: 'btn-new',
         textContent: '+ Nouveau',
-        onClick: function () { createCharacter(cls); },
+        /* Evolution #3 : le Niveau 0 demande d'abord COMBIEN tirer ;
+           les autres classes creent directement (comportement inchange) */
+        onClick: function () { cls === 'lvl0' ? startLvl0Roll() : createCharacter(cls); },
       }),
       el('button', {
         className: 'btn-import',
@@ -1499,6 +1501,152 @@
   /* =========================================================================
      9. Character CRUD
      ======================================================================== */
+
+  /* --- Evolution #3 : « + Nouveau » du Niveau 0 demande COMBIEN tirer --- */
+
+  /* Modale « combien de personnages ? » : champ numerique 1..20 (defaut 1),
+     boutons Annuler / Tirer. Meme squelette que showPromoteModal (pied
+     standard .modal-actions). Retour : un nombre compris dans [1, 20],
+     ou null si l'utilisateur annule (Echap / clic hors modale / Annuler). */
+  function showLvl0CountModal() {
+    return new Promise(function (resolve) {
+      var overlay = el('div', { className: 'modal-overlay' });
+      var box = el('div', { className: 'modal-box' });
+
+      box.appendChild(el('div', { className: 'modal-title', textContent: 'Tirer des personnages' }));
+      box.appendChild(el('div', {
+        className: 'modal-message',
+        textContent: 'Combien de personnages de niveau 0 tirer ?',
+      }));
+
+      var input = el('input', {
+        type: 'number',
+        min: '1',
+        max: '20',
+        step: '1',
+        value: '1',
+        className: 'lvl0-count-input',
+        'aria-label': 'Nombre de personnages à tirer (1 à 20)',
+      });
+
+      /* Clamp a la validation : 0, 99, vide ou texte ne sortent jamais de [1, 20] */
+      function readCount() {
+        var n = parseInt(input.value, 10);
+        if (isNaN(n)) n = 1;
+        return Math.max(1, Math.min(20, n));
+      }
+
+      var row = el('div', { className: 'lvl0-count-row' });
+      row.appendChild(input);
+      box.appendChild(row);
+      box.appendChild(el('div', {
+        className: 'lvl0-count-hint',
+        textContent: 'De 1 à 20 — défaut 1',
+      }));
+
+      var actions = el('div', { className: 'modal-actions' });
+      var cancelBtn = el('button', {
+        className: 'modal-btn-cancel',
+        textContent: 'Annuler',
+        onClick: function () { close(null); },
+      });
+      var okBtn = el('button', {
+        className: 'modal-btn-ok',
+        textContent: 'Tirer',
+        onClick: function () { close(readCount()); },
+      });
+      actions.appendChild(cancelBtn);
+      actions.appendChild(okBtn);
+      box.appendChild(actions);
+
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+
+      function onKeyDown(e) { if (e.key === 'Escape') close(null); }
+      document.addEventListener('keydown', onKeyDown);
+
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) close(null);
+      });
+
+      /* Entree = valider le nombre saisi */
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); close(readCount()); }
+      });
+
+      function close(result) {
+        document.removeEventListener('keydown', onKeyDown);
+        overlay.remove();
+        resolve(result);
+      }
+
+      input.focus();
+      input.select();
+    });
+  }
+
+  /* Tirage multiple : N personnages crees a la suite, TOUS a l'auberge
+     (is_active: 0 passe DEJA dans le create : 1 requete create + 1 save
+     par perso, pas de set_active supplementaire). Aucune fiche ouverte et
+     session de tirage fermee : le bouton « Autre tirage » n'existe que
+     pour un tirage unique. Progression reutilisee de l'import, puis liste
+     rafraichie + toast final. */
+  async function rollLvl0Batch(count) {
+    if (!window.DCCLvl0Roll) return 0;
+    var created = 0;
+    showImportProgress('Tirage en cours…');
+    setImportProgress(0, 'Tirage en cours… (0/' + count + ')');
+    try {
+      for (var i = 0; i < count; i++) {
+        var rolled = window.DCCLvl0Roll.roll();
+        var res = await api('characters.php', {
+          method: 'POST',
+          body: {
+            action: 'create',
+            class: 'lvl0',
+            name: (rolled && rolled.nom) ? rolled.nom : 'Sans nom',
+            is_active: 0, /* à l'auberge : lot entier hors expédition */
+          },
+        });
+        if (res.character) {
+          await saveCharacter(res.character.id, rolled, rolled.nom);
+          created += 1;
+        }
+        setImportProgress((i + 1) / count,
+          'Tirage en cours… (' + (i + 1) + '/' + count + ')');
+      }
+    } catch (err) {
+      console.error('Erreur tirage multiple niveau 0:', err);
+    }
+    hideImportProgress();
+    rollSessionId = null; /* session de tirage = 1 perso : fermee sur un lot */
+    invalidateEquipePanel(); /* la composition de l'equipe change */
+    await loadClassCharacters('lvl0', false); /* on RESTE sur la liste */
+    if (created > 0) {
+      showToast(created > 1
+        ? created + ' personnages tirés, tous à l\'auberge'
+        : created + ' personnage tiré, à l\'auberge', 'success');
+    } else {
+      showToast('Erreur lors du tirage', 'error');
+    }
+    return created;
+  }
+
+  /* Point d'entree du bouton « + Nouveau » (Niveau 0) : on demande le
+     nombre, puis 1 = comportement historique, >1 = lot a l'auberge. */
+  var lvl0Rolling = false; /* anti double-lancement pendant un lot */
+  async function startLvl0Roll() {
+    if (lvl0Rolling || !currentUser) return;
+    var count = await showLvl0CountModal();
+    if (!count) return; /* annulation : aucune requête */
+    if (count === 1) { await createCharacter('lvl0'); return; }
+    lvl0Rolling = true;
+    try {
+      await rollLvl0Batch(count);
+    } finally {
+      lvl0Rolling = false;
+    }
+  }
 
   async function createCharacter(cls) {
     if (!currentUser) return;

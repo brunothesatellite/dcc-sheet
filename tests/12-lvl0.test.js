@@ -6,7 +6,8 @@
                      race (« commence par »), arme CàC/distance, promotion ;
    - funnel-icons.js: catalogue de portraits + mapping métier -> tokens ;
    - classes/lvl0.js: fiche BLOC_COMMUN sans dé de vie + Notes ;
-   - câblage        : onglet, pastille mobile, boutons « Autre tirage »/Promouvoir, API. */
+   - câblage        : onglet, pastille mobile, boutons « Autre tirage »/Promouvoir, API,
+                      « + Nouveau » qui demande COMBIEN tirer (évolution #3, 1 à 20). */
 
 const { createReporter } = require('./helpers/assert');
 const { createEnv, read, exists, collectSheetData } = require('./helpers/env');
@@ -558,6 +559,96 @@ function testWiring(r) {
   r.ok(equipe.indexOf("lvl0: 'Niv.0'") !== -1, 'onglet Équipe connaît le libellé Niv.0');
 }
 
+/* ------------------------------------------------------------------ *
+ * 10b. Évolution #3 : « + Nouveau » demande COMBIEN tirer (1 à 20)
+ * ------------------------------------------------------------------ */
+function testRollCount(r) {
+  const js = read('script.js');
+  const css = read('style.css');
+
+  /* --- Point d'entrée : la modale ne concerne QUE le Niveau 0 --- */
+  r.eq(js.split('async function startLvl0Roll').length - 1, 1,
+    'startLvl0Roll défini une seule fois');
+  r.ok(/cls === 'lvl0' \? startLvl0Roll\(\) : createCharacter\(cls\)/.test(js),
+    'createNewButton : lvl0 -> modale, autres classes -> createCharacter inchangé');
+  r.ok(js.indexOf("textContent: '+ Nouveau'") !== -1, 'libellé « + Nouveau » toujours présent');
+  r.ok(js.indexOf('empty.appendChild(createNewButton(cls))') !== -1,
+    'état vide : « + Nouveau » passe aussi par createNewButton');
+  r.ok(js.indexOf('createNewButton(cls),') !== -1,
+    'liste : l\'en-tête passe aussi par createNewButton');
+
+  /* --- Modale : champ numérique 1..20, défaut 1, clamp --- */
+  r.eq(js.split('function showLvl0CountModal').length - 1, 1,
+    'showLvl0CountModal défini une seule fois');
+  r.ok(js.indexOf("className: 'lvl0-count-input'") !== -1, 'champ .lvl0-count-input');
+  r.ok(/type: 'number'/.test(js), 'champ de type number');
+  r.ok(/min: '1'/.test(js), 'min = 1');
+  r.ok(/max: '20'/.test(js), 'max = 20');
+  r.ok(/value: '1'/.test(js), 'valeur par défaut = 1');
+  r.ok(/return Math\.max\(1, Math\.min\(20, n\)\)/.test(js), 'clamp dans [1, 20] à la validation');
+  r.ok(/if \(isNaN\(n\)\) n = 1;/.test(js), 'saisie vide ou texte -> 1');
+  r.ok(js.indexOf("textContent: 'Annuler'") !== -1, 'bouton Annuler');
+  r.ok(js.indexOf("textContent: 'Tirer'") !== -1, 'bouton Tirer');
+  r.ok(js.indexOf("className: 'modal-actions'") !== -1, 'pied de modale standard .modal-actions');
+  r.ok(/input\.addEventListener\('keydown', function \(e\) \{\s*if \(e\.key === 'Enter'\)/.test(js),
+    'Entrée valide le nombre saisi');
+  r.ok(/if \(!count\) return;/.test(js), 'annulation (null) -> aucune requête');
+
+  /* --- Lot : enchaînement, tous à l'auberge, aucune fiche ouverte --- */
+  r.eq(js.split('async function rollLvl0Batch').length - 1, 1,
+    'rollLvl0Batch défini une seule fois');
+  r.ok(/for \(var i = 0; i < count; i\+\+\)/.test(js), 'boucle sur count');
+  r.ok(js.indexOf("showImportProgress('Tirage en cours…')") !== -1,
+    'overlay de progression réutilisé (titre « Tirage en cours… »)');
+  r.ok(/setImportProgress\(\(i \+ 1\) \/ count/.test(js), 'progression mise à jour à chaque perso (x/N)');
+  r.ok(js.indexOf('hideImportProgress()') !== -1, 'overlay refermé en sortie');
+  r.ok(/await loadClassCharacters\('lvl0', false\)/.test(js),
+    'liste rafraîchie SANS ouvrir de fiche (on reste sur la liste)');
+  r.ok(js.indexOf('rollSessionId = null; /* session de tirage = 1 perso') !== -1,
+    'session de tirage fermée sur un lot (pas d\'« Autre tirage »)');
+  r.ok(/personnages tirés, tous à l\\'auberge/.test(js), 'toast final : « tous à l\'auberge »');
+  r.ok(/var lvl0Rolling = false/.test(js), 'garde anti double-lancement');
+  r.ok(/if \(lvl0Rolling \|\| !currentUser\) return;/.test(js), 'garde testée à l\'entrée');
+
+  const batchBody = js.match(/async function rollLvl0Batch[\s\S]*?\n  \}/);
+  r.ok(!!batchBody, 'corps de rollLvl0Batch trouvé');
+  if (batchBody) {
+    r.ok(batchBody[0].indexOf('is_active: 0') !== -1,
+      'le lot crée avec is_active: 0 (à l\'auberge dès la création)');
+    r.ok(batchBody[0].indexOf('openSheet(') === -1, 'le lot n\'ouvre aucune fiche');
+    r.ok(batchBody[0].indexOf('rollSessionId = res.character.id') === -1,
+      'le lot n\'ouvre pas de session de tirage');
+    r.ok(batchBody[0].indexOf('set_active') === -1,
+      'pas de requête set_active supplémentaire (is_active passe au create)');
+  }
+
+  /* --- Non-régression : chemin « 1 personnage » strictement inchangé --- */
+  r.ok(js.indexOf("if (count === 1) { await createCharacter('lvl0'); return; }") !== -1,
+    'count = 1 -> createCharacter historique (fiche ouverte + « Autre tirage »)');
+  r.ok(js.indexOf('rollSessionId = res.character.id') !== -1,
+    'session de tirage toujours ouverte à la création unique');
+  r.ok(js.indexOf('DCCLvl0Roll.roll()') !== -1, 'tirage lvl0 toujours appelé à la création');
+  r.ok(/showImportProgress\(\)/.test(js), 'import global : appel sans argument conservé');
+  const php = read('api/characters.php');
+  r.ok(php.indexOf("$input['is_active'] ?? 1") !== -1,
+    'api/characters.php : action create accepte déjà is_active');
+
+  /* --- CSS de la modale --- */
+  ['.lvl0-count-row', '.lvl0-count-input', '.lvl0-count-hint'].forEach(function (sel) {
+    r.ok(css.indexOf(sel + ' {') !== -1, 'style.css contient ' + sel);
+  });
+  const countInput = css.match(/\.lvl0-count-input \{[^}]+\}/);
+  r.ok(!!countInput, '.lvl0-count-input block found');
+  if (countInput) {
+    r.ok(countInput[0].indexOf('text-align: center') !== -1, 'champ centré dans la modale');
+    r.ok(countInput[0].indexOf('font-size: 24px') !== -1, 'gros chiffre (24 px)');
+    r.ok(countInput[0].indexOf('var(--font-heading)') !== -1, 'chiffre en police de titre');
+  }
+  const countHint = css.match(/\.lvl0-count-hint \{[^}]+\}/);
+  r.ok(!!countHint && countHint[0].indexOf('text-align: center') !== -1,
+    'indice « De 1 à 20 » centré');
+}
+
 module.exports = async function suite() {
   const r = createReporter('12-lvl0');
 
@@ -588,6 +679,7 @@ module.exports = async function suite() {
   testSheet(r);
   testPortraitRegistry(r);
   testWiring(r);
+  testRollCount(r);
 
   r.ok(exists('tools/build-lvl0-data.js'), 'générateur présent (tools/build-lvl0-data.js)');
 

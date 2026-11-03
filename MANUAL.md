@@ -277,10 +277,11 @@ L'onglet **Niveau 0** gère les personnages du *funnel* DCC, ceux qui existent a
 
 *L'onglet **Niveau 0** : cartes avec le métier en sous-titre, boutons **+ Nouveau** (tirage) et **Import**.*
 
-**Tirer un personnage**
+**Tirer un personnage — « + Nouveau » demande combien**
 1. Ouvrez l'onglet **Niveau 0** — en mobile, il s'affiche sous sa forme courte **« Niv 0 »**, juste après *Voleur* (les 8 onglets partagent toute la largeur : aucun défilement).
-2. Cliquez sur **+ Nouveau** : un personnage complet est tiré au sort — nom, métier (avec son arme et son équipement), 6 caractéristiques en 3d6 et leurs modificateurs, CA, PV, initiative, jet chanceux, langues, notes, équipement, trésor de 5d12 pc et un portrait tiré selon le métier.
-3. La fiche s'ouvre aussitôt : elle contient **uniquement le bloc commun et les Notes**, **sans dé de vie** dans le bouclier PV (les niveaux 0 n'en ont pas).
+2. Cliquez sur **+ Nouveau** (en haut de la liste, ou dans l'écran vide) : une fenêtre demande **combien de personnages tirer** — champ numérique de **1 à 20**, **défaut 1**. La saisie est **bornée à la validation** : 0 devient 1, 99 devient 20, un champ vide ou non numérique vaut 1. **Annuler**, **Échap** ou un clic **en dehors** de la fenêtre ferme **sans rien créer** ; **Entrée** valide le nombre saisi.
+3. Avec **1** (défaut) — **comportement historique inchangé** : un personnage complet est tiré au sort — nom, métier (avec son arme et son équipement), 6 caractéristiques en 3d6 et leurs modificateurs, CA, PV, initiative, jet chanceux, langues, notes, équipement, trésor de 5d12 pc et un portrait tiré selon le métier. La fiche s'ouvre aussitôt : elle contient **uniquement le bloc commun et les Notes**, **sans dé de vie** dans le bouclier PV (les niveaux 0 n'en ont pas) — avec le bouton **Autre tirage** (§ ci-dessous).
+4. Avec **plus de 1** : les N personnages sont tirés **les uns après les autres**, avec une **barre de progression « Tirage en cours… (x/N) »** (20 persos = 40 requêtes serveur — sur un NAS lent, comptez quelques dizaines de secondes). **Tous** sont créés **à l'auberge** (interrupteur **A L'AUBERGE** rouge, aucun en expédition) et **aucune fiche ne s'ouvre** : la liste se rafraîchit avec les N nouvelles cartes et un toast confirme **« N personnages tirés, tous à l'auberge »**. Le bouton **Autre tirage** n'existe que pour un tirage unique (il est propre à une fiche ouverte). Chaque personnage d'un lot reste supprimable depuis la liste comme d'habitude.
 
 <img src="captures/fiche0.png" alt="Fiche de personnage de niveau 0 : en-tête sur deux lignes (retour, Export, Autre tirage, Promouvoir, interrupteur en expédition, puis le nom avec un bras musclé rouge suivi de la somme des modificateurs), bouclier de classe d'armure, casque de points de vie sans dé de vie, caractéristiques et notes" width="420">
 

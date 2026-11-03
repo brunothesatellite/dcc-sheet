@@ -529,7 +529,7 @@ Colonnes :
 | **Init.** | Initiative lue dans la fiche | Non (éditez-la dans la fiche) |
 | **AC** | Classe d'armure lue dans la fiche | Non (éditez-la dans la fiche) |
 | **PV** | Points de vie, avec sous le champ une **barre de PV** et le **PV max** à droite | **Oui** : sauvegarde immédiate en base + **synchronisation vers la fiche** du PJ, même déjà ouverte (toast disquette) |
-| **Init. combat** | Initiative d'ordre de combat | **Oui** : sauvegarde **automatique en base** (pause ~0,6 s, toast disquette), restaurée au prochain affichage et **incluse dans l'export JSON** |
+| **Init. combat** | Initiative d'ordre de combat | **Oui** : saisie manuelle ou remplie par le bouton **INIT** (§ 8.1) ; sauvegarde **automatique en base** (pause ~0,6 s, toast disquette), restaurée au prochain affichage et **incluse dans l'export JSON** |
 | **Tour** | Compteur de tour visuel (§ 8.2) | **Oui** (§ 8.2) : sauvegarde automatique en base comme l'Init. combat |
 
 > **PV à 0 ou moins** : un **crâne rouge** recouvre alors le portrait du personnage dans ce tableau **et** dans la grille d'ordre de marche (§ 8.1c), ainsi que dans sa propre fiche (§ 7.2). Dès que ses PV repassent au-dessus de 0, l'overlay disparaît partout.
@@ -538,7 +538,12 @@ Colonnes :
 
 > Seuls les PJ **en expédition** apparaissent. Pour en retirer un, passez-le à l'auberge depuis sa classe (§ 5) : à votre retour sur l'onglet Équipe, la page est **rechargée automatiquement** (votre état combat est alors relu en base, comme en F5).
 
-Sous le tableau, **à cheval sous les colonnes Init. combat et Tour**, un bouton **RAZ** remet à zéro la colonne Init. combat et les compteurs Tour de **tous les PJ**. Une confirmation s'affiche avant d'exécuter, puis la remise à zéro est **propagée en base** (et dans l'export). Les ennemis (§ 8.3) ne sont pas concernés.
+Sous le tableau, **sur une même ligne justifiée à droite** (donc plus ou moins sous les colonnes **Init. combat** et **Tour**, qu'ils pilotent), deux boutons se succèdent :
+
+- **INIT** (à gauche) : tire l'initiative de **tous les PJ en expédition** en une seule action. Pour chaque personnage, la valeur est calculée d'après la formule de **sa propre fiche** (§ 7, bloc **Combat**, champ **Initiative**) : `1d20+2` = un d20 + 2, `1d16-1` = un d16 − 1, `+3` = un d20 + 3, `-1` = un d20 − 1 ; **si aucun dé n'est indiqué** (champ vide ou illisible), c'est un **d20** qui est tiré. Le jet est écrit dans la colonne **Init. combat** — la colonne **Init.**, elle, continue d'afficher la formule lue dans la fiche. Le compteur **Tour** de chaque personnage est en même temps **remis à 0**. Le résultat est **propagé en base** (et dans l'export), exactement comme une saisie manuelle. Une demande de confirmation apparaît **uniquement s'il existe déjà un jet ou un tour** à écraser ; sinon le tirage est immédiat.
+- **RAZ** (à droite) : remet à zéro la colonne Init. combat et les compteurs Tour de **tous les PJ**. Une confirmation s'affiche avant d'exécuter, puis la remise à zéro est **propagée en base** (et dans l'export).
+
+Les ennemis (§ 8.3) ne sont concernés par aucun des deux boutons. Les deux boutons sont **hors du tableau** : cette ligne d'actions ne dépend d'aucune colonne, donc **aucun débordement** — ils restent côte à côte sur une seule ligne, y compris sur **petit écran (≤ 600 px)** (placés *dans* le tableau, leur largeur minimale imposait celle de la table entière, qui sortait alors vers la droite de l'écran).
 
 **Synchronisation automatique** : chaque fois que vous affichez à nouveau l'onglet Équipe (retour depuis une fiche ou un autre onglet), les valeurs issues des fiches — **Nom, Initiative, AC, PV, détail combat, statistiques** — sont resynchronisées avec la base **sans recharger l'onglet** : votre état combat affiché (Init. combat, compteurs de tour, tableau des ennemis) est **conservé**, puisque cet état est déjà en base et que la prochaine saisie le ré-écrira. Si la **composition** de l'expédition a changé (personnage ajouté, supprimé ou basculé à l'auberge), la page est **rechargée entièrement** à la place : l'état combat est alors relu depuis la base. Les PV sont toujours synchronisés dans les deux sens (§ tableau ci-dessus) ; en cas d'échec réseau, l'affichage actuel est conservé.
 
@@ -1161,6 +1166,7 @@ Deux livrables **identiques en contenu**, à télécharger depuis les **releases
 | **Old School** | Portraits OSR, 17 images réparties par classe |
 | **Funnel** | 75 tokens de niveau 0 (`icons/funnel-tokens/`), réservés aux fiches de niveau 0 |
 | **Toast** | Petit message transitoire en bas à droite |
+| **INIT** | Bouton de l'onglet Équipe : tire l'initiative de tous les PJ en expédition (formule de chaque fiche) et remet leurs tours à 0 |
 | **RAZ** | Remise à zéro (table des ennemis) |
 
 ---

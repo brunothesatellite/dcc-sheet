@@ -366,20 +366,18 @@ async function run() {
     r.eq(counts(container).statsDetails, 0, 'Space collapse removes stats detail');
   }
 
-  // --- RAZ Init. combat + Tours ---
+  // --- RAZ Init. combat + Tours (ligne d'actions SOUS le tableau) ---
   const expTable = container.querySelector('table.team-table:not(.team-table-enemies):not(.team-table-stats)');
   r.ok(!!expTable, 'expedition table for RAZ');
   if (expTable) {
-    const foot = expTable.querySelector('tfoot');
-    r.ok(!!foot, 'expedition table has tfoot');
-    const footTds = foot ? foot.querySelectorAll('td') : [];
-    r.eq(footTds.length, 2, 'tfoot has 2 cells');
-    if (footTds.length === 2) {
-      r.eq(footTds[0].colSpan, 5, 'pad cell colspan=5');
-      r.eq(footTds[1].colSpan, 2, 'RAZ cell colspan=2 (Init combat + Tour)');
-    }
-    const btnRazExp = foot ? foot.querySelector('.btn-raz') : null;
-    r.ok(!!btnRazExp, 'RAZ button in tfoot');
+    r.ok(!expTable.querySelector('tfoot'), 'no tfoot: action buttons live below the table');
+    const actionsRow = container.querySelector('.table-actions');
+    r.ok(!!actionsRow, 'action row present below the expedition table');
+    r.eq(actionsRow ? actionsRow.previousElementSibling === expTable : false, true,
+      'action row sits right after the table (same parent)');
+    const btnRazExp = actionsRow ? actionsRow.querySelector('.btn-raz') : null;
+    r.ok(!!btnRazExp, 'RAZ button in the action row');
+    r.ok(!!(actionsRow && actionsRow.querySelector('.btn-init')), 'INIT button in the action row');
 
     const initInputs = expTable.querySelectorAll('.init-combat-input');
     r.eq(initInputs.length, 2, 'init combat inputs tagged');

@@ -56,10 +56,34 @@ module.exports = function suite() {
     '.spell-viewer table.stackable.keep-table',
     '.spell-viewer table.stackable.keep-table.fit-narrow',
     '.spell-viewer table.stackable.scroll-table',
+    '.table-actions',
+    '.table-actions .btn-init',
+    '.table-actions .btn-raz',
+    '.btn-init',
   ];
   critical.forEach(function (sel) {
     r.ok(css.indexOf(sel) !== -1, 'CSS selector present: ' + sel);
   });
+
+  // Boutons INIT + RAZ : SORTIS DU TABLEAU, sur une meme ligne SOUS celui-ci.
+  // Dans un pied de tableau (cellule « Init. combat + Tour », ~22 % de la
+  // table), leur largeur minimale imposait celle de la table ENTIERE
+  // (table-layout: auto) : le tableau debordait vers la droite en mobile.
+  r.ok(css.indexOf('.team-table tfoot') === -1,
+    'plus aucune regle CSS liee a un pied de tableau (tfoot)');
+
+  const actionsBlock = css.match(/\.table-actions \{[^}]+\}/);
+  r.ok(!!actionsBlock, '.table-actions block found');
+  if (actionsBlock) {
+    r.ok(actionsBlock[0].indexOf('display: flex') !== -1, '.table-actions is a flex row (boutons sur une meme ligne)');
+    r.ok(actionsBlock[0].indexOf('justify-content: flex-end') !== -1, '.table-actions is right-justified');
+    r.ok(actionsBlock[0].indexOf('flex-direction: column') === -1, '.table-actions is never stacked');
+  }
+
+  // Mobile (<= 600 px) : la ligne reste sur une seule ligne, juste resserree
+  // (gap 6px -> 4px) : aucune empilement, aucune largeur imposee.
+  const actionsMobile = css.match(/\.table-actions \{[^}]*gap: 4px[^}]*\}/);
+  r.ok(!!actionsMobile, 'mobile : ligne d\'actions resserree (gap: 4px), toujours sur une ligne');
 
   // La popup doit desactiver l'ancrage de defilement du navigateur : sinon le
   // recale manuel de loadUp() (scrollTop += delta) est double par le navigateur

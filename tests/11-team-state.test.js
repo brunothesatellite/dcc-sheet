@@ -246,7 +246,7 @@ function testEquipe(r) {
     r.eq(enemyRows(container).length, 3, 'RAZ : retour à 3 lignes vides');
 
     /* --- RAZ Init. combat + tours --- */
-    const btnRazInit = container.querySelector('tfoot .btn-raz');
+    const btnRazInit = container.querySelector('.table-actions .btn-raz');
     r.ok(!!btnRazInit, 'bouton RAZ (init. combat + tours) présent');
     click(btnRazInit);
     await delay(SAVE_DELAY);

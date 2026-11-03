@@ -2713,17 +2713,9 @@ tr.team-stats-detail.open .team-detail-wrap {
   grid-template-rows: 1fr;
 }
 
-/* RAZ Init. combat + Tours (tfoot expédition) */
-.team-table tfoot td {
-  border-top: none;
-  padding: 4px 6px;
-  text-align: center;
-  background: transparent;
-}
-
-.team-table tfoot .btn-raz {
-  min-width: 56px;
-}
+/* Ancien pied du tableau (INIT + RAZ à cheval sous « Init. combat + Tour »)
+   supprimé : les deux boutons sont désormais sur une même ligne SOUS le
+   tableau — voir « .table-actions » plus bas. */
 
 .btn-group {
   display: flex;
@@ -2779,6 +2771,36 @@ tr.team-stats-detail.open .team-detail-wrap {
 }
 
 .btn-raz:hover {
+  background: var(--line);
+}
+
+/* Ligne d'actions SOUS le tableau expédition (évol. #1) : INIT (tirage de
+   l'initiative de tous les PJ) + RAZ, sur une MÊME ligne, alignés à droite
+   (sous les colonnes Init. combat / Tour qu'ils pilotent).
+   Sortis du tableau : dans une cellule à cheval sous ces 2 colonnes, leur
+   largeur minimale imposait celle de la table entière (table-layout: auto)
+   et le tableau débordait vers la droite en mobile.
+   Défini APRÈS .btn-sm / .btn-raz pour que les styles de base ne reprennent
+   pas la main. */
+.table-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.table-actions .btn-init,
+.table-actions .btn-raz {
+  min-width: 56px;
+}
+
+.btn-init {
+  background: transparent;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+}
+
+.btn-init:hover {
   background: var(--line);
 }
 
@@ -3273,6 +3295,13 @@ tr.team-stats-detail.open .team-detail-wrap {
   .team-stat-value { font-size: 14px; }
   .btn-group { flex-wrap: wrap; gap: 4px; }
   .btn-sm { padding: 4px 8px; font-size: 10px; }
+
+  /* Ligne d'actions SOUS le tableau : les deux boutons restent SUR UNE MÊME
+     ligne — la ligne est hors tableau, il n'y a donc plus aucune contrainte
+     de largeur de colonne, donc plus de débordement à droite. */
+  .table-actions { gap: 4px; margin-top: 6px; }
+  .table-actions .btn-init,
+  .table-actions .btn-raz { min-width: 64px; }
 
   .portrait-picker-overlay { padding: 10px; }
   .portrait-picker { max-height: 85vh; max-height: 85svh; }

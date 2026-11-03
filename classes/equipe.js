@@ -1224,15 +1224,62 @@ window.DCCModules.equipe = {
 
         tableChars.appendChild(tbody);
 
-        // RAZ sous Init. combat + Tour (colspan 5 | 2)
-        const tfoot = document.createElement('tfoot');
-        const trFoot = document.createElement('tr');
-        trFoot.className = 'stats-raz-row';
-        const tdPad = document.createElement('td');
-        tdPad.colSpan = 5;
-        trFoot.appendChild(tdPad);
-        const tdRaz = document.createElement('td');
-        tdRaz.colSpan = 2;
+        /* Évolution #1 : tirage de l'initiative de TOUS les PJ.
+           Le jet va dans « Init. combat » (persisté, conservé par la resync) ;
+           la colonne « Init. » continue d'afficher la formule de la fiche.
+           Les deux boutons vivent SUR UNE LIGNE SOUS LE TABLEAU (et non dans
+           un pied à cheval sous les colonnes Init. combat / Tour) : cette
+           cellule imposait sa largeur minimale à la table entière, qui
+           débordait vers la droite en mobile. */
+        const btnInit = document.createElement('button');
+        btnInit.type = 'button';
+        btnInit.className = 'btn-sm btn-init';
+        btnInit.textContent = 'INIT';
+        btnInit.setAttribute('aria-label', "Tirer l'initiative de tous les personnages");
+        btnInit.addEventListener('click', async function () {
+          const rows = [].slice.call(tableChars.querySelectorAll('tr[data-char-id]'));
+          if (!rows.length) return;
+
+          /* Confirmation SEULEMENT s'il existe déjà un état à écraser
+             (init. combat renseignée ou tour > 0) : sinon clic = tirage. */
+          const hasState = rows.some(function (tr) {
+            const inp = tr.querySelector('.init-combat-input');
+            if (inp && String(inp.value).trim() !== '') return true;
+            const counter = tr.querySelector('.turn-counter');
+            return !!(counter && typeof counter.getTurn === 'function' && counter.getTurn() > 0);
+          });
+          if (hasState) {
+            const message = 'Écraser les Init. combat actuelles et remettre les tours à 0 pour tous les personnages ?';
+            let confirmed = false;
+            if (typeof window.showModal === 'function') {
+              confirmed = await window.showModal({
+                title: "Tirer l'initiative",
+                message: message,
+                type: 'confirm',
+                okText: 'INIT',
+              });
+            } else {
+              confirmed = window.confirm(message);
+            }
+            if (!confirmed) return;
+          }
+
+          const mod = window.DCCModules.equipe;
+          rows.forEach(function (tr) {
+            const cd = tr._charData || {};
+            const formula = parsedDataOf(cd).initiative;   /* fiche : BLOC_COMMUN / Combat */
+            const input = tr.querySelector('.init-combat-input');
+            if (input) input.value = String(mod.rollInitiative(formula));
+            const counter = tr.querySelector('.turn-counter');
+            if (counter && typeof counter.setTurn === 'function') counter.setTurn(0);
+          });
+
+          /* UNE seule écriture : setTurn(0) ne notifie pas et le
+             remplissage programmé de l'input ne déclenche aucun événement —
+             sans ce relais, le jet ne partirait jamais en base. */
+          scheduleTeamStateSave();
+        });
+
         const btnRazInit = document.createElement('button');
         btnRazInit.type = 'button';
         btnRazInit.className = 'btn-sm btn-raz';
@@ -1260,12 +1307,13 @@ window.DCCModules.equipe = {
           });
           scheduleTeamStateSave(); /* RAZ propagée en base */
         });
-        tdRaz.appendChild(btnRazInit);
-        trFoot.appendChild(tdRaz);
-        tfoot.appendChild(trFoot);
-        tableChars.appendChild(tfoot);
+        const actionsRow = document.createElement('div');
+        actionsRow.className = 'table-actions';
+        actionsRow.appendChild(btnInit);   /* INIT à gauche du RAZ */
+        actionsRow.appendChild(btnRazInit);
 
         container.appendChild(tableChars);
+        container.appendChild(actionsRow);
       }
 
       // Section ennemis
@@ -1485,5 +1533,49 @@ window.DCCModules.equipe = {
     };
 
     render();
+  },
+
+  /* ------------------------------------------------------------------
+     Évolution #1 — initiative (logique PURE, rng injectable)
+     ------------------------------------------------------------------
+     Lecture de la formule d'initiative d'une fiche (BLOC_COMMUN, section
+     Combat, champ « Initiative ») : +x, -x, 1d20+x, 1dY+x (+ tolérances
+     « d20+x », nombre nu, casse/espaces). Jamais null : dé absent ou
+     valeur illisible -> d20 + 0 (aucun blocage en plein combat).
+     Exposé sur le module pour être testable sans DOM (suite 25). */
+  parseInitiative(formula) {
+    const s = String(formula == null ? '' : formula).trim().toLowerCase().replace(/\s+/g, '');
+
+    if (s === '') return { count: 1, sides: 20, mod: 0 };
+
+    /* 1d20+2 | 1d16-1 | d20+5 | 2d6+1 */
+    const dm = s.match(/^(\d*)d(\d+)([+-]\d+)?$/);
+    if (dm) {
+      const count = dm[1] === '' ? 1 : parseInt(dm[1], 10);
+      const sides = parseInt(dm[2], 10);
+      const mod = dm[3] ? parseInt(dm[3], 10) : 0;
+      /* Formule invalide (dé ou compte hors bornes) -> repli d20 + mod */
+      if (!(count >= 1 && count <= 50) || !(sides >= 2 && sides <= 1000)) {
+        return { count: 1, sides: 20, mod: mod };
+      }
+      return { count: count, sides: sides, mod: mod };
+    }
+
+    /* +3 | -1 | 3 -> d20 + modificateur */
+    const sm = s.match(/^([+-]?\d+)$/);
+    if (sm) return { count: 1, sides: 20, mod: parseInt(sm[1], 10) };
+
+    return { count: 1, sides: 20, mod: 0 };
+  },
+
+  /* Tirage : somme de `count` dés à `sides` faces + modificateur.
+     Entier non borné en valeur (négatif ou > 20 accepté : seules les
+     chaînes sont bornées en base, 20 car.). */
+  rollInitiative(formula, rng) {
+    const f = window.DCCModules.equipe.parseInitiative(formula);
+    const r = typeof rng === 'function' ? rng : Math.random;
+    let total = 0;
+    for (let i = 0; i < f.count; i++) total += 1 + Math.floor(r() * f.sides);
+    return total + f.mod;
   }
 };

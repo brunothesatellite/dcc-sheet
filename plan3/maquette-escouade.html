@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette — Escouades (évolution #4)</title>
+<style>
+/* Jetons de thème repris tels quels de style.css (:root, thème clair) */
+:root {
+  --bg: #f1eee8; --paper: #fff; --ink: #171717; --muted: #706d68;
+  --line: #d7d1c8; --accent: #2a2a2a; --red: #c0392b; --green: #27ae60;
+  --yellow: #f2bd3d; --field-bg: #dde4f0; --input-border: #9aa5b4;
+  --header-bg: #1a1a2e; --header-text: #fff; --tab-active: #c0392b;
+  --tab-bg: #e8e5df; --shadow: rgba(0,0,0,.08);
+  --font-heading: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --font-body: 'Inter', 'Segoe UI', sans-serif;
+  --radius: 6px; --radius-sm: 4px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.5; padding: 24px 16px 64px; }
+
+/* ---------- En-tête de la maquette ---------- */
+.mq-head { max-width: 1080px; margin: 0 auto 28px; }
+.mq-head h1 { font-family: var(--font-heading); font-weight: 800; font-size: 30px; text-transform: uppercase; letter-spacing: 1px; }
+.mq-sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+.mq-badge { display: inline-block; background: var(--yellow); color: #171717; font-family: var(--font-heading); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; padding: 2px 8px; border-radius: var(--radius-sm); margin-right: 6px; vertical-align: 2px; }
+.workflow { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 18px 14px 38px; margin-top: 16px; box-shadow: 0 2px 6px var(--shadow); }
+.workflow li { margin: 5px 0; font-size: 13.5px; }
+.workflow li b { font-family: var(--font-heading); text-transform: uppercase; letter-spacing: .5px; }
+.workflow li::marker { color: var(--red); font-weight: 700; }
+
+/* ---------- Cadre d'écran ---------- */
+.screen { max-width: 1080px; margin: 0 auto 40px; }
+.screen > h2 { font-family: var(--font-heading); font-weight: 800; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
+.frame { background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; box-shadow: 0 2px 8px var(--shadow); position: relative; }
+.callouts { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 10px; font-size: 12.5px; color: var(--muted); }
+.callouts span b { color: var(--ink); }
+
+/* Pastille numérotée d'annotation */
+.pin { display: inline-flex; align-items: center; justify-content: center; width: 17px; height: 17px; border-radius: 50%; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; vertical-align: 1px; margin-left: 6px; flex: none; }
+
+/* ---------- En-tête de section (app) ---------- */
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+.section-title { font-family: var(--font-heading); font-weight: 800; font-size: 22px; text-transform: uppercase; letter-spacing: 1px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-family: var(--font-heading); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; border-radius: var(--radius); border: 1px solid transparent; cursor: pointer; }
+.btn-new { color: #fff; background: var(--green); }
+.btn-import { color: var(--ink); background: var(--field-bg); border-color: var(--input-border); }
+.btn-squad { color: var(--ink); background: var(--field-bg); border-color: var(--input-border); }
+.btn-squad::before { content: "⬢"; color: var(--red); }
+.btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- Bandeau d'escouade (liste Niveau 0) ---------- */
+.squad-bar-list { display: flex; align-items: center; gap: 8px; font-family: var(--font-heading); font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--ink); background: var(--field-bg); border: 1px solid var(--input-border); border-radius: var(--radius); padding: 6px 12px; margin: 18px 0 10px; }
+.squad-bar-list .count { color: var(--muted); font-weight: 700; letter-spacing: .5px; }
+.squad-bar-list.is-void { background: transparent; border-style: dashed; color: var(--muted); }
+.squad-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; display: inline-block; }
+
+/* ---------- Grille + cartes ---------- */
+.char-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.char-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 2px 6px var(--shadow); padding: 16px; display: flex; flex-direction: column; gap: 12px; cursor: pointer; transition: box-shadow .2s, border-color .2s; }
+.char-card:hover { box-shadow: 0 4px 12px var(--shadow); border-color: var(--muted); }
+.char-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.name-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.portrait { width: 34px; height: 34px; border-radius: 50%; background: #8e44ad; color: #fff; font-family: var(--font-heading); font-weight: 800; font-size: 16px; display: flex; align-items: center; justify-content: center; flex: none; }
+.char-card-name { font-family: var(--font-heading); font-weight: 700; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.toggle-inn { display: flex; align-items: center; gap: 6px; flex: none; }
+.switch { position: relative; width: 34px; height: 18px; display: inline-block; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; inset: 0; background: #ccc; border-radius: 18px; transition: .2s; }
+.slider::before { content: ""; position: absolute; width: 14px; height: 14px; left: 2px; top: 2px; background: #fff; border-radius: 50%; transition: .2s; }
+.switch input:checked + .slider { background: var(--green); }
+.switch input:checked + .slider::before { transform: translateX(16px); }
+.toggle-label { font-family: var(--font-heading); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: .5px; }
+.toggle-label.exp { color: var(--green); }
+.toggle-label.aub { color: var(--red); }
+.char-card-meta { font-size: 12px; color: var(--muted); }
+.char-card-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.squad-pick { display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1; }
+.squad-pick-label { font-size: 10px; font-family: var(--font-heading); font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); flex: none; }
+.char-card-squad { flex: 1; min-width: 0; max-width: 150px; font-family: var(--font-body); font-size: 11.5px; padding: 4px 6px; color: var(--ink); background: var(--field-bg); border: 1px solid var(--input-border); border-radius: var(--radius-sm); }
+.char-card-btns { display: flex; gap: 6px; flex: none; }
+.btn-open, .btn-delete { width: 30px; height: 28px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: var(--paper); font-size: 13px; cursor: pointer; }
+.btn-delete { color: var(--red); }
+
+/* ---------- Tableaux Équipe ---------- */
+.section-bar { font-family: var(--font-heading); font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: var(--header-text); background: var(--header-bg); padding: 8px 14px; border-radius: var(--radius); margin: 20px 0 12px; }
+.team-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; table-layout: fixed; }
+.team-table th { background: var(--ink); color: var(--paper); font-family: var(--font-heading); font-weight: 700; font-size: 11px; text-transform: uppercase; padding: 6px 8px; text-align: center; white-space: nowrap; }
+.team-table td { border: 1px solid var(--line); padding: 4px 6px; text-align: center; vertical-align: middle; }
+.team-table tbody:nth-child(odd) tr:not(.squad-head):not(:first-child) { background: rgba(0,0,0,.02); }
+.team-table .char-name { text-align: left; font-weight: 600; cursor: pointer; }
+.team-table .squad-head td { background: var(--field-bg); border-color: var(--input-border); font-family: var(--font-heading); font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; text-align: left; padding: 6px 10px; color: var(--ink); }
+.team-table .squad-head.is-void td { background: transparent; color: var(--muted); border-style: dashed; font-weight: 700; }
+.team-table .stat-max { background: rgba(39,174,96,.14); }
+.team-table .stat-min { background: rgba(192,57,43,.12); }
+.tag { display: inline-block; font-family: var(--font-heading); font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: .5px; padding: 1px 6px; border-radius: 3px; background: var(--tab-bg); color: var(--ink); }
+
+/* ---------- Modale ---------- */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center; z-index: 900; padding: 16px; }
+.modal-box { background: var(--paper); border-radius: var(--radius); width: min(520px, 100%); padding: 18px 18px 16px; box-shadow: 0 12px 40px rgba(0,0,0,.3); }
+.modal-title { font-family: var(--font-heading); font-weight: 800; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; text-align: center; }
+.modal-message { font-size: 12.5px; color: var(--muted); text-align: center; margin: 6px 0 12px; }
+.squad-manage { border: 1px solid var(--input-border); background: var(--field-bg); border-radius: var(--radius); padding: 10px; display: flex; flex-direction: column; gap: 10px; max-height: 260px; overflow: auto; }
+.squad-manage-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 10px; }
+.squad-name { flex: 1; min-width: 110px; font-family: var(--font-heading); font-weight: 700; font-size: 15px; padding: 4px 8px; border: 1px solid var(--input-border); border-radius: var(--radius-sm); background: var(--field-bg); color: var(--ink); }
+.squad-count { font-size: 11px; color: var(--muted); }
+.btn-mini { font-family: var(--font-heading); font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; padding: 4px 9px; border-radius: var(--radius-sm); border: 1px solid var(--input-border); background: var(--field-bg); color: var(--ink); cursor: pointer; }
+.btn-mini.danger { color: var(--red); border-color: var(--red); background: transparent; }
+.squad-members { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 4px 2px 2px; font-size: 12.5px; }
+.squad-members label { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+.new-squad { display: flex; gap: 8px; margin-top: 10px; }
+.new-squad input { flex: 1; padding: 7px 9px; border: 1px solid var(--input-border); border-radius: var(--radius-sm); background: var(--field-bg); color: var(--ink); font-size: 13px; }
+.hint { font-size: 11.5px; color: var(--muted); font-style: italic; margin-top: 8px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+.modal-btn-cancel, .modal-btn-ok { font-family: var(--font-heading); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; padding: 8px 18px; border-radius: var(--radius); cursor: pointer; }
+.modal-btn-cancel { background: var(--field-bg); border: 1px solid var(--input-border); color: var(--ink); }
+.modal-btn-ok { background: var(--green); border: 1px solid var(--green); color: #fff; }
+
+@media (max-width: 600px) {
+  body { padding: 14px 8px 48px; }
+  .frame { padding: 12px 8px; }
+  .squad-bar-list { flex-wrap: wrap; }
+  .char-card-squad { max-width: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="mq-head">
+  <h1><span class="mq-badge">Maquette</span>Escouades — regrouper les personnages</h1>
+  <p class="mq-sub">Évolution #4 de <code>TODO.md</code> — plan complet : <code>plan3/PLAN-ESCOUADE.md</code>.
+     Rendu fidèle au thème clair de l'application. <b>Document de conception : aucun code applicatif.</b><br>
+     <b>Restriction validée :</b> l'escouade <b>ne concerne que les personnages de niveau 0</b> — à la promotion, le personnage <b>sort</b> de son escouade, et un niv.1+ <b>n'est jamais éligible</b>.</p>
+
+  <ol class="workflow">
+    <li><b>Créer</b> — bouton <b>Escouades</b> dans l'en-tête de la liste <b>Niveau 0</b> → saisir le nom puis cocher <b>au moins un membre niveau 0</b> (une escouade sans membre n'existe pas : elle est dérivée des personnages).</li>
+    <li><b>Affecter</b> — sur chaque <b>carte de niveau 0</b>, le sélecteur <b>« Escouade : Alpha »</b> (avec <b>+ Nouvelle…</b> pour créer au fil de l'eau). Les cartes des 7 classes n'ont <b>aucun</b> sélecteur : <b>un personnage de niveau 1 ou plus n'est jamais éligible</b>.</li>
+    <li><b>Voir</b> — la liste Niveau 0 se <b>segmente</b> (bandeau + cartes), « Sans escouade » en <b>dernier</b>. Dans l'onglet Équipe, les <b>mêmes bandeaux</b> segmentent les deux tableaux : <b>niv.1+ d'abord</b> sous « Hors escouade », <b>puis</b> les groupes lvl0 — et <b>uniquement s'il existe au moins une escouade représentée</b>, sinon les tableaux sont strictement identiques à aujourd'hui.</li>
+    <li><b>Renommer</b> — dans la modale, le champ du nom se valide par <b>Entrée</b> : tous les membres lvl0 sont mis à jour (unicité insensible à la casse, 40 caractères max).</li>
+    <li><b>Supprimer</b> — confirmation, puis les membres repassent en <b>Sans escouade</b>.</li>
+    <li><b>Promotion</b> — à la promotion lvl0 → niv.1, le personnage <b>sort définitivement de son escouade</b> (la clé est retirée du personnage promu). L'escouade voyage sinon intacte dans l'<b>export / import JSON</b>.</li>
+  </ol>
+</header>
+
+<!-- ================= ÉCRAN 1 : liste Niveau 0 ================= -->
+<section class="screen">
+  <h2>Écran 1 — Onglet Niveau 0 : liste segmentée par escouade</h2>
+  <div class="frame">
+
+    <div class="section-header">
+      <div class="section-title">Niveau 0</div>
+      <div class="btn-group">
+        <button class="btn btn-squad">Escouades<span class="pin">1</span></button>
+        <button class="btn btn-import">Import</button>
+        <button class="btn btn-new">+ Nouveau</button>
+      </div>
+    </div>
+
+    <div class="squad-bar-list"><span class="squad-dot" style="background:#c0392b"></span> Alpha <span class="count">— 3 persos</span><span class="pin">2</span></div>
+    <div class="char-grid">
+
+      <div class="char-card">
+        <div class="char-card-top">
+          <div class="name-row"><div class="portrait">B</div><div class="char-card-name">Borin — Niv.0</div></div>
+          <div class="toggle-inn"><label class="switch"><input type="checkbox"><span class="slider"></span></label><span class="toggle-label aub">A l'auberge</span></div>
+        </div>
+        <div class="char-card-meta">Forgeron — Marteau de guerre, 1d6</div>
+        <div class="char-card-actions">
+          <div class="squad-pick"><span class="squad-pick-label">Escouade</span>
+            <select class="char-card-squad"><option>— Sans escouade</option><option selected>Alpha</option><option>Bravo</option><option>+ Nouvelle…</option></select>
+          </div>
+          <div class="char-card-btns"><button class="btn-open">&#9998;</button><button class="btn-delete">&#10006;</button></div>
+        </div>
+      </div>
+
+      <div class="char-card">
+        <div class="char-card-top">
+          <div class="name-row"><div class="portrait" style="background:#2980b9">W</div><div class="char-card-name">Wrena — Niv.0</div></div>
+          <div class="toggle-inn"><label class="switch"><input type="checkbox" checked><span class="slider"></span></label><span class="toggle-label exp">En expédition</span></div>
+        </div>
+        <div class="char-card-meta">Voleuse — Dague, 1d4</div>
+        <div class="char-card-actions">
+          <div class="squad-pick"><span class="squad-pick-label">Escouade</span>
+            <select class="char-card-squad"><option>— Sans escouade</option><option selected>Alpha</option><option>Bravo</option><option>+ Nouvelle…</option></select>
+          </div>
+          <div class="char-card-btns"><button class="btn-open">&#9998;</button><button class="btn-delete">&#10006;</button></div>
+        </div>
+      </div>
+
+      <div class="char-card">
+        <div class="char-card-top">
+          <div class="name-row"><div class="portrait" style="background:#27ae60">G</div><div class="char-card-name">Grub — Niv.0</div></div>
+          <div class="toggle-inn"><label class="switch"><input type="checkbox"><span class="slider"></span></label><span class="toggle-label aub">A l'auberge</span></div>
+        </div>
+        <div class="char-card-meta">Cochonnier — Faux, 1d6</div>
+        <div class="char-card-actions">
+          <div class="squad-pick"><span class="squad-pick-label">Escouade</span>
+            <select class="char-card-squad"><option>— Sans escouade</option><option selected>Alpha</option><option>Bravo</option><option>+ Nouvelle…</option></select>
+          </div>
+          <div class="char-card-btns"><button class="btn-open">&#9998;</button><button class="btn-delete">&#10006;</button></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="squad-bar-list"><span class="squad-dot" style="background:#2980b9"></span> Bravo <span class="count">— 1 perso</span></div>
+    <div class="char-grid">
+      <div class="char-card">
+        <div class="char-card-top">
+          <div class="name-row"><div class="portrait" style="background:#8e44ad">T</div><div class="char-card-name">Tibb — Niv.0</div></div>
+          <div class="toggle-inn"><label class="switch"><input type="checkbox"><span class="slider"></span></label><span class="toggle-label aub">A l'auberge</span></div>
+        </div>
+        <div class="char-card-meta">Sorcier de rue — Bâton, 1d4</div>
+        <div class="char-card-actions">
+          <div class="squad-pick"><span class="squad-pick-label">Escouade</span>
+            <select class="char-card-squad"><option>— Sans escouade</option><option>Alpha</option><option selected>Bravo</option><option>+ Nouvelle…</option></select>
+          </div>
+          <div class="char-card-btns"><button class="btn-open">&#9998;</button><button class="btn-delete">&#10006;</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="squad-bar-list is-void">Sans escouade <span class="count">— 2 persos</span><span class="pin">3</span></div>
+    <div class="char-grid">
+      <div class="char-card">
+        <div class="char-card-top">
+          <div class="name-row"><div class="portrait" style="background:#d35400">M</div><div class="char-card-name">Mara — Niv.0</div></div>
+          <div class="toggle-inn"><label class="switch"><input type="checkbox" checked><span class="slider"></span></label><span class="toggle-label exp">En expédition</span></div>
+        </div>
+        <div class="char-card-meta">Bretteuse — Épée courte, 1d6</div>
+        <div class="char-card-actions">
+          <div class="squad-pick"><span class="squad-pick-label">Escouade</span>
+            <select class="char-card-squad"><option selected>— Sans escouade</option><option>Alpha</option><option>Bravo</option><option>+ Nouvelle…</option></select>
+          </div>
+          <div class="char-card-btns"><button class="btn-open">&#9998;</button><button class="btn-delete">&#10006;</button></div>
+        </div>
+      </div>
+
+      <div class="char-card">
+        <div class="char-card-top">
+          <div class="name-row"><div class="portrait" style="background:#16a085">O</div><div class="char-card-name">Osric — Niv.0</div></div>
+          <div class="toggle-inn"><label class="switch"><input type="checkbox"><span class="slider"></span></label><span class="toggle-label aub">A l'auberge</span></div>
+        </div>
+        <div class="char-card-meta">Paysan — Bâton de combat, 1d4</div>
+        <div class="char-card-actions">
+          <div class="squad-pick"><span class="squad-pick-label">Escouade</span>
+            <select class="char-card-squad"><option selected>— Sans escouade</option><option>Alpha</option><option>Bravo</option><option>+ Nouvelle…</option></select>
+          </div>
+          <div class="char-card-btns"><button class="btn-open">&#9998;</button><button class="btn-delete">&#10006;</button></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="callouts">
+    <span><b>1</b> — Bouton <b>Escouades</b> : ouvre la modale de gestion (écran 2).</span>
+    <span><b>2</b> — Bandeau de groupe : <b>pastille d'identité</b> (couleur propre au nom, identique sur les 3 écrans) + nom + effectif.</span>
+    <span><b>3</b> — <b>Sans escouade</b> en dernier, bandeau muet (pointillé).</span>
+    <span><b>Sur la carte</b> — le sélecteur remplace le clic : il arrête la propagation (la carte ouvre la fiche, le sélecteur non).</span>
+    <span><b>Réservé au niveau 0</b> — bouton, sélecteur et modale n'existent que dans cet onglet : <b>les cartes des 7 classes n'ont aucun sélecteur</b> (R11).</span>
+  </div>
+</section>
+
+<!-- ================= ÉCRAN 2 : modale ================= -->
+<section class="screen">
+  <h2>Écran 2 — Modale « Escouades » (créer / renommer / supprimer)</h2>
+  <div class="frame" style="background:rgba(0,0,0,.35); padding:26px 12px;">
+    <div class="modal-overlay" style="position:static; background:transparent; padding:0;">
+      <div class="modal-box">
+        <div class="modal-title">Escouades</div>
+        <div class="modal-message">Regroupez vos personnages <b>de niveau 0</b> — l'escouade voyage avec eux dans l'export / l'import.</div>
+
+        <div class="squad-manage">
+          <div>
+            <div class="squad-manage-row">
+              <span class="squad-dot" style="background:#c0392b"></span>
+              <input class="squad-name" value="Alpha" aria-label="Nom de l'escouade">
+              <span class="squad-count">3 membres</span>
+              <button class="btn-mini">Renommer</button>
+              <button class="btn-mini danger">Supprimer</button><span class="pin">4</span>
+            </div>
+            <div class="squad-members">
+              <label><input type="checkbox" checked> Borin</label>
+              <label><input type="checkbox" checked> Wrena</label>
+              <label><input type="checkbox" checked> Grub</label>
+              <label><input type="checkbox"> Mara</label>
+              <label><input type="checkbox"> Osric</label>
+              <label><input type="checkbox"> Tibb</label><span class="pin">5</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="squad-manage-row">
+              <span class="squad-dot" style="background:#2980b9"></span>
+              <input class="squad-name" value="Bravo" aria-label="Nom de l'escouade">
+              <span class="squad-count">1 membre</span>
+              <button class="btn-mini">Renommer</button>
+              <button class="btn-mini danger">Supprimer</button>
+            </div>
+            <div class="squad-members">
+              <label><input type="checkbox" checked> Tibb</label>
+              <label><input type="checkbox"> Borin</label>
+              <label><input type="checkbox"> Wrena</label>
+              <label><input type="checkbox"> Grub</label>
+              <label><input type="checkbox"> Mara</label>
+              <label><input type="checkbox"> Osric</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="new-squad">
+          <input placeholder="Nouvelle escouade (40 caractères max)" aria-label="Nouvelle escouade">
+          <button class="btn-mini">+ Nouvelle</button><span class="pin">6</span>
+        </div>
+        <div class="hint">Réservé aux personnages <b>de niveau 0</b> : à la promotion, le personnage sort de son escouade. Une escouade a besoin d'au moins un membre pour exister.</div>
+
+        <div class="modal-actions">
+          <button class="modal-btn-cancel">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="callouts">
+    <span><b>4</b> — <b>Renommer</b> : Entrée valide → tous les membres passent au nouveau nom (unicité insensible à la casse).</span>
+    <span><b>5</b> — <b>Membres cochés</b> : affecter / désaffecter aussi depuis la modale (chemin complet, sans retour à la liste).</span>
+    <span><b>6</b> — <b>+ Nouvelle</b> : le nom n'existe qu'avec ≥ 1 membre (règle « dérivée des persos »).</span>
+    <span><b>Membres lvl0</b> — la modale ne liste <b>que des personnages de niveau 0</b> : un niv.1+ n'y apparaît jamais, il ne peut être affecté ni retiré.</span>
+    <span><b>Fermer</b> — Échap ou clic extérieur : aucune « validation » globale, les écritures sont faites au fil de l'eau.</span>
+  </div>
+</section>
+
+<!-- ================= ÉCRAN 3 : Équipe / expédition ================= -->
+<section class="screen">
+  <h2>Écran 3 — Onglet Équipe · section « Personnages en expédition »</h2>
+  <div class="frame">
+    <div class="section-bar">Personnages en expédition</div>
+    <table class="team-table">
+      <thead>
+        <tr><th style="text-align:left">Nom</th><th>Classe</th><th>Init.</th><th>AC</th><th>PV</th><th>Init. combat</th><th>Tour</th></tr>
+      </thead>
+      <tbody>
+        <tr class="squad-head is-void"><td colspan="7">Hors escouade — 3 persos<span class="pin">7</span></td></tr>
+        <tr><td class="char-name">Doran</td><td><span class="tag">Guerrier</span></td><td>0</td><td>16</td><td>9</td><td>12</td><td>2</td></tr>
+        <tr><td class="char-name">Sela</td><td><span class="tag">Clerc</span></td><td>-1</td><td>13</td><td>4</td><td>—</td><td>0</td></tr>
+        <tr><td class="char-name">Kael</td><td><span class="tag">Mage</span></td><td>+1</td><td>11</td><td>5</td><td>15</td><td>1</td></tr>
+      </tbody>
+      <tbody>
+        <tr class="squad-head"><td colspan="7"><span class="squad-dot" style="background:#c0392b"></span> Alpha — 2 persos<span class="pin">8</span></td></tr>
+        <tr><td class="char-name">Wrena</td><td><span class="tag">Niv.0</span></td><td>+1</td><td>12</td><td>3</td><td>17</td><td>1</td></tr>
+        <tr><td class="char-name">Grub</td><td><span class="tag">Niv.0</span></td><td>0</td><td>11</td><td>4</td><td>6</td><td>0</td></tr>
+      </tbody>
+      <tbody>
+        <tr class="squad-head is-void"><td colspan="7">Sans escouade — 1 perso<span class="pin">9</span></td></tr>
+        <tr><td class="char-name">Mara</td><td><span class="tag">Niv.0</span></td><td>+2</td><td>12</td><td>5</td><td>8</td><td>0</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callouts">
+    <span><b>7</b> — <b>Niv.1+ d'abord</b> (S5) : bloc unique <b>« Hors escouade »</b> — aucun de ces persos n'est éligible à une escouade.</span>
+    <span><b>8</b> — Puis les <b>groupes lvl0</b> (alpha) : bandeau <code>&lt;tr class="squad-head"&gt;&lt;td colspan="7"&gt;</code>, un <b>&lt;tbody&gt; par bloc</b> (zébrage propre à chaque bloc).</span>
+    <span><b>9</b> — <b>« Sans escouade »</b> (lvl0 sans escouade) ferme le tableau.</span>
+    <span><b>S6</b> — Les bandeaux ne s'affichent que si <b>≥ 1 escouade représentée</b> : sinon ce tableau est <b>strictement identique</b> à aujourd'hui.</span>
+    <span><b>Inchangé</b> — colonnes, dépli détail, boutons INIT / RAZ / d20 ; les lignes de bandeau n'ont ni <code>data-char-id</code> ni <code>data-id</code>.</span>
+  </div>
+</section>
+
+<!-- ================= ÉCRAN 4 : Équipe / statistiques ================= -->
+<section class="screen">
+  <h2>Écran 4 — Onglet Équipe · section « Statistiques »</h2>
+  <div class="frame">
+    <div class="section-bar">Statistiques</div>
+    <table class="team-table team-table-stats">
+      <thead>
+        <tr><th style="text-align:left">Nom</th><th>FOR</th><th>AGI</th><th>END</th><th>INT</th><th>SAG</th><th>CHA</th></tr>
+      </thead>
+      <tbody>
+        <tr class="squad-head is-void"><td colspan="7">Hors escouade — 3 persos</td></tr>
+        <tr><td class="char-name">Doran</td><td class="stat-max">18</td><td class="stat-min">11</td><td>13</td><td>9</td><td>10</td><td class="stat-max">15</td></tr>
+        <tr><td class="char-name">Sela</td><td>10</td><td>12</td><td class="stat-min">8</td><td>14</td><td class="stat-max">15</td><td>10</td></tr>
+        <tr><td class="char-name">Kael</td><td class="stat-min">7</td><td>13</td><td>10</td><td class="stat-max">17</td><td>14</td><td>11</td></tr>
+      </tbody>
+      <tbody>
+        <tr class="squad-head"><td colspan="7"><span class="squad-dot" style="background:#c0392b"></span> Alpha — 2 persos</td></tr>
+        <tr><td class="char-name">Wrena</td><td>9</td><td class="stat-max">16</td><td>11</td><td>12</td><td>11</td><td>12</td></tr>
+        <tr><td class="char-name">Grub</td><td>13</td><td>12</td><td class="stat-max">14</td><td class="stat-min">8</td><td class="stat-min">7</td><td>10</td></tr>
+      </tbody>
+      <tbody>
+        <tr class="squad-head is-void"><td colspan="7">Sans escouade — 1 perso</td></tr>
+        <tr><td class="char-name">Mara</td><td>11</td><td>15</td><td>12</td><td>13</td><td>14</td><td class="stat-min">9</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callouts">
+    <span><b>Mêmes blocs</b> que l'écran 3, même ordre (S5) : <b>« Hors escouade »</b> (niv.1+) puis les groupes lvl0.</span>
+    <span><b>Min/max</b> — vert / rouge recalculés sur les <b>lignes de persos uniquement</b> : les bandeaux n'entrent jamais dans le calcul.</span>
+    <span><b>Dépli</b> — la ligne de détail s'insère <b>dans le même &lt;tbody&gt;</b> que sa ligne mère (le bloc reste cohérent).</span>
+    <span><b>S6</b> — aucun bandeau si aucune escouade n'est représentée : le tableau retrouve exactement son rendu actuel.</span>
+  </div>
+</section>
+
+</body>
+</html>

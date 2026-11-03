@@ -1338,9 +1338,34 @@ window.DCCModules.equipe = {
       btnRaz.className = 'btn-sm btn-raz';
       btnRaz.textContent = 'RAZ';
 
+      /* Évolution #2 : bouton « d20 » — tirage d'initiative « à la volée »
+         pour les ennemis. Même ligne que + Ajouter / - Supprimer / RAZ mais
+         logé dans un conteneur DÉCALÉ (margin-left 14 px) : impossible de le
+         viser par mégarde en visant l'un des 3 boutons. Rien n'est persisté
+         (pur affichage : aucun scheduleTeamStateSave). */
+      const d20Wrap = document.createElement('div');
+      d20Wrap.className = 'd20-wrap';
+
+      const btnD20 = document.createElement('button');
+      btnD20.type = 'button';
+      btnD20.className = 'btn-sm btn-d20';
+      btnD20.textContent = 'd20';
+      btnD20.setAttribute('aria-label', 'Tirer un d20 (nombre aléatoire de 1 à 20)');
+
+      /* Bulle de résultat, ancrée AU-DESSUS du bouton (popover à flèche) :
+         role=status + aria-live pour la lecture d'écran. */
+      const d20Bubble = document.createElement('div');
+      d20Bubble.className = 'd20-bubble';
+      d20Bubble.setAttribute('role', 'status');
+      d20Bubble.setAttribute('aria-live', 'polite');
+
+      d20Wrap.appendChild(btnD20);
+      d20Wrap.appendChild(d20Bubble);
+
       btnGroup.appendChild(btnAdd);
       btnGroup.appendChild(btnRemove);
       btnGroup.appendChild(btnRaz);
+      btnGroup.appendChild(d20Wrap);
       container.appendChild(btnGroup);
 
       // Table ennemis
@@ -1405,6 +1430,20 @@ window.DCCModules.equipe = {
           tbodyE.appendChild(createEnemyRow());
         }
         scheduleTeamStateSave(); /* table vidé → ennemis effacés en base */
+      });
+
+      /* Clic sur d20 : entier 1 à 20 INCLUS, bulle visible 2,5 s puis
+         masquée. Un nouveau clic relance le tirage et redémarre le
+         minuteur. Zéro écriture en base (l'état des ennemis est intact). */
+      let d20Timer = null;
+      btnD20.addEventListener('click', function () {
+        const value = 1 + Math.floor(Math.random() * 20);
+        d20Bubble.textContent = String(value);
+        d20Bubble.classList.add('is-visible');
+        clearTimeout(d20Timer);
+        d20Timer = setTimeout(function () {
+          d20Bubble.classList.remove('is-visible');
+        }, 2500);
       });
 
       // Section Statistiques (hors scope si 0 PJ)

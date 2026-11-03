@@ -2804,6 +2804,65 @@ tr.team-stats-detail.open .team-detail-wrap {
   background: var(--line);
 }
 
+/* Bouton d20 (section Ennemis, évol. #2) : sur la MÊME ligne que
+   + Ajouter / - Supprimer / RAZ mais DÉCALÉ de 14 px pour ne pas cliquer
+   par mégarde sur l'un d'eux. Contour encre : ni le vert « ajouter » ni le
+   rouge « supprimer » ni le muet « RAZ ». */
+.btn-d20 {
+  background: transparent;
+  border: 1px solid var(--ink);
+  color: var(--ink);
+}
+
+.btn-d20:hover {
+  background: var(--line);
+}
+
+.d20-wrap {
+  position: relative;
+  margin-left: 14px;
+}
+
+/* Bulle de résultat : petit popover posé AU-DESSUS du bouton d20 (flèche
+   vers le bas), affiché 2,5 s puis masqué (classe .is-visible).
+   Fond encre / texte papier → lisible aussi en thème sombre. */
+.d20-bubble {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  right: 0;
+  min-width: 34px;
+  padding: 5px 8px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  border-radius: var(--radius-sm);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(4px);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.d20-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  right: 12px;
+  border: 5px solid transparent;
+  border-top-color: var(--ink);
+}
+
+.d20-bubble.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
 /* --------------------------------------------------------------------------
    Responsive - 600px Breakpoint
    -------------------------------------------------------------------------- */

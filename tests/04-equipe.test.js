@@ -226,6 +226,56 @@ async function run() {
       await delay(20);
       r.eq(enemies.querySelectorAll('tbody tr').length, 3, 'confirm RAZ resets to 3 rows');
       r.eq(enemies.querySelectorAll('tbody tr input')[0].value, '', 'confirm clears enemy name');
+
+      // --- d20 (évolution #2) : tirage « à la volée » + bulle de résultat ---
+      const btnD20 = group.querySelector('.btn-d20');
+      r.ok(!!btnD20, 'd20 button present in the enemy button row');
+      r.eq(btnD20.textContent, 'd20', 'd20 label');
+      r.eq(btnD20.getAttribute('type'), 'button', 'd20 is type=button');
+      r.ok(!!btnD20.getAttribute('aria-label'), 'd20 aria-label set');
+      r.eq(btnD20.parentNode.className, 'd20-wrap', 'd20 sits in its offset wrapper');
+      r.eq(btnD20.parentNode.parentNode, group, 'wrapper is a direct child of the btn-group');
+      r.eq(group.lastElementChild, btnD20.parentNode,
+        'd20 is the LAST item of the row, right after RAZ');
+      r.ok(!!group.querySelector('.btn-add') && !!group.querySelector('.btn-remove')
+        && !!group.querySelector('.btn-raz'),
+        'the 3 original buttons are still there');
+
+      const d20Bubble = btnD20.parentNode.querySelector('.d20-bubble');
+      r.ok(!!d20Bubble, 'bubble lives in the wrapper (anchored to the button)');
+      r.eq(d20Bubble.getAttribute('role'), 'status', 'bubble role=status');
+      r.eq(d20Bubble.getAttribute('aria-live'), 'polite', 'bubble aria-live=polite');
+      r.ok(!d20Bubble.classList.contains('is-visible'), 'bubble hidden before any click');
+
+      const enemyRowsBeforeD20 = enemies.querySelectorAll('tbody tr').length;
+      const modalBeforeD20 = modalCalls;
+      const realRandom = env.window.Math.random;
+
+      env.window.Math.random = function () { return 0; };
+      click(btnD20);
+      r.eq(d20Bubble.textContent, '1', 'rng=0 rolls the minimum (1)');
+      r.ok(d20Bubble.classList.contains('is-visible'), 'bubble visible after click');
+
+      env.window.Math.random = function () { return 0.999999; };
+      click(btnD20);
+      r.eq(d20Bubble.textContent, '20', 'rng~1 rolls the maximum (20)');
+      r.ok(d20Bubble.classList.contains('is-visible'), 'bubble still visible on 2nd click');
+      env.window.Math.random = realRandom;
+
+      r.eq(modalCalls, modalBeforeD20, 'no confirmation modal for a d20 roll');
+      r.eq(enemies.querySelectorAll('tbody tr').length, enemyRowsBeforeD20,
+        'd20 touches no enemy row');
+
+      // Un clic relance le tirage ET redémarre le minuteur (2,5 s).
+      click(btnD20);                       // t = 0
+      await delay(1500);
+      click(btnD20);                       // t = 1500 ms : minuteur relancé
+      await delay(1600);                   // t = 3100 ms > 2500 (1er minuteur)
+      r.ok(d20Bubble.classList.contains('is-visible'),
+        'bubble still visible 3.1 s after the 1st click (timer restarted)');
+      await delay(1100);                   // t = 4200 ms > 4000 (2e minuteur)
+      r.ok(!d20Bubble.classList.contains('is-visible'),
+        'bubble hidden 2.5 s after the last click');
     }
   }
 

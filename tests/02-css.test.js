@@ -60,6 +60,10 @@ module.exports = function suite() {
     '.table-actions .btn-init',
     '.table-actions .btn-raz',
     '.btn-init',
+    '.btn-d20',
+    '.d20-wrap',
+    '.d20-bubble',
+    '.d20-bubble.is-visible',
   ];
   critical.forEach(function (sel) {
     r.ok(css.indexOf(sel) !== -1, 'CSS selector present: ' + sel);
@@ -84,6 +88,42 @@ module.exports = function suite() {
   // (gap 6px -> 4px) : aucune empilement, aucune largeur imposee.
   const actionsMobile = css.match(/\.table-actions \{[^}]*gap: 4px[^}]*\}/);
   r.ok(!!actionsMobile, 'mobile : ligne d\'actions resserree (gap: 4px), toujours sur une ligne');
+
+  // Bouton d20 (section Ennemis, evolution #2) : meme ligne que
+  // + Ajouter / - Supprimer / RAZ mais DECALÉ (margin-left 14 px) pour
+  // eviter les clics par megarde ; bulle de resultat en popover AU-DESSUS
+  // du bouton (flèche vers le bas), masquee par defaut, visible 2,5 s.
+  const d20Wrap = css.match(/\.d20-wrap \{[^}]+\}/);
+  r.ok(!!d20Wrap, '.d20-wrap block found');
+  if (d20Wrap) {
+    r.ok(d20Wrap[0].indexOf('position: relative') !== -1,
+      '.d20-wrap is relative (ancre de la bulle)');
+    r.ok(d20Wrap[0].indexOf('margin-left: 14px') !== -1,
+      '.d20-wrap decole le bouton de 14 px de ses 3 voisins');
+  }
+
+  const d20Bubble = css.match(/\.d20-bubble \{[^}]+\}/);
+  r.ok(!!d20Bubble, '.d20-bubble block found');
+  if (d20Bubble) {
+    r.ok(d20Bubble[0].indexOf('bottom: calc(100% + 10px)') !== -1,
+      'bulle posee AU-DESSUS du bouton d20');
+    r.ok(d20Bubble[0].indexOf('opacity: 0') !== -1, 'bulle masquee par defaut (opacity: 0)');
+    r.ok(d20Bubble[0].indexOf('visibility: hidden') !== -1, 'bulle invisible par defaut');
+    r.ok(d20Bubble[0].indexOf('pointer-events: none') !== -1,
+      'bulle non cliquable (ne masque jamais le bouton)');
+  }
+
+  const d20Visible = css.match(/\.d20-bubble\.is-visible \{[^}]+\}/);
+  r.ok(!!d20Visible, '.d20-bubble.is-visible block found');
+  if (d20Visible) {
+    r.ok(d20Visible[0].indexOf('opacity: 1') !== -1, '.is-visible affiche la bulle');
+  }
+
+  const d20Arrow = css.match(/\.d20-bubble::after \{[^}]+\}/);
+  r.ok(!!d20Arrow, 'petite fleche de la bulle (vers le bouton) presente');
+  if (d20Arrow) {
+    r.ok(d20Arrow[0].indexOf('border-top-color') !== -1, 'fleche orientee vers le bas');
+  }
 
   // La popup doit desactiver l'ancrage de defilement du navigateur : sinon le
   // recale manuel de loadUp() (scrollTop += delta) est double par le navigateur

@@ -603,6 +603,7 @@ Sous la section **Ennemis** : un tableau de **3 lignes vides par défaut**, colo
 - **+ Ajouter** : ajoute une ligne en fin de tableau.
 - **− Supprimer** : supprime la **dernière** ligne.
 - **RAZ** : demande confirmation, puis vide le tableau et le réinitialise à **3 lignes vides** ; le tableau vidé est **propagé en base**.
+- **d20** : tire un nombre **au hasard entre 1 et 20** (inclus) et l'affiche dans une **bulle** posée **juste au-dessus du bouton** (petit popover à flèche), pendant **2,5 secondes** ; un nouveau clic **relance le tirage et redémarre le minuteur**. Le bouton est sur la **même ligne** que les trois précédents mais **décalé de 14 px** : impossible de le viser par mégarde en visant le RAZ. C'est un tirage **« à la volée »** (initiative d'un ennemi au jugé) : **rien n'est écrit en base**, aucune confirmation ne s'affiche et le tableau des ennemis n'est pas touché.
 
 > Les ennemis sont **sauvegardés en base** et **inclus dans l'export global JSON** : ils sont restaurés au prochain affichage de l'onglet. Seules les **lignes renseignées** sont conservées (les lignes entièrement vides sont ignorées) : après un rechargement, vous retrouvez vos ennemis déclarés, complétés s'il en manque pour retomber à 3 lignes. Les compteurs de tour fonctionnent comme pour les PJ (§ 8.2).
 
@@ -1167,6 +1168,7 @@ Deux livrables **identiques en contenu**, à télécharger depuis les **releases
 | **Funnel** | 75 tokens de niveau 0 (`icons/funnel-tokens/`), réservés aux fiches de niveau 0 |
 | **Toast** | Petit message transitoire en bas à droite |
 | **INIT** | Bouton de l'onglet Équipe : tire l'initiative de tous les PJ en expédition (formule de chaque fiche) et remet leurs tours à 0 |
+| **d20 (bouton)** | Bouton de la section Ennemis : affiche 2,5 s une bulle avec un nombre aléatoire de 1 à 20 — tirage à la volée, sans écriture en base |
 | **RAZ** | Remise à zéro (table des ennemis) |
 
 ---

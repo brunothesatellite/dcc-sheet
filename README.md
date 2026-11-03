@@ -112,6 +112,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
   - Zone **AGI–END–PRE** groupée + **chevron sous END** → detail des jets de sauvegarde (REF / VIG / VOL) juste sous la ligne
   - Un seul detail JdS ouvert ; collapse independant du detail combat
 - Tableau des ennemis : colonnes **Ennemi, AC, ATT, PV, Init., Tour** (ajout/suppression/RAZ avec confirmation) — **sauvegarde en base, seules les lignes renseignees sont conservees** ; **crane rouge a 0 PV** sur la cellule Ennemi et **barre de PV** sous le champ PV (max = plus grand PV saisi sur la ligne)
+- **Bouton d20** (section Ennemis) : sur la meme ligne que + Ajouter / - Supprimer / RAZ mais **decale de 14 px** (pas de clic par megarde) ; au clic, une **bulle ancree juste au-dessus du bouton** affiche un nombre aleatoire **entre 1 et 20** pendant **2,5 s** (nouveau clic = nouveau tirage + minuteur relance) — **aucune ecriture en base**, le tableau des ennemis n'est pas touche
 - Compteurs de tour (clic = +1, clic droit / appui long = reset, cycle modulo 5) — **sauvegardes en base**
 - **Etat combat en base** : Init. combat, tours et ennemis sont ecrits dans `users.team_state` (debounce 600 ms + toast), restaurs au prochain affichage et **inclus dans l'export/import global JSON** (`team_state`, remap des index vers les nouveaux ids ; fichier ancien sans le champ = remise a zero)
 - Notes d'equipe (sauvegardees en base via l'API, inclues dans l'export/import global JSON)

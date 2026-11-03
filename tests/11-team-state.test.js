@@ -245,6 +245,18 @@ function testEquipe(r) {
     r.eq(saves[4].ennemis.length, 0, 'tableau vidé -> aucun ennemi persisté');
     r.eq(enemyRows(container).length, 3, 'RAZ : retour à 3 lignes vides');
 
+    /* --- d20 (évolution #2) : pur affichage, zéro écriture --- */
+    const btnD20 = container.querySelector('.btn-group .btn-d20');
+    r.ok(!!btnD20, 'bouton « d20 » présent dans le groupe ennemi');
+    click(btnD20);
+    const d20Bubble = btnD20 ? btnD20.parentNode.querySelector('.d20-bubble') : null;
+    r.ok(!!d20Bubble && d20Bubble.classList.contains('is-visible'),
+      'clic d20 -> bulle affichée');
+    const d20Value = d20Bubble ? parseInt(d20Bubble.textContent, 10) : NaN;
+    r.ok(d20Value >= 1 && d20Value <= 20, 'bulle : entier entre 1 et 20');
+    await delay(SAVE_DELAY);
+    r.eq(saves.length, 5, 'clic d20 -> aucune écriture en base (pur affichage)');
+
     /* --- RAZ Init. combat + tours --- */
     const btnRazInit = container.querySelector('.table-actions .btn-raz');
     r.ok(!!btnRazInit, 'bouton RAZ (init. combat + tours) présent');

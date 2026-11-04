@@ -11,6 +11,122 @@ window.DCCModules.equipe = {
     let expandedCharacterId = null;
     let expandedStatsId = null;
 
+    /* --- Evolution #4 : escouades (NOTION EXCLUSIVE DU NIVEAU 0) -----------
+       Le module n'importe pas script.js : ces helpers sont la duplication
+       VOLONTAIRE des memes regles (hash de couleur identique partout —
+       c'est le seul lien visuel entre la liste, l'expedition et les stats).
+       characters.data.escouade = nom ; absent/'' = sans escouade ; un
+       niv.1+ n'est JAMAIS eligible (R11) : la garde est dans squadOf(). */
+    const SQUAD_COLORS = ['#c0392b', '#2980b9', '#27ae60', '#8e44ad', '#d35400', '#16a085'];
+
+    function squadOf(charData) {
+      if (!charData || charData.class !== 'lvl0') return '';
+      let parsed = {};
+      try { parsed = JSON.parse(charData.data || '{}'); } catch (e) { return ''; }
+      const s = parsed.escouade;
+      return typeof s === 'string' ? s.trim() : '';
+    }
+
+    function squadColor(name) {
+      const s = String(name || '').toLowerCase();
+      let h = 0;
+      for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+      return SQUAD_COLORS[h % SQUAD_COLORS.length];
+    }
+
+    /* Decoupage des DEUX tableaux, dans l'ordre S5 : niv.1+ d'abord (bloc
+       « Hors escouade »), puis les groupes lvl0 alpha, puis lvl0 « Sans
+       escouade » en dernier. S6 : retourne NULL des qu'aucune escouade
+       n'est representee — le rendu est alors STRICTEMENT celui d'avant
+       (aucun bandeau, aucun reordonnancement : CLASSES finit par 'lvl0',
+       donc S5 ne bouge rien tant qu'il n'y a pas de bandeau). */
+    function squadBlocks(rows) {
+      const others = [];
+      const free = [];
+      const byKey = {};
+      const order = [];
+
+      rows.forEach(function (row) {
+        if (row.class !== 'lvl0') { others.push(row); return; } /* niv.1+ : jamais eligible */
+        const s = squadOf(row);
+        if (!s) { free.push(row); return; }
+        const key = s.toLowerCase();
+        if (!byKey[key]) { byKey[key] = { label: s, members: [] }; order.push(key); }
+        byKey[key].members.push(row);
+      });
+
+      if (!order.length) return null; /* S6 : aucune escouade = aucun bandeau */
+
+      const blocks = [];
+      if (others.length) blocks.push({ label: 'Hors escouade', members: others, isVoid: true });
+      order.map(function (k) { return byKey[k]; })
+        .sort(function (a, b) {
+          return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
+        })
+        .forEach(function (g) { blocks.push(g); });
+      if (free.length) blocks.push({ label: 'Sans escouade', members: free, isVoid: true });
+      return blocks;
+    }
+
+    /* Bandeau <tr class="squad-head"><td colspan> : libelle + effectif,
+       nom injecte en textContent (jamais innerHTML — R9). Le bandeau n'a
+       NI data-char-id NI data-id : invisible pour resync, les compteurs de
+       lignes et le min/max des stats (recalcules sur les seules lignes de
+       persos, inchange). */
+    function squadHeadRow(block, cols) {
+      const tr = document.createElement('tr');
+      tr.className = 'squad-head' + (block.isVoid ? ' is-void' : '');
+
+      const td = document.createElement('td');
+      td.colSpan = cols;
+      if (!block.isVoid) {
+        const dot = document.createElement('span');
+        dot.className = 'squad-dot';
+        dot.style.background = squadColor(block.label);
+        td.appendChild(dot);
+      }
+      td.appendChild(document.createTextNode(' ' + block.label));
+      const count = document.createElement('span');
+      count.className = 'count';
+      const n = block.members.length;
+      count.textContent = '— ' + n + (n > 1 ? ' persos' : ' perso');
+      td.appendChild(count);
+
+      tr.appendChild(td);
+      return tr;
+    }
+
+    /* Redistribue les lignes DEJA construites dans un <tbody> par bloc :
+       un <tbody> par escouade fait repartir le zebra tr:nth-child(even) a
+       zero dans chaque bloc, la ligne de detail reste collee a sa mere (elle
+       n'a pas d'id -> elle suit le bloc courant), et resync ne voit toujours
+       que des lignes persos. Les noeuds sont DEPLACES (appendChild = move),
+       jamais recopies. */
+    function applySquadBlocks(table, sourceTbody, blocks) {
+      const index = {};
+      blocks.forEach(function (b, i) {
+        b.members.forEach(function (m) { index[String(m.id)] = i; });
+      });
+
+      const headRow = table.querySelector('thead tr');
+      const cols = headRow ? headRow.children.length : 7;
+
+      const tbodies = blocks.map(function (b) {
+        const tb = document.createElement('tbody');
+        tb.appendChild(squadHeadRow(b, cols));
+        table.appendChild(tb);
+        return tb;
+      });
+
+      let current = 0;
+      Array.prototype.slice.call(sourceTbody.children).forEach(function (node) {
+        const id = node.getAttribute('data-char-id') || node.getAttribute('data-id');
+        if (id && index[id] !== undefined) current = index[id];
+        tbodies[current].appendChild(node);
+      });
+      sourceTbody.remove();
+    }
+
     /* --- État combat (Init. combat, tours, ennemis) -----------------------
        Persistance via team-state.js (optionnel, comme dead-overlay.js) :
        sans ce fichier ou sans callback, pas de sauvegarde (comportement
@@ -606,6 +722,12 @@ window.DCCModules.equipe = {
       });
 
       table.appendChild(tbody);
+
+      /* Evolution #4 : bandeaux par escouade dans les Statistiques (S4-S6).
+         Meme decoupage que le tableau d'expedition, memes blocs. */
+      const statBlocks = squadBlocks(parsedRows.map(function (row) { return row.charData; }));
+      if (statBlocks) applySquadBlocks(table, tbody, statBlocks);
+
       fragment.appendChild(table);
       return fragment;
     }
@@ -1223,6 +1345,14 @@ window.DCCModules.equipe = {
         });
 
         tableChars.appendChild(tbody);
+
+        /* Evolution #4 : bandeaux par escouade dans « Personnages en
+           expédition » (S4-S6) — niv.1+ d'abord, groupes lvl0 alpha, puis
+           « Sans escouade ». S6 : sans aucune escouade representee,
+           squadBlocks() renvoie null et le tableau reste strictement tel
+           qu'aujourd'hui. */
+        const charBlocks = squadBlocks(characters);
+        if (charBlocks) applySquadBlocks(tableChars, tbody, charBlocks);
 
         /* Évolution #1 : tirage de l'initiative de TOUS les PJ.
            Le jet va dans « Init. combat » (persisté, conservé par la resync) ;

@@ -316,6 +316,12 @@
     out.portrait_source = '';
     out.portrait_index = '0';
 
+    /* Evolution #4 (R10) : l'escouade est une notion EXCLUSIVE du niveau 0 —
+       le personnage promu en sort definitivement (la cle n'est jamais
+       recopiee dans le niv.1+ ; un ancien data.escouade herite d'import est
+       ignore a l'affichage par squadOf(), jamais migre ni purge). */
+    delete out.escouade;
+
     return out;
   }
 

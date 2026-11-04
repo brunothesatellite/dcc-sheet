@@ -275,7 +275,7 @@ L'onglet **Niveau 0** gère les personnages du *funnel* DCC, ceux qui existent a
 
 <img src="captures/onglet0.png" alt="Onglet Niveau 0 : liste des personnages de niveau 0 avec leur portrait, leur nom suivi de Niv.0, leur métier en sous-titre, l'interrupteur expédition / auberge et les boutons + Nouveau et Import" width="420">
 
-*L'onglet **Niveau 0** : cartes avec le métier en sous-titre, boutons **+ Nouveau** (tirage) et **Import**.*
+*L'onglet **Niveau 0** : cartes avec le métier en sous-titre, boutons **+ Nouveau** (tirage) et **Import**. (Capture antérieure à l'évolution #4 : le bouton **Escouades** n'y figure pas.)*
 
 **Tirer un personnage — « + Nouveau » demande combien**
 1. Ouvrez l'onglet **Niveau 0** — en mobile, il s'affiche sous sa forme courte **« Niv 0 »**, juste après *Voleur* (les 8 onglets partagent toute la largeur : aucun défilement).
@@ -301,17 +301,46 @@ L'onglet **Niveau 0** gère les personnages du *funnel* DCC, ceux qui existent a
    - sinon → choix entre **Clerc, Guerrier, Mage, Voleur** (les autres sont grisées).
    Le bouton **Promouvoir** reste inactif tant qu'aucune classe n'est cochée.
 3. La case **« Supprimer le personnage de niveau 0 après la conversion »** est décochée par défaut : elle permet de convertir *sans* garder l'originel.
-4. À la validation, un **nouveau personnage de niveau 1** est créé dans la classe choisie : **la fiche est recopiée intégralement** — identité (nom, titre, métier, alignement, mouvement), caractéristiques et modificateurs, **jets de sauvegarde (JS Ref / Vig / Vol)**, bonus d'attaque, dés et table de critique, initiative, jet chanceux, langues, notes, armes, équipement, trésor, armure, PV et CA. **Seul le portrait est retiré** : un nouveau est tiré dans ceux de la classe. Vérifiez simplement les valeurs héritées du funnel qui dépendent de la classe (bonus d'attaque, dé de critique) : elles sont conservées telles quelles. La fiche du personnage promu s'ouvre directement.
+4. À la validation, un **nouveau personnage de niveau 1** est créé dans la classe choisie : **la fiche est recopiée intégralement** — identité (nom, titre, métier, alignement, mouvement), caractéristiques et modificateurs, **jets de sauvegarde (JS Ref / Vig / Vol)**, bonus d'attaque, dés et table de critique, initiative, jet chanceux, langues, notes, armes, équipement, trésor, armure, PV et CA. **Seul le portrait est retiré** : un nouveau est tiré dans ceux de la classe. **L'escouade aussi** : un niveau 1 n'y est pas éligible — le personnage **sort définitivement de son escouade** (le cas échéant, il rejoint le bloc **Hors escouade** de l'onglet Équipe). Vérifiez simplement les valeurs héritées du funnel qui dépendent de la classe (bonus d'attaque, dé de critique) : elles sont conservées telles quelles. La fiche du personnage promu s'ouvre directement.
 
 <img src="captures/promo0.png" alt="Fenêtre Promouvoir en niveau 1 : liste des classes à cocher (Clerc, Guerrier, Mage, Voleur), les classes raciales grisées avec le motif, la case Supprimer le personnage de niveau 0 après la conversion, et les boutons Annuler et Promouvoir" width="420">
 
 *La fenêtre **Promouvoir** : le métier impose la classe quand il s'agit d'une race, et le bouton reste inactif tant qu'aucune classe n'est cochée.*
+
+**Regrouper par escouade — « Escouades » (réservé au niveau 0)**
+
+> **Restriction** : une **escouade ne concerne que les personnages de niveau 0**. Aucun personnage de niveau 1 ou plus n'y entre : **à la promotion, le personnage sort définitivement de son escouade**.
+
+Les escouades **segmentent la liste** de l'onglet : un **bandeau** par escouade (pastille de couleur, nom en majuscules, effectif), ses cartes en dessous — escouades en **ordre alphabétique**, groupe **« Sans escouade » en dernier**. Le tri à l'intérieur de chaque groupe (personnages **en expédition d'abord**, puis date de mise à jour) est **inchangé**.
+
+<img src="captures/niveau0-escouades-desktop.png" alt="Onglet Niveau 0 segmenté par escouade : bandeau ALPHA — 2 PERSOS avec ses deux cartes (sélecteur Escouade sur chacune), puis bandeau pointillé SANS ESCOUADE — 1 PERSO ; boutons Escouades, Nouveau et Import en haut à droite" width="420">
+
+*La liste **Niveau 0** segmentée : **Alpha — 2 persos** (pastille verte) puis **Sans escouade — 1 perso** en pointillé. Chaque carte porte son sélecteur **Escouade**, et le bouton **Escouades** ouvre la fenêtre de gestion.*
+
+<img src="captures/modal-escouades-desktop.png" alt="Fenêtre Escouades : champ de nom Alpha, compteur 2 membres, boutons Renommer et Supprimer, cases à cocher Mui / Oppah / Lureene, bloc + Nouvelle escouade avec nom, membre fondateur et bouton Ajouter, bouton Fermer" width="420">
+
+*La fenêtre **Escouades** : renommage, suppression, affectation par case à cocher, et création d'une escouade avec son **membre fondateur**.*
+
+En **mobile (390 px)**, la liste et la fenêtre s'adaptent **sans défilement horizontal** :
+
+| Liste Niveau 0 | Fenêtre Escouades |
+|---|---|
+| <img src="captures/niveau0-escouades-mobile.png" alt="Onglet Niveau 0 en mobile 390 px : bandeaux d'escouade et cartes empilées sur une seule colonne, sans débordement" width="240"> | <img src="captures/modal-escouades-mobile.png" alt="Fenêtre Escouades en mobile 390 px : nom de l'escouade, membres, nouvelle escouade et boutons empilés pleine largeur" width="240"> |
+
+- **Créer / nommer** — deux entrées :
+  1. bouton **Escouades** en haut de la liste (entre le titre et **+ Nouveau**) → fenêtre de gestion : saisissez le **nom** (**40 caractères** maximum, nom **unique** — `Alpha` et `alpha` sont la même escouade), choisissez un **membre fondateur niveau 0** puis cliquez **Ajouter**. *Une escouade sans membre n'existe pas : elle est dérivée de ses membres.*
+  2. sur **chaque carte** de niveau 0, le sélecteur **Escouade** → **+ Nouvelle…** : le personnage de la carte rejoint aussitôt la nouvelle escouade (le nom est saisi dans une petite fenêtre).
+- **Affecter / désaffecter** — sur la carte : sélecteur **Escouade** → **— Sans escouade** ou le nom d'une escouade existante. Dans la fenêtre de gestion : **cases à cocher** devant chaque nom de personnage (niveau 0 uniquement) ; chaque case est enregistrée **immédiatement**.
+- **Renommer** — fenêtre **Escouades** : corrigez le nom dans son champ puis **Renommer** (ou **Entrée**) : les membres suivent ; un nom déjà pris affiche l'avertissement **« Une escouade « X » existe déjà »** et rien n'est écrit.
+- **Supprimer** — **Supprimer** dans la fenêtre de gestion, après confirmation : les membres repassent en **Sans escouade**. Retirer le **dernier membre** d'une escouade la fait **disparaître d'elle-même**.
 
 **Bon à savoir**
 - **Puissance** : à droite du nom dans l'en-tête de la fiche, un **bras musclé rouge** suivi de la **somme des modificateurs des 6 caractéristiques** (ex. `+3`) — repère rapide pour juger la qualité d'un tirage. Ce badge n'existe que sur la fiche de niveau 0.
 - La carte de la liste affiche le **métier** en sous-titre (à la place du dieu des Clercs) et le nom suivi de `— Niv.0`.
 - Un niveau 0 **en expédition** entre dans l'**onglet Équipe** comme les autres personnages : PV, initiative, tour, ordre de marche, statistiques.
 - L'export/import **individuel** et **global** (§ 4.4 à 4.6) prennent en charge les niveaux 0 sans rien changer à la procédure.
+- L'**escouade** est **stockée avec le personnage** : elle suit vos **export / import** sans rien changer à la procédure, et l'**onglet Équipe** la reprend dans ses deux tableaux (§ 8.1 et § 8.3b).
+- La fenêtre **Escouades** se ferme par **Échap**, un clic **en dehors** ou **Fermer** — il n'y a **pas de bouton « valider »** : chaque modification est enregistrée **immédiatement**.
 
 ---
 
@@ -539,6 +568,16 @@ Colonnes :
 
 > Seuls les PJ **en expédition** apparaissent. Pour en retirer un, passez-le à l'auberge depuis sa classe (§ 5) : à votre retour sur l'onglet Équipe, la page est **rechargée automatiquement** (votre état combat est alors relu en base, comme en F5).
 
+> **Bandeaux d'escouade (niveau 0)** : dès qu'**au moins une escouade est représentée** dans ce tableau, les lignes sont **segmentées par bandeau** — bloc **« Hors escouade »** en tout premier (les personnages de **niveau 1 et plus** ne sont **jamais éligibles**, même s'ils portaient une escouade), puis les **escouades de niveau 0** en **ordre alphabétique**, et le groupe **« Sans escouade »** en dernier. Chaque bandeau affiche l'**effectif** de son bloc ; les blocs vides (« Hors escouade » / « Sans escouade ») sont dessinés en **pointillé** et sans pastille. **Sans aucune escouade représentée, le tableau est strictement celui d'avant** : aucun bandeau, aucun réordonnancement. Le **détail combat** (§ 8.1b) s'ouvre toujours **dans le bloc** de son personnage.
+
+<img src="captures/equipe-escouades-desktop.png" alt="Tableau Personnages en expédition avec bandeau HORS ESCOUADE — 7 PERSOS en tête, suivi des lignes des personnages de niveau 1" width="420">
+
+*Le tableau des PJ en expédition avec son bandeau **Hors escouade — 7 persos** (les niv.1+ d'abord), puis les blocs d'escouade.*
+
+<img src="captures/equipe-escouades-mobile.png" alt="Même tableau en mobile 390 px : bandeaux Hors escouade, Alpha et Sans escouade visibles, tableaux compressés sans défilement horizontal" width="240">
+
+*En **mobile (390 px)** : les mêmes bandeaux, sans débordement horizontal.*
+
 Sous le tableau, **sur une même ligne justifiée à droite** (donc plus ou moins sous les colonnes **Init. combat** et **Tour**, qu'ils pilotent), deux boutons se succèdent :
 
 - **INIT** (à gauche) : tire l'initiative de **tous les PJ en expédition** en une seule action. Pour chaque personnage, la valeur est calculée d'après la formule de **sa propre fiche** (§ 7, bloc **Combat**, champ **Initiative**) : `1d20+2` = un d20 + 2, `1d16-1` = un d16 − 1, `+3` = un d20 + 3, `-1` = un d20 − 1 ; **si aucun dé n'est indiqué** (champ vide ou illisible), c'est un **d20** qui est tiré. Le jet est écrit dans la colonne **Init. combat** — la colonne **Init.**, elle, continue d'afficher la formule lue dans la fiche. Le compteur **Tour** de chaque personnage est en même temps **remis à 0**. Le résultat est **propagé en base** (et dans l'export), exactement comme une saisie manuelle. Une demande de confirmation apparaît **uniquement s'il existe déjà un jet ou un tour** à écraser ; sinon le tirage est immédiat.
@@ -623,6 +662,15 @@ Entre **Ennemis** et **Notes** : un tableau des PJ **en expédition** avec les 6
   JdS REF    JdS VIG    JdS VOL
   ```
 - Un **seul** détail JdS est ouvert à la fois ; re-cliquez (chevron ▲) pour replier. Ce collapse est **indépendant** du détail combat (§ 8.1b) : les deux peuvent coexister.
+- **Bandeaux d'escouade** : mêmes blocs que le tableau des PJ en expédition (§ 8.1) — **Hors escouade** (niv.1+) d'abord, puis les **escouades de niveau 0** en ordre alphabétique, puis **Sans escouade** ; un **<tbody> par bloc** fait repartir le zébrage à zéro dans chaque bloc. Les bandeaux sont affichés **uniquement s'il existe au moins une escouade représentée** : sinon ce tableau est **strictement identique** à avant. Le **min / max** et le détail **JdS** ne tiennent compte que des **lignes de personnages** (le bandeau n'est pas une ligne de personnage) — voir aussi le compteur de lignes, inchangé.
+
+<img src="captures/stats-escouades-desktop.png" alt="Section Statistiques avec les bandeaux HORS ESCOUADE — 7 PERSOS, ALPHA — 2 PERSOS et SANS ESCOUADE — 1 PERSO séparant les lignes, couleurs vert max et rouge min inchangées" width="420">
+
+*Les **Statistiques** découpées en **Hors escouade**, **Alpha** et **Sans escouade** : le vert/rouge du min-max ne concerne que les lignes de personnages.*
+
+<img src="captures/stats-escouades-mobile.png" alt="Section Statistiques en mobile 390 px avec les mêmes bandeaux d'escouade" width="240">
+
+*En **mobile (390 px)**.*
 
 ### 8.4 Notes d'équipe
 
@@ -1147,6 +1195,7 @@ Deux livrables **identiques en contenu**, à télécharger depuis les **releases
 | **Niveau 0 / funnel** | Personnage du funnel DCC (avant le choix d'une classe) — onglet **Niveau 0** |
 | **Autre tirage** | Bouton d'une fiche de niveau 0 : relance le tirage complet et **remplace** le personnage ouvert — présent **uniquement pendant la session de tirage** (création, puis tant qu'on ne quitte pas la fiche) |
 | **Promouvoir** | Bouton d'une fiche de niveau 0 : convertit le personnage en **niveau 1** dans la classe choisie (§ 4.9) |
+| **Escouade** | Groupe **nommé** de personnages de **niveau 0** uniquement (onglet Niveau 0 : bandeaux + sélecteur de carte ; onglet Équipe : bandeaux des tableaux expédition et statistiques). **Dérivée de ses membres** : elle disparaît quand le dernier membre part ; à la **promotion**, le personnage **sort** de son escouade |
 | **PX** | Points d'expérience |
 | **JS Ref / Vig / Vol** | Jets de sauvegarde : Réflexes, Vigueur, Volonté |
 | **Init.** | Initiative (jet d'entrée en combat) |

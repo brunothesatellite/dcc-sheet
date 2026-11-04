@@ -30,6 +30,7 @@ const suites = [
   require('./24-ref-reader.test'),
   require('./25-init-expedition.test'),
   require('./26-anchors-audit.test'),
+  require('./27-squads.test'),
 ];
 
 function pad(s, n) {

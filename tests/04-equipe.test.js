@@ -105,6 +105,19 @@ async function run() {
   r.eq(counts(container).details, 0, 'initially no detail row');
   r.eq(counts(container).expanded, 0, 'initially none expanded');
 
+  /* Evolution #4 (S6) : sans aucune escouade representee, AUCUN bandeau —
+     les tableaux sont strictement ceux d'avant. Les compteurs de lignes de
+     cette batterie passent par un selecteur classe/id (tr[data-char-id],
+     tr.stats-char-row) : ils excluent donc les bandeaux par construction. */
+  r.eq(container.querySelectorAll('tr.squad-head').length, 0,
+    'S6 : aucun bandeau quand aucune escouade n\'est representee');
+  r.eq(container.querySelectorAll('tr[data-char-id]').length, CHARACTERS.length,
+    'S6 : une ligne par perso (expedition), bandeaux exclus');
+  r.eq(container.querySelectorAll('tr.stats-char-row').length, CHARACTERS.length,
+    'S6 : une ligne par perso (stats), bandeaux exclus');
+  r.eq(container.querySelectorAll('table.team-table:not(.team-table-enemies):not(.team-table-stats) tbody').length, 1,
+    'S6 : un seul <tbody> sans bandeau (zebrage d\'origine intact)');
+
   // aria basics on class cells
   tds.forEach(function (td) {
     r.eq(td.getAttribute('role'), 'button', 'class cell role=button');

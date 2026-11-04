@@ -64,6 +64,18 @@ module.exports = function suite() {
     '.d20-wrap',
     '.d20-bubble',
     '.d20-bubble.is-visible',
+    /* Evolution #4 : escouades (niveau 0) */
+    '.btn-squads',
+    '.squad-bar-list',
+    '.squad-bar-list.is-void',
+    '.squad-dot',
+    '.squad-pick',
+    '.char-card-squad',
+    '.team-table .squad-head',
+    '.team-table .squad-head.is-void',
+    '.modal-squads',
+    '.squad-manage',
+    '.squad-name-input',
   ];
   critical.forEach(function (sel) {
     r.ok(css.indexOf(sel) !== -1, 'CSS selector present: ' + sel);
@@ -124,6 +136,59 @@ module.exports = function suite() {
   if (d20Arrow) {
     r.ok(d20Arrow[0].indexOf('border-top-color') !== -1, 'fleche orientee vers le bas');
   }
+
+  // Evolution #4 : escouades — bandeau de la liste, bandeaux des deux
+  // tableaux Equipe, selecteur de carte, adaptation mobile.
+  const squadBar = css.match(/\.squad-bar-list \{[^}]+\}/);
+  r.ok(!!squadBar, '.squad-bar-list block found');
+  if (squadBar) {
+    r.ok(squadBar[0].indexOf('display: flex') !== -1, 'bandeau escouade : flex');
+    r.ok(squadBar[0].indexOf('text-transform: uppercase') !== -1,
+      'bandeau escouade : majuscules (vocabulaire .section-bar)');
+  }
+
+  const squadVoid = css.match(/\.squad-bar-list\.is-void \{[^}]+\}/);
+  r.ok(!!squadVoid, '.squad-bar-list.is-void block found');
+  if (squadVoid) {
+    r.ok(squadVoid[0].indexOf('border-style: dashed') !== -1,
+      '« Sans escouade » : trait pointille');
+    r.ok(squadVoid[0].indexOf('color: var(--muted)') !== -1, '« Sans escouade » : rendu muet');
+  }
+
+  const squadHead = css.match(/\.team-table \.squad-head td \{[^}]+\}/);
+  r.ok(!!squadHead, '.team-table .squad-head td block found');
+  if (squadHead) {
+    r.ok(squadHead[0].indexOf('text-align: left') !== -1, 'bandeau Equipe aligne a gauche');
+    r.ok(squadHead[0].indexOf('text-transform: uppercase') !== -1, 'bandeau Equipe en majuscules');
+  }
+
+  const squadHeadVoid = css.match(/\.team-table \.squad-head\.is-void td \{[^}]+\}/);
+  r.ok(!!squadHeadVoid, '.team-table .squad-head.is-void td block found');
+  if (squadHeadVoid) {
+    r.ok(squadHeadVoid[0].indexOf('border-style: dashed') !== -1,
+      '« Hors escouade » / « Sans escouade » : pointille');
+  }
+
+  const squadPick = css.match(/\.squad-pick \{[^}]+\}/);
+  r.ok(!!squadPick, '.squad-pick block found');
+  if (squadPick) {
+    r.ok(squadPick[0].indexOf('flex: 1') !== -1,
+      'selecteur escouade : prend la place restante (boutons a droite)');
+    r.ok(squadPick[0].indexOf('min-width: 0') !== -1, 'selecteur escouade : pas de debordement');
+  }
+
+  // Mobile (<= 600 px) : bandeau en wrap, selecteur en pleine largeur —
+  // aucune de ces regles hors media (lecon evolution #1).
+  const squadBarMobile = css.indexOf('.squad-bar-list { flex-wrap: wrap;');
+  r.ok(squadBarMobile !== -1, 'mobile : bandeau escouade en flex-wrap');
+  r.ok(squadBarMobile !== -1 &&
+        css.lastIndexOf('@media (max-width: 600px)', squadBarMobile) !== -1,
+    'mobile : wrap du bandeau DANS un media 600px');
+  const squadSelMobile = css.indexOf('.char-card-squad { max-width: none; }');
+  r.ok(squadSelMobile !== -1, 'mobile : selecteur escouade en pleine largeur');
+  r.ok(squadSelMobile !== -1 &&
+        css.lastIndexOf('@media (max-width: 600px)', squadSelMobile) !== -1,
+    'mobile : pleine largeur DANS un media 600px');
 
   // La popup doit desactiver l'ancrage de defilement du navigateur : sinon le
   // recale manuel de loadUp() (scrollTop += delta) est double par le navigateur

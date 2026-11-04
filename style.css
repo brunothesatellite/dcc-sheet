@@ -727,6 +727,332 @@ ul, ol {
 }
 
 /* --------------------------------------------------------------------------
+   7b. Escouades (evolution #4) — NOTION EXCLUSIVE DU NIVEAU 0
+   -------------------------------------------------------------------------- */
+
+/* Bouton d'entree de gestion : meme vocabulaire que .btn-import */
+.btn-squads {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink);
+  background: var(--field-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.btn-squads:hover {
+  background: var(--line);
+  border-color: var(--muted);
+}
+
+.btn-squads::before {
+  content: "\25C6"; /* pastille d'identite : meme teinte que le bandeau */
+  color: var(--red);
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* Bandeau de la liste Niveau 0 : pastille + nom en majuscules + effectif */
+.squad-bar-list {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ink);
+  background: var(--field-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+  padding: 7px 12px;
+  margin: 18px 0 12px;
+}
+
+.squad-bar-list .count {
+  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* « Sans escouade » : rendu muet, pointille — pas de pastille */
+.squad-bar-list.is-void {
+  background: transparent;
+  border-style: dashed;
+  color: var(--muted);
+}
+
+.squad-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+/* Selecteur d'escouade d'une carte (lvl0 seulement) — il prend la place
+   restante a gauche des boutons (maquette) */
+.squad-pick {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.squad-pick-label {
+  flex: none;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+}
+
+.char-card-squad {
+  flex: 1;
+  min-width: 0;
+  max-width: 140px;
+  padding: 4px 6px;
+  font-family: var(--font-body);
+  font-size: 11.5px;
+  color: var(--ink);
+  background: var(--field-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.char-card-squad:focus {
+  outline: 2px solid var(--tab-active);
+  outline-offset: 1px;
+}
+
+/* Bandeaux des DEUX tableaux Equipe (un <tbody> par bloc) */
+.team-table .squad-head {
+  background: transparent; /* le zebra s'applique aux lignes de donnees */
+}
+
+.team-table .squad-head td {
+  background: var(--field-bg);
+  border-color: var(--input-border);
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: left;
+  padding: 6px 10px;
+  color: var(--ink);
+}
+
+.team-table .squad-head.is-void td {
+  background: transparent;
+  border-style: dashed;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.team-table .squad-head .count {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* Modale « Escouades » : lignes de gestion + mini-boutons */
+.modal-squads {
+  max-width: 560px;
+  width: calc(100% - 40px);
+}
+
+.squad-manage {
+  max-height: 52vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.squad-manage-empty {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.squad-manage-row {
+  background: var(--field-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.squad-manage-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.squad-name-field {
+  flex: 1;
+  min-width: 120px;
+  padding: 6px 8px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+}
+
+.squad-name-field:focus {
+  outline: 2px solid var(--tab-active);
+  outline-offset: 1px;
+}
+
+.squad-count {
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.squad-members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 8px;
+}
+
+.squad-member {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.squad-member input {
+  accent-color: var(--red);
+  cursor: pointer;
+}
+
+/* « + Nouvelle escouade » : nom + membre fondateur + Ajouter */
+.squad-new {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-top: 1px dashed var(--line);
+  margin-top: 4px;
+  padding-top: 10px;
+}
+
+.squad-new-title {
+  flex: 1 1 100%;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--ink);
+}
+
+.squad-new .squad-name-field {
+  flex: 1 1 150px;
+}
+
+.squad-founder {
+  flex: 1 1 150px;
+  min-width: 0;
+  padding: 6px 8px;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+}
+
+.squad-new-hint {
+  flex: 1 1 100%;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* Mini-boutons de la modale (Renommer / Supprimer / Ajouter) */
+.btn-mini {
+  padding: 5px 10px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.btn-mini:hover {
+  background: var(--line);
+  border-color: var(--muted);
+}
+
+.btn-mini-danger {
+  color: var(--red);
+}
+
+.btn-mini-danger:hover {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
+/* Mini-modale « nom d'escouade » (champ texte) */
+.squad-name-row {
+  display: flex;
+  margin: 10px 0 6px;
+}
+
+.squad-name-input {
+  flex: 1;
+  padding: 8px 10px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--field-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-sm);
+}
+
+.squad-name-input:focus {
+  outline: 2px solid var(--tab-active);
+  outline-offset: 1px;
+}
+
+.squad-name-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+/* --------------------------------------------------------------------------
    8. Toggle Inn (Switch Slider)
    -------------------------------------------------------------------------- */
 
@@ -3387,6 +3713,17 @@ tr.team-stats-detail.open .team-detail-wrap {
   .team-stat-value { font-size: 14px; }
   .btn-group { flex-wrap: wrap; gap: 4px; }
   .btn-sm { padding: 4px 8px; font-size: 10px; }
+
+  /* Escouades (evolution #4) : bandeaux en flex-wrap et selecteur en
+     pleine largeur — aucun debordement horizontal (lecon evol. #1) */
+  .squad-bar-list { flex-wrap: wrap; row-gap: 2px; font-size: 12px; letter-spacing: 0.5px; }
+  .squad-pick { flex: 1 1 auto; }
+  .char-card-squad { max-width: none; }
+  .modal-squads { width: calc(100% - 24px); }
+  .squad-manage { max-height: 46vh; }
+  .squad-new .squad-name-field,
+  .squad-founder { flex: 1 1 100%; }
+  .btn-mini { padding: 4px 8px; font-size: 10px; }
 
   /* Ligne d'actions SOUS le tableau : les deux boutons restent SUR UNE MÊME
      ligne — la ligne est hors tableau, il n'y a donc plus aucune contrainte

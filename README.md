@@ -11,6 +11,14 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 |:--------------:|:---------------:|
 | <img src="captures/fiche0.png" alt="Fiche de personnage de niveau 0 : en-tête sur deux lignes avec les boutons Export, Autre tirage et Promouvoir, le nom suivi du badge de puissance (bras musclé rouge), le casque de points de vie sans dé de vie, les caractéristiques, l'équipement et les notes" width="420"> | <img src="captures/onglet0.png" alt="Onglet Niveau 0 : liste des personnages de niveau 0 avec portrait, nom suivi de Niv.0, métier en sous-titre, interrupteur expédition / auberge et boutons + Nouveau / Import" width="420"> |
 
+| Escouades (Niveau 0) | Escouades (Équipe) |
+|:---------------------:|:-------------------:|
+| <img src="captures/niveau0-escouades-desktop.png" alt="Onglet Niveau 0 segmenté par escouade : bandeau ALPHA — 2 PERSOS avec ses deux cartes portant le sélecteur Escouade, puis bandeau pointillé SANS ESCOUADE — 1 PERSO, bouton Escouades en haut à droite" width="420"> | <img src="captures/equipe-escouades-desktop.png" alt="Onglet Équipe, section Personnages en expédition segmentée par bandeaux d'escouade : HORS ESCOUADE — 7 PERSOS puis les escouades de niveau 0 et le groupe Sans escouade" width="420"> |
+
+| Escouades (mobile) | Fenêtre Escouades |
+|:-------------------:|:-----------------:|
+| <img src="captures/niveau0-escouades-mobile.png" alt="Onglet Niveau 0 en mobile 390 px : bandeaux d'escouade et cartes sur une seule colonne, sans défilement horizontal" width="240"> | <img src="captures/modal-escouades-mobile.png" alt="Fenêtre Escouades en mobile 390 px : nom de l'escouade, compteur de membres, boutons Renommer et Supprimer, cases à cocher, création d'une nouvelle escouade et Fermer empilés pleine largeur" width="240"> |
+
 | Module Carte (mobile) | Tiroir des calques |
 |:---------------------:|:------------------:|
 | <img src="captures/carte-module-mobile.png" alt="Module carte sur mobile : carte de fond webp annotée de traits, barre d'état en haut et barre d'outils en bas" width="420"> | <img src="captures/carte-liste-calques.png" alt="Tiroir des cartes : liste des calques avec leur nom, nombre d'opérations, nom de l'image de fond et son identifiant" width="420"> |
@@ -62,6 +70,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 - **Edition identique** aux autres onglets (auto-save, export/import individuel et global, supression, toggle expedition/auberge) ; un niveau 0 en expedition apparait dans l'**onglet Equipe** (PV, initiative, tour, ordre de marche)
 - Carte : 1re ligne de metier (a la place du dieu), nom suivi de `— Niv.0`
 - **Puissance** : dans l'en-tete de la fiche **uniquement** (a droite du nom), icone de bras muscule en rouge + somme des modificateurs des 6 carac (ex. `+3`) - repere rapide sur la qualite du tirage (`DCCLvl0Roll.powerOf`)
+- **Escouades** (evolution #4, **niveau 0 exclusif**) : bouton **`Escouades`** en haut de la liste -> fenetre de gestion (**nom unique insensible a la casse, 40 car. max**, membre fondateur, renommer / supprimer / cocher les membres) ; selecteur **Escouade** sur **chaque carte lvl0** (absent des 7 classes) ; la liste est **segmentee** : bandeau par escouade (pastille coloree, nom en majuscules, effectif), groupes **alpha**, **« Sans escouade » en dernier**, tri interne (actifs puis `updated_at`) inchange ; stockee dans `characters.data.escouade` donc **presente a l'export / import global sans migration** ; a la **promotion**, `promote()` **supprime** la cle (R10) et un niv.1+ n'est **jamais** eligible (R11)
 
 ### Definition des sorts (dossier frere dcc-spells-reader)
 - **Detection automatique** : au demarrage, chargement de `../dcc-spells-reader/content/anchors.js` (1 requete = presence du dossier frere + index des ancres) ; si le dossier est absent ou non accessible HTTP, **aucune icone n'apparait** et la fiche reste identique (aucun PHP, aucune configuration)
@@ -101,6 +110,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 ### Onglet Equipe
 - **Ordre de marche** (section repliable en haut) : grille 3x3 (portraits + noms, 9 persos max) ; les **portraits occupent ~74 % de la case**, nom sur une ligne en dessous ; drag & drop unifie souris (clic maintenu) / tactile (appui long ~0,4 s) ; case vide = deplacement, case occupee = echange instantane ; sauvegarde immediate en base + auto-reparation (doublon / id perdu → reconstruction gauche→droite) ; inclus dans l'export/import JSON (`marching_order`)
 - Tableau des personnages en expedition avec **icone de portrait** dans la colonne Classe (100% hauteur de ligne)
+- **Bandeaux d'escouade** (evolution #4) : des qu'**au moins une escouade est representee**, les lignes des **2 tableaux** (expedition **et** Statistiques) sont decoupees en **un `<tbody> par bloc** — **« Hors escouade »** en premier (les niv.1+ ne sont **jamais** eligibles, meme avec `data.escouade` herite), puis les **escouades lvl0 en alpha**, puis **« Sans escouade »** (blocs vides en `.is-void` pointille, sans pastille) ; bandeau = `tr.squad-head` avec `colspan` sur le nombre reel de colonnes, **sans `data-char-id`** (invisible de `resync`, compteurs et min/max inchanges) ; **sans aucune escouade : tableau strictement identique a avant** (S6) ; le detail combat reste dans le bloc de sa mere
 - Nom cliquable (**ouvre la fiche**), nom trop long **tronque avec ...** (infobulle = nom complet), Init, AC, PV editables, Init combat et **Compteur de tour visuel** (remplissage circulaire par 20%) — **etat combat sauvegarde en base** (debounce 600 ms)
 - **Barre de PV** sous chaque champ PV (PJ **et** ennemis) : remplissage colore (vert >= 75 %, orange >= 50 %, rouge >= 25 %, noir < 25 %) et **PV max** a droite (PJ : `max_pv` de la fiche ; ennemis : plus grand PV saisi, `-` tant qu'il est inconnu)
 - **Detail combat depliable** : clic sur la colonne Classe (chevron sous le libelle) → ligne de stats sous le personnage (Att/Degats Cac + Att/Degats distance) ; un seul perso ouvert a la fois ; valeur vide = tiret

@@ -1137,8 +1137,15 @@
     }
   }
 
+  /* Signature de composition de l'onglet Equipe : les ids SEULS ne bougent
+     pas quand on change une escouade (evolution #4) — on y ajoute l'escouade
+     de chaque lvl0, sinon le groupement en bandeaux pereime jusqu'au
+     rechargement (resync sans re-render). JSON : les noms peuvent contenir
+     la virgule. */
   function expeditionIdsAttr(chars) {
-    return chars.map(function (c) { return c.id; }).join(',');
+    return JSON.stringify(chars.map(function (c) {
+      return [c.id, squadOf(c)];
+    }));
   }
 
   async function fetchExpeditionChars() {
@@ -1340,7 +1347,7 @@
   }
 
   function createNewButton(cls) {
-    var btnGroup = el('div', { className: 'btn-group' }, [
+    var buttons = [
       el('button', {
         className: 'btn-new',
         textContent: '+ Nouveau',
@@ -1354,8 +1361,21 @@
         title: 'Importer un JSON',
         onClick: function () { importCharacter(cls); },
       }),
-    ]);
-    return btnGroup;
+    ];
+
+    /* Evolution #4 (S2a) : entree de gestion des escouades — SEULEMENT sur
+       le Niveau 0 : pour les 7 autres classes le code n'est pas construit
+       (R11, meme garde que le selecteur des cartes). */
+    if (cls === 'lvl0') {
+      buttons.unshift(el('button', {
+        className: 'btn-squads',
+        textContent: 'Escouades',
+        title: 'Gérer les escouades du niveau 0',
+        onClick: function () { showSquadsModal(); },
+      }));
+    }
+
+    return el('div', { className: 'btn-group' }, buttons);
   }
 
   function renderCharList(panel, cls, active, inactive) {
@@ -1374,12 +1394,29 @@
     ]);
     listContent.appendChild(header);
 
-    var grid = el('div', { className: 'char-grid' });
-
     var sorted = active.concat(inactive).sort(function (a, b) {
       if (a.is_active !== b.is_active) return b.is_active - a.is_active;
       return (b.updated_at || '').localeCompare(a.updated_at || '');
     });
+
+    /* Evolution #4 (S3) : Niveau 0 segmente par escouade — un bandeau par
+       groupe (alpha, insensible a la casse) puis SES cartes, « Sans
+       escouade » en dernier. Le tri ci-dessus reste celui de CHAQUE groupe
+       (tri interne inchange). Les autres classes gardent la grille plate. */
+    if (cls === 'lvl0') {
+      var squadNames = squadNamesOf(sorted);
+      groupBySquad(sorted).forEach(function (group) {
+        listContent.appendChild(squadBanner(group));
+        var squadGrid = el('div', { className: 'char-grid' });
+        group.members.forEach(function (c) {
+          squadGrid.appendChild(createCharCard(cls, c, squadNames));
+        });
+        listContent.appendChild(squadGrid);
+      });
+      return;
+    }
+
+    var grid = el('div', { className: 'char-grid' });
 
     sorted.forEach(function (c) {
       grid.appendChild(createCharCard(cls, c));
@@ -1388,7 +1425,7 @@
     listContent.appendChild(grid);
   }
 
-  function createCharCard(cls, charData) {
+  function createCharCard(cls, charData, squadNames) {
     var isActive = charData.is_active === 1;
     var metaParts = [];
     var parsed = {};
@@ -1487,6 +1524,11 @@
     btns.appendChild(openBtn);
     btns.appendChild(delBtn);
 
+    /* Evolution #4 (S2b) : selecteur d'escouade a GAUCHE des boutons (cf.
+       maquette) — SEULEMENT sur une carte Niveau 0 : pour les 7 autres
+       classes le code n'est meme pas construit (R11). */
+    if (cls === 'lvl0') actions.appendChild(createSquadPicker(charData, squadNames));
+
     actions.appendChild(btns);
 
     card.appendChild(actions);
@@ -1496,6 +1538,537 @@
     });
 
     return card;
+  }
+
+  /* =========================================================================
+     8d. Escouades (evolution #4) — NOTION EXCLUSIVE DU NIVEAU 0
+     ======================================================================== */
+
+  /* characters.data.escouade = nom de l'escouade ; absent ou '' = sans
+     escouade (S1 : aucune table, aucune entite — une escouade N'EXISTE QUE
+     PAR SES MEMBRES lvl0, elle est derivee).
+     Regle S0/R11 : SEULEMENT pour class === 'lvl0'. La garde est ici, a la
+     LECTURE (squadOf) comme a l'ECRITURE (setCharacterSquad) : ce sont les
+     deux seuls points de la regle, appeles partout. Un data.escouade porte
+     par un niv.1+ (import d'avant la restriction) reste en base mais n'est
+     jamais affiche : ni migration, ni purge. */
+  function squadOf(charData) {
+    if (!charData || charData.class !== 'lvl0') return '';
+    var parsed = {};
+    try { parsed = JSON.parse(charData.data || '{}'); } catch (e) { return ''; }
+    var s = parsed.escouade;
+    return typeof s === 'string' ? s.trim() : '';
+  }
+
+  /* Couleur d'identite : hash du nom -> 6 teintes. MEMME fonction dans
+     classes/equipe.js (le module n'importe pas script.js) : les 3 ecrans
+     doivent donner la meme couleur au meme nom (pastille = seul lien
+     visuel entre la liste, l'expedition et les statistiques). */
+  var SQUAD_COLORS = ['#c0392b', '#2980b9', '#27ae60', '#8e44ad', '#d35400', '#16a085'];
+  function squadColor(name) {
+    var s = String(name || '').toLowerCase();
+    var h = 0;
+    for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return SQUAD_COLORS[h % SQUAD_COLORS.length];
+  }
+
+  /* Groupement : alpha (insensible a la casse — 'Alpha' = 'alpha'), le
+     libelle affiche est celui du premier membre rencontre, « Sans escouade »
+     en DERNIER. chars = seulement des lvl0 ; le tri interne de members est
+     celui de l'appelant (inchange : actifs d'abord, puis updated_at
+     decroissant) — on ne trie que les en-tetes de groupe. */
+  function groupBySquad(chars) {
+    var byKey = {};
+    var order = [];
+    var rest = [];
+    (chars || []).forEach(function (c) {
+      var s = squadOf(c);
+      if (!s) { rest.push(c); return; }
+      var key = s.toLowerCase();
+      if (!byKey[key]) { byKey[key] = { label: s, members: [] }; order.push(key); }
+      byKey[key].members.push(c);
+    });
+    var groups = order.map(function (key) { return byKey[key]; });
+    groups.sort(function (a, b) {
+      return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
+    });
+    if (rest.length) groups.push({ label: '', members: rest });
+    return groups;
+  }
+
+  /* Bandeau de la liste Niveau 0 : pastille + nom en majuscules + effectif.
+     « Sans escouade » (label vide) = rendu muet .is-void, sans pastille. */
+  function squadBanner(group) {
+    var isVoid = !group.label;
+    var bar = el('div', { className: 'squad-bar-list' + (isVoid ? ' is-void' : '') });
+    if (!isVoid) {
+      var dot = el('span', { className: 'squad-dot' });
+      dot.style.background = squadColor(group.label);
+      bar.appendChild(dot);
+    }
+    bar.appendChild(el('span', { textContent: group.label || 'Sans escouade' }));
+    bar.appendChild(el('span', {
+      className: 'count',
+      textContent: '— ' + group.members.length +
+        (group.members.length > 1 ? ' persos' : ' perso'),
+    }));
+    return bar;
+  }
+
+  /* Noms proposes dans les selecteurs : toutes les escouades des lvl0
+     connus, alpha, sans doublon de casse. */
+  function squadNamesOf(chars) {
+    var seen = {};
+    var names = [];
+    (chars || []).forEach(function (c) {
+      var s = squadOf(c);
+      if (s && !seen[s.toLowerCase()]) { seen[s.toLowerCase()] = s; names.push(s); }
+    });
+    names.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
+    return names;
+  }
+
+  /* Ecriture unique de l'escouade (S1) : action=get d'ABORD (regle du
+     projet : jamais depuis le snapshot de la carte), injection de la cle,
+     une seule action=save, puis invalidation de l'onglet Equipe.
+     Refuse tout id non-lvl0 (R11) et tout nom > 40 caracteres. */
+  async function setCharacterSquad(id, name) {
+    if (!currentUser || !id) return false;
+
+    var fresh = null;
+    try {
+      var got = await api('characters.php', {
+        method: 'GET',
+        data: { action: 'get', id: id },
+      });
+      fresh = got.character || null;
+    } catch (e) { fresh = null; }
+
+    if (!fresh) { showToast('Personnage introuvable', 'error'); return false; }
+    if (fresh.class !== 'lvl0') return false; /* R11 : un niv.1+ n'est jamais eligible */
+
+    var parsed = {};
+    try { parsed = JSON.parse(fresh.data || '{}'); } catch (e) {}
+    var next = String(name || '').trim().slice(0, 40);
+    if (next) parsed.escouade = next; else delete parsed.escouade;
+
+    try {
+      await api('characters.php', {
+        method: 'POST',
+        body: { action: 'save', id: fresh.id, data: parsed },
+      });
+    } catch (e) {
+      showToast('Erreur de sauvegarde de l\'escouade', 'error');
+      return false;
+    }
+
+    invalidateEquipePanel(); /* la composition du tableau Equipe bouge */
+    return true;
+  }
+
+  /* Selecteur d'escouade d'une carte (lvl0 SEULEMENT — R11).
+     stopPropagation sur click ET change : la carte a un click global ->
+     openSheet (meme motif que .toggle-inn). Apres ecriture : la liste est
+     resegmentee (loadClassCharacters, on RESTE sur la liste). */
+  function createSquadPicker(charData, squadNames) {
+    var current = squadOf(charData);
+    var names = (squadNames || []).slice();
+    if (current && names.indexOf(current) === -1) names.push(current);
+
+    var wrap = el('div', { className: 'squad-pick' });
+    wrap.appendChild(el('span', { className: 'squad-pick-label', textContent: 'Escouade' }));
+
+    var sel = el('select', {
+      className: 'char-card-squad',
+      'aria-label': 'Escouade de ' + (charData.name || 'Sans nom'),
+    });
+    sel.appendChild(el('option', { value: '', textContent: '— Sans escouade' }));
+    names.forEach(function (n) {
+      sel.appendChild(el('option', { value: n, textContent: n }));
+    });
+    sel.appendChild(el('option', { value: '__new__', textContent: '+ Nouvelle…' }));
+    sel.value = current || '';
+
+    sel.addEventListener('click', function (e) { e.stopPropagation(); });
+    sel.addEventListener('change', async function (e) {
+      e.stopPropagation();
+      var value = e.target.value;
+      var ok;
+
+      if (value === '__new__') {
+        var picked = await showSquadNameModal();
+        if (!picked) { sel.value = current || ''; return; } /* annule : aucune ecriture */
+        ok = await setCharacterSquad(charData.id, picked);
+      } else {
+        ok = await setCharacterSquad(charData.id, value);
+      }
+
+      if (!ok) { sel.value = current || ''; return; } /* echec : etat connu restaure */
+      await loadClassCharacters('lvl0', false); /* resegmentation de la liste */
+    });
+
+    wrap.appendChild(sel);
+    return wrap;
+  }
+
+  /* Mini-modale « nom d'escouade » (champ texte, 1 a 40 caracteres, trim a
+     la validation) — meme squelette que showLvl0CountModal (pied standard
+     .modal-actions). Retour : le nom, ou null si annulation (Echap / clic
+     hors modale / Annuler / Entree vide). */
+  function showSquadNameModal() {
+    return new Promise(function (resolve) {
+      var overlay = el('div', { className: 'modal-overlay' });
+      var box = el('div', { className: 'modal-box' });
+
+      box.appendChild(el('div', { className: 'modal-title', textContent: 'Nouvelle escouade' }));
+      box.appendChild(el('div', {
+        className: 'modal-message',
+        textContent: 'Nom de l\'escouade (40 caractères maximum) :',
+      }));
+
+      var input = el('input', {
+        type: 'text',
+        maxlength: '40',
+        className: 'squad-name-input',
+        'aria-label': 'Nom de l\'escouade (40 caractères maximum)',
+      });
+
+      var row = el('div', { className: 'squad-name-row' });
+      row.appendChild(input);
+      box.appendChild(row);
+      box.appendChild(el('div', {
+        className: 'squad-name-hint',
+        textContent: 'Le personnage de cette carte rejoint aussitôt l\'escouade : ' +
+          'une escouade sans membre n\'existe pas.',
+      }));
+
+      var actions = el('div', { className: 'modal-actions' });
+      actions.appendChild(el('button', {
+        className: 'modal-btn-cancel',
+        textContent: 'Annuler',
+        onClick: function () { close(null); },
+      }));
+      actions.appendChild(el('button', {
+        className: 'modal-btn-ok',
+        textContent: 'Créer',
+        onClick: function () { close(readName()); },
+      }));
+      box.appendChild(actions);
+
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+
+      function readName() {
+        var v = (input.value || '').trim().slice(0, 40);
+        return v || null; /* Entree sur champ vide = rien a creer */
+      }
+      function onKeyDown(e) { if (e.key === 'Escape') close(null); }
+      document.addEventListener('keydown', onKeyDown);
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) close(null);
+      });
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); close(readName()); }
+      });
+
+      function close(result) {
+        document.removeEventListener('keydown', onKeyDown);
+        overlay.remove();
+        resolve(result);
+      }
+
+      input.focus();
+    });
+  }
+
+  /* Modale « Escouades » (S2a) : la passerelle de gestion — creer avec au
+     moins un membre, affecter / desaffecter, renommer, supprimer.
+     - Membres = personnages de NIVEAU 0 uniquement (R11) : la liste vient
+       toujours de action=list&class=lvl0, jamais d'une autre classe ni
+       d'une donnee importee heritee.
+     - Ecritures AU FIL DE L'EAU (pas de « valider » global), une seule
+       requete par mutation via setCharacterSquad(), puis relecture en base :
+       l'effectif affiche est toujours l'etat reel.
+     - Escouade derivee (S1) : plus aucun membre -> la ligne disparaît.
+     Fermeture : Echap / clic hors modale / Fermer. */
+  function showSquadsModal() {
+    return new Promise(function (resolve) {
+      var overlay = el('div', { className: 'modal-overlay' });
+      var box = el('div', { className: 'modal-box modal-squads' });
+
+      box.appendChild(el('div', { className: 'modal-title', textContent: 'Escouades' }));
+      box.appendChild(el('div', {
+        className: 'modal-message',
+        textContent: 'Réservé aux personnages de niveau 0 : à la promotion, ' +
+          'le personnage sort de son escouade.',
+      }));
+
+      var body = el('div', { className: 'squad-manage' });
+      box.appendChild(body);
+
+      var actions = el('div', { className: 'modal-actions' });
+      actions.appendChild(el('button', {
+        className: 'modal-btn-ok',
+        textContent: 'Fermer',
+        onClick: function () { close(); },
+      }));
+      box.appendChild(actions);
+
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+
+      var lvl0 = [];   /* liste de reference, rechargee apres chaque mutation */
+      var busy = false; /* anti double-clic le temps d'une ecriture */
+
+      function onKeyDown(e) { if (e.key === 'Escape') close(); }
+      document.addEventListener('keydown', onKeyDown);
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) close();
+      });
+      function close() {
+        document.removeEventListener('keydown', onKeyDown);
+        overlay.remove();
+        resolve();
+      }
+
+      /* showModal() de l'app partage le MEMME z-index (10001) : la question
+         imbriquee (confirmation de suppression) doit passer par DESSUS —
+         notre overlay est mis en pause le temps de la question. */
+      async function askInAppModal(opts) {
+        document.removeEventListener('keydown', onKeyDown);
+        overlay.classList.add('hidden');
+        var result = await showModal(opts);
+        overlay.classList.remove('hidden');
+        document.addEventListener('keydown', onKeyDown);
+        return result;
+      }
+
+      async function guard(fn) {
+        if (busy) return;
+        busy = true;
+        try { await fn(); } finally { busy = false; }
+      }
+
+      /* Relecture en base : noms + effectifs + membres = etat reel */
+      async function reload() {
+        try {
+          var res = await api('characters.php', {
+            method: 'GET',
+            data: { action: 'list', class: 'lvl0' },
+          });
+          lvl0 = res.characters || [];
+        } catch (e) { lvl0 = []; }
+        render();
+      }
+
+      function render() {
+        body.innerHTML = '';
+        var groups = groupBySquad(lvl0).filter(function (g) { return !!g.label; });
+
+        if (!groups.length) {
+          body.appendChild(el('div', {
+            className: 'squad-manage-empty',
+            textContent: 'Aucune escouade : donnez-lui un nom ci-dessous et ' +
+              'cochez au moins un membre niveau 0.',
+          }));
+        }
+        groups.forEach(function (g) { body.appendChild(squadRow(g)); });
+        body.appendChild(newSquadRow());
+      }
+
+      /* --- Une escouade : nom + effectif + Renommer / Supprimer + cases --- */
+      function squadRow(group) {
+        var row = el('div', { className: 'squad-manage-row' });
+        var head = el('div', { className: 'squad-manage-head' });
+
+        var dot = el('span', { className: 'squad-dot' });
+        dot.style.background = squadColor(group.label);
+        head.appendChild(dot);
+
+        var input = el('input', {
+          type: 'text',
+          maxlength: '40',
+          value: group.label,
+          className: 'squad-name-field',
+          'aria-label': 'Nom de l\'escouade ' + group.label,
+        });
+        head.appendChild(input);
+
+        head.appendChild(el('span', {
+          className: 'squad-count',
+          textContent: group.members.length +
+            (group.members.length > 1 ? ' membres' : ' membre'),
+        }));
+
+        var renameBtn = el('button', {
+          className: 'btn-mini',
+          textContent: 'Renommer',
+          onClick: function () {
+            guard(function () { return rename(group, input.value); });
+          },
+        });
+        head.appendChild(renameBtn);
+
+        head.appendChild(el('button', {
+          className: 'btn-mini btn-mini-danger',
+          textContent: 'Supprimer',
+          onClick: function () {
+            guard(function () { return remove(group); });
+          },
+        }));
+
+        /* Entree dans le champ = Renommer (pas de Enter non gere) */
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') { e.preventDefault(); renameBtn.click(); }
+        });
+
+        row.appendChild(head);
+
+        /* Membres : cases a cocher — SEULEMENT des lvl0 (R11) */
+        var members = el('div', { className: 'squad-members' });
+        lvl0.forEach(function (c) {
+          var inGroup = group.members.some(function (m) {
+            return String(m.id) === String(c.id);
+          });
+          var label = el('label', { className: 'squad-member' });
+          var chk = el('input', { type: 'checkbox' });
+          chk.checked = inGroup;
+          chk.addEventListener('change', async function () {
+            var ok = await setCharacterSquad(c.id, chk.checked ? group.label : '');
+            if (!ok) { chk.checked = !chk.checked; return; }
+            await reload();
+          });
+          label.appendChild(chk);
+          label.appendChild(el('span', { textContent: c.name || 'Sans nom' }));
+          members.appendChild(label);
+        });
+        row.appendChild(members);
+        return row;
+      }
+
+      /* Renommer : trim + max 40 + unicite insensible a la casse, puis
+         boucle sequentielle save sur les MEMBRES (meme motif que le tirage
+         multiple, evol. #3) — chaque ecriture est independante. */
+      async function rename(group, rawName) {
+        var next = String(rawName || '').trim().slice(0, 40);
+        if (!next) { showToast('Nom d\'escouade vide', 'error'); await reload(); return; }
+        if (next.toLowerCase() === group.label.toLowerCase()) return; /* rien a faire */
+
+        var clash = groupBySquad(lvl0).some(function (g) {
+          return !!g.label && g.label.toLowerCase() === next.toLowerCase();
+        });
+        if (clash) {
+          showToast('Une escouade « ' + next + ' » existe déjà', 'error');
+          await reload();
+          return;
+        }
+
+        var renamed = 0;
+        for (var i = 0; i < group.members.length; i++) {
+          var ok = await setCharacterSquad(group.members[i].id, next);
+          if (ok) renamed += 1;
+        }
+        if (renamed) showToast('Escouade renommée « ' + next + ' »', 'success');
+        await reload();
+      }
+
+      /* Supprimer : confirmation, puis les membres repassent en
+         « Sans escouade » — l'escouade cesse d'exister (derivee). */
+      async function remove(group) {
+        var confirmed = await askInAppModal({
+          title: 'Supprimer l\'escouade',
+          message: '« ' + group.label + ' » — ' +
+            (group.members.length > 1
+              ? 'ses ' + group.members.length + ' membres repassent'
+              : 'son unique membre repasse') +
+            ' en « Sans escouade ».',
+          type: 'confirm',
+          okText: 'Supprimer',
+          danger: true,
+        });
+        if (!confirmed) return;
+
+        for (var i = 0; i < group.members.length; i++) {
+          await setCharacterSquad(group.members[i].id, '');
+        }
+        showToast('Escouade « ' + group.label + ' » supprimée', 'success');
+        await reload();
+      }
+
+      /* « + Nouvelle escouade » : nom + un membre lvl0 fondateur, sinon le
+         nom n'existerait pas (regle derivee de S1 : pas de membre, pas
+         d'escouade). */
+      function newSquadRow() {
+        var row = el('div', { className: 'squad-new' });
+        row.appendChild(el('div', {
+          className: 'squad-new-title',
+          textContent: '+ Nouvelle escouade',
+        }));
+
+        var nameInput = el('input', {
+          type: 'text',
+          maxlength: '40',
+          placeholder: 'Nom (40 car. max)',
+          className: 'squad-name-field',
+          'aria-label': 'Nom de la nouvelle escouade',
+        });
+
+        var founder = el('select', {
+          className: 'squad-founder',
+          'aria-label': 'Premier membre de la nouvelle escouade',
+        });
+        if (!lvl0.length) {
+          founder.appendChild(el('option', {
+            value: '',
+            textContent: 'Aucun personnage de niveau 0',
+          }));
+          founder.disabled = true;
+        } else {
+          lvl0.slice().sort(function (a, b) {
+            return String(a.name || '').localeCompare(String(b.name || ''));
+          }).forEach(function (c) {
+            founder.appendChild(el('option', {
+              value: String(c.id),
+              textContent: (c.name || 'Sans nom') + (squadOf(c) ? ' — ' + squadOf(c) : ''),
+            }));
+          });
+        }
+
+        var addBtn = el('button', {
+          className: 'btn-mini',
+          textContent: 'Ajouter',
+          onClick: function () {
+            guard(async function () {
+              var name = (nameInput.value || '').trim().slice(0, 40);
+              var id = parseInt(founder.value, 10);
+              if (!name) { showToast('Nom d\'escouade vide', 'error'); return; }
+              if (!id) { showToast('Cochez un membre niveau 0', 'error'); return; }
+              var ok = await setCharacterSquad(id, name);
+              if (ok) {
+                showToast('Escouade « ' + name + ' » créée', 'success');
+                await reload();
+              }
+            });
+          },
+        });
+        nameInput.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') { e.preventDefault(); addBtn.click(); }
+        });
+
+        row.appendChild(nameInput);
+        row.appendChild(founder);
+        row.appendChild(addBtn);
+        row.appendChild(el('div', {
+          className: 'squad-new-hint',
+          textContent: 'Le premier membre est nécessaire : une escouade sans ' +
+            'membre n\'existe pas.',
+        }));
+        return row;
+      }
+
+      /* Première lecture : la modale s'ouvre sur l'etat reel de la base */
+      reload();
+    });
   }
 
   /* =========================================================================

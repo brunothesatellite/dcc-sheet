@@ -250,7 +250,10 @@ async function testImport(r) {
     version: 1,
     team_notes: 'notes d equipe',
     characters: [
-      { name: 'Alpha', class: 'clerc', is_active: 1, data: {} },
+      /* Evolution #4 : data.escouade voyage dans l'import (R4). Sur un
+         niv.1+ elle n'est JAMAIS affichée (R11 : garde squadOf) mais elle
+         reste en base — aucune migration, aucune purge. */
+      { name: 'Alpha', class: 'clerc', is_active: 1, data: { escouade: 'Garde' } },
       { name: 'Bobby', class: 'elfe', is_active: 0, data: {} },
       { name: 'Beta', class: 'mage', is_active: 1, data: {} },
     ],
@@ -293,6 +296,12 @@ async function testImport(r) {
     'import: ordre remappe sur les ids actifs (index fichier 0 et 2)');
   r.eq(h.state.savesNotes.length, 1, 'import: notes d equipe restaurees');
   r.eq(h.state.savesState.length, 1, 'import: etat combat ecrit une seule fois');
+
+  /* Evolution #4 (R4) : data.escouade ecrite telle quelle a l'import ;
+     sur un perso de niveau 1+ elle reste ignorée à l'affichage (R11). */
+  const importedAlpha = h.state.chars.find(function (c) { return c.id === 60; });
+  r.ok(!!importedAlpha && String(importedAlpha.data).indexOf('"escouade":"Garde"') !== -1,
+    'import: data.escouade restituée telle quelle (aller-retour sans perte, R4)');
   r.eq(JSON.stringify(h.state.savesState[0] || {}), JSON.stringify({
     init_combat: { '60': '14', '61': '5' },
     tours: { '62': 1 },

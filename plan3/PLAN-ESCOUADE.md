@@ -12,7 +12,9 @@
 > « Sans escouade » en dernier, **S4** en-têtes de groupe entre les lignes des deux tableaux
 > Équipe, **S5** niv.1+ **d'abord** dans les tableaux Équipe, **S6** bandeaux Équipe
 > **conditionnels** (≥ 1 escouade représentée), **S7** libellé **« Hors escouade »**.
-> **Statut** : **plan + maquette livrés, aucun code** — l'implémentation n'est engagée qu'après
+> **Statut** : **implémentée le 04/11/2026** — code + tests (`27-squads`, 137 contrôles) +
+> docs (MANUAL § 4.9 / 8.1 / 8.3b / glossaire, README, JOURNAL) sur la branche `evol-escouade`.
+> Historique : **plan + maquette livrés, aucun code** — l'implémentation n'est engagée qu'après
 > validation du rendu (maquette) par Bruno.
 
 **Livrables de cette évolution** : le présent plan + `plan3/maquette-escouade.html`

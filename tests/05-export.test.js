@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { createReporter } = require('./helpers/assert');
-const { ROOT, CLASSES } = require('./helpers/env');
+const { ROOT, CLASSES, read } = require('./helpers/env');
 
 module.exports = function suite() {
   const r = createReporter('05-export');
@@ -66,6 +66,21 @@ module.exports = function suite() {
     r.ok(shapeOk, rel + ': all character items have name/class/data');
     r.ok(classesFound.size >= 3, rel + ': at least 3 distinct classes (got ' + classesFound.size + ')');
   });
+
+  /* Evolution #4 (R4) : l'escouade vit dans characters.data -> elle sort
+     avec l'export et revient a l'import, sans migration ni endpoint.
+     Elle reste IGNOREE a l'affichage sur un perso niv.1+ (R11). */
+  const script = read('script.js');
+  r.ok(script.indexOf('data: JSON.parse(detail.character.data || \'{}\')') !== -1,
+    'export : data serialise tel quel (data.escouade incluse)');
+  r.ok(script.indexOf('await saveCharacter(res.character.id, c.data || {}, c.name);') !== -1,
+    'import : data restituee telle quelle (aller-retour sans perte)');
+  r.ok(script.indexOf('charData.class !== \'lvl0\'') !== -1,
+    'affichage : escouade ignoree sur un perso niv.1+ (garde squadOf, R11)');
+
+  const sample = JSON.parse(JSON.stringify({ escouade: 'Alpha', niveau: '0' }));
+  r.eq(sample.escouade, 'Alpha', 'aller-retour JSON : escouade conservee');
+  r.eq(sample.niveau, '0', 'aller-retour JSON : niveau conserve');
 
   return r;
 };

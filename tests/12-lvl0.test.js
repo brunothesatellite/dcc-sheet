@@ -318,15 +318,21 @@ function testPromote(r, env, R) {
   d.js_vigueur = '+2';
   d.js_volonte = '-1';
   d.cle_experimentale = 'conservée'; /* clé hors liste : rien ne se perd */
+  d.escouade = 'Alpha'; /* évolution #4 : le promu SORT de son escouade (R10) */
 
   const p = R.promote(d);
 
-  /* Recopie intégrale : tout part tel quel, sauf niveau et portrait */
+  /* Recopie intégrale : tout part tel quel, sauf niveau, portrait et
+     escouade (R10 : notion exclusive du niveau 0) */
   Object.keys(d).forEach(function (key) {
     if (key === 'niveau' || key === 'portrait_source' || key === 'portrait_index') return;
+    if (key === 'escouade') return; /* R10 : supprimée à la promotion */
     r.eq(p[key], d[key], 'promotion recopie ' + key);
   });
-  r.ok(Object.keys(p).length >= Object.keys(d).length, 'aucune clé perdue à la promotion');
+  r.ok(Object.keys(p).length >= Object.keys(d).length - 1,
+    'aucune clé perdue à la promotion (hors escouade, R10)');
+  r.ok(!Object.prototype.hasOwnProperty.call(p, 'escouade'),
+    'R10 : la promotion supprime la clé escouade');
 
   r.eq(p.niveau, '1', 'niveau 1');
   r.eq(p.px, '0', 'PX remis à 0');
@@ -649,6 +655,38 @@ function testRollCount(r) {
     'indice « De 1 à 20 » centré');
 }
 
+/* ------------------------------------------------------------------ *
+ * 10c. Evolution #4 : escouades — restriction au Niveau 0 (S0)
+ * ------------------------------------------------------------------ */
+function testSquads(r) {
+  const js = read('script.js');
+  const css = read('style.css');
+
+  /* Entrées : bouton d'en-tête + sélecteur de carte, tous deux conditionnés */
+  r.ok(/if \(cls === 'lvl0'\) \{\s*buttons\.unshift\([\s\S]{0,220}showSquadsModal\(\)/.test(js),
+    'bouton « Escouades » construit SEULEMENT pour le Niveau 0');
+  r.ok(js.indexOf('if (cls === \'lvl0\') actions.appendChild(createSquadPicker(') !== -1,
+    'sélecteur de carte construit SEULEMENT pour le Niveau 0 (absent des 7 classes)');
+  r.ok(js.indexOf('function createSquadPicker(') !== -1 &&
+        js.split('createSquadPicker(').length - 1 === 2,
+    'une seule construction de sélecteur dans tout script.js');
+
+  /* Rendu : « Sans escouade » en dernier, tri interne inchangé */
+  r.ok(js.indexOf('groups.push({ label: \'\', members: rest })') !== -1,
+    'bandeau « Sans escouade » en dernier');
+  r.ok(js.indexOf('if (cls === \'lvl0\')') !== -1 && js.indexOf('groupBySquad(sorted)') !== -1,
+    'liste du Niveau 0 segmentée par escouade');
+
+  /* Aide de la modale : la promotion fait sortir le perso (R10) */
+  r.ok(js.indexOf('le personnage sort de son escouade') !== -1,
+    'modale : mention « à la promotion, le personnage sort de son escouade »');
+
+  /* CSS des cartes lvl0 + bandeau */
+  r.ok(css.indexOf('.char-card-squad') !== -1, 'sélecteur stylé (.char-card-squad)');
+  r.ok(css.indexOf('.squad-bar-list.is-void') !== -1, 'bandeau muet stylé (.squad-bar-list.is-void)');
+  r.ok(css.indexOf('.team-table .squad-head') !== -1, 'bandeau des tableaux Équipe stylé');
+}
+
 module.exports = async function suite() {
   const r = createReporter('12-lvl0');
 
@@ -680,6 +718,7 @@ module.exports = async function suite() {
   testPortraitRegistry(r);
   testWiring(r);
   testRollCount(r);
+  testSquads(r);
 
   r.ok(exists('tools/build-lvl0-data.js'), 'générateur présent (tools/build-lvl0-data.js)');
 

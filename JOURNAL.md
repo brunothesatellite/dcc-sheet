@@ -1,6 +1,6 @@
 # Journal de developpement - DCC Fiches de Personnage
 
-## Date : 4 novembre 2026 — Évolution #4 « Escouades » (branche `evol-escouade`)
+## Date : 4 novembre 2026 — Évolution #4 « Escouades » (branche `evol-escouade`, commit `df94225`)
 
 - **Périmètre** : regrouper les personnages de **niveau 0** par **escouades nommées**, visibles dans **l'onglet Niveau 0** (segmentation de la liste) **et l'onglet Équipe** (bandeaux des tableaux « Personnages en expédition » et « Statistiques »), avec **persistance DB** et **import / export JSON**. Plan + maquette `plan3/PLAN-ESCOUADE.md` (arbitrages **S0–S7**, règles **R1–R11**) livrés séparément en `9d2b80e` ; implémentation sur la branche **`evol-escouade`**.
 - **Règles structurantes** : escouade **niveau 0 exclusif** ; **dérivée de ses membres** (le groupe disparaît quand le dernier membre part, pas de table dédiée) ; à la **promotion**, `promote()` **supprime** `data.escouade` (R10) — le personnage **sort** de son escouade ; un niv.1+ n'est **jamais** éligible (R11), même avec une clé héritée → il bascule dans le bloc **« Hors escouade »**. **Sans aucune escouade représentée : rendu strictement identique** à avant (S6).

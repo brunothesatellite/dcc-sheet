@@ -7,8 +7,8 @@ param(
 $deployDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $src = Split-Path -Parent $deployDir
 
-$excludeDirs = @('.git','maquettes', 'captures','tools', 'deploy','data','exemples','node_modules','tests','.opencode','plan0','plan1','installeur')
-$excludeFiles = @('*.log','.gitignore','.DS_Store','Thumbs.db','*.md','TODO.md','BUGFIX.md','JOURNAL.md','PLAN.md','PLAN_DB.md','PROMPT.md','README.md','LICENSE','DCC_Fiche_*','maquette_*','package.json','package-lock.json','test.bat')
+$excludeDirs = @('.git','maquettes', 'captures','tools', 'deploy','data','exemples','node_modules','tests','.opencode','plan0','plan1','plan2','plan3','installeur')
+$excludeFiles = @('*.log','.gitignore','.DS_Store','Thumbs.db','*.md','TODO.md','BUGFIX.md','JOURNAL.md','PLAN.md','PLAN_DB.md','PROMPT.md','README.md','LICENSE','DCC_Fiche_*','maquette_*','maquette-*','package.json','package-lock.json','test.bat')
 
 # Redistribution interdite (TODO E9) : exclus du zip de release uniquement,
 # pas du build NAS classique (build.bat = usage prive)

@@ -47,10 +47,10 @@ Ok "package\ et dist\ reinitialises"
 Step '2/7 Copie de l application web'
 # Exclusions reprises de deploy\_build.ps1, enrichies des dossiers interdits
 $excludeDirs  = @('.git', 'maquettes', 'captures', 'tools', 'deploy', 'data', 'exemples',
-                  'node_modules', 'tests', '.opencode', 'plan0', 'plan1', 'installeur')
+                  'node_modules', 'tests', '.opencode', 'plan0', 'plan1', 'plan2', 'plan3', 'installeur')
 $excludeFiles = @('*.log', '.gitignore', '.DS_Store', 'Thumbs.db', '*.md', 'TODO.md', 'BUGFIX.md',
                   'JOURNAL.md', 'PLAN.md', 'PLAN_DB.md', 'PROMPT.md', 'README.md',
-                  'DCC_Fiche_*', 'maquette_*', 'package.json', 'package-lock.json', 'test.bat')
+                  'DCC_Fiche_*', 'maquette_*', 'maquette-*', 'package.json', 'package-lock.json', 'test.bat')
 $banned = @('dcc-pc-tokens', 'funnel-tokens')   # droits de redistribution interdits (E9)
 
 function Test-Excluded([string]$rel) {

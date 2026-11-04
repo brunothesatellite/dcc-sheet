@@ -22,7 +22,7 @@ const NM = path.join(__dirname, 'node_modules');
 /* Dossiers/fichiers hors webapp (meme esprit que le zip webapp) */
 const BLOCK_DIRS = new Set([
   'node_modules', '.git', '.opencode', '.vscode', 'tests', 'deploy',
-  'installeur', 'tools', 'plan0', 'plan1', 'pregens', 'captures',
+  'installeur', 'tools', 'plan0', 'plan1', 'plan2', 'plan3', 'pregens', 'captures',
   'pdf-sheets', 'exemples', 'data', 'vendor', 'dist',
 ]);
 const BLOCK_FILES = [/\.md$/i, /^package(-lock)?\.json$/i, /^test\.bat$/i, /^\.[a-z]/i];

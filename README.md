@@ -25,7 +25,7 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 
 | Tapis de dés (vide) | Tapis après lancer |
 |:-------------------:|:------------------:|
-| <img src="captures/dice-tray-vide.png" alt="Tapis de dés plein écran sur mobile : barre des 14 dés en haut, tapis vert vide avec l'invite « Tapis vide par défaut », boutons son et aide, barre Vider / Lancer en bas" width="420"> | <img src="captures/dice-tray-des.png" alt="Tapis de dés après un lancer : cinq dés 3D (deux D20, un D12, un D8, un D6) avec leurs valeurs en pastilles colorées et le total 28 dans la barre du bas" width="420"> |
+| <img src="captures/dice-tray-vide.png" alt="Tapis de dés plein écran sur mobile : barre des 14 dés en haut, tapis vert vide avec l'invite « Tapis vide par défaut », boutons son et aide, barre Vider / Lancer en bas" width="420"> | <img src="captures/dice-tray-des.png" alt="Tapis de dés après un lancer : cinq dés 3D (D24, D20, D6, D8, D12) avec leurs valeurs en pastilles colorées et le total 54 dans la barre du bas" width="420"> |
 
 ## Fonctionnalites
 
@@ -145,9 +145,10 @@ Manuel d'utilisation consultable dans **[MANUAL.md](./MANUAL.md)**
 ### Tapis de des 3D (Dice Tray)
 - Bouton `des` dans la topbar (avant l'icone carte, visible pour tous y compris sans compte) : overlay plein ecran ferme par croix ou Echap (d'abord la modale d'aide des gestes, puis le module)
 - **three.js r186 embarque** (`dice/lib/`, MIT) + solides de des d'apres **dice-box-dcc** (dicebox de SOND LecT, MIT) : 14 des (D3 a D30 + D%), lancer physique, total affichable, son Web Audio **synthetise** (aucun fichier audio)
+- **Modeles 3D retravailles (v3.9)** : chanfreins sur tous les polyedres, **D3/D5 arrondis** (projection douce), **D7 prisme pentagonal**, **D14 trapezoedre**, **D16 bipyramide** ; textures **256 px** sans cadre interieur, chiffres agrandis/recentres (D14/D16 ajustes), eclairage de remplissage et anisotropie 8
 - Gestes : toucher (ajouter / lancer), **appui long 500 ms sur un de de la barre = lancer direct** (pastille de valeur ephemere au-dessus du bouton), appui long sur le tapis (retirer), glisser-deposer + lacher avec elan ; WebGL requis (sinon « Des 3D indisponibles sur ce navigateur » + fermeture propre, sans chargement)
 - **Zero persistance** : tapis vide au depart, etat conserve tant que la page reste ouverte (fermeture = simple masquage avec pause rendu/audio) ; seule ecriture localStorage : la preference muette `dicebox.sound`
-- Suite `23-dice-tray` (81 controles) : coquille (boutons, croix, Echap modale puis module), regle `#dice-module[hidden]`, imports three resolus sur disque, libelles du menu, zero ecriture locale
+- Suite `23-dice-tray` (80 controles) : coquille (boutons, croix, Echap modale puis module), regle `#dice-module[hidden]`, imports three resolus sur disque, libelles du menu, zero ecriture locale
 
 ### Sauvegarde automatique
 - Debounce 600ms sur tous les champs modifiables

@@ -2,19 +2,20 @@
 // fontScale = taille du chiffre dans sa case (débordement de face) ;
 // size = multiplicateur de gabarit (lisibilité des petites faces).
 export const DICE = [
-  { sides: 3,  label: 'D3',  color: '#d94848', kind: 'd3' },
+  { sides: 3,  label: 'D3',  color: '#d94848', kind: 'd3', fontScale: 0.45 },
   { sides: 4,  label: 'D4',  color: '#ef7d23', kind: 'd4', fontScale: 0.78 },
-  { sides: 5,  label: 'D5',  color: '#d9a416', kind: 'd5' },
+  { sides: 5,  label: 'D5',  color: '#d9a416', kind: 'd5', fontScale: 0.45 },
   { sides: 6,  label: 'D6',  color: '#12a0a8', kind: 'd6' },
   { sides: 7,  label: 'D7',  color: '#2f6fed', kind: 'd7' },
   { sides: 8,  label: 'D8',  color: '#6a4de0', kind: 'd8', fontScale: 0.78 },
   { sides: 10, label: 'D10', color: '#c93b8f', kind: 'd10', fontScale: 0.74 },
   { sides: 10, label: 'D%',  color: '#f272a8', kind: 'd10', pct: true, fontScale: 0.6 },
   { sides: 12, label: 'D12', color: '#9a6a2f', kind: 'd12' },
-  // D14/D16 en forme "type d20". Pour reprendre l'ancienne forme + rendu étiré :
-  // stretchUV: true ici + d14Legacy()/d16Legacy()/d16J17() dans solids.js.
-  { sides: 14, label: 'D14', color: '#7ba428', kind: 'd14', fontScale: 0.8, size: 1.15 },
-  { sides: 16, label: 'D16', color: '#64748b', kind: 'd16', fontScale: 0.7, size: 1.15 },
+  // D14 = trapézoèdre heptagonal ; D16 = bipyramide octogonale (formes de la
+  // table de référence). Anciennes formes « type d20 » conservées dans
+  // solids.js : truncatedOctahedron() / gyroelongatedSquareBipyramid().
+  { sides: 14, label: 'D14', color: '#7ba428', kind: 'd14', fontScale: 0.45, size: 1.15 },
+  { sides: 16, label: 'D16', color: '#64748b', kind: 'd16', fontScale: 0.35, size: 1.15 },
   { sides: 20, label: 'D20', color: '#23262b', kind: 'd20', fontScale: 0.68, size: 1.2 },
   { sides: 24, label: 'D24', color: '#9aa7b5', kind: 'd24', fontScale: 0.72 },
   { sides: 30, label: 'D30', color: '#f2ead8', kind: 'd30', fontScale: 0.72, size: 1.15 },

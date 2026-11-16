@@ -51,6 +51,10 @@ export class Tray {
     key.shadow.camera.near = 1; key.shadow.camera.far = 30;
     this.key = key;
     this.scene.add(key);
+    // Remplissage arrière : révèle les bandes de chanfrein à contre-jour.
+    const fill = new THREE.DirectionalLight(0xffffff, 0.45);
+    fill.position.set(-7, 6, -5);
+    this.scene.add(fill);
     this.ground = new THREE.Mesh(
       new THREE.PlaneGeometry(40, 40),
       new THREE.ShadowMaterial({ opacity: 0.28 })

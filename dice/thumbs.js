@@ -2,29 +2,32 @@
 import * as THREE from './lib/three.module.min.js';
 import { buildDie, normalForValue } from './dice3d.js';
 import { valuesFor } from './config.js';
-import { solidFor } from './solids.js';
 
-// Présente la première face (1, ou 00) face caméra : un chiffre lisible.
+// Présente la première face (1, ou 00) face caméra, chiffre droit :
+// la normale de la face vise la caméra, puis on roule autour de cet axe
+// pour aligner l'axe « haut » de la texture (le même que faceUVs) avec le
+// haut de l'écran.
 function presentFace(g, cam) {
   const def = g.userData.def, built = g.userData.built;
   const camDir = cam.position.clone().normalize();
   const n = normalForValue(def, built, valuesFor(def)[0]);
   const target = camDir.clone();
   g.quaternion.setFromUnitVectors(n, target);
-  if (def.kind === 'd16') {
-    // d16 : la pointe (pôle) fait saillir un coin dans la face présentée →
-    // on l'aligne à la verticale pour une silhouette droite (miroir haut/bas).
-    const solid = solidFor(def.kind);
-    const face = solid.faces[built.landing[0]];
-    const pole = face.reduce((a, b) => (Math.abs(solid.verts[b][2]) > Math.abs(solid.verts[a][2]) ? b : a));
-    const v = new THREE.Vector3(...solid.verts[pole]).applyQuaternion(g.quaternion);
-    const z = target;
-    const x = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), z).normalize();
-    const y = new THREE.Vector3().crossVectors(z, x);
-    const ang = Math.atan2(v.dot(x), v.dot(y));
-    g.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(target, -ang));
-  } else {
-    g.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(target, 0.3));
+  const hint = Math.abs(n.y) > 0.9 ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3(0, 1, 0);
+  const u = new THREE.Vector3().crossVectors(hint, n).normalize();
+  const v = new THREE.Vector3().crossVectors(n, u).normalize();
+  const upAxis = built.faceUp && built.faceUp[0] === 'u' ? u : v;
+  const vWorld = upAxis.applyQuaternion(g.quaternion);
+  const camUp = new THREE.Vector3(0, 1, 0).applyQuaternion(cam.quaternion);
+  const camRight = new THREE.Vector3(1, 0, 0).applyQuaternion(cam.quaternion);
+  const ang = Math.atan2(vWorld.dot(camRight), vWorld.dot(camUp));
+  g.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(target, -ang));
+  // Vue 3/4 réservée au D7 (prisme à faces planes) : de face, il se présente
+  // comme une carte plate. Les dés arrondis D3/D5 et les polyèdres gardent
+  // leur face de résultat bien centrée, plus lisible dans le picker.
+  if (def.kind === 'd7') {
+    g.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(camUp, 0.7));
+    g.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(camRight, 0.3));
   }
 }
 
@@ -37,6 +40,9 @@ export function renderThumbs(defs, size = 112) {
   const key = new THREE.DirectionalLight(0xffffff, 1.8);
   key.position.set(3, 5, 4);
   scene.add(key);
+  const fill = new THREE.DirectionalLight(0xffffff, 0.6);
+  fill.position.set(-3, 3, -4);
+  scene.add(fill);
   const cam = new THREE.PerspectiveCamera(32, 1, 0.1, 20);
   cam.position.set(1.9, 2.2, 3.0);
   cam.lookAt(0, 0, 0);

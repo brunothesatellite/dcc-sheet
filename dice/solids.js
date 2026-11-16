@@ -183,6 +183,124 @@ function bevelSolid(solid, amount = 0.19) {
     faceKinds: faces.map((_, i) => (i < solid.faces.length ? 'landing' : 'bevel')),
   };
 }
+// Chanfrein générique : mêmes faces d'atterrissage (inset), plus les bandes
+// d'arête et les pans de coin, laissés vierges (sans chiffre).
+function beveled(solid, amount) {
+  const out = bevelSolid(solid, amount);
+  out.bevel = amount;
+  out.blank = out.faces.map((_, i) => i).filter((i) => !out.landingFaces.includes(i));
+  return out;
+}
+// --- D3 / D5 « arrondis » (méthode de la table de référence) ---------------
+// Le corps est l'intersection de demi-espaces (prisme à section hexagonale :
+// 3 grandes faces plates + 3 chants), puis chaque sommet est projeté sur une
+// sphère de rayon R et ramené sur les plans des faces numérotées : les chants
+// deviennent des congés continus, les faces gardent un aplat lisible.
+const SOFT3 = { R: 0.9, cap: 0.8, flat: 0.64, chamfer: 0.9, blend: 0.1, N: 14 };
+const SOFT5 = { R: 0.95, cap: 0.7, flat: 0.74, chamfer: 0.95, blend: 0.08, N: 14 };
+const SOFT_S = [0, 1, 2].map((i) => {
+  const t = Math.PI / 2 + (2 * Math.PI * i) / 3;
+  return [0, Math.cos(t), Math.sin(t)];
+});
+// Intersection de 3 plans n·p = d (null si parallèles/dégénérés).
+function planePoint(a, b, c) {
+  const c23 = cross(b[0], c[0]), c31 = cross(c[0], a[0]), c12 = cross(a[0], b[0]);
+  const det = dot(a[0], c23);
+  if (Math.abs(det) < 1e-9) return null;
+  return [
+    (a[1] * c23[0] + b[1] * c31[0] + c[1] * c12[0]) / det,
+    (a[1] * c23[1] + b[1] * c31[1] + c[1] * c12[1]) / det,
+    (a[1] * c23[2] + b[1] * c31[2] + c[1] * c12[2]) / det,
+  ];
+}
+// Demi-espaces n·p <= d -> polyèdre convexe (sommets + faces + plan de face).
+function planesToSolid(planes) {
+  const verts = [];
+  for (let i = 0; i < planes.length; i++) {
+    for (let j = i + 1; j < planes.length; j++) {
+      for (let k = j + 1; k < planes.length; k++) {
+        const p = planePoint(planes[i], planes[j], planes[k]);
+        if (!p) continue;
+        if (planes.some(([n, d]) => dot(n, p) > d + 1e-5)) continue;
+        if (verts.some((q) => Math.hypot(q[0] - p[0], q[1] - p[1], q[2] - p[2]) < 1e-4)) continue;
+        verts.push(p);
+      }
+    }
+  }
+  const faces = [], facePlanes = [];
+  planes.forEach(([n, d]) => {
+    const ring = [];
+    verts.forEach((p, pi) => { if (Math.abs(dot(n, p) - d) < 1e-5) ring.push(pi); });
+    if (ring.length < 3) return;
+    const centre = ring.reduce((s, i) => [s[0] + verts[i][0], s[1] + verts[i][1], s[2] + verts[i][2]], [0, 0, 0])
+      .map((x) => x / ring.length);
+    const u = norm(sub(verts[ring[0]], centre));
+    const w = cross(n, u);
+    ring.sort((ia, ib) => {
+      const a = sub(verts[ia], centre), b = sub(verts[ib], centre);
+      return Math.atan2(dot(a, w), dot(a, u)) - Math.atan2(dot(b, w), dot(b, u));
+    });
+    if (dot(newellNormal(ring.map((i) => verts[i])), n) < 0) ring.reverse();
+    faces.push(ring);
+    facePlanes.push({ n, d });
+  });
+  return { verts, faces, facePlanes };
+}
+function softSolid(kind) {
+  const P = kind === 'd3' ? SOFT3 : SOFT5;
+  const planes = [
+    [[1, 0, 0], P.cap], [[-1, 0, 0], P.cap],
+  ];
+  SOFT_S.forEach((n) => {
+    planes.push([n, P.flat]);
+    planes.push([n.map((x) => -x), P.chamfer]);
+  });
+  const base = planesToSolid(planes);
+  // Faces qui restent plates (aplats) : bases du D5 + 3 chants à .flat.
+  const clampFlats = kind === 'd5'
+    ? [[[1, 0, 0], P.cap], [[-1, 0, 0], P.cap], ...SOFT_S.map((n) => [n, P.flat])]
+    : SOFT_S.map((n) => [n, P.flat]);
+  // Chiffres sur les faces réellement plates (pas sur les grands pans
+  // sphériques) : le glyphe n'est ainsi ni étiré ni bombé.
+  const landingFlats = clampFlats;
+  const landing = landingFlats.map(([n, d]) => base.facePlanes.findIndex((fp) => dot(fp.n, n) > 0.999 && Math.abs(fp.d - d) < 1e-4));
+  if (landing.some((i) => i < 0)) throw new Error('face d’atterrissage introuvable : ' + kind);
+  return {
+    verts: base.verts,
+    faces: base.faces,
+    landing,
+    landingNormals: landingFlats.map(([n]) => n),
+    blank: base.faces.map((_, i) => i).filter((i) => !landing.includes(i)),
+    soft: { kind, ...P, flats: clampFlats, base },
+  };
+}
+// Projection douce d'un sommet : sphère R + plans des faces plates.
+export function softProject(soft, v, tri) {
+  const R = soft.R;
+  const nv = Math.hypot(v[0], v[1], v[2]) || 1;
+  let l = [v[0] * R / nv, v[1] * R / nv, v[2] * R / nv];
+  const c = [
+    (tri[0][0] + tri[1][0] + tri[2][0]) / 3,
+    (tri[0][1] + tri[1][1] + tri[2][1]) / 3,
+    (tri[0][2] + tri[1][2] + tri[2][2]) / 3,
+  ];
+  const nc = Math.hypot(c[0], c[1], c[2]) || 1;
+  const cs = [c[0] * R / nc, c[1] * R / nc, c[2] * R / nc];
+  let flatN = null;
+  for (const [n, d] of soft.flats) if (dot(cs, n) > d) { flatN = n; break; }
+  for (const [n, d] of soft.flats) {
+    const a = dot(l, n);
+    const radius = Math.sqrt(Math.max(0, R * R - d * d));
+    const s = [l[0] - n[0] * a, l[1] - n[1] * a, l[2] - n[2] * a];
+    const si = Math.hypot(s[0], s[1], s[2]);
+    if (a > 0 && Math.abs(si - radius) < soft.blend && si > 1e-9) {
+      l = [s[0] * radius / si + n[0] * d, s[1] * radius / si + n[1] * d, s[2] * radius / si + n[2] * d];
+    } else if (a > d) {
+      l = [l[0] + n[0] * (d - a), l[1] + n[1] * (d - a), l[2] + n[2] * (d - a)];
+    }
+  }
+  return { p: l, n: flatN || norm(l) };
+}
 // Tonneau prismatique : n faces rectangulaires numérotées, pointes décoratives.
 function prismBarrel(n) {
   const verts = [];
@@ -410,52 +528,59 @@ export function solidFor(kind) {
   if (cache.has(kind)) return cache.get(kind);
   let s;
   if (kind === 'd3') {
-    const b = prismBarrel(3);
-    s = { ...b, landing: [...b.landingFaces], blank: b.faces.map((_, i) => i).filter((i) => !b.landingFaces.includes(i)) };
+    // D3 arrondi : prisme à section hexagonale (3 grandes faces numérotées,
+    // chants en congé), méthode de la table de référence.
+    s = softSolid('d3');
   } else if (kind === 'd4') {
-    const t = tetra();
-    s = { ...t, landing: [0, 1, 2, 3] };
+    // Chanfrein plus profond sur le tétraèdre (comme le d4 de la table de
+    // référence) : ses arêtes vives sont les plus agressives.
+    const b = beveled(tetra(), 0.18);
+    s = { ...b, landing: [...b.landingFaces] };
   } else if (kind === 'd5') {
-    const b = bevelSolid(regularPrism(3, 0.72), 0.19);
-    s = { ...b, landing: [...b.landingFaces], blank: b.faces.map((_, i) => i).filter((i) => !b.landingFaces.includes(i)) };
+    // D5 arrondi : 2 bases + 3 côtés numérotés, chants en congé.
+    s = softSolid('d5');
   } else if (kind === 'd6') {
-    const c = cube();
-    s = { ...c, landing: [0, 1, 2, 3, 4, 5], cube: true };
+    const b = beveled(cube(), 0.12);
+    s = { ...b, landing: [...b.landingFaces], cube: true };
   } else if (kind === 'd7') {
-    const b7 = prismBarrel(7);
-    s = { ...b7, landing: [...b7.landingFaces], blank: b7.faces.map((_, i) => i).filter((i) => !b7.landingFaces.includes(i)) };
+    // Prisme pentagonal (5 côtés + 2 bases = 7 faces), forme classique du d7.
+    const b = beveled(regularPrism(5, 1.0), 0.14);
+    s = { ...b, landing: [...b.landingFaces], blank: b.blank };
   } else if (kind === 'd8') {
-    const o = octa();
-    s = { ...o, landing: o.faces.map((_, i) => i) };
+    const b = beveled(octa(), 0.12);
+    s = { ...b, landing: [...b.landingFaces] };
   } else if (kind === 'd10') {
-    const t = trapezohedron(5);
-    s = { ...t, landing: t.faces.map((_, i) => i) };
+    const b = beveled(trapezohedron(5), 0.12);
+    s = { ...b, landing: [...b.landingFaces] };
   } else if (kind === 'd12') {
-    const d = dodeca();
-    s = { ...d, landing: d.faces.map((_, i) => i) };
+    const b = beveled(dodeca(), 0.12);
+    s = { ...b, landing: [...b.landingFaces] };
   } else if (kind === 'd14') {
-    // Forme historique trapézoèdre (type d10) : d14Legacy() ici pour y revenir.
-    const t14 = truncatedOctahedron();
-    s = { ...t14, landing: t14.faces.map((_, i) => i) };
+    // Trapézoèdre heptagonal (forme classique du commerce, comme la table de
+    // référence). Forme « bille » précédente : truncatedOctahedron() ici.
+    const b = beveled(trapezohedron(7, 1.083), 0.12);
+    s = { ...b, landing: [...b.landingFaces] };
   } else if (kind === 'd16') {
-    // Forme historique bipyramide 8 : d16Legacy() ici pour y revenir.
-    // Forme intermédiaire J17 allongée : d16J17() ici pour y revenir.
-    const b16 = gyroelongatedSquareBipyramid();
-    s = { ...b16, landing: b16.faces.map((_, i) => i) };
+    // Bipyramide octogonale (16 triangles, forme classique). Forme « bille »
+    // précédente : gyroelongatedSquareBipyramid() ici.
+    const b = beveled(bipyramid(8, 0.862), 0.12);
+    s = { ...b, landing: [...b.landingFaces] };
   } else if (kind === 'd20') {
-    const i = icosa();
-    s = { ...i, landing: i.faces.map((_, i2) => i2) };
+    const b = beveled(icosa(), 0.12);
+    s = { ...b, landing: [...b.landingFaces] };
   } else if (kind === 'd24') {
-    const d = deltoidalIcositetrahedron();
-    s = { ...d, landing: d.faces.map((_, i) => i) };
+    const b = beveled(deltoidalIcositetrahedron(), 0.12);
+    s = { ...b, landing: [...b.landingFaces] };
   } else if (kind === 'd30') {
-    const r = rhombicTriacontahedron();
-    s = { ...r, landing: r.faces.map((_, i) => i) };
+    const b = beveled(rhombicTriacontahedron(), 0.12);
+    s = { ...b, landing: [...b.landingFaces] };
   } else {
     throw new Error('kind inconnu: ' + kind);
   }
-  const out = normalize(s);
-  out.landing = s.landing; out.blank = s.blank || []; out.cube = !!s.cube;
+  // Les dés « doux » (D3/D5) sont déjà dans leur repère de projection : on ne
+  // les normalise pas ici, la mise à l'échelle finale se fait dans dice3d.
+  const out = s.soft ? s : normalize(s);
+  out.landing = s.landing; out.blank = s.blank || []; out.cube = !!s.cube; out.bevel = s.bevel || 0;
   cache.set(kind, out);
   return out;
 }

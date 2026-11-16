@@ -2,7 +2,7 @@
 // Chiffres uniquement, fond = couleur du dé, encre auto-contrastée.
 import { valuesFor, inkFor } from './config.js';
 
-export const CELL = 128;
+export const CELL = 256;
 const atlasCache = new Map();
 
 function labelOf(def, v) {
@@ -32,14 +32,23 @@ export function atlasFor(def, bg) {
   g.textBaseline = 'middle';
   values.forEach((v, i) => {
     const cx = (i % cols) * CELL, cy = Math.floor(i / cols) * CELL;
-    g.strokeStyle = 'rgba(0,0,0,0.22)';
-    g.lineWidth = 5;
-    g.strokeRect(cx + 4, cy + 4, CELL - 8, CELL - 8);
     const s = labelOf(def, v);
-    g.font = '900 ' + Math.round((s.length > 1 ? 74 : 86) * (def.fontScale || 1)) + 'px system-ui, sans-serif';
-    g.fillText(s, cx + CELL / 2, cy + CELL / 2 + 4);
+    g.font = '900 ' + Math.round((s.length > 1 ? CELL * 0.58 : CELL * 0.67) * (def.fontScale || 1)) + 'px system-ui, sans-serif';
+    // D3 et les côtés du D5 sont des faces longues et étroites : le chiffre
+    // est tourné de 90° dans sa case pour que sa hauteur suive le grand axe
+    // (sinon la case n'échantillonne qu'une bande du glyphe).
+    const rot = def.kind === 'd3' || (def.kind === 'd5' && v >= 3);
+    if (rot) {
+      g.save();
+      g.translate(cx + CELL / 2, cy + CELL / 2);
+      g.rotate(Math.PI / 2);
+      g.fillText(s, 0, 0);
+      g.restore();
+    } else {
+      g.fillText(s, cx + CELL / 2, cy + CELL / 2 + CELL * 0.03);
+    }
     if (!def.pct && (v === 6 || v === 9)) {
-      g.fillRect(cx + CELL / 2 - 26, cy + CELL / 2 + 32, 52, 7); // 6/9 soulignés
+      g.fillRect(cx + CELL / 2 - CELL * 0.2, cy + CELL / 2 + CELL * 0.25, CELL * 0.4, CELL * 0.055); // 6/9 soulignés
     }
   });
   const out = { canvas: cv, cols, rows };

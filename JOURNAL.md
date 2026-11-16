@@ -1,6 +1,19 @@
 # Journal de developpement - DCC Fiches de Personnage
 
-## Date : 4 novembre 2026 — Release v3.8 (skill RELEASE)
+## Date : 16 novembre 2026 - Release v3.9 (skill RELEASE)
+
+- **Contenu fonctionnel depuis v3.8** : refonte des **modeles 3D du tapis de des** d'apres la table de reference `https://test-dice-table.netlify.app/`, reproduite dans le moteur maison (geometrie + rendu, sans copier le bundle minifie) :
+  - **chanfreins** sur tous les polyedres (12 %, 18 % pour le D4) et suppression des traits d'aretes WebGL : separation des faces par la lumiere, **2 draw calls -> 1 par de** ;
+  - **D3 et D5 arrondis** par intersection de plans + projection sur une sphere + conges progressifs (3 920 triangles par de, normales lisses), avec un **aplat local sous le chiffre** pour eviter toute deformation ;
+  - **D7** : prisme pentagonal (5 cotes + 2 bases) ; **D14** : trapezoedre heptagonal ; **D16** : bipyramide octogonale ;
+  - **textures 256 px** par face (au lieu de 128), suppression du cadre interieur, chiffres agrandis/recentres, rotation des glyphes sur les faces longues D3/D5 et tailles **D14 0,45 / D16 0,35** pour ne plus deborder ;
+  - eclairage de **remplissage** pour lire les chanfreins, anisotropie 8, vignettes du picker avec chiffre droit (vue 3/4 pour le D7).
+- **Captures** : `captures/dice-tray-{vide,des,aide}.png` regenerees en **1080x2400** depuis le Pixel 7a (APK de test 3.8.1) - nouveau picker, tapis vide avec invite, lancer de 5 des (D24, D20, D6, D8, D12 ; total 54) et modale des gestes.
+- **Docs release** : README section « Tapis de des 3D » (puce modeles 3D v3.9, suite `23-dice-tray` 80 controles) + alt de la capture apres lancer ; MANUAL §9b (puce modeles 3D, alt de la capture avec les nouveaux des).
+- **Tests (etape 2.5, PHP active)** : `PHP_BIN=D:\VS_Code_Workspaces\php\php.exe node tests/run.js` -> **3812/3812 OK** (aucun skip), dont `23-dice-tray` 80/80 ; reference v3.8 : 3776/3776.
+- **Build differentiel, artefacts, tag/release, appareil** : a completer apres les etapes 4 a 7.
+
+## Date : 4 novembre 2026 - Release v3.8 (skill RELEASE)
 
 - **Contenu fonctionnel depuis v3.7** (4 évolutions, chacune avec plan validé avant codage) :
   - `82b9e4f` **Bouton INIT** (§ Personnages en expédition) : tire l'initiative **de tous les PJ en expédition** selon la formule de leur fiche (`+x`, `-x`, `1d20+x`, `1dY+x` — dé implicite = d20), remet à 0 les compteurs de tour et écrit dans **Init. combat** (la colonne « Init. » reste la formule de la fiche, resynchronisée à chaque retour sur l'onglet). Plan `plan3/PLAN-INIT.md`, tests `25-init-expedition` (80 contrôles).

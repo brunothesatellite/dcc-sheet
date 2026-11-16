@@ -826,10 +826,11 @@ Un **tapis de dés 3D** (moteur three.js **embarqué** — fonctionne hors-ligne
 
 - Au démarrage, le tapis est **vide** (invite au centre : « Tapis vide par défaut »).
 - La **barre du haut** propose 14 dés : **D3, D4, D5, D6, D7, D8, D10, D%, D12, D14, D16, D20, D24, D30**.
+- **Modèles 3D (v3.9)** : tous les polyèdres sont **chanfreinés** (arêtes adoucies), le **D3** et le **D5** sont **arrondis**, le **D7** est un **prisme pentagonal**, le **D14** un **trapézoèdre heptagonal** et le **D16** une **bipyramide octogonale**. Les chiffres sont dessinés en **256 px** par face (sans cadre intérieur), avec une taille ajustée pour ne pas déborder, et un éclairage de remplissage révèle les chanfreins.
 - **🎲 Lancer** : lance tous les dés du tapis et affiche le **total** (cliquez dessus pour le masquer).
 - **🗑 Vider** : retire tous les dés, sans confirmation.
 
-<img src="captures/dice-tray-des.png" alt="Tapis de dés après un lancer : cinq dés 3D (deux D20, un D12, un D8, un D6) avec leurs valeurs en pastilles colorées et « Total : 28 » dans la barre du bas" width="380">
+<img src="captures/dice-tray-des.png" alt="Tapis de dés après un lancer : cinq dés 3D (D24, D20, D6, D8, D12) avec leurs valeurs en pastilles colorées et « Total : 54 » dans la barre du bas" width="380">
 
 *Après **Lancer** : chaque dé affiche sa valeur dans une pastille à sa couleur, et la barre du bas affiche le **total**.*
 
